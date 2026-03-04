@@ -369,6 +369,8 @@
   justify-content: space-between;
   gap: 0.5rem;
   align-items: center;
+  /* Pequeño padding interno para que los botones no toquen el borde del card */
+  padding: 0 0.4rem 0.1rem;
 }
 
 .game-card-actions .button-ghost {
@@ -391,6 +393,13 @@
   font-size: 0.64rem;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* En escritorio también queremos que los dos botones de la tarjeta ocupen el 50% */
+.game-card-actions .game-card-button {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
 }
 
 .hero-price-old {

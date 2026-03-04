@@ -3,7 +3,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
+import { formatMoneyWithGeo } from "@/lib/geo-format";
 
 // Props mínimos del CartDrawer: callback para cerrarlo.
 type Props = {
@@ -21,6 +23,7 @@ export function CartDrawer({ onClose }: Props) {
     removeFromCart,
     clearCart,
   } = useCart();
+  const [lang, setLang] = useState<"es" | "en">("es");
 
   // Indica si hay productos en el carrito o está vacío.
   const hasItems = items.length > 0;
@@ -30,6 +33,18 @@ export function CartDrawer({ onClose }: Props) {
     (sum, item) => sum + item.game.priceFinal * item.quantity,
     0
   );
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
 
   // Cierra el drawer y navega a la pantalla de checkout.
   const goToCheckout = () => {
@@ -52,17 +67,17 @@ export function CartDrawer({ onClose }: Props) {
               <span className="cart-icon-button cart-drawer-cart-icon-button">
                 <Image
                   src="/iconos_platforms/carritoCompra2.svg"
-                  alt="Carrito"
+                  alt={lang === "en" ? "Cart" : "Carrito"}
                   width={20}
                   height={20}
                   className="cart-drawer-cart-icon"
                 />
               </span>
-              Tu carrito
+              {lang === "en" ? "Your cart" : "Tu carrito"}
             </h2>
 
             <button type="button" className="button-ghost btn-padding-site" onClick={onClose}>
-              Cerrar
+              {lang === "en" ? "Close" : "Cerrar"}
             </button>
           </header>
 
@@ -70,8 +85,9 @@ export function CartDrawer({ onClose }: Props) {
           <div className="cart-drawer-body">
             {!hasItems && (
               <p className="cart-empty-text">
-                Todavía no has añadido ningún juego. Busca tu título favorito y
-                pulsa <strong>“Añadir”</strong> para agregarlo al carrito.
+                {lang === "en"
+                  ? "You haven't added any games yet. Find your favorite title and click “Add” to put it in the cart."
+                  : "Todavía no has añadido ningún juego. Busca tu título favorito y pulsa “Añadir” para agregarlo al carrito."}
               </p>
             )}
 
@@ -128,7 +144,7 @@ export function CartDrawer({ onClose }: Props) {
                         className="button-ghost btn-padding-site"
                         onClick={() => removeFromCart(item.slug)}
                       >
-                        Quitar
+                        {lang === "en" ? "Remove" : "Quitar"}
                       </button>
                     </div>
                   </div>
@@ -140,15 +156,14 @@ export function CartDrawer({ onClose }: Props) {
           {/* cart-drawer-footer */}
           <div className="cart-drawer-footer">
             <div className="cart-drawer-summary">
-              <strong>Resumen</strong>
-              <div>Total de juegos: {totalItems}</div>
+              <strong>{lang === "en" ? "Summary" : "Resumen"}</strong>
+              <div>
+                {lang === "en" ? "Total games:" : "Total de juegos:"} {totalItems}
+              </div>
 
               <div>
-                Total:{" "}
-                {totalAmount.toLocaleString("es-ES", {
-                  style: "currency",
-                  currency: "EUR",
-                })}
+                {lang === "en" ? "Total:" : "Total:"}{" "}
+                {formatMoneyWithGeo(totalAmount)}
               </div>
             </div>
 
@@ -160,7 +175,7 @@ export function CartDrawer({ onClose }: Props) {
               disabled={!hasItems}
               onClick={goToCheckout}
             >
-              Pagar ahora
+              {lang === "en" ? "Checkout now" : "Pagar ahora"}
             </button>
 
             {/* Botón secundario: VACIAR */}
@@ -169,7 +184,7 @@ export function CartDrawer({ onClose }: Props) {
               className="button-ghost cart-full-width btn-padding-site"
               onClick={clearCart}
             >
-              Vaciar carrito
+              {lang === "en" ? "Empty cart" : "Vaciar carrito"}
             </button>
             </div>
           </div>

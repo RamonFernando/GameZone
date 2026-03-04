@@ -10,6 +10,19 @@ export default function HomePage() {
   const { query, platform } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState<"es" | "en">("es");
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -45,7 +58,11 @@ export default function HomePage() {
   return (
     <>
       <Hero products={filteredGames.length > 0 ? filteredGames : products} />
-      {loading ? <p className="section-subtitle">Cargando productos...</p> : null}
+      {loading ? (
+        <p className="section-subtitle">
+          {lang === "en" ? "Loading products..." : "Cargando productos..."}
+        </p>
+      ) : null}
       <GameGrid games={filteredGames} />
     </>
   );

@@ -819,6 +819,51 @@ img {
   gap: 0.6rem;
 }
 
+.nav-locale-select {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(
+    45deg,
+    rgba(15, 23, 42, 0.98) 0%,
+    rgba(30, 41, 59, 0.95) 45%,
+    rgba(51, 65, 85, 0.92) 55%,
+    rgba(15, 23, 42, 0.98) 100%
+  );
+  color: #f1f5f9;
+  font-size: 0.7rem;
+  /* Mínimo espacio a la derecha para acercar al máximo la flecha al texto */
+  padding: 0.26rem 0.35rem 0.26rem 0.5rem;
+  cursor: pointer;
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.3s ease-out, background 0.3s ease-out, color 0.3s ease-out,
+    border-color 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.nav-locale-select option {
+  /* Fondo claro y texto oscuro para que el desplegable sea legible
+     aunque el select tenga estilo oscuro. */
+  background-color: #e5e7eb;
+  color: #0f172a;
+}
+
+.nav-locale-select:hover {
+  transform: scale(0.94);
+  border-color: rgba(56, 189, 248, 0.9);
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.96));
+  color: #f0f9ff;
+}
+
+.nav-locale-select:focus-visible {
+  outline: none;
+  border-color: rgba(191, 219, 254, 0.9);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 0 0 3px rgba(191, 219, 254, 0.9);
+}
+
 .nav-search-button {
   width: 2.25rem;
   height: 2.25rem;

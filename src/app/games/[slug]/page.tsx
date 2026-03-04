@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
+import { formatMoneyWithGeo } from "@/lib/geo-format";
 import type { ProductPreview } from "@/types/product";
 
 type Props = {
@@ -28,6 +29,19 @@ export default function GameDetailPage({ params }: Props) {
   const [game, setGame] = useState<ProductView | null>(null);
   const [suggestions, setSuggestions] = useState<ProductView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lang, setLang] = useState<"es" | "en">("es");
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -59,17 +73,29 @@ export default function GameDetailPage({ params }: Props) {
   }
 
   if (isLoading || !game) {
-    return <p className="section-subtitle">Cargando detalle del juego...</p>;
+    return (
+      <p className="section-subtitle">
+        {lang === "en" ? "Loading game details..." : "Cargando detalle del juego..."}
+      </p>
+    );
   }
+
+  const isEnglish = lang === "en";
+  const isUnchartedLegacySlug = game.slug === "uncharted-coleccio-un-legado-de-los-ladrones";
+  const localizedName =
+    isEnglish && isUnchartedLegacySlug ? "Uncharted - Legacy of Thieves Collection" : game.name;
+
+  const detailDescription =
+    (isEnglish ? "Digital purchase of " : "Compra digital de ") + localizedName + ".";
 
   const mainPreview: ProductPreview = {
     id: game.id,
-    name: game.name,
+    name: localizedName,
     slug: game.slug,
-    description: `Compra digital de ${game.name}.`,
+    description: detailDescription,
     coverImage: game.coverImage,
     platform: "PC",
-    region: "EUROPA",
+    region: isEnglish ? "EUROPE" : "EUROPA",
     storeLabel: "Steam",
     cardSubtitle: "",
     priceOriginal: game.priceOriginal,
@@ -100,7 +126,7 @@ export default function GameDetailPage({ params }: Props) {
           >
             <Image
               src="/iconos_platforms/carritoCompra2.svg"
-              alt="Añadir al carrito"
+              alt={lang === "en" ? "Add to cart" : "Añadir al carrito"}
               width={20}
               height={20}
             />
@@ -109,28 +135,24 @@ export default function GameDetailPage({ params }: Props) {
 
         {/* INFO */}
         <div>
-          <h1 className="game-detail-title">
-            {game.name}
-          </h1>
+          <h1 className="game-detail-title">{localizedName}</h1>
 
-          <p className="game-detail-copy">
-            {game.description}
-          </p>
+          <p className="game-detail-copy">{detailDescription}</p>
           <p className="game-detail-copy game-detail-price-line">
-            Precio:{" "}
+            {lang === "en" ? "Price: " : "Precio: "}
             {game.discountPercent > 0 ? (
               <>
                 <span className="game-detail-price-old">
-                  {game.priceOriginal.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                  {formatMoneyWithGeo(game.priceOriginal)}
                 </span>
                 <strong className="game-detail-price-final">
-                  {game.priceFinal.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                  {formatMoneyWithGeo(game.priceFinal)}
                 </strong>
                 <span className="game-detail-price-discount">-{game.discountPercent}%</span>
               </>
             ) : (
               <strong className="game-detail-price-final">
-                {game.priceFinal.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                {formatMoneyWithGeo(game.priceFinal)}
               </strong>
             )}
           </p>
@@ -142,7 +164,7 @@ export default function GameDetailPage({ params }: Props) {
               className="button-ghost btn-padding-site"
               onClick={() => router.push("/")}
             >
-              ← Volver
+              {lang === "en" ? "← Back" : "← Volver"}
             </button>
           </div>
         </div>
@@ -153,20 +175,34 @@ export default function GameDetailPage({ params }: Props) {
       {suggestions.length > 0 && (
         <section>
           <div className="section-header">
-            <h2 className="section-title">También te puede interesar</h2>
-            <p className="section-subtitle">Otros juegos de tu catálogo.</p>
+            <h2 className="section-title">
+              {lang === "en" ? "You may also like" : "También te puede interesar"}
+            </h2>
+            <p className="section-subtitle">
+              {lang === "en" ? "Other games from your catalog." : "Otros juegos de tu catálogo."}
+            </p>
           </div>
 
           <div className="grid-games">
             {suggestions.map((g) => {
+              const isUnchartedLegacySlug =
+                g.slug === "uncharted-coleccio-un-legado-de-los-ladrones";
+              const suggestionName =
+                lang === "en" && isUnchartedLegacySlug
+                  ? "Uncharted - Legacy of Thieves Collection"
+                  : g.name;
+
               const preview: ProductPreview = {
                 id: g.id,
-                name: g.name,
+                name: suggestionName,
                 slug: g.slug,
-                description: `Compra digital de ${g.name}.`,
+                description:
+                  (lang === "en" ? "Digital purchase of " : "Compra digital de ") +
+                  suggestionName +
+                  ".",
                 coverImage: g.coverImage,
                 platform: "PC",
-                region: "EUROPA",
+                region: lang === "en" ? "EUROPE" : "EUROPA",
                 storeLabel: "Steam",
                 cardSubtitle: "",
                 priceOriginal: g.priceOriginal,
@@ -191,7 +227,7 @@ export default function GameDetailPage({ params }: Props) {
                     className="game-suggestion-cover"
                   />
                   <div className="game-suggestion-body">
-                    <h3 className="game-suggestion-title">{g.name}</h3>
+                    <h3 className="game-suggestion-title">{suggestionName}</h3>
                     <div
                       style={{
                         marginTop: 4,
@@ -201,29 +237,23 @@ export default function GameDetailPage({ params }: Props) {
                         gap: 8,
                       }}
                     >
-                      <p className="game-detail-copy game-suggestion-price" style={{ marginTop: 0 }}>
+                      <p
+                        className="game-detail-copy game-suggestion-price"
+                        style={{ marginTop: 0 }}
+                      >
                         {g.discountPercent > 0 ? (
                           <>
                             <span className="game-detail-price-old">
-                              {g.priceOriginal.toLocaleString("es-ES", {
-                                style: "currency",
-                                currency: "EUR",
-                              })}
+                              {formatMoneyWithGeo(g.priceOriginal)}
                             </span>
                             <strong className="game-detail-price-final">
-                              {g.priceFinal.toLocaleString("es-ES", {
-                                style: "currency",
-                                currency: "EUR",
-                              })}
+                              {formatMoneyWithGeo(g.priceFinal)}
                             </strong>
                             <span className="game-detail-price-discount">-{g.discountPercent}%</span>
                           </>
                         ) : (
                           <strong className="game-detail-price-final">
-                            {g.priceFinal.toLocaleString("es-ES", {
-                              style: "currency",
-                              currency: "EUR",
-                            })}
+                            {formatMoneyWithGeo(g.priceFinal)}
                           </strong>
                         )}
                       </p>
@@ -234,8 +264,12 @@ export default function GameDetailPage({ params }: Props) {
                           event.stopPropagation();
                           addToCart(preview);
                         }}
-                        aria-label={`Añadir ${g.name} al carrito`}
-                        title="Añadir al carrito"
+                        aria-label={
+                          (lang === "en" ? "Add " : "Añadir ") +
+                          g.name +
+                          (lang === "en" ? " to cart" : " al carrito")
+                        }
+                        title={lang === "en" ? "Add to cart" : "Añadir al carrito"}
                       >
                         <Image
                           src="/iconos_platforms/carritoCompra2.svg"

@@ -24,12 +24,51 @@ const PLATFORMS = [
   "PC"
 ];
 
+type UiLocaleOption = {
+  value: string;
+  label: string;
+  currency: string;
+};
+
+const UI_LOCALE_OPTIONS: UiLocaleOption[] = [
+  { value: "es-ES", label: "ES · EUR", currency: "EUR" },
+  { value: "en-US", label: "EN · USD", currency: "USD" },
+];
+
 // Header que envuelve logo, filtros de plataforma, buscador, carrito y avatar.
 export function Header() {
   const { totalItems } = useCart();
   const [open, setOpen] = useState(false);
   const [miniProfile, setMiniProfile] = useState<MiniProfile | null>(null);
   const { query, setQuery, platform, setPlatform } = useSearch();
+  const [uiLocale, setUiLocale] = useState<string>("es-ES");
+  const [lang, setLang] = useState<"es" | "en">("es");
+
+  // Lee el idioma/moneda preferidos (si existen) al montar.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setUiLocale(locale);
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
+
+  const handleUiLocaleChange = (value: string) => {
+    if (typeof document === "undefined") return;
+    const option = UI_LOCALE_OPTIONS.find((opt) => opt.value === value);
+    const currency = option?.currency ?? "EUR";
+    const maxAge = 60 * 60 * 24 * 30; // 30 días
+    document.cookie = `uiLocale=${encodeURIComponent(value)}; path=/; max-age=${maxAge}`;
+    document.cookie = `uiCurrency=${encodeURIComponent(currency)}; path=/; max-age=${maxAge}`;
+    setUiLocale(value);
+    // Recargamos la página para que todos los textos/precios se actualicen.
+    window.location.reload();
+  };
 
   // Carga un mini perfil del usuario autenticado para mostrar su avatar en la nav.
   useEffect(() => {
@@ -82,7 +121,10 @@ export function Header() {
         </Link>
 
         {/* PLATAFORMAS */}
-<nav className="nav-platforms" aria-label="Plataformas">
+<nav
+  className="nav-platforms"
+  aria-label={lang === "en" ? "Platforms" : "Plataformas"}
+>
   {PLATFORMS.map((platformName) => {
     const iconMap: Record<string, string> = {
       PlayStation: "/iconos_platforms/icon-play.svg",
@@ -128,7 +170,7 @@ export function Header() {
             <span className="nav-search-icon" aria-hidden="true">🔍</span>
             <input
               type="text"
-              placeholder="Buscar..."
+              placeholder={lang === "en" ? "Search..." : "Buscar..."}
               className="nav-search-input"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -149,7 +191,7 @@ export function Header() {
           >
             <Image
               src="/iconos_platforms/carritoCompra2.svg"
-              alt="Carrito"
+              alt={lang === "en" ? "Cart" : "Carrito"}
               width={16}
               height={16}
               className="nav-cart-icon"
@@ -184,6 +226,20 @@ export function Header() {
               />
             )}
           </Link>
+
+          {/* Selector idioma/moneda */}
+          <select
+            className="nav-locale-select"
+            aria-label="Idioma y moneda"
+            value={uiLocale}
+            onChange={(event) => handleUiLocaleChange(event.target.value)}
+          >
+            {UI_LOCALE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
 
         </div>
       </div>

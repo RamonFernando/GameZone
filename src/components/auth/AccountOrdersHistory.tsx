@@ -34,8 +34,8 @@ type PurchaseRow = {
 };
 
 // Formatea importes para mostrarlos en la tabla de historial.
-function formatMoney(amount: number, currency = "EUR") {
-  return amount.toLocaleString("es-ES", { style: "currency", currency });
+function formatMoney(amount: number, currency = "EUR", locale = "es-ES") {
+  return amount.toLocaleString(locale, { style: "currency", currency });
 }
 
 // Componente que lista el historial completo de compras del usuario.
@@ -43,6 +43,19 @@ export function AccountOrdersHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [lang, setLang] = useState<"es" | "en">("es");
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
 
   const rows = useMemo<PurchaseRow[]>(() => {
     return orders
@@ -70,13 +83,22 @@ export function AccountOrdersHistory() {
         const payload = (await response.json()) as { orders?: Order[]; message?: string };
 
         if (!response.ok) {
-          setErrorMessage(payload.message ?? "No se pudo cargar el historial de compras.");
+          setErrorMessage(
+            payload.message ??
+              (lang === "en"
+                ? "We couldn't load your purchase history."
+                : "No se pudo cargar el historial de compras.")
+          );
           return;
         }
 
         setOrders(payload.orders ?? []);
       } catch {
-        setErrorMessage("Error de red cargando el historial de compras.");
+        setErrorMessage(
+          lang === "en"
+            ? "Network error while loading your purchase history."
+            : "Error de red cargando el historial de compras."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +108,11 @@ export function AccountOrdersHistory() {
   }, []);
 
   if (isLoading) {
-    return <p className="auth-alt">Cargando historial de compras...</p>;
+    return (
+      <p className="auth-alt">
+        {lang === "en" ? "Loading purchase history..." : "Cargando historial de compras..."}
+      </p>
+    );
   }
 
   if (errorMessage) {
@@ -96,7 +122,7 @@ export function AccountOrdersHistory() {
           {errorMessage}
         </p>
         <Link href="/account" className="button-primary auth-submit-compact auth-center-button btn-padding-site">
-          Volver a mi cuenta
+          {lang === "en" ? "Back to my account" : "Volver a mi cuenta"}
         </Link>
       </div>
     );
@@ -105,9 +131,13 @@ export function AccountOrdersHistory() {
   if (rows.length === 0) {
     return (
       <div className="auth-form">
-        <p className="auth-alt">Todavía no tienes compras registradas.</p>
+        <p className="auth-alt">
+          {lang === "en"
+            ? "You don't have any purchases yet."
+            : "Todavía no tienes compras registradas."}
+        </p>
         <Link href="/" className="button-primary auth-submit-compact auth-center-button btn-padding-site">
-          Ir a comprar juegos
+          {lang === "en" ? "Go to buy games" : "Ir a comprar juegos"}
         </Link>
       </div>
     );
@@ -119,10 +149,10 @@ export function AccountOrdersHistory() {
         <table className="account-orders-table">
           <thead>
             <tr>
-              <th>Juego</th>
-              <th>Fecha</th>
-              <th>Precio</th>
-              <th>Estado</th>
+              <th>{lang === "en" ? "Game" : "Juego"}</th>
+              <th>{lang === "en" ? "Date" : "Fecha"}</th>
+              <th>{lang === "en" ? "Price" : "Precio"}</th>
+              <th>{lang === "en" ? "Status" : "Estado"}</th>
             </tr>
           </thead>
           <tbody>
@@ -132,8 +162,18 @@ export function AccountOrdersHistory() {
                   {row.gameName}
                   <span className="auth-alt account-orders-qty">x{row.quantity}</span>
                 </td>
-                <td>{new Date(row.date).toLocaleString("es-ES")}</td>
-                <td>{formatMoney(row.price, row.currency)}</td>
+                <td>
+                  {new Date(row.date).toLocaleString(
+                    lang === "en" ? "en-US" : "es-ES"
+                  )}
+                </td>
+                <td>
+                  {formatMoney(
+                    row.price,
+                    row.currency,
+                    lang === "en" ? "en-US" : "es-ES"
+                  )}
+                </td>
                 <td>{row.orderStatus}</td>
               </tr>
             ))}
@@ -141,8 +181,11 @@ export function AccountOrdersHistory() {
         </table>
       </div>
 
-      <Link href="/account" className="button-primary auth-submit-compact auth-center-button btn-padding-site">
-        Volver a mi cuenta
+      <Link
+        href="/account"
+        className="button-primary auth-submit-compact auth-center-button btn-padding-site"
+      >
+        {lang === "en" ? "Back to my account" : "Volver a mi cuenta"}
       </Link>
     </div>
   );

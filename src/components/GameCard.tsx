@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ProductPreview } from "@/types/product";
 import { useCart } from "@/contexts/CartContext";
+import { formatMoneyWithGeo } from "@/lib/geo-format";
 
 // Props que recibe la tarjeta de juego (información básica del producto).
 type Props = {
@@ -18,6 +19,7 @@ export function GameCard({ game }: Props) {
   const [likesCount, setLikesCount] = useState(game.likesCount);
   const [isLiking, setIsLiking] = useState(false);
   const [liked, setLiked] = useState(Boolean(game.likedByCurrentUser));
+  const [lang, setLang] = useState<"es" | "en">("es");
 
   // Sincroniza el estado local de likes cuando cambian los datos del juego.
   useEffect(() => {
@@ -25,9 +27,28 @@ export function GameCard({ game }: Props) {
     setLiked(Boolean(game.likedByCurrentUser));
   }, [game.likesCount, game.likedByCurrentUser, game.slug]);
 
-  // Formatea un número como precio en euros para mostrarlo en la UI.
-  const money = (value: number) =>
-    value.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+  // Formatea un número como precio para mostrarlo en la UI (según geo/ui locale).
+  const money = (value: number) => formatMoneyWithGeo(value);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
+
+  const displayRegion =
+    lang === "en" && game.region === "EUROPA" ? "EUROPE" : game.region;
+
+  const displayCardSubtitle =
+    lang === "en" && game.cardSubtitle === "Código digital oficial"
+      ? "Official digital code"
+      : game.cardSubtitle;
 
   // Maneja el toggle de "me gusta" llamando al API y actualizando el estado local.
   const handleLike = async () => {
@@ -96,8 +117,10 @@ export function GameCard({ game }: Props) {
       <div className="game-card-body">
         {/*TÍTULO */}
         <h3 className="game-card-title">{game.name}</h3>
-        {game.cardSubtitle ? <p className="game-card-subtitle">{game.cardSubtitle}</p> : null}
-        <p className="game-card-region">{game.region}</p>
+        {displayCardSubtitle ? (
+          <p className="game-card-subtitle">{displayCardSubtitle}</p>
+        ) : null}
+        <p className="game-card-region">{displayRegion}</p>
 
         {/* PRECIO */}
         <div className="game-card-price">
@@ -122,7 +145,9 @@ export function GameCard({ game }: Props) {
         </div>
         {/* CASHBACK */}
         {game.cashbackPercent > 0 ? (
-          <p className="game-card-cashback-text">{game.cashbackPercent}% Cashback</p>
+          <p className="game-card-cashback-text">
+            {game.cashbackPercent}% Cashback
+          </p>
         ) : null}
         {/* FIN DEL CASHBACK */}
         <button
@@ -144,14 +169,14 @@ export function GameCard({ game }: Props) {
             href={`/games/${slug}`}
             className="button-ghost game-card-button btn-padding-site"
           >
-            Ver detalles
+            {lang === "en" ? "View details" : "Ver detalles"}
           </Link>
           <button
             type="button"
             className="button-primary game-card-button btn-padding-site"
             onClick={() => addToCart(game)}
           >
-            Añadir
+            {lang === "en" ? "Add" : "Añadir"}
           </button>
         </div>
       </div> {/* FIN DEL CUERPO */}

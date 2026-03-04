@@ -147,7 +147,7 @@ export async function sendPurchaseConfirmationEmail(input: {
   }>;
 }) {
   const { transporter, from, isTestTransport } = await getMailerConfig();
-  const brandName = process.env.MAIL_BRAND_NAME ?? "GameZone Store";
+  const brandName = process.env.MAIL_BRAND_NAME ?? "GameZone";
   const supportEmail = process.env.MAIL_SUPPORT_EMAIL ?? "support@gamezone.local";
   const logoUrl = process.env.MAIL_LOGO_URL ?? "";
 
@@ -277,7 +277,7 @@ export async function sendRefundConfirmationEmail(input: {
   reason: string;
 }) {
   const { transporter, from, isTestTransport } = await getMailerConfig();
-  const brandName = process.env.MAIL_BRAND_NAME ?? "GameZone Store";
+  const brandName = process.env.MAIL_BRAND_NAME ?? "GameZone";
   const supportEmail = process.env.MAIL_SUPPORT_EMAIL ?? "support@gamezone.local";
 
   const info = await transporter.sendMail({

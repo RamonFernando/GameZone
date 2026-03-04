@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,6 +36,25 @@ function LoginContent() {
   const [isPushPending, setIsPushPending] = useState(false);
   const [pushChallengeId, setPushChallengeId] = useState<string | null>(null);
   const [twoFactorMode, setTwoFactorMode] = useState<"email" | "totp" | null>(null);
+  const [lang, setLang] = useState<"es" | "en">("es");
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
+
+  const baseTitle = lang === "en" ? "Sign in" : "Inicia sesión";
+  const baseSubtitle =
+    lang === "en"
+      ? "Sign in to your GameZone account to keep growing your digital library."
+      : "Accede a tu cuenta para seguir ampliando tu biblioteca gaming dentro de la Next Gaming Store.";
 
 const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -289,20 +308,32 @@ return (
                         <h1 className="auth-title">
                           {isTwoFactorStep
                             ? twoFactorMode === "totp"
-                              ? "Verifica con tu app"
-                              : "Verifica tu acceso"
+                              ? lang === "en"
+                                ? "Verify with your app"
+                                : "Verifica con tu app"
+                              : lang === "en"
+                                ? "Verify your access"
+                                : "Verifica tu acceso"
                             : isPushPending
-                              ? "Confirma desde tu email"
-                              : "Inicia sesión"}
+                              ? lang === "en"
+                                ? "Confirm from your email"
+                                : "Confirma desde tu email"
+                              : baseTitle}
                         </h1>
                         <p className="auth-subtitle">
                           {isTwoFactorStep
                             ? twoFactorMode === "totp"
-                              ? "Abre tu app de autenticación (Google Authenticator, Authy...) e introduce el código de 6 dígitos para completar el acceso."
-                              : "Hemos enviado un código de verificación a tu email. Introduce ese código para completar el acceso."
+                              ? lang === "en"
+                                ? "Open your authenticator app (Google Authenticator, Authy...) and enter the 6‑digit code to complete the sign‑in."
+                                : "Abre tu app de autenticación (Google Authenticator, Authy...) e introduce el código de 6 dígitos para completar el acceso."
+                              : lang === "en"
+                                ? "We have sent a verification code to your email. Enter that code to complete the sign‑in."
+                                : "Hemos enviado un código de verificación a tu email. Introduce ese código para completar el acceso."
                             : isPushPending
-                              ? "Revisa tu bandeja de entrada y aprueba o rechaza el acceso desde el email que te hemos enviado. Después pulsa en 'Comprobar estado'."
-                              : "Accede a tu cuenta para seguir ampliando tu biblioteca gaming dentro de la Next Gaming Store."}
+                              ? lang === "en"
+                                ? "Check your inbox and approve or deny the sign‑in from the email we sent you. Then click on 'Check status'."
+                                : "Revisa tu bandeja de entrada y aprueba o rechaza el acceso desde el email que te hemos enviado. Después pulsa en 'Comprobar estado'."
+                              : baseSubtitle}
                         </p>
                     </header>
 
@@ -312,7 +343,7 @@ return (
                     {/* Campo: nombre de usuario */}
                         <div className="auth-field">
                             <label htmlFor="name" className="auth-label">
-                                Nombre de usuario
+                                {lang === "en" ? "Username" : "Nombre de usuario"}
                             </label>
                             <input
                                 id="name"
@@ -327,7 +358,7 @@ return (
                         {/* Campo: identificador (email o usuario) */}
                         <div className="auth-field">
                             <label htmlFor="identifier" className="auth-label">
-                                Email o usuario
+                                {lang === "en" ? "Email or username" : "Email o usuario"}
                             </label>
                             <input
                                 id="identifier"
@@ -335,7 +366,11 @@ return (
                                 type="text"
                                 autoComplete="username"
                                 className="auth-input"
-                                placeholder="admin o tucorreo@ejemplo.com"
+                                placeholder={
+                                  lang === "en"
+                                    ? "admin or youremail@example.com"
+                                    : "admin o tucorreo@ejemplo.com"
+                                }
                                 value={loginIdentifier}
                                 onChange={(event) => setLoginIdentifier(event.target.value)}
                                 required
@@ -345,7 +380,7 @@ return (
                         {/* Campo: contraseña + enlace de recuperación */}
                         <div className="auth-field">
                             <label htmlFor="password" className="auth-label">
-                                Contraseña
+                                {lang === "en" ? "Password" : "Contraseña"}
                             </label>
                             <input
                                 id="password"
@@ -358,7 +393,7 @@ return (
                             />
                             <div className="auth-field-helper">
                                 <Link href="#" className="auth-link">
-                                    ¿Olvidaste la contraseña?
+                                  {lang === "en" ? "Forgot your password?" : "¿Olvidaste la contraseña?"}
                                 </Link>
                             </div>
                     </div> {/* Fin campo contraseña */}
@@ -369,7 +404,13 @@ return (
                       className="button-primary auth-submit btn-padding-site"
                       disabled={isSubmitting}
                     >
-                        {isSubmitting ? "Entrando..." : "Entrar"}
+                        {isSubmitting
+                          ? lang === "en"
+                            ? "Signing in..."
+                            : "Entrando..."
+                          : lang === "en"
+                            ? "Sign in"
+                            : "Entrar"}
                     </button>
 
                     {errorMessage ? (
@@ -397,34 +438,46 @@ return (
                         onClick={handleResendVerification}
                         disabled={isResending}
                       >
-                        {isResending ? "Reenviando..." : "Reenviar email de verificación"}
+                        {isResending
+                          ? lang === "en"
+                            ? "Resending..."
+                            : "Reenviando..."
+                          : lang === "en"
+                            ? "Resend verification email"
+                            : "Reenviar email de verificación"}
                       </button>
                     ) : null}
 
                     {/* Enlace alternativo para registro */}
                     <p className="auth-alt">
-                        ¿Aún no tienes cuenta?{" "}
+                        {lang === "en" ? "Don't have an account yet?" : "¿Aún no tienes cuenta?"}{" "}
                         <Link href="/auth/register" className="auth-link">
-                            Crear cuenta
+                            {lang === "en" ? "Create account" : "Crear cuenta"}
                         </Link>
                     </p>
 
                     {shouldVerifyEmail ? (
                         <p className="auth-alt" role="status" aria-live="polite">
-                            Cuenta creada. Revisa tu correo y verifica tu email antes de iniciar sesión.
+                            {lang === "en"
+                              ? "Account created. Check your email and verify it before signing in."
+                              : "Cuenta creada. Revisa tu correo y verifica tu email antes de iniciar sesión."}
                         </p>
                     ) : null}
 
                     {wasVerified ? (
                         <p className="auth-alt" role="status" aria-live="polite">
-                            Cuenta verificada correctamente. Ahora ya puedes iniciar sesión.
+                            {lang === "en"
+                              ? "Account verified successfully. You can now sign in."
+                              : "Cuenta verificada correctamente. Ahora ya puedes iniciar sesión."}
                         </p>
                     ) : null}
 
                     {/* Separador visual "o continúa con" */}
                     <div className="auth-divider">
                         <span className="auth-divider-line" />
-                        <span className="auth-divider-text">o continúa con</span>
+                        <span className="auth-divider-text">
+                          {lang === "en" ? "or continue with" : "o continúa con"}
+                        </span>
                         <span className="auth-divider-line" />
                     </div>
 

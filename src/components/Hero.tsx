@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
 import type { ProductPreview } from "@/types/product";
+import { formatMoneyWithGeo } from "@/lib/geo-format";
 
 // Estructura interna que usamos para representar cada slide del hero.
 type Slide = {
@@ -24,9 +25,27 @@ type Slide = {
 const AUTO_DELAY_MS = 7000;
 
 // Convierte un ProductPreview en un Slide listo para pintar en el hero.
-function toSlide(game: ProductPreview, index: number): Slide {
-  const badgeByIndex = ["Oferta destacada", "Más vendido", "Top descuento", "Recomendado"];
-  const subtitleParts = [game.platform, game.region, game.cardSubtitle || "Entrega inmediata"];
+function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide {
+  const badgeByIndexEs = ["Oferta destacada", "Más vendido", "Top descuento", "Recomendado"];
+  const badgeByIndexEn = ["Featured offer", "Best seller", "Top discount", "Recommended"];
+  const badgeByIndex = lang === "en" ? badgeByIndexEn : badgeByIndexEs;
+
+  const defaultSubtitleEs = "Entrega inmediata";
+  const defaultSubtitleEn = "Instant delivery";
+
+  const cardSubtitle =
+    lang === "en" && game.cardSubtitle === "Código digital oficial"
+      ? "Official digital code"
+      : game.cardSubtitle;
+
+  const subtitleParts = [
+    game.platform,
+    game.region === "EUROPA" && lang === "en" ? "EUROPE" : game.region,
+    cardSubtitle ||
+      (lang === "en" ? "Official digital code" : defaultSubtitleEs) ||
+      (lang === "en" ? defaultSubtitleEn : defaultSubtitleEs),
+  ];
+
   return {
     id: game.id,
     title: game.name,
@@ -50,6 +69,7 @@ type Props = {
 export function Hero({ products }: Props) {
   const { addToCart } = useCart();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [lang, setLang] = useState<"es" | "en">("es");
 
   const slides = useMemo<Slide[]>(() => {
     const featured = [...products]
@@ -61,8 +81,20 @@ export function Hero({ products }: Props) {
       })
       .slice(0, 4);
 
-    return featured.map((game, index) => toSlide(game, index));
-  }, [products]);
+    return featured.map((game, index) => toSlide(game, index, lang));
+  }, [products, lang]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
 
   useEffect(() => {
     if (slides.length < 2) {
@@ -83,7 +115,7 @@ export function Hero({ products }: Props) {
   }
 
   const active = slides[Math.min(activeIndex, slides.length - 1)];
-  const money = (value: number) => value.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+  const money = (value: number) => formatMoneyWithGeo(value);
 
   return (
     <section className="hero hero--carousel">
@@ -121,7 +153,9 @@ export function Hero({ products }: Props) {
             </div>
 
             {active.cashbackPercent > 0 ? (
-              <span className="hero-cashback-chip">{active.cashbackPercent}% Cashback</span>
+              <span className="hero-cashback-chip">
+                {active.cashbackPercent}% {lang === "en" ? "Cashback" : "Cashback"}
+              </span>
             ) : null}
 
             <button
@@ -129,22 +163,26 @@ export function Hero({ products }: Props) {
               className="button-primary hero-cta btn-padding-site"
               onClick={() => addToCart(active.game)}
             >
-              Añadir al carrito
+              {lang === "en" ? "Add to cart" : "Añadir al carrito"}
             </button>
 
           </div>
 
           <p className="hero-subcopy">
-            Desliza entre los últimos lanzamientos y prepara tu catálogo gaming.
+            {lang === "en"
+              ? "Browse the latest releases and prepare your gaming catalog."
+              : "Desliza entre los últimos lanzamientos y prepara tu catálogo gaming."}
             <br />
-            ¡No te lo pierdas!
+            {lang === "en" ? "Don't miss it!" : "¡No te lo pierdas!"}
           </p>
         </div>
 
         {/* Mini carrusel de últimos lanzamientos */}
         <div className="hero-thumbs-wrapper">
           <div className="hero-thumbs-header">
-            <h2 className="section-title">Destacados</h2>
+            <h2 className="section-title">
+              {lang === "en" ? "Featured" : "Destacados"}
+            </h2>
             {/* <p className="section-subtitle">Explora juegos recientes de tu catálogo.</p> */}
           </div>
 

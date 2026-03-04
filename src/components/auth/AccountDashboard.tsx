@@ -50,6 +50,8 @@ type SessionRow = {
 };
 
 // Formatea un número como importe de dinero en la divisa indicada.
+// Por ahora mantiene EUR/es-ES; más adelante podríamos usar geo-format si quieres
+// que este panel también cambie según geoCurrency/geoLocale.
 function formatMoney(amount: number, currency = "EUR") {
   return amount.toLocaleString("es-ES", { style: "currency", currency });
 }
@@ -88,6 +90,7 @@ export function AccountDashboard() {
   const [totpSecret, setTotpSecret] = useState("");
   const [totpQrDataUrl, setTotpQrDataUrl] = useState("");
   const [totpCodeDraft, setTotpCodeDraft] = useState("");
+  const [lang, setLang] = useState<"es" | "en">("es");
 
   const totalSpent = useMemo(
     () => orders.reduce((sum, order) => sum + order.totalAmount, 0),
@@ -167,6 +170,18 @@ export function AccountDashboard() {
 
   useEffect(() => {
     void loadDashboardData();
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieMap = new Map(
+      document.cookie.split(";").map((entry) => {
+        const [key, ...rest] = entry.trim().split("=");
+        return [key, decodeURIComponent(rest.join("=") || "")] as const;
+      })
+    );
+    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
+    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
 
   const handleSaveProfile = async () => {
@@ -439,7 +454,11 @@ export function AccountDashboard() {
   };
 
   if (isLoading) {
-    return <p className="auth-alt">Cargando tu panel de cuenta...</p>;
+    return (
+      <p className="auth-alt">
+        {lang === "en" ? "Loading your account dashboard..." : "Cargando tu panel de cuenta..."}
+      </p>
+    );
   }
 
   return (
@@ -452,7 +471,7 @@ export function AccountDashboard() {
           }
           onClick={() => setActiveTab("account")}
         >
-          Perfil
+          {lang === "en" ? "Profile" : "Perfil"}
         </button>
         <button
           type="button"
@@ -461,7 +480,7 @@ export function AccountDashboard() {
           }
           onClick={() => setActiveTab("details")}
         >
-          Datos personales
+          {lang === "en" ? "Personal data" : "Datos personales"}
         </button>
         <button
           type="button"
@@ -470,7 +489,7 @@ export function AccountDashboard() {
           }
           onClick={() => setActiveTab("security")}
         >
-          Seguridad
+          {lang === "en" ? "Security" : "Seguridad"}
         </button>
       </div>
 
@@ -478,7 +497,7 @@ export function AccountDashboard() {
         <>
           <div className="auth-field">
             <label htmlFor="profile-name" className="auth-label">
-              Nombre
+              {lang === "en" ? "Name" : "Nombre"}
             </label>
             <input
               id="profile-name"
@@ -491,7 +510,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-email" className="auth-label">
-              Email
+              "Email"
             </label>
             <input
               id="profile-email"
@@ -508,7 +527,17 @@ export function AccountDashboard() {
             onClick={handleSaveProfile}
             disabled={isSavingProfile}
           >
-            {isSavingProfile ? "Guardando..." : hasProfileChanges ? "Guardar perfil" : "Sin cambios"}
+            {isSavingProfile
+              ? lang === "en"
+                ? "Saving..."
+                : "Guardando..."
+              : hasProfileChanges
+                ? lang === "en"
+                  ? "Save profile"
+                  : "Guardar perfil"
+                : lang === "en"
+                  ? "No changes"
+                  : "Sin cambios"}
           </button>
 
           {profileMessage ? (
@@ -523,30 +552,48 @@ export function AccountDashboard() {
 
           {profile ? (
             <p className="auth-alt">
-              Usuario activo: <strong>{profile.email}</strong>
+              {lang === "en" ? "Active user:" : "Usuario activo:"}{" "}
+              <strong>{profile.email}</strong>
             </p>
           ) : null}
 
           <p className="auth-alt">
-            Total gastado: <strong>{formatMoney(totalSpent)}</strong>
+            {lang === "en" ? "Total spent:" : "Total gastado:"}{" "}
+            <strong>{formatMoney(totalSpent)}</strong>
           </p>
 
           <hr className="auth-divider-rule" />
 
           <p className="auth-alt">
-            Tu sesión está protegida con cookie httpOnly y expiración automática.
+            {lang === "en"
+              ? "Your session is protected with an httpOnly cookie and automatic expiration."
+              : "Tu sesión está protegida con cookie httpOnly y expiración automática."}
           </p>
 
           <div className="auth-field">
             <span className="auth-label">Sesiones activas</span>
             {sessions.length === 0 ? (
-              <p className="auth-alt">No hay sesiones activas registradas.</p>
+              <p className="auth-alt">
+                {lang === "en"
+                  ? "There are no active sessions registered."
+                  : "No hay sesiones activas registradas."}
+              </p>
             ) : (
               sessions.map((session) => (
                 <p key={session.id} className="auth-alt">
-                  {session.isCurrent ? "Esta sesión" : "Otra sesión"} - IP:{" "}
-                  {session.ipAddress ?? "desconocida"} -{" "}
-                  {session.userAgent ? session.userAgent.slice(0, 40) : "UA desconocido"}
+                  {session.isCurrent
+                    ? lang === "en"
+                      ? "This session"
+                      : "Esta sesión"
+                    : lang === "en"
+                      ? "Other session"
+                      : "Otra sesión"}{" "}
+                  - IP: {session.ipAddress ?? (lang === "en" ? "unknown" : "desconocida")} -{" "}
+                  {session.userAgent
+                    ? session.userAgent.slice(0, 40)
+                    : lang === "en"
+                      ? "UA unknown"
+                      : "UA desconocido"}
                 </p>
               ))
             )}
@@ -558,7 +605,13 @@ export function AccountDashboard() {
             onClick={handleLogoutAll}
             disabled={isRevokingAll}
           >
-            {isRevokingAll ? "Cerrando sesiones..." : "Cerrar sesión en todos los dispositivos"}
+            {isRevokingAll
+              ? lang === "en"
+                ? "Closing sessions..."
+                : "Cerrando sesiones..."
+              : lang === "en"
+                ? "Log out on all devices"
+                : "Cerrar sesión en todos los dispositivos"}
           </button>
 
           {errorMessage ? (
@@ -579,7 +632,7 @@ export function AccountDashboard() {
         <>
           <div className="auth-field">
             <label htmlFor="profile-avatar-url" className="auth-label">
-              URL de avatar (opcional)
+              {lang === "en" ? "Avatar URL (optional)" : "URL de avatar (opcional)"}
             </label>
             <input
               id="profile-avatar-url"
@@ -593,7 +646,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-avatar-file" className="auth-label">
-              Subir imagen de perfil
+              {lang === "en" ? "Upload profile image" : "Subir imagen de perfil"}
             </label>
             <input
               id="profile-avatar-file"
@@ -603,17 +656,21 @@ export function AccountDashboard() {
               onChange={handleAvatarFileChange}
             />
             {isUploadingAvatar ? (
-              <p className="auth-alt">Subiendo avatar...</p>
+              <p className="auth-alt">
+                {lang === "en" ? "Uploading avatar..." : "Subiendo avatar..."}
+              </p>
             ) : (
               <p className="auth-alt">
-                Puedes elegir una imagen de tu ordenador. La guardaremos como tu foto de perfil.
+                {lang === "en"
+                  ? "You can choose an image from your computer. We will save it as your profile picture."
+                  : "Puedes elegir una imagen de tu ordenador. La guardaremos como tu foto de perfil."}
               </p>
             )}
           </div>
 
           <div className="auth-field">
             <label htmlFor="profile-phone" className="auth-label">
-              Teléfono
+              {lang === "en" ? "Phone" : "Teléfono"}
             </label>
             <input
               id="profile-phone"
@@ -626,7 +683,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-address" className="auth-label">
-              Dirección
+              {lang === "en" ? "Address" : "Dirección"}
             </label>
             <input
               id="profile-address"
@@ -639,7 +696,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-city" className="auth-label">
-              Ciudad
+              {lang === "en" ? "City" : "Ciudad"}
             </label>
             <input
               id="profile-city"
@@ -652,7 +709,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-postal" className="auth-label">
-              Código postal
+              {lang === "en" ? "Postal code" : "Código postal"}
             </label>
             <input
               id="profile-postal"
@@ -665,7 +722,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-country" className="auth-label">
-              País
+              {lang === "en" ? "Country" : "País"}
             </label>
             <input
               id="profile-country"
@@ -678,7 +735,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-province" className="auth-label">
-              Provincia
+              {lang === "en" ? "Province" : "Provincia"}
             </label>
             <input
               id="profile-province"
@@ -695,7 +752,17 @@ export function AccountDashboard() {
             onClick={handleSaveProfile}
             disabled={isSavingProfile}
           >
-            {isSavingProfile ? "Guardando..." : hasProfileChanges ? "Guardar cambios" : "Sin cambios"}
+            {isSavingProfile
+              ? lang === "en"
+                ? "Saving..."
+                : "Guardando..."
+              : hasProfileChanges
+                ? lang === "en"
+                  ? "Save changes"
+                  : "Guardar cambios"
+                : lang === "en"
+                  ? "No changes"
+                  : "Sin cambios"}
           </button>
 
           {profileMessage ? (
@@ -715,8 +782,9 @@ export function AccountDashboard() {
           <div className="auth-field">
             <span className="auth-label">Acceso en dos pasos (2FA)</span>
             <p className="auth-alt">
-              Añade una segunda capa de seguridad. Cuando esté activado, al iniciar sesión
-              tendrás que introducir además un código que te enviaremos a tu email.
+              {lang === "en"
+                ? "Add a second security layer. When it is enabled, each time you sign in you will have to enter an additional code that we send to your email."
+                : "Añade una segunda capa de seguridad. Cuando esté activado, al iniciar sesión tendrás que introducir además un código que te enviaremos a tu email."}
             </p>
           </div>
 
@@ -729,15 +797,29 @@ export function AccountDashboard() {
             disabled={isUpdatingTwoFactor}
           >
             {isUpdatingTwoFactor
-              ? "Guardando..."
+              ? lang === "en"
+                ? "Saving..."
+                : "Guardando..."
               : twoFactorEnabled
-                ? "Desactivar 2FA por email"
-                : "Activar 2FA por email"}
+                ? lang === "en"
+                  ? "Disable 2FA by email"
+                  : "Desactivar 2FA por email"
+                : lang === "en"
+                  ? "Enable 2FA by email"
+                  : "Activar 2FA por email"}
           </button>
 
           <p className="auth-alt">
-            Estado actual:{" "}
-            <strong>{twoFactorEnabled ? "2FA activado" : "2FA desactivado"}</strong>
+            {lang === "en" ? "Current status:" : "Estado actual:"}{" "}
+            <strong>
+              {twoFactorEnabled
+                ? lang === "en"
+                  ? "2FA enabled"
+                  : "2FA activado"
+                : lang === "en"
+                  ? "2FA disabled"
+                  : "2FA desactivado"}
+            </strong>
           </p>
 
           {twoFactorMessage ? (
@@ -751,9 +833,13 @@ export function AccountDashboard() {
           <div className="auth-field">
             <span className="auth-label">Autenticación con app (TOTP)</span>
             <p className="auth-alt">
-              Usa apps como <strong>Google Authenticator</strong>, <strong>Authy</strong> o{" "}
-              <strong>FreeOTP</strong> para generar códigos de 6 dígitos que cambian cada 30
-              segundos. Es el sistema 2FA más utilizado a nivel profesional.
+              {lang === "en" ? "Use apps like " : "Usa apps como "}
+              <strong>Google Authenticator</strong>, <strong>Authy</strong>{" "}
+              {lang === "en" ? "or " : "o "}
+              <strong>FreeOTP</strong>{" "}
+              {lang === "en"
+                ? "to generate 6‑digit codes that change every 30 seconds. It is the most widely used 2FA system in professional environments."
+                : "para generar códigos de 6 dígitos que cambian cada 30 segundos. Es el sistema 2FA más utilizado a nivel profesional."}
             </p>
           </div>
 
@@ -765,7 +851,13 @@ export function AccountDashboard() {
                 onClick={handleStartTotpSetup}
                 disabled={isUpdatingTotp}
               >
-                {isUpdatingTotp ? "Preparando..." : "Iniciar configuración con app (QR)"}
+                {isUpdatingTotp
+                  ? lang === "en"
+                    ? "Preparing..."
+                    : "Preparando..."
+                  : lang === "en"
+                    ? "Start setup with app (QR)"
+                    : "Iniciar configuración con app (QR)"}
               </button>
 
               {totpSecret && (
@@ -780,14 +872,18 @@ export function AccountDashboard() {
                     </div>
                   ) : null}
                   <p className="auth-alt">
-                    1. Escanea el código QR con tu app de autenticación (Google Authenticator,
-                    Authy, etc.). Si no puedes escanearlo, añade la cuenta manualmente usando este
-                    secreto:
+                    {lang === "en"
+                      ? "1. Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.). If you can't scan it, add the account manually using this secret:"
+                      : "1. Escanea el código QR con tu app de autenticación (Google Authenticator, Authy, etc.). Si no puedes escanearlo, añade la cuenta manualmente usando este secreto:"}
                   </p>
                   <p className="auth-alt" style={{ fontFamily: "monospace" }}>
                     {totpSecret}
                   </p>
-                  <p className="auth-alt">2. Introduce aquí el código de 6 dígitos que veas en la app:</p>
+                  <p className="auth-alt">
+                    {lang === "en"
+                      ? "2. Enter here the 6‑digit code that you see in the app:"
+                      : "2. Introduce aquí el código de 6 dígitos que veas en la app:"}
+                  </p>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -805,7 +901,13 @@ export function AccountDashboard() {
                     onClick={handleConfirmTotp}
                     disabled={isUpdatingTotp}
                   >
-                    {isUpdatingTotp ? "Verificando..." : "Confirmar código y activar 2FA con app"}
+                    {isUpdatingTotp
+                      ? lang === "en"
+                        ? "Verifying..."
+                        : "Verificando..."
+                      : lang === "en"
+                        ? "Confirm code and enable 2FA with app"
+                        : "Confirmar código y activar 2FA con app"}
                   </button>
                 </div>
               )}
@@ -815,8 +917,9 @@ export function AccountDashboard() {
           {totpEnabled && (
             <>
               <p className="auth-alt">
-                Estado actual: <strong>2FA con app activado</strong>. Cada vez que inicies sesión,
-                se te pedirá el código de tu app de autenticación.
+                {lang === "en"
+                  ? "Current status: 2FA with app enabled. Every time you sign in, you will be asked for the code from your authenticator app."
+                  : "Estado actual: 2FA con app activado. Cada vez que inicies sesión, se te pedirá el código de tu app de autenticación."}
               </p>
               <button
                 type="button"
@@ -824,7 +927,13 @@ export function AccountDashboard() {
                 onClick={handleDisableTotp}
                 disabled={isUpdatingTotp}
               >
-                {isUpdatingTotp ? "Desactivando..." : "Desactivar 2FA con app"}
+                {isUpdatingTotp
+                  ? lang === "en"
+                    ? "Disabling..."
+                    : "Desactivando..."
+                  : lang === "en"
+                    ? "Disable 2FA with app"
+                    : "Desactivar 2FA con app"}
               </button>
             </>
           )}
@@ -840,14 +949,14 @@ export function AccountDashboard() {
           <div className="auth-field">
             <span className="auth-label">Verificación de acceso desde el móvil (Push MFA)</span>
             <p className="auth-alt">
-              Es el sistema donde recibes una notificación en tu móvil y aceptas o rechazas el
-              inicio de sesión (por ejemplo: &quot;¿Eres tú?&quot; con botones de Sí / No).
+              {lang === "en"
+                ? "This is the system where you receive a notification on your phone and approve or deny the sign‑in (for example: “Is this you?” with Yes / No buttons)."
+                : "Es el sistema donde recibes una notificación en tu móvil y aceptas o rechazas el inicio de sesión (por ejemplo: \"¿Eres tú?\" con botones de Sí / No)."}
             </p>
             <p className="auth-alt">
-              Para tener esto igual que Google, necesitaríamos una app móvil propia con
-              notificaciones push conectada a GameZone. De momento solo está disponible el
-              segundo factor por email, pero esta sección deja preparado el apartado de
-              seguridad para activarlo en el futuro.
+              {lang === "en"
+                ? "To have this working exactly like Google, we would need our own mobile app with push notifications connected to GameZone. For now only the email second factor is available, but this section prepares the security area to enable it in the future."
+                : "Para tener esto igual que Google, necesitaríamos una app móvil propia con notificaciones push conectada a GameZone. De momento solo está disponible el segundo factor por email, pero esta sección deja preparado el apartado de seguridad para activarlo en el futuro."}
             </p>
           </div>
 
@@ -857,7 +966,9 @@ export function AccountDashboard() {
             disabled
             title="Requiere app móvil y sistema de notificaciones push"
           >
-            Próximamente: activar verificación por notificación en el móvil
+            {lang === "en"
+              ? "Coming soon: enable verification by mobile notification"
+              : "Próximamente: activar verificación por notificación en el móvil"}
           </button>
         </>
       ) : null}
