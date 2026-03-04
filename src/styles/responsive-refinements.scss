@@ -1,0 +1,840 @@
+.navbar {
+  gap: 1rem;
+}
+
+.nav-actions {
+  margin-left: auto;
+}
+
+.search-container {
+  min-width: 0;
+}
+
+.nav-search-input {
+  width: clamp(130px, 18vw, 190px);
+  max-width: 100%;
+}
+
+.nav-search-input:focus {
+  width: clamp(160px, 28vw, 240px);
+}
+
+.footer-wrapper {
+  align-items: flex-start;
+}
+
+.cart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cart-drawer-cart-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  opacity: 0.88;
+  filter: brightness(0) saturate(100%) invert(42%) sepia(45%) saturate(1200%) hue-rotate(5deg);
+}
+
+.game-detail-cart-button img,
+.game-suggestion-cart-button img {
+  opacity: 0.88;
+  filter: brightness(0) saturate(100%) invert(42%) sepia(45%) saturate(1200%) hue-rotate(5deg);
+}
+
+.cart-drawer-cart-icon-button {
+  flex-shrink: 0;
+}
+
+.cart-empty-text {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.qty-value {
+  min-width: 20px;
+  text-align: center;
+}
+
+.cart-inline-button {
+  padding-inline: 0.55rem;
+}
+
+.cart-full-width {
+  width: 100%;
+  justify-content: center;
+}
+
+.game-detail-shell {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.game-detail-card {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.25rem;
+}
+
+.game-detail-media {
+  border-radius: 0.9rem;
+  overflow: hidden;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  position: relative;
+  height: 420px;
+}
+
+.game-detail-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: #cbd5e1;
+}
+
+.game-detail-copy {
+  font-size: 0.9rem;
+  color: #b8c4d4;
+  max-width: 40rem;
+}
+
+.game-detail-price-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.game-detail-price-old {
+  text-decoration: line-through;
+  color: #94a3b8;
+  margin-right: 0.1rem;
+}
+
+.game-detail-price-final {
+  color: #cbd5e1;
+}
+
+.game-detail-price-discount {
+  color: #b91c1c;
+  opacity: 0.9;
+  margin-left: 0.1rem;
+}
+
+.game-suggestion-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.game-suggestion-price {
+  max-width: none;
+}
+
+.game-detail-back {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.game-detail-back .button-ghost {
+  background: linear-gradient(45deg, #5c3db8 0%, #7f58e7 45%, #9d7aeb 55%, #5c3db8 100%);
+  color: #f1f5f9;
+}
+
+.game-suggestion-card {
+  cursor: pointer;
+}
+
+.game-suggestion-cover {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.game-suggestion-body {
+  padding: 0.75rem 0.8rem 0.9rem;
+}
+
+.cart-icon-button,
+.game-suggestion-cart-button,
+.game-detail-cart-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem;
+  background: radial-gradient(circle at top, rgba(249, 115, 22, 0.18), rgba(15, 23, 42, 0.98));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: background 0.2s ease-out, transform 0.3s ease-out, box-shadow 0.2s ease-out;
+}
+
+.cart-icon-button:hover,
+.game-suggestion-cart-button:hover,
+.game-detail-cart-button:hover {
+  background: radial-gradient(circle at top, rgba(249, 115, 22, 0.3), rgba(15, 23, 42, 0.98));
+  transform: scale(0.92);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.85);
+}
+
+.game-detail-cart-button {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.9rem;
+}
+
+.game-card-media {
+  position: relative;
+  overflow: hidden;
+  height: 240px;
+}
+
+.game-card-plus {
+  border-color: rgba(185, 28, 28, 0.8);
+}
+
+.card.game-card-plus.card-hover:hover {
+  border-color: rgba(185, 28, 28, 0.8);
+}
+
+.game-card-cashback-badge {
+  position: absolute;
+  left: 0.55rem;
+  top: 0.6rem;
+  z-index: 2;
+  background: #34d399;
+  color: #064e3b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.45rem;
+}
+
+.game-card-discount-badge {
+  position: absolute;
+  right: 0.55rem;
+  top: 0.6rem;
+  z-index: 2;
+  background: #b91c1c;
+  color: #fef2f2;
+  opacity: 0.9;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+}
+
+.game-card-store-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 0.45rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  background: rgba(2, 6, 23, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.game-card-store-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+}
+
+.game-card-body {
+  padding: 0.7rem 0.75rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.game-card-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6rem;
+}
+
+.game-card-subtitle {
+  font-size: 0.78rem;
+  color: #b8c4d4;
+  margin: 0;
+}
+
+.game-card-region {
+  margin: 0.05rem 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #34d399;
+  letter-spacing: 0.03em;
+}
+
+.game-card-price {
+  padding: 0 0.05rem;
+  /* Reserva espacio para 2 líneas (con/sin descuento) para alinear botones en todas las tarjetas */
+  min-height: 3.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.game-card-original-line {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #b8c4d4;
+}
+
+.game-card-original-line--empty {
+  visibility: hidden;
+}
+
+.game-card-original-price {
+  text-decoration: line-through;
+}
+
+.game-card-discount {
+  color: #b91c1c;
+  opacity: 0.9;
+  font-weight: 700;
+}
+
+.game-card-final-price {
+  margin: 0.2rem 0 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #b8c4d4;
+}
+
+.game-card-cashback-text {
+  margin: 0.1rem 0 0.2rem;
+  color: #34d399;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.game-card-like-button {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: #b8c4d4;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  width: fit-content;
+}
+
+.game-card-like-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.game-card-like-icon {
+  display: inline-block;
+  margin-right: 0.12rem;
+  font-size: 1.1em;
+  transform: scaleX(1.1);
+  transform-origin: center center;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.game-card-like-icon--active {
+  color: #7f1d1d;
+  opacity: 0.8;
+  text-shadow: 0 0 6px rgba(127, 29, 29, 0.3);
+}
+
+.game-card-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.game-card-actions .button-ghost {
+  color: #cbd5e1;
+}
+
+.game-card-actions .button-ghost:hover {
+  color: #e2e8f0;
+}
+
+.game-card-actions .button-primary {
+  color: #cbd5e1;
+}
+
+.game-card-actions .button-primary:hover {
+  color: #e2e8f0;
+}
+
+.game-card-button {
+  font-size: 0.64rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hero-price-old {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.hero-cashback-chip {
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  background: rgba(132, 204, 22, 0.18);
+  border: 1px solid rgba(132, 204, 22, 0.55);
+  color: #bef264;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .navbar {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .nav-platforms {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .nav-actions {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 840px) {
+  .navbar {
+    padding: 0.65rem 0.9rem 0.7rem;
+  }
+
+  .nav-logo-text {
+    margin: 0 0 0 0.55rem;
+  }
+
+  .nav-logo-text-2 {
+    font-size: 0.82rem;
+  }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.45rem;
+  }
+
+  .search-container {
+    flex: 1;
+  }
+
+  .nav-search-input {
+    width: 100%;
+  }
+
+  .nav-search-input:focus {
+    width: 100%;
+  }
+
+  .cart-drawer {
+    right: 0;
+    top: 0;
+    width: min(460px, 100vw);
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .game-detail-media {
+    height: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-wrapper {
+    padding: 1rem 0.85rem 2.2rem;
+  }
+
+  .footer-wrapper {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .footer-icons {
+    flex-wrap: wrap;
+  }
+
+  .game-detail-title {
+    font-size: 1.2rem;
+  }
+
+  .game-detail-media {
+    height: 250px;
+  }
+}
+
+/* ============================ */
+/* NAVBAR BREAKPOINT REFINEMENTS */
+/* ============================ */
+
+/* Móviles hasta 480px: misma estructura y sin huecos entre media queries */
+@media (max-width: 480px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem 0.75rem;
+  }
+
+  .nav-logo {
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .nav-logo-text {
+    margin: 0 0 0 0.5rem;
+    align-items: center;
+  }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .search-container {
+    flex: 1;
+  }
+
+  .nav-search {
+    width: 100%;
+  }
+
+  .nav-cart-button {
+    min-width: auto;
+    padding-inline: 0.6rem;
+  }
+
+  .nav-platforms {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: thin;
+  }
+
+  .nav-platform-pill {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.25rem 0.8rem;
+    text-align: center;
+  }
+
+  .nav-platform-with-icon {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  /* Botones de las tarjetas: 50% del ancho cada uno en una sola fila */
+  .game-card-actions {
+    width: 100%;
+  }
+
+  .game-card-actions .game-card-button {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+  }
+}
+
+/* Móviles muy estrechos (<375px): que cada botón mida solo icono + texto */
+@media (max-width: 374px) {
+  .nav-platforms {
+    justify-content: flex-start;
+  }
+
+  .nav-platform-pill {
+    flex: 0 0 auto;
+    min-width: auto;
+    padding-inline: 0.7rem;
+    text-align: center;
+  }
+}
+
+/* Móviles medianos (375–420px): mismo comportamiento de ancho por contenido */
+@media (min-width: 375px) and (max-width: 420px) {
+  .nav-platform-pill {
+    flex: 0 0 auto;
+    min-width: auto;
+    padding-inline: 0.8rem;
+    text-align: center;
+  }
+}
+
+/* Móvil horizontal / tablets pequeñas (~480–720px) */
+@media (min-width: 481px) and (max-width: 720px) {
+  /* Misma estructura que móvil: 3 filas, logo centrado y nav alineada con el contenido */
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem 0.75rem;
+  }
+
+  /* Fila 1: logo + texto centrados */
+  .nav-logo {
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .nav-logo-text {
+    margin: 0 0 0 0.5rem;
+    align-items: center;
+  }
+
+  /* Fila 2: buscador + carrito + avatar */
+  .nav-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .search-container {
+    flex: 1;
+  }
+
+  .nav-search {
+    width: 100%;
+  }
+
+  .nav-cart-button {
+    min-width: auto;
+    padding-inline: 0.6rem;
+  }
+
+  /* Fila 3: los 4 botones de plataforma en una sola fila con scroll si no caben */
+  .nav-platforms {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .nav-platform-pill {
+    flex: 1 1 0;     /* todos se reparten el ancho disponible */
+    min-width: 0;
+    padding: 0.25rem 0.8rem;
+    text-align: center;
+  }
+
+  .nav-platform-with-icon {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  /* Botones de las tarjetas: 50% del ancho cada uno en una sola fila */
+  .game-card-actions {
+    width: 100%;
+  }
+
+  .game-card-actions .game-card-button {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+  }
+}
+
+/* Tablets / iPad en vertical (~720–1024px) – ya cubierto por max-width: 840 y 1100,
+   solo afinamos un poco tamaños de texto. */
+@media (min-width: 721px) and (max-width: 1024px) {
+  /* Fila 1: logo centrado con texto */
+  .navbar {
+    flex-wrap: wrap;
+    row-gap: 0.7rem;
+    justify-content: center;
+    /* mismo margen horizontal que .main-wrapper para que no quede descuadrado */
+    padding: 0.65rem 1.75rem 0.75rem;
+  }
+
+  .nav-logo {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .nav-logo-text {
+    margin: 0 0 0 0.75rem;
+  }
+
+  .nav-logo-text-1 {
+    font-size: 0.74rem;
+  }
+
+  .nav-logo-text-2 {
+    font-size: 0.86rem;
+  }
+
+  /* Fila 2: buscador a la izquierda, carrito + avatar a la derecha */
+  .nav-actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem; /* carrito más pegado al avatar */
+  }
+
+  .nav-search {
+    flex: 0 0 auto; /* mantiene su ancho base */
+  }
+
+  .nav-actions .button-ghost-cart {
+    margin-left: auto; /* empuja carrito + avatar al borde derecho juntos */
+  }
+
+  /* Fila 3: plataformas ocupando todo el ancho con espacio entre botones */
+  .nav-platforms {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  /* Botones de la 3ª fila algo más anchos en tablet */
+  .nav-platform-pill {
+    padding-left: 1.9rem;
+    padding-right: 1.9rem;
+  }
+}
+
+/* Escritorio 1080p (~1025–1439px): base, solo pequeños ajustes de separación */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .navbar {
+    gap: 0.9rem;
+  }
+
+  .nav-actions {
+    gap: 0.55rem;
+  }
+}
+
+/* Escritorio grande / 2K (>=1440px y <2560px) */
+@media (min-width: 1440px) and (max-width: 2559px) {
+  .navbar {
+    max-width: 1320px;
+    gap: 1.25rem;
+  }
+
+  .nav-logo-mark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-logo-letter {
+    font-size: 1.05rem;
+  }
+
+  .nav-logo-letter--big {
+    font-size: 1.3rem;
+  }
+
+  .nav-logo-text-2 {
+    font-size: 0.95rem;
+  }
+
+  .nav-platforms {
+    gap: 0.9rem;
+    font-size: 0.82rem;
+  }
+
+  .nav-platform-pill {
+    padding: 0.4rem 1rem;
+  }
+
+  .nav-cart-button,
+  .nav-search {
+    height: 32px;
+  }
+}
+
+/* 4K y pantallas muy grandes (>=2560px) */
+@media (min-width: 2560px) {
+  .navbar {
+    max-width: 1680px;
+    padding: 0.8rem 2.5rem 0.9rem;
+    gap: 1.6rem;
+  }
+
+  .nav-logo-mark {
+    width: 48px;
+    height: 48px;
+  }
+
+  .nav-logo-letter {
+    font-size: 1.1rem;
+  }
+
+  .nav-logo-letter--big {
+    font-size: 1.4rem;
+  }
+
+  .nav-logo-text-1 {
+    font-size: 0.82rem;
+  }
+
+  .nav-logo-text-2 {
+    font-size: 1rem;
+  }
+
+  .nav-platforms {
+    gap: 1rem;
+    font-size: 0.86rem;
+  }
+
+  .nav-platform-pill {
+    padding: 0.45rem 1.1rem;
+  }
+
+  .nav-search {
+    height: 34px;
+    min-width: 190px;
+  }
+
+  .nav-search-input {
+    font-size: 0.9rem;
+  }
+
+  .nav-cart-button,
+  .nav-search-button {
+    height: 34px;
+  }
+}

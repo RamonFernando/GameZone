@@ -1,0 +1,44 @@
+{
+  "name": "ecommerce-next-gaming",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "e2e:checkout": "node scripts/e2e-checkout.mjs",
+    "e2e:stripe": "node scripts/e2e-stripe.mjs",
+    "e2e:paypal": "node scripts/e2e-paypal.mjs",
+    "e2e:all": "npm run e2e:checkout && npm run e2e:stripe && npm run e2e:paypal",
+    "e2e:all:continue": "node scripts/e2e-all-continue.mjs",
+    "test:all": "npm run test:unit && npm run build && npm run e2e:all",
+    "stripe:webhook:listen": "stripe listen --forward-to localhost:3000/api/payments/stripe/webhook",
+    "stripe:webhook:test:checkout": "stripe trigger checkout.session.completed",
+    "stripe:webhook:test:async": "stripe trigger checkout.session.async_payment_succeeded"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "next": "14.1.0",
+    "nodemailer": "^8.0.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "stripe": "^20.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.6",
+    "@types/nodemailer": "^7.0.11",
+    "@types/react": "18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "eslint": "8.56.0",
+    "eslint-config-next": "14.1.0",
+    "prisma": "^6.10.1",
+    "sass": "1.69.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

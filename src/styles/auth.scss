@@ -1,0 +1,486 @@
+    /* =========================================
+    AUTH / LOGIN - GameZone Access
+    Sección específica para la página /login
+    ========================================= */
+
+    .auth-shell {
+    margin-top: 1.75rem;
+    }
+
+    /* Card de login: reutiliza .card, pero ajustamos padding interno */
+    .auth-card {
+    padding: 0;
+    }
+
+    /* Grid principal: formulario + imagen lateral */
+    .auth-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    min-height: 420px;
+    }
+
+    /* Panel izquierdo: formulario */
+    .auth-form-panel {
+    padding: 2.25rem 2.25rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    }
+
+    /* Encabezado del formulario */
+    .auth-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    }
+
+    .auth-kicker {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #A78BFA;
+    }
+
+    .auth-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    }
+
+    .auth-subtitle {
+    font-size: 0.9rem;
+    color: #b8c4d4;
+    max-width: 26rem;
+    }
+
+    /* Bloque general del formulario */
+    .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    }
+
+    /* Grupo de campo (label + input + helper) */
+    .auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    }
+
+    .auth-label {
+    font-size: 0.8rem;
+    color: #b8c4d4;
+    }
+
+    /* Inputs adaptados al estilo de tu navbar/búsqueda */
+    .auth-input {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-subtle);
+    background: rgba(15, 23, 42, 0.9);
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    }
+
+    .auth-input::placeholder {
+    color: #94a3b8;
+    }
+
+    .auth-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.6);
+    }
+
+    /* Texto auxiliar bajo el campo (ej. "¿Olvidaste la contraseña?") */
+    .auth-field-helper {
+    display: flex;
+    justify-content: flex-end;
+    }
+
+    /* Enlaces dentro del login */
+    .auth-link {
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-decoration: none;
+    }
+
+    .auth-link:hover {
+    text-decoration: underline;
+    }
+
+    /* Botón principal de acceso (usa button-primary) */
+    .auth-submit {
+    width: 100%;
+    margin-top: 0.4rem;
+    padding-block: 0.7rem;
+    font-size: 0.9rem;
+    }
+
+    /* Variante compacta: misma altura pero sin ancho completo */
+    .auth-submit-compact {
+    margin-top: 0.4rem;
+    padding-block: 0.7rem;
+    font-size: 0.9rem;
+    padding-inline: 1.2rem;
+    align-self: flex-start;
+    }
+
+    .admin-center-button {
+    align-self: center;
+    }
+
+    .auth-center-button {
+    align-self: center;
+    }
+
+    /* Mismo color de letra que el resto en Mi cuenta (visible en todos los dispositivos) */
+    .auth-form-panel .button-ghost {
+      color: #cbd5e1;
+    }
+    .auth-form-panel .button-ghost:hover {
+      color: #e2e8f0;
+    }
+
+    /* Texto alternativo de registro */
+    .auth-alt {
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    color: #b8c4d4;
+    }
+
+    /* Separador "o continúa con" */
+    .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.6rem 0;
+    }
+
+    .auth-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(148, 163, 184, 0.4),
+        transparent
+    );
+    }
+
+    .auth-divider-text {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #b8c4d4;
+    }
+
+    /* Fila de botones sociales */
+    .auth-social-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    }
+
+    /* Botones de acceso social (Google, Facebook, Twitter) */
+    .auth-social-button {
+    flex: 1;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
+    background: radial-gradient(
+        circle at top,
+        rgba(15, 23, 42, 0.98),
+        rgba(15, 23, 42, 0.94)
+    );
+    color: var(--text-main);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transform: scale(1);
+    transform-origin: center center;
+    transition: background 140ms ease-out, border-color 140ms ease-out,
+        transform 0.3s ease-out, box-shadow 120ms ease-out;
+    }
+
+    .auth-social-button:hover {
+    background: radial-gradient(
+        circle at top left,
+        rgba(124, 58, 237, 0.25),
+        rgba(15, 23, 42, 0.97)
+    );
+    border-color: var(--accent-strong);
+    box-shadow: 0 14px 28px rgba(30, 64, 175, 0.6);
+    transform: scale(0.92);
+    }
+
+    /* Iconos de los botones sociales */
+    .auth-social-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    }
+
+    .auth-social-icon-img {
+    width: 18px;
+    height: 18px;
+    }
+
+    /* Panel derecho con imagen y branding */
+    .auth-media-panel {
+    position: relative;
+    overflow: hidden;
+    }
+
+    /* Contenedor relativo para el <Image fill /> */
+    .auth-media-inner {
+    position: relative;
+    height: 100%;
+    min-height: 420px;
+    }
+
+    /* Imagen de fondo del login */
+    .auth-media-image {
+    object-fit: cover;
+    }
+
+    /* Degradado sobre la imagen para integrar tu paleta */
+    .auth-media-gradient {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.88)),
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.45), transparent 55%),
+        url("/games_data/Forspoken/forspoken-cover.jpg");
+    background-size: cover, cover, cover;
+    background-position: center, center, center;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    }
+
+    /* Caja de texto sobre la imagen */
+    .auth-media-brand {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    background: radial-gradient(
+        circle at top left,
+        rgba(15, 23, 42, 0.96),
+        rgba(15, 23, 42, 0.92)
+    );
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+    }
+
+    .auth-media-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(129, 140, 248, 0.95);
+    }
+
+    .auth-media-text {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    }
+
+    /* ------------------------------
+    RESPONSIVE
+    ------------------------------ */
+
+    @media (max-width: 960px) {
+    .auth-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .auth-media-panel {
+        display: none; /* En móvil ocultamos la imagen lateral */
+    }
+
+    .auth-form-panel {
+        padding: 1.75rem 1.5rem 2rem;
+    }
+    }
+
+    @media (max-width: 640px) {
+    .auth-shell {
+        margin-top: 1.25rem;
+    }
+
+    .auth-form-panel {
+        padding: 1.5rem 1.25rem 1.85rem;
+    }
+}
+
+.account-orders-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.85rem;
+}
+
+.account-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.account-orders-table th,
+.account-orders-table td {
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  vertical-align: top;
+}
+
+.account-orders-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b8c4d4;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.account-orders-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.account-orders-qty {
+  margin-left: 0.35rem;
+}
+
+.auth-divider-rule {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
+  margin: 0.2rem 0 0.4rem;
+}
+
+.account-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.account-tab {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.9);
+  color: #b8c4d4;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.account-tab--active {
+  border-color: rgba(129, 140, 248, 0.9);
+  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.96));
+  color: #cbd5e1;
+}
+
+.account-avatar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.account-avatar-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid rgba(129, 140, 248, 0.9);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 14px 30px rgba(30, 64, 175, 0.8);
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease-out;
+}
+
+.account-avatar-circle:hover {
+  transform: scale(1.3);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+  border-color: rgba(191, 219, 254, 0.9);
+}
+
+/* Panel de control y Pedidos globales: mismo estilo blanco que las cartas */
+.auth-shell .auth-title {
+  color: #cbd5e1;
+}
+.auth-shell .auth-subtitle {
+  color: #b8c4d4;
+}
+.auth-shell .auth-kicker {
+  color: #c4b5fd;
+}
+.auth-shell .auth-alt,
+.auth-shell .auth-label,
+.auth-shell .auth-divider-text {
+  color: #b8c4d4;
+}
+.auth-shell .auth-link {
+  color: #a5b4fc;
+}
+.auth-shell .auth-link:hover {
+  color: #c7d2fe;
+}
+.auth-shell .auth-form-panel .button-ghost {
+  color: #cbd5e1;
+}
+.auth-shell .auth-form-panel .button-ghost:hover {
+  color: #e2e8f0;
+}
+.auth-shell .auth-input {
+  color: #cbd5e1;
+}
+.auth-shell .auth-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Tabla de Pedidos del sistema: mismo blanco que las cartas */
+.auth-shell .auth-form table {
+  color: #cbd5e1;
+}
+.auth-shell .auth-form table th {
+  color: #b8c4d4;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.auth-shell .auth-form table td {
+  color: #cbd5e1;
+  padding: 8px 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+.auth-shell .auth-form table strong {
+  color: #cbd5e1;
+}
