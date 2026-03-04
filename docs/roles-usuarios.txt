@@ -1,0 +1,45 @@
+Roles de usuario en GameZone
+============================
+
+En la aplicación existen tres tipos de rol definidos en el backend (enum UserRole):
+
+1) Usuario normal (USER)
+------------------------
+- Puede:
+  - Ver y editar **su propio perfil de cuenta**.
+  - Ver sus **sesiones activas** y cerrarlas todas (cerrar sesión en todos los dispositivos).
+  - Hacer **checkout** y crear pedidos.
+  - Ver su **historial de pedidos**.
+- No puede:
+  - Ver ni editar cuentas de otros usuarios.
+  - Ver ni gestionar pedidos globales de otros usuarios.
+  - Crear, editar o desactivar productos del catálogo.
+
+
+2) Administrador (ADMIN)
+------------------------
+Incluye todo lo que puede hacer un usuario normal, y además:
+
+- Puede:
+  - Ver **usuarios del sistema** (panel de usuarios).
+  - Ver **pedidos de todo el sistema** (pedidos globales).
+  - **Gestionar pedidos y reembolsos** (cambiar estado, procesar devoluciones, etc.).
+  - Ver productos del catálogo.
+  - **Gestionar productos** del catálogo (crear, editar, desactivar).
+- Es el rol pensado para tareas de administración diaria:
+  - Gestión de catálogo.
+  - Revisión y gestión de pedidos.
+
+
+3) Súper administrador / Super user (SUPER_ADMIN)
+-------------------------------------------------
+Es el rol con **todos los permisos posibles** en la aplicación.
+
+- Puede:
+  - Todo lo que puede hacer un ADMIN.
+  - Dispone de todos los permisos definidos en el sistema de autorización.
+  - Actúa como usuario maestro que controla la configuración global del sistema.
+- Es el rol reservado para:
+  - Configuración inicial del sistema (incluyendo permisos).
+  - Tareas críticas donde no queremos restricciones de permisos.
+

@@ -98,6 +98,40 @@ export async function sendVerificationEmail(input: {
   }
 }
 
+// Email sencillo para códigos de 2FA (login en dos pasos)
+export async function sendTwoFactorCodeEmail(input: {
+  to: string;
+  username: string;
+  code: string;
+}) {
+  const { transporter, from, isTestTransport } = await getMailerConfig();
+
+  const info = await transporter.sendMail({
+    from: `"GameZone Access" <${from}>`,
+    to: input.to,
+    subject: "Tu código de acceso en dos pasos",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.5;">
+        <h2>Hola ${input.username},</h2>
+        <p>Estás intentando iniciar sesión en tu cuenta de <strong>GameZone</strong>.</p>
+        <p>Introduce este código para completar el acceso:</p>
+        <p style="font-size: 24px; font-weight: bold; letter-spacing: 0.3em;">
+          ${input.code}
+        </p>
+        <p>Este código caduca en 10 minutos. Si no fuiste tú, puedes ignorar este mensaje.</p>
+      </div>
+    `,
+    text: `Tu código de acceso a GameZone es: ${input.code}. Caduca en 10 minutos.`,
+  });
+
+  if (isTestTransport) {
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`Vista previa email 2FA: ${previewUrl}`);
+    }
+  }
+}
+
 export async function sendPurchaseConfirmationEmail(input: {
   to: string;
   username: string;

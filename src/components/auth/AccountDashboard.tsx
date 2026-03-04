@@ -16,6 +16,9 @@ type Profile = {
   postalCode?: string | null;
   country?: string | null;
   province?: string | null;
+  twoFactorEnabled?: boolean;
+  totpEnabled?: boolean;
+  pushAuthEnabled?: boolean;
 };
 
 // Ítem individual de un pedido concreto.
@@ -74,8 +77,17 @@ export function AccountDashboard() {
   );
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"account" | "details">("account");
+  const [activeTab, setActiveTab] = useState<"account" | "details" | "security">("account");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [isUpdatingTwoFactor, setIsUpdatingTwoFactor] = useState(false);
+  const [twoFactorMessage, setTwoFactorMessage] = useState("");
+  const [totpEnabled, setTotpEnabled] = useState(false);
+  const [isUpdatingTotp, setIsUpdatingTotp] = useState(false);
+  const [totpMessage, setTotpMessage] = useState("");
+  const [totpSecret, setTotpSecret] = useState("");
+  const [totpQrDataUrl, setTotpQrDataUrl] = useState("");
+  const [totpCodeDraft, setTotpCodeDraft] = useState("");
 
   const totalSpent = useMemo(
     () => orders.reduce((sum, order) => sum + order.totalAmount, 0),
@@ -142,6 +154,8 @@ export function AccountDashboard() {
       setPostalCodeDraft(nextProfile?.postalCode ?? "");
       setCountryDraft(nextProfile?.country ?? "");
       setProvinceDraft(nextProfile?.province ?? "");
+      setTwoFactorEnabled(Boolean(nextProfile?.twoFactorEnabled));
+      setTotpEnabled(Boolean(nextProfile?.totpEnabled));
       setOrders(ordersPayload.orders ?? []);
       setSessions(sessionsPayload.sessions ?? []);
     } catch {
@@ -283,6 +297,147 @@ export function AccountDashboard() {
     }
   };
 
+  const handleToggleTwoFactor = async () => {
+    setTwoFactorMessage("");
+    try {
+      setIsUpdatingTwoFactor(true);
+      const response = await fetch("/api/account/security/2fa", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ enabled: !twoFactorEnabled }),
+      });
+
+      const payload = (await response.json()) as {
+        message?: string;
+        twoFactorEnabled?: boolean;
+      };
+
+      if (!response.ok) {
+        setTwoFactorMessage(payload.message ?? "No se pudo actualizar la configuración de 2FA.");
+        return;
+      }
+
+      setTwoFactorEnabled(Boolean(payload.twoFactorEnabled));
+      setTwoFactorMessage(payload.message ?? "Configuración de seguridad actualizada.");
+    } catch {
+      setTwoFactorMessage("Error de red al cambiar la configuración de 2FA.");
+    } finally {
+      setIsUpdatingTwoFactor(false);
+    }
+  };
+
+  const handleStartTotpSetup = async () => {
+    setTotpMessage("");
+    setTotpSecret("");
+    setTotpQrDataUrl("");
+    setTotpCodeDraft("");
+
+    try {
+      setIsUpdatingTotp(true);
+      const response = await fetch("/api/account/security/totp/setup", {
+        method: "POST",
+      });
+      const payload = (await response.json()) as {
+        message?: string;
+        secret?: string;
+        qrDataUrl?: string;
+        otpauthUrl?: string;
+      };
+
+      if (!response.ok) {
+        setTotpMessage(payload.message ?? "No se pudo iniciar la configuración de TOTP.");
+        return;
+      }
+
+      if (payload.secret) {
+        setTotpSecret(payload.secret);
+      }
+      if (payload.qrDataUrl) {
+        setTotpQrDataUrl(payload.qrDataUrl);
+      }
+      setTotpMessage(
+        payload.message ??
+          "Escanea el código QR con tu app y luego introduce el código de 6 dígitos para activar."
+      );
+    } catch {
+      setTotpMessage("Error de red al iniciar la configuración de TOTP.");
+    } finally {
+      setIsUpdatingTotp(false);
+    }
+  };
+
+  const handleConfirmTotp = async () => {
+    if (!totpSecret || !totpCodeDraft.trim()) {
+      setTotpMessage("Primero escanea el QR y luego introduce el código de tu app.");
+      return;
+    }
+
+    try {
+      setIsUpdatingTotp(true);
+      const response = await fetch("/api/account/security/totp/enable", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          secret: totpSecret,
+          code: totpCodeDraft.trim(),
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        message?: string;
+        totpEnabled?: boolean;
+      };
+
+      if (!response.ok) {
+        setTotpMessage(payload.message ?? "No se pudo activar 2FA con app.");
+        return;
+      }
+
+      setTotpEnabled(Boolean(payload.totpEnabled));
+      setTotpMessage(payload.message ?? "2FA con app activado correctamente.");
+      setTotpCodeDraft("");
+      setTotpSecret("");
+      setTotpQrDataUrl("");
+    } catch {
+      setTotpMessage("Error de red al activar 2FA con app.");
+    } finally {
+      setIsUpdatingTotp(false);
+    }
+  };
+
+  const handleDisableTotp = async () => {
+    setTotpMessage("");
+    try {
+      setIsUpdatingTotp(true);
+      const response = await fetch("/api/account/security/totp/disable", {
+        method: "POST",
+      });
+      const payload = (await response.json()) as {
+        message?: string;
+        totpEnabled?: boolean;
+      };
+
+      if (!response.ok) {
+        setTotpMessage(payload.message ?? "No se pudo desactivar 2FA con app.");
+        return;
+      }
+
+      setTotpEnabled(Boolean(payload.totpEnabled));
+      setTotpSecret("");
+      setTotpQrDataUrl("");
+      setTotpCodeDraft("");
+      setTotpMessage(payload.message ?? "2FA con app desactivado.");
+    } catch {
+      setTotpMessage("Error de red al desactivar 2FA con app.");
+    } finally {
+      setIsUpdatingTotp(false);
+    }
+  };
+
   if (isLoading) {
     return <p className="auth-alt">Cargando tu panel de cuenta...</p>;
   }
@@ -307,6 +462,15 @@ export function AccountDashboard() {
           onClick={() => setActiveTab("details")}
         >
           Datos personales
+        </button>
+        <button
+          type="button"
+          className={
+            "account-tab" + (activeTab === "security" ? " account-tab--active" : "")
+          }
+          onClick={() => setActiveTab("security")}
+        >
+          Seguridad
         </button>
       </div>
 
@@ -543,6 +707,158 @@ export function AccountDashboard() {
               {profileMessage}
             </p>
           ) : null}
+        </>
+      ) : null}
+
+      {activeTab === "security" ? (
+        <>
+          <div className="auth-field">
+            <span className="auth-label">Acceso en dos pasos (2FA)</span>
+            <p className="auth-alt">
+              Añade una segunda capa de seguridad. Cuando esté activado, al iniciar sesión
+              tendrás que introducir además un código que te enviaremos a tu email.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={
+              "button-primary auth-submit-compact auth-center-button btn-padding-site"
+            }
+            onClick={handleToggleTwoFactor}
+            disabled={isUpdatingTwoFactor}
+          >
+            {isUpdatingTwoFactor
+              ? "Guardando..."
+              : twoFactorEnabled
+                ? "Desactivar 2FA por email"
+                : "Activar 2FA por email"}
+          </button>
+
+          <p className="auth-alt">
+            Estado actual:{" "}
+            <strong>{twoFactorEnabled ? "2FA activado" : "2FA desactivado"}</strong>
+          </p>
+
+          {twoFactorMessage ? (
+            <p className="auth-alt" role="status" aria-live="polite">
+              {twoFactorMessage}
+            </p>
+          ) : null}
+
+          <hr className="auth-divider-rule" />
+
+          <div className="auth-field">
+            <span className="auth-label">Autenticación con app (TOTP)</span>
+            <p className="auth-alt">
+              Usa apps como <strong>Google Authenticator</strong>, <strong>Authy</strong> o{" "}
+              <strong>FreeOTP</strong> para generar códigos de 6 dígitos que cambian cada 30
+              segundos. Es el sistema 2FA más utilizado a nivel profesional.
+            </p>
+          </div>
+
+          {!totpEnabled && (
+            <>
+              <button
+                type="button"
+                className="button-primary auth-submit-compact auth-center-button btn-padding-site"
+                onClick={handleStartTotpSetup}
+                disabled={isUpdatingTotp}
+              >
+                {isUpdatingTotp ? "Preparando..." : "Iniciar configuración con app (QR)"}
+              </button>
+
+              {totpSecret && (
+                <div className="auth-field" style={{ marginTop: "0.75rem" }}>
+                  {totpQrDataUrl ? (
+                    <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+                      <img
+                        src={totpQrDataUrl}
+                        alt="Código QR para app de autenticación"
+                        style={{ maxWidth: 180, margin: "0 auto" }}
+                      />
+                    </div>
+                  ) : null}
+                  <p className="auth-alt">
+                    1. Escanea el código QR con tu app de autenticación (Google Authenticator,
+                    Authy, etc.). Si no puedes escanearlo, añade la cuenta manualmente usando este
+                    secreto:
+                  </p>
+                  <p className="auth-alt" style={{ fontFamily: "monospace" }}>
+                    {totpSecret}
+                  </p>
+                  <p className="auth-alt">2. Introduce aquí el código de 6 dígitos que veas en la app:</p>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    className="auth-input"
+                    value={totpCodeDraft}
+                    onChange={(event) => setTotpCodeDraft(event.target.value)}
+                    placeholder="Código de 6 dígitos"
+                  />
+                  <button
+                    type="button"
+                    className="button-primary auth-submit-compact auth-center-button btn-padding-site"
+                    style={{ marginTop: "0.5rem" }}
+                    onClick={handleConfirmTotp}
+                    disabled={isUpdatingTotp}
+                  >
+                    {isUpdatingTotp ? "Verificando..." : "Confirmar código y activar 2FA con app"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {totpEnabled && (
+            <>
+              <p className="auth-alt">
+                Estado actual: <strong>2FA con app activado</strong>. Cada vez que inicies sesión,
+                se te pedirá el código de tu app de autenticación.
+              </p>
+              <button
+                type="button"
+                className="button-ghost auth-center-button btn-padding-site"
+                onClick={handleDisableTotp}
+                disabled={isUpdatingTotp}
+              >
+                {isUpdatingTotp ? "Desactivando..." : "Desactivar 2FA con app"}
+              </button>
+            </>
+          )}
+
+          {totpMessage ? (
+            <p className="auth-alt" role="status" aria-live="polite">
+              {totpMessage}
+            </p>
+          ) : null}
+
+          <hr className="auth-divider-rule" />
+
+          <div className="auth-field">
+            <span className="auth-label">Verificación de acceso desde el móvil (Push MFA)</span>
+            <p className="auth-alt">
+              Es el sistema donde recibes una notificación en tu móvil y aceptas o rechazas el
+              inicio de sesión (por ejemplo: &quot;¿Eres tú?&quot; con botones de Sí / No).
+            </p>
+            <p className="auth-alt">
+              Para tener esto igual que Google, necesitaríamos una app móvil propia con
+              notificaciones push conectada a GameZone. De momento solo está disponible el
+              segundo factor por email, pero esta sección deja preparado el apartado de
+              seguridad para activarlo en el futuro.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="button-ghost auth-center-button btn-padding-site"
+            disabled
+            title="Requiere app móvil y sistema de notificaciones push"
+          >
+            Próximamente: activar verificación por notificación en el móvil
+          </button>
         </>
       ) : null}
     </div>

@@ -736,6 +736,62 @@
   }
 }
 
+/* Escritorio pequeño (1024–1125px):
+   - Fila 1: logo GameZone a la izquierda, buscador + carrito + avatar a la derecha
+   - Fila 2: botones de plataformas (PlayStation, Xbox, Nintendo, PC) centrados y ocupando toda la fila */
+@media (min-width: 1024px) and (max-width: 1125px) {
+  .navbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "logo actions"
+      "platforms platforms";
+    align-items: center;
+    /* Mismo margen horizontal que el resto del proyecto (.main-wrapper en >=768px) */
+    padding: 0.65rem 1.75rem 0.75rem;
+    column-gap: 1.1rem;
+    row-gap: 0.4rem;
+  }
+
+  .nav-logo {
+    grid-area: logo;
+    justify-self: flex-start;
+    /* Separa un poco más el logo del borde izquierdo */
+    margin-left: 0.75rem;
+  }
+
+  .nav-platforms {
+    grid-area: platforms;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.15rem;
+  }
+
+  .nav-actions {
+    grid-area: actions;
+    justify-self: flex-end;
+    margin-left: 0;
+    gap: 0.55rem;
+  }
+}
+
+/* Hasta 1125px: hacer el buscador algo más grande en desktop/tablet.
+   Incluimos desde 721px porque en ese rango ya no ocupa el 100% por layout. */
+@media (min-width: 721px) and (max-width: 1125px) {
+  .nav-search {
+    min-width: 220px;
+  }
+
+  .nav-search-input {
+    width: clamp(200px, 30vw, 280px);
+  }
+
+  .nav-search-input:focus {
+    width: clamp(230px, 38vw, 320px);
+  }
+}
+
 /* Escritorio 1080p (~1025–1439px): base, solo pequeños ajustes de separación */
 @media (min-width: 1025px) and (max-width: 1439px) {
   .navbar {
@@ -836,5 +892,12 @@
   .nav-cart-button,
   .nav-search-button {
     height: 34px;
+  }
+}
+
+/* A partir de 1121px: separa un poco más el logo del borde izquierdo */
+@media (min-width: 1121px) {
+  .nav-logo {
+    margin-left: 1rem;
   }
 }

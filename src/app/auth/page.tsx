@@ -30,12 +30,20 @@ function LoginContent() {
   const [isResending, setIsResending] = useState(false);
   const [canResendEmail, setCanResendEmail] = useState(false);
   const [loginIdentifier, setLoginIdentifier] = useState("");
+  const [isTwoFactorStep, setIsTwoFactorStep] = useState(false);
+  const [twoFactorChallengeId, setTwoFactorChallengeId] = useState<string | null>(null);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [isPushPending, setIsPushPending] = useState(false);
+  const [pushChallengeId, setPushChallengeId] = useState<string | null>(null);
+  const [twoFactorMode, setTwoFactorMode] = useState<"email" | "totp" | null>(null);
 
 const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
     setCanResendEmail(false);
+    setIsPushPending(false);
+    setPushChallengeId(null);
 
     const formData = new FormData(event.currentTarget);
     const identifier = String(formData.get("identifier") ?? "").trim();
@@ -57,7 +65,11 @@ const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         }),
       });
 
-      const payload = (await response.json()) as { message?: string; code?: string };
+      const payload = (await response.json()) as {
+        message?: string;
+        code?: string;
+        challengeId?: string;
+      };
 
       if (!response.ok) {
         setErrorMessage(payload.message ?? "No se pudo iniciar sesión.");
@@ -67,6 +79,41 @@ const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         return;
       }
 
+      // Si el backend indica que hace falta 2FA por email, pasamos al segundo paso
+      if (payload.code === "TWO_FACTOR_REQUIRED" && payload.challengeId) {
+        setIsTwoFactorStep(true);
+        setTwoFactorMode("email");
+        setTwoFactorChallengeId(payload.challengeId);
+        setSuccessMessage(
+          payload.message ?? "Hemos enviado un código de verificación a tu email."
+        );
+        return;
+      }
+
+      // Si hace falta 2FA con app (TOTP), también usamos el segundo paso pero contra otro endpoint
+      if (payload.code === "TOTP_REQUIRED" && payload.challengeId) {
+        setIsTwoFactorStep(true);
+        setTwoFactorMode("totp");
+        setTwoFactorChallengeId(payload.challengeId);
+        setSuccessMessage(
+          payload.message ??
+            "Abre tu app de autenticación (Google Authenticator, Authy...) e introduce el código de 6 dígitos."
+        );
+        return;
+      }
+
+      // Si el backend indica que hace falta aprobación tipo push, mostramos estado pendiente
+      if (payload.code === "PUSH_APPROVAL_REQUIRED" && payload.challengeId) {
+        setIsPushPending(true);
+        setPushChallengeId(payload.challengeId);
+        setSuccessMessage(
+          payload.message ??
+            "Hemos enviado un email para que apruebes este inicio de sesión desde otro dispositivo."
+        );
+        return;
+      }
+
+      // Flujo normal (sin 2FA)
       setSuccessMessage(payload.message ?? "Inicio de sesión correcto.");
       const safeNextUrl = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/account";
       router.push(safeNextUrl);
@@ -132,6 +179,96 @@ const oauthErrorMessage =
               ? "Respuesta OAuth inválida."
               : "";
 
+const handleTwoFactorSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!twoFactorChallengeId) {
+      setErrorMessage("Falta el identificador de sesión. Intenta iniciar sesión de nuevo.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const endpoint =
+        twoFactorMode === "totp" ? "/api/auth/totp/verify" : "/api/auth/2fa/verify";
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          challengeId: twoFactorChallengeId,
+          code: twoFactorCode,
+        }),
+      });
+
+      const payload = (await response.json()) as { message?: string; code?: string };
+
+      if (!response.ok) {
+        setErrorMessage(payload.message ?? "Código inválido.");
+        return;
+      }
+
+      setSuccessMessage(payload.message ?? "Inicio de sesión correcto.");
+      const safeNextUrl = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/account";
+      router.push(safeNextUrl);
+      router.refresh();
+    } catch {
+      setErrorMessage("Error de red al verificar el código. Inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCheckPushStatus = async () => {
+    if (!pushChallengeId) {
+      setErrorMessage("Falta el identificador de aprobación. Vuelve a iniciar sesión.");
+      return;
+    }
+
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/auth/push/check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ challengeId: pushChallengeId }),
+      });
+
+      const payload = (await response.json()) as { message?: string; code?: string };
+
+      if (!response.ok) {
+        setErrorMessage(payload.message ?? "No se pudo completar el acceso.");
+        return;
+      }
+
+      if (payload.code === "PUSH_PENDING") {
+        setSuccessMessage(
+          payload.message ?? "Seguimos esperando a que apruebes el acceso desde el email."
+        );
+        return;
+      }
+
+      // LOGIN_OK
+      setIsPushPending(false);
+      setSuccessMessage(payload.message ?? "Inicio de sesión correcto.");
+      const safeNextUrl = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/account";
+      router.push(safeNextUrl);
+      router.refresh();
+    } catch {
+      setErrorMessage("Error de red al comprobar el estado del acceso. Inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 return (
     // ============================
     // SECCIÓN GENERAL DE LA PÁGINA DE LOGIN
@@ -149,14 +286,28 @@ return (
                     {/* Encabezado del login */}
                     <header className="auth-header">
                         <p className="auth-kicker">GameZone Access</p>
-                        <h1 className="auth-title">Inicia sesión</h1>
+                        <h1 className="auth-title">
+                          {isTwoFactorStep
+                            ? twoFactorMode === "totp"
+                              ? "Verifica con tu app"
+                              : "Verifica tu acceso"
+                            : isPushPending
+                              ? "Confirma desde tu email"
+                              : "Inicia sesión"}
+                        </h1>
                         <p className="auth-subtitle">
-                        Accede a tu cuenta para seguir ampliando tu biblioteca gaming
-                        dentro de la Next Gaming Store.
+                          {isTwoFactorStep
+                            ? twoFactorMode === "totp"
+                              ? "Abre tu app de autenticación (Google Authenticator, Authy...) e introduce el código de 6 dígitos para completar el acceso."
+                              : "Hemos enviado un código de verificación a tu email. Introduce ese código para completar el acceso."
+                            : isPushPending
+                              ? "Revisa tu bandeja de entrada y aprueba o rechaza el acceso desde el email que te hemos enviado. Después pulsa en 'Comprobar estado'."
+                              : "Accede a tu cuenta para seguir ampliando tu biblioteca gaming dentro de la Next Gaming Store."}
                         </p>
                     </header>
 
-                    {/* Formulario de login */}
+                    {/* Formulario de login (paso 1) */}
+                    {!isTwoFactorStep && !isPushPending && (
                     <form className="auth-form" onSubmit={handleSubmit}>
                     {/* Campo: nombre de usuario */}
                         <div className="auth-field">
@@ -320,7 +471,96 @@ return (
                           <span>Twitter</span>
                         </button>
                     </div>
-                    </form> {/* Fin formulario de login */}
+                    </form>
+                    )} {/* Fin formulario de login (paso 1) */}
+
+                    {/* Paso alternativo: esperando aprobación tipo push */}
+                    {isPushPending && (
+                      <div className="auth-form">
+                        <p className="auth-alt">
+                          Hemos enviado un email con las opciones{" "}
+                          <strong>&quot;Sí, soy yo&quot;</strong> y{" "}
+                          <strong>&quot;No, no soy yo&quot;</strong>. Ábrelo en tu móvil u otro
+                          dispositivo y selecciona la opción correcta.
+                        </p>
+                        <button
+                          type="button"
+                          className="button-primary auth-submit btn-padding-site"
+                          onClick={handleCheckPushStatus}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Comprobando..." : "Comprobar estado del acceso"}
+                        </button>
+                        <button
+                          type="button"
+                          className="auth-link"
+                          style={{ marginTop: 8 }}
+                          onClick={() => {
+                            setIsPushPending(false);
+                            setPushChallengeId(null);
+                            setSuccessMessage("");
+                            setErrorMessage("");
+                          }}
+                        >
+                          Volver a intentar iniciar sesión
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Paso 2: formulario para introducir código 2FA */}
+                    {isTwoFactorStep && (
+                      <form className="auth-form" onSubmit={handleTwoFactorSubmit}>
+                        <div className="auth-field">
+                          <label htmlFor="twoFactorCode" className="auth-label">
+                            Código de verificación
+                          </label>
+                          <input
+                            id="twoFactorCode"
+                            name="twoFactorCode"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]{6}"
+                            maxLength={6}
+                            className="auth-input"
+                            placeholder="Introduce el código de 6 dígitos"
+                            value={twoFactorCode}
+                            onChange={(event) => setTwoFactorCode(event.target.value)}
+                            required
+                          />
+                          <div className="auth-field-helper">
+                            <span className="auth-alt">
+                              {twoFactorMode === "totp"
+                                ? "Introduce el código de 6 dígitos que ves ahora mismo en tu app de autenticación."
+                                : "Te hemos enviado un código a tu email. Caduca en unos minutos."}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="button-primary auth-submit btn-padding-site"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Verificando..." : "Confirmar código"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="auth-link"
+                          style={{ marginTop: 8 }}
+                          onClick={() => {
+                            // Volver al primer paso para reintentar login completo
+                            setIsTwoFactorStep(false);
+                            setTwoFactorCode("");
+                            setTwoFactorChallengeId(null);
+                            setSuccessMessage("");
+                            setErrorMessage("");
+                          }}
+                        >
+                          Volver a introducir usuario y contraseña
+                        </button>
+                      </form>
+                    )}
                 </div> {/* Fin columna izquierda */}
 
                     {/* ============================

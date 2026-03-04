@@ -1,0 +1,102 @@
+Sistemas de autenticación en GameZone
+=====================================
+
+En GameZone hay tres niveles de seguridad relacionados con el acceso a la cuenta:
+
+1) Login normal (usuario + contraseña)
+--------------------------------------
+- Flujo:
+  1. El usuario introduce **email/usuario** y **contraseña**.
+  2. El backend valida las credenciales.
+  3. Si son correctas, se crea una **sesión** (cookie httpOnly) y el usuario entra directamente.
+- Características:
+  - Es el modo más sencillo, pero **solo tiene un factor** de seguridad:
+    - “Algo que sabes”: la contraseña.
+  - Si alguien descubre la contraseña, podría acceder sin más pasos.
+
+
+2) 2FA (Two‑Factor Authentication) con código
+---------------------------------------------
+El 2FA añade un **segundo paso** después del login normal. En lugar de depender solo de la
+contraseña, se pide un **código adicional**.
+
+En GameZone se han implementado tres variantes de 2FA:
+
+2.1) Código enviado por email
+-----------------------------
+- Flujo:
+  1. El usuario introduce email y contraseña.
+  2. Si tiene 2FA por email activado, el backend **no crea todavía la sesión**.
+  3. Se envía un **código de 6 dígitos al email** del usuario.
+  4. En la pantalla de login se muestra un segundo formulario para introducir ese código.
+  5. Si el código es correcto y no ha caducado, se crea la sesión y se concede acceso.
+- Características:
+  - Segundo factor: “algo que tienes” (acceso a la cuenta de correo).
+  - Ideal para usuarios que no usan apps de autenticación.
+
+2.2) Código generado por app TOTP (Google Authenticator, Authy, FreeOTP…)
+--------------------------------------------------------------------------
+- Qué es:
+  - TOTP (Time‑based One‑Time Password) genera **códigos de 6 dígitos** que cambian cada ~30 s.
+  - Apps típicas: **Google Authenticator**, **Authy**, **FreeOTP**, etc.
+- Activación (pestaña Seguridad):
+  1. El usuario pulsa “Iniciar configuración con app (QR)”.
+  2. El servidor genera un **secreto TOTP** y un **código QR**.
+  3. El usuario escanea el QR con su app de autenticación.
+  4. Introduce el **primer código** de 6 dígitos que ve en la app.
+  5. Si el código es correcto, se guarda el secreto y se marca `totpEnabled = true`.
+- Login con TOTP:
+  1. El usuario mete email/contraseña.
+  2. Si `totpEnabled` está activo, el backend responde `TOTP_REQUIRED`.
+  3. La pantalla de login muestra un formulario que pide el código de la app.
+  4. Si el código de 6 dígitos es correcto, se crea la sesión y se concede acceso.
+- Características:
+  - No depende del email.
+  - Es el método 2FA más usado a nivel profesional.
+
+2.3) Código / aprobación simulada vía email tipo “push”
+-------------------------------------------------------
+- No es un push real al móvil, sino un **flujo de aprobación por email**:
+  - Tras usuario + contraseña, el backend crea un **LoginChallenge**.
+  - Envía un email con dos enlaces:
+    - “Sí, soy yo” → aprueba el intento.
+    - “No, no soy yo” → lo rechaza.
+  - En la pantalla de login se muestra un estado de “esperando tu aprobación”.
+  - El usuario abre el email en otro dispositivo, pulsa la opción, y luego la web comprueba
+    el estado del desafío.
+- Esto prepara la arquitectura para, en el futuro, poder conectar una **app móvil real con
+  notificaciones push**.
+
+
+3) MFA (Multi‑Factor Authentication)
+------------------------------------
+- Definiciones:
+  - **2FA (Two‑Factor Authentication)**: exactamente **dos factores** (por ejemplo,
+    contraseña + código TOTP).
+  - **MFA (Multi‑Factor Authentication)**: **dos o más factores** (por ejemplo,
+    contraseña + TOTP + una llave física, etc.).
+- En GameZone:
+  - A nivel práctico, el sistema actual implementa principalmente **2FA**:
+    - Contraseña + código por email.
+    - Contraseña + código de app TOTP.
+  - También está preparada una arquitectura para un segundo factor tipo “push” que, en el
+    futuro, podría convertirse en parte de un **MFA real** (combinando varios factores a la vez).
+
+
+Resumen de qué ve el usuario en la pestaña Seguridad
+----------------------------------------------------
+- **2FA por email**:
+  - Botón para activar/desactivar.
+  - Cuando está activo, al iniciar sesión se envía un código al correo.
+
+- **2FA con app (TOTP)**:
+  - Botón para iniciar configuración:
+    - Muestra un QR y el secreto.
+    - El usuario escanea el QR con su app y confirma con un código de 6 dígitos.
+  - Botón para desactivar cuando ya está activo.
+
+- **Verificación por móvil (Push MFA simulada)**:
+  - Explicación de cómo funcionaría un sistema tipo Google (notificación “¿Eres tú?”).
+  - Actualmente se simula con enlaces en un email; en el futuro podría conectarse a una app
+    móvil real con notificaciones push.
+
