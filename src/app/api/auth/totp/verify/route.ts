@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authenticator } from "otplib";
+import { verify } from "otplib";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 
@@ -41,7 +41,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const isValid = authenticator.check(code, user.totpSecret);
+  const { valid: isValid } = await verify({
+    secret: user.totpSecret,
+    token: code,
+  });
   if (!isValid) {
     return NextResponse.json(
       { message: "Código incorrecto o caducado.", code: "TOTP_CODE_INVALID" },

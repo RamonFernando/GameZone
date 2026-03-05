@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test:unit": "vitest run",
@@ -17,12 +17,13 @@
     "e2e:all": "npm run e2e:checkout && npm run e2e:stripe && npm run e2e:paypal",
     "e2e:all:continue": "node scripts/e2e-all-continue.mjs",
     "test:all": "npm run test:unit && npm run build && npm run e2e:all",
+    "postinstall": "prisma generate",
     "stripe:webhook:listen": "stripe listen --forward-to localhost:3000/api/payments/stripe/webhook",
     "stripe:webhook:test:checkout": "stripe trigger checkout.session.completed",
     "stripe:webhook:test:async": "stripe trigger checkout.session.async_payment_succeeded"
   },
   "dependencies": {
-    "@prisma/client": "^6.10.1",
+    "@prisma/client": "6.10.1",
     "next": "14.1.0",
     "nodemailer": "^8.0.1",
     "otplib": "^13.3.0",
@@ -38,7 +39,7 @@
     "@types/react-dom": "^18.2.15",
     "eslint": "8.56.0",
     "eslint-config-next": "14.1.0",
-    "prisma": "^6.10.1",
+    "prisma": "6.10.1",
     "sass": "1.69.5",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"

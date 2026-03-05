@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 // Datos completos del perfil editable del usuario.
@@ -510,7 +511,7 @@ export function AccountDashboard() {
 
           <div className="auth-field">
             <label htmlFor="profile-email" className="auth-label">
-              "Email"
+              {lang === "en" ? "Email" : "Correo electrónico"}
             </label>
             <input
               id="profile-email"
@@ -864,10 +865,12 @@ export function AccountDashboard() {
                 <div className="auth-field" style={{ marginTop: "0.75rem" }}>
                   {totpQrDataUrl ? (
                     <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
-                      <img
+                      <Image
                         src={totpQrDataUrl}
                         alt="Código QR para app de autenticación"
-                        style={{ maxWidth: 180, margin: "0 auto" }}
+                        width={180}
+                        height={180}
+                        style={{ maxWidth: 180, height: "auto", margin: "0 auto" }}
                       />
                     </div>
                   ) : null}

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   }
 
   const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const bytes = new Uint8Array(arrayBuffer);
 
   let ext = "jpg";
   if (file.type === "image/png") ext = "png";
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   const filePath = path.join(publicDir, fileName);
 
   await fs.mkdir(publicDir, { recursive: true });
-  await fs.writeFile(filePath, buffer);
+  await fs.writeFile(filePath, bytes);
 
   const avatarUrl = `/avatars/${fileName}`;
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { getUserById } from "@/lib/auth/store";
-import { authenticator } from "otplib";
+import { generateSecret, generateURI } from "otplib";
 import QRCode from "qrcode";
 
 export async function POST(request: Request) {
@@ -30,10 +30,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const secret = authenticator.generateSecret();
+  const secret = generateSecret();
   const label = user.email || user.name || "usuario";
   const issuer = "GameZone";
-  const otpauthUrl = authenticator.keyuri(label, issuer, secret);
+  const otpauthUrl = generateURI({
+    issuer,
+    label,
+    secret,
+  });
 
   const qrDataUrl = await QRCode.toDataURL(otpauthUrl);
 
