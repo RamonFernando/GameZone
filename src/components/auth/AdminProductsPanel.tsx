@@ -2,6 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // Fila de producto tal y como viene del backend para el panel admin.
 type ProductRow = {
@@ -318,6 +319,15 @@ export function AdminProductsPanel() {
     setPendingDeleteId(null);
     setPendingDeleteName(null);
   };
+
+  useEffect(() => {
+    if (!pendingDeleteId) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [pendingDeleteId]);
 
   const openEditModal = (product: ProductRow) => {
     setEditingProductId(product.id);
@@ -810,6 +820,7 @@ export function AdminProductsPanel() {
                   className="button-primary auth-submit-compact admin-center-button button-primary-edit-product-save"
                   onClick={handleModalSave}
                   disabled={savingId === editingProductId}
+                  style={{ color: "#cbd5e1" }}
                 >
                   {savingId === editingProductId ? "Guardando..." : "Guardar"}
                 </button>
@@ -817,6 +828,7 @@ export function AdminProductsPanel() {
                   type="button"
                   className="button-ghost button-ghost-equal admin-center-button button-primary-edit-product-cancel"
                   onClick={closeEditModal}
+                  style={{ color: "#cbd5e1", fontWeight: 600 }}
                 >
                   Cancelar
                 </button>
@@ -826,55 +838,66 @@ export function AdminProductsPanel() {
         </div>
       ) : null}
 
-      {pendingDeleteId ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={closeDeleteModal}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15,23,42,0.7)",
-            display: "grid",
-            placeItems: "center",
-            zIndex: 1000,
-            padding: 16,
-          }}
-        >
-          <div
-            className="card"
-            onClick={(event) => event.stopPropagation()}
-            style={{ width: "min(420px, 100%)", padding: 16 }}
-          >
-            <h3 className="auth-title" style={{ marginBottom: 8 }}>
-              Eliminar producto
-            </h3>
-            <p className="auth-alt" style={{ marginBottom: 12 }}>
-              {pendingDeleteName
-                ? `¿Seguro que quieres eliminar "${pendingDeleteName}"?`
-                : "¿Seguro que quieres eliminar este producto?"}
-              {" "}
-              Esta acción no se puede deshacer.
-            </p>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end" }}>
-              <button
-                type="button"
-                className="button-ghost admin-center-button button-primary-edit-product-cancel"
-                onClick={closeDeleteModal}
+      {typeof document !== "undefined" && pendingDeleteId
+        ? createPortal(
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-product-title"
+              onClick={closeDeleteModal}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(15,23,42,0.7)",
+                display: "grid",
+                placeItems: "center",
+                zIndex: 10000,
+                padding: 16,
+                overflow: "auto",
+              }}
+            >
+              <div
+                className="card"
+                onClick={(event) => event.stopPropagation()}
+                style={{
+                  width: "min(420px, 100%)",
+                  padding: 16,
+                  margin: "auto",
+                }}
               >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="button-primary admin-center-button button-primary-edit-product-delete"
-                onClick={handleDelete}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+                <h3 id="delete-product-title" className="auth-title" style={{ marginBottom: 8 }}>
+                  Eliminar producto
+                </h3>
+                <p className="auth-alt" style={{ marginBottom: 12 }}>
+                  {pendingDeleteName
+                    ? `¿Seguro que quieres eliminar "${pendingDeleteName}"?`
+                    : "¿Seguro que quieres eliminar este producto?"}
+                  {" "}
+                  Esta acción no se puede deshacer.
+                </p>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end" }}>
+                  <button
+                    type="button"
+                    className="button-ghost admin-center-button button-primary-edit-product-cancel"
+                    onClick={closeDeleteModal}
+                    style={{ color: "#cbd5e1", fontWeight: 600 }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="button-primary admin-center-button button-primary-edit-product-delete"
+                    onClick={handleDelete}
+                    style={{ color: "#cbd5e1" }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
 
       {toasts.length > 0 ? (
         <div style={{ position: "fixed", right: 16, bottom: 16, zIndex: 1200, display: "grid", gap: 8 }}>

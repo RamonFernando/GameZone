@@ -233,6 +233,7 @@ export function Hero({ products, headerSlot }: Props) {
               style={
                 {
                   "--thumbs-offset": thumbScrollIndex,
+                  "--thumbs-offset-center": activeIndex,
                   transition: thumbTransition ? "transform 0.6s ease-in-out" : "none",
                 } as React.CSSProperties
               }
