@@ -1,8 +1,14 @@
-# GameZoneV3
+# GameZone / Next Gaming Store
 
-Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticacion con sesiones persistentes, RBAC y checkout con pasarelas de pago.
+Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticación con sesiones persistentes, RBAC y checkout con pasarelas de pago.
 
-Documentacion de pruebas centralizada en: `TESTING.md`.
+Documentación de pruebas centralizada en: `TESTING.md`.
+
+## Registro y páginas legales
+
+- **Registro** (`/auth/register`): checkbox obligatorio de aceptación de [Términos y condiciones](/terms); checkbox opcional para recibir correos con novedades y ofertas.
+- **Términos y condiciones**: `/terms`.
+- **Política de privacidad**: `/privacy`.
 
 ## Comandos de tests (ejecucion rapida)
 
@@ -217,3 +223,15 @@ npm run stripe:webhook:test:async
 - Se guarda referencia de pago (`paymentReference`) y proveedor (`paymentProvider`).
 - El email de confirmacion se envia despues de confirmar pago.
 - Webhooks permiten completar pago aunque el cliente cierre la pestaña.
+
+## Despliegue en Netlify
+
+- **Build command:** `npm run build` (incluye `prisma generate`).
+- **Variables de entorno:** definir al menos `DATABASE_URL` y las que use la app (sesión, Stripe, PayPal, OAuth, etc.) en el panel de Netlify.
+
+### Base de datos en producción
+
+La app usa SQLite por defecto (`prisma/dev.db`). En Netlify tienes dos opciones:
+
+1. **Incluir la base de datos en el repo (solo para pruebas):** quitar `prisma/dev.db` del `.gitignore`, hacer commit de `dev.db` y en Netlify poner `DATABASE_URL=file:./prisma/dev.db`. En entornos serverless SQLite puede tener limitaciones (escritura/lectura).
+2. **Usar una base de datos en la nube (recomendado):** usar un servicio como Supabase, Neon, PlanetScale o Postgres de Netlify, configurar Prisma para ese proveedor y definir `DATABASE_URL` en Netlify con la URL del servicio. Así la web en producción tendrá datos persistentes y correctos.
