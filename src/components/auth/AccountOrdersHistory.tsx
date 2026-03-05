@@ -105,7 +105,7 @@ export function AccountOrdersHistory() {
     };
 
     void loadOrders();
-  }, []);
+  }, [lang]);
 
   if (isLoading) {
     return (

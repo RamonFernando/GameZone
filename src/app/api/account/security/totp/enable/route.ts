@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
-import { authenticator } from "otplib";
+import { verify } from "otplib";
 
 type EnableTotpPayload = {
   secret?: string;
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const isValid = authenticator.check(code, secret);
+  const { valid: isValid } = await verify({ secret, token: code });
   if (!isValid) {
     return NextResponse.json(
       { message: "El código de la app no es válido. Revisa que el reloj del dispositivo esté ajustado.", code: "TOTP_CODE_INVALID" },

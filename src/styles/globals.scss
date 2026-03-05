@@ -931,6 +931,51 @@ img {
     border-color 0.3s ease-out, box-shadow 0.3s ease-out;
 }
 
+/* ========================================= */
+/* === NAV RESPONSIVE 721px – 1024px ======= */
+/* ========================================= */
+@media (min-width: 721px) and (max-width: 1024px) {
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding-inline: 1.5rem;
+    gap: 0.9rem;
+  }
+
+  .nav-logo {
+    justify-content: flex-start;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .nav-logo-text {
+    margin: 0 1.5rem;
+  }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .nav-search {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-platforms {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .nav-platform-pill {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
 .nav-locale-select option {
   /* Fondo claro y texto oscuro para que el desplegable sea legible
      aunque el select tenga estilo oscuro. */
@@ -1206,6 +1251,35 @@ img {
   max-width: 100%;
   padding: 0.5rem 0 0.75rem;
   border-radius: 20px;
+}
+
+/* Hasta 1024px: el buscador ocupa todo el espacio disponible antes del carrito */
+@media (max-width: 1024px) {
+  .nav-actions {
+    width: 100%;
+  }
+
+  .nav-search {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-search-input:focus {
+    width: 100%;
+  }
+
+  /* En tablet, el buscador no se encoge al hacer hover:
+     mantiene todo el ancho disponible. */
+  .nav-search:hover {
+    transform: scale(1);
+  }
+}
+
+/* Hero thumbs: que el contenedor use todo el ancho en tablet */
+@media (max-width: 960px) {
+  .hero-thumbs-row-wrap {
+    width: 100%;
+  }
 }
 
 .hero-thumbs-row {
