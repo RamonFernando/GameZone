@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
 import type { ProductPreview } from "@/types/product";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
+import type { ReactNode } from "react";
 
 // Estructura interna que usamos para representar cada slide del hero.
 type Slide = {
@@ -21,8 +22,8 @@ type Slide = {
   game: ProductPreview;
 };
 
-// Tiempo de auto-rotación del carrusel (en milisegundos).
-const AUTO_DELAY_MS = 7000;
+// Tiempo de rotación: imagen grande, borde naranja y focus del carrusel a 10 s (sincronizados).
+const BANNER_ROTATE_MS = 10000;
 
 // Convierte un ProductPreview en un Slide listo para pintar en el hero.
 function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide {
@@ -60,15 +61,18 @@ function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide 
   };
 }
 
-// Props que recibe el Hero: lista de productos destacados.
+// Props que recibe el Hero: lista de productos destacados y opcionalmente el header para meter dentro de la section.
 type Props = {
   products: ProductPreview[];
+  headerSlot?: ReactNode;
 };
 
 // Sección hero/carrousel que muestra el juego destacado y las miniaturas clicables.
-export function Hero({ products }: Props) {
+export function Hero({ products, headerSlot }: Props) {
   const { addToCart } = useCart();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [thumbScrollIndex, setThumbScrollIndex] = useState(0);
+  const [thumbTransition, setThumbTransition] = useState(true);
   const [lang, setLang] = useState<"es" | "en">("es");
 
   const slides = useMemo<Slide[]>(() => {
@@ -84,6 +88,12 @@ export function Hero({ products }: Props) {
     return featured.map((game, index) => toSlide(game, index, lang));
   }, [products, lang]);
 
+  // Última posición del carrusel de thumbs (rueda triplicada: 3× slides, ventana de 3).
+  const maxThumbScrollIndex = useMemo(
+    () => (slides.length > 0 ? slides.length * 3 - 3 : 0),
+    [slides.length]
+  );
+
   useEffect(() => {
     if (typeof document === "undefined") return;
     const cookieMap = new Map(
@@ -96,19 +106,47 @@ export function Hero({ products }: Props) {
     setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
 
+  // Al cargar o cambiar datos: centrar el primer slide para que el borde naranja esté en el centro.
   useEffect(() => {
-    if (slides.length < 2) {
-      return;
+    if (slides.length > 0) {
+      setActiveIndex(0);
+      setThumbScrollIndex(slides.length - 1);
+    } else {
+      setActiveIndex(0);
+      setThumbScrollIndex(0);
     }
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % slides.length);
-    }, AUTO_DELAY_MS);
-    return () => window.clearInterval(timer);
   }, [slides.length]);
 
+  // Un solo timer a 10 s: avanza carrusel, imagen grande y borde naranja a la vez (mismo tick).
   useEffect(() => {
-    setActiveIndex(0);
-  }, [slides.length]);
+    if (slides.length < 2) return;
+    const timer = window.setInterval(() => {
+      setThumbScrollIndex((i) => {
+        const next = i + 1;
+        if (next > maxThumbScrollIndex) {
+          setThumbTransition(false);
+          setActiveIndex(0);
+          return slides.length - 1;
+        }
+        setThumbTransition(true);
+        setActiveIndex((next + 1) % slides.length);
+        return next;
+      });
+    }, BANNER_ROTATE_MS);
+    return () => window.clearInterval(timer);
+  }, [slides.length, maxThumbScrollIndex]);
+
+  // Reactivar transición después de resetear el índice a 0 (evita que se vea el salto).
+  useEffect(() => {
+    if (!thumbTransition) {
+      const t = setTimeout(() => setThumbTransition(true), 0);
+      return () => clearTimeout(t);
+    }
+  }, [thumbTransition]);
+
+  // Rueda infinita: triplicamos los slides para que nunca se vea vacío al hacer loop.
+  const slidesWithLoop =
+    slides.length > 0 ? [...slides, ...slides, ...slides] : [];
 
   if (slides.length === 0) {
     return null;
@@ -118,8 +156,8 @@ export function Hero({ products }: Props) {
   const money = (value: number) => formatMoneyWithGeo(value);
 
   return (
-    <section className="hero hero--carousel">
-      {/* Background */}
+    <section className={`hero hero--carousel${headerSlot ? " hero--with-header" : ""}`}>
+      {/* Background: la imagen cubre toda la section, incluida la zona del header */}
       <div className="hero-bg">
         <Image
           src={active.image}
@@ -127,10 +165,13 @@ export function Hero({ products }: Props) {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: "cover" }}
+          style={{ objectFit: "cover", objectPosition: "center center" }}
         />
         <div className="hero-bg-gradient" />
       </div>
+
+      {/* Header dentro de la section para que la imagen coja la barra superior */}
+      {headerSlot}
 
       {/* Content */}
       <div className="hero-inner">
@@ -186,36 +227,62 @@ export function Hero({ products }: Props) {
             {/* <p className="section-subtitle">Explora juegos recientes de tu catálogo.</p> */}
           </div>
 
-          <div className="hero-thumbs-row">
-            {slides.map((slide, index) => (
-              <button
-                key={slide.id}
-                type="button"
-                className={
-                  "hero-thumb" + (index === activeIndex ? " hero-thumb--active" : "")
-                }
-                onClick={() => setActiveIndex(index)}
-              >
-                <div className="hero-thumb-image">
-                  <Image
-                    src={slide.image}
-                    alt={slide.title}
-                    fill
-                    sizes="160px"
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
-                <div className="hero-thumb-info">
-                  <div className="hero-thumb-title">{slide.title}</div>
-                  <div className="hero-thumb-meta">
-                    <span>{money(slide.priceFinal)}</span>
-                    {slide.discountPercent > 0 ? (
-                      <span className="hero-thumb-discount">-{slide.discountPercent}%</span>
-                    ) : null}
-                  </div>
-                </div>
-              </button>
-            ))}
+          <div className="hero-thumbs-row-wrap">
+            <div
+              className="hero-thumbs-row hero-thumbs-row--slider"
+              style={
+                {
+                  "--thumbs-offset": thumbScrollIndex,
+                  transition: thumbTransition ? "transform 0.6s ease-in-out" : "none",
+                } as React.CSSProperties
+              }
+            >
+              {slidesWithLoop.map((slide, index) => {
+                const realIndex = index % slides.length;
+                const position =
+                  index === thumbScrollIndex
+                    ? "left"
+                    : index === thumbScrollIndex + 1
+                      ? "center"
+                      : index === thumbScrollIndex + 2
+                        ? "right"
+                        : "off";
+                return (
+                  <button
+                    key={`${slide.id}-${index}`}
+                    type="button"
+                    className={
+                      "hero-thumb hero-thumb--" +
+                      position +
+                      (realIndex === activeIndex ? " hero-thumb--active" : "")
+                    }
+                    onClick={() => {
+                    setActiveIndex(realIndex);
+                    setThumbScrollIndex((realIndex - 1 + slides.length) % slides.length);
+                  }}
+                  >
+                    <div className="hero-thumb-image">
+                      <Image
+                        src={slide.image}
+                        alt={slide.title}
+                        fill
+                        sizes="160px"
+                        style={{ objectFit: "cover", objectPosition: "center center" }}
+                      />
+                    </div>
+                    <div className="hero-thumb-info">
+                      <div className="hero-thumb-title">{slide.title}</div>
+                      <div className="hero-thumb-meta">
+                        <span>{money(slide.priceFinal)}</span>
+                        {slide.discountPercent > 0 ? (
+                          <span className="hero-thumb-discount">-{slide.discountPercent}%</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

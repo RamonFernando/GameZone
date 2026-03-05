@@ -74,9 +74,11 @@ export default function GameDetailPage({ params }: Props) {
 
   if (isLoading || !game) {
     return (
-      <p className="section-subtitle">
-        {lang === "en" ? "Loading game details..." : "Cargando detalle del juego..."}
-      </p>
+      <main className="main-wrapper">
+        <p className="section-subtitle">
+          {lang === "en" ? "Loading game details..." : "Cargando detalle del juego..."}
+        </p>
+      </main>
     );
   }
 
@@ -107,6 +109,7 @@ export default function GameDetailPage({ params }: Props) {
   };
 
   return (
+    <main className="main-wrapper">
     <div className="game-detail-shell">
       <div className="card game-detail-card">
 
@@ -287,5 +290,6 @@ export default function GameDetailPage({ params }: Props) {
         </section>
       )}
     </div>
+    </main>
   );
 }

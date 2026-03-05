@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Hero } from "@/components/Hero";
+import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";
@@ -57,13 +58,18 @@ export default function HomePage() {
 
   return (
     <>
-      <Hero products={filteredGames.length > 0 ? filteredGames : products} />
-      {loading ? (
-        <p className="section-subtitle">
-          {lang === "en" ? "Loading products..." : "Cargando productos..."}
-        </p>
-      ) : null}
-      <GameGrid games={filteredGames} />
+      <Hero
+        products={filteredGames.length > 0 ? filteredGames : products}
+        headerSlot={<Header />}
+      />
+      <main className="main-wrapper">
+        {loading ? (
+          <p className="section-subtitle">
+            {lang === "en" ? "Loading products..." : "Cargando productos..."}
+          </p>
+        ) : null}
+        <GameGrid games={filteredGames} />
+      </main>
     </>
   );
 }
