@@ -112,6 +112,34 @@ img {
   animation: badge-gradient-sweep 30s linear infinite;
 }
 
+.button-primary-edit-product-save{
+  /* Igualar tamaño de los botones Guardar / Cancelar
+     sin cambiar sus estilos de color */
+  margin-top: 0.4rem !important;
+  padding-block: 0.45rem !important;
+  padding-inline: 1.2rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600;
+}
+.button-primary-edit-product-cancel{
+  /* Igualar tamaño de los botones Guardar / Cancelar
+     sin cambiar sus estilos de color */
+  margin-top: 0.4rem !important;
+  padding-block: 0.5rem !important;
+  padding-inline: 1.2rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600;
+}
+.button-primary-edit-product-delete{
+  /* Igualar tamaño de los botones Guardar / Cancelar
+     sin cambiar sus estilos de color */
+  margin-top: 0.4rem !important;
+  padding-block: 0.45rem !important;
+  padding-inline: 1.2rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600;
+}
+
 .button-ghost {
   display: inline-flex;
   align-items: center;
@@ -148,6 +176,19 @@ img {
   border-color: rgba(129, 140, 248, 0.85);
   color: #e5e7eb;
   background: radial-gradient(circle at top, rgba(30, 64, 175, 0.3), rgba(15, 23, 42, 0.9));
+}
+
+/* Variante para botones "Cancelar" en modales admin:
+   mismo tamaño visual que .button-primary */
+.button-ghost-equal {
+  padding-block: 0.7rem;
+  padding-inline: 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Marca común para los botones Guardar / Cancelar del modal de edición de producto */
+.button-primary-edit-product {
 }
 
 /* Botón Back (detalle de juego): mismo efecto de barrido que .badge-soft */
@@ -1803,7 +1844,16 @@ img {
 
 /* Páginas legales: Términos y condiciones / Política de privacidad */
 .legal-page {
-  padding: 1.5rem 0 3rem;
+  padding: 1.5rem 1.25rem 3rem;
+  background: linear-gradient(
+    45deg,
+    rgba(15, 23, 42, 0.98) 0%,
+    rgba(30, 41, 59, 0.95) 45%,
+    rgba(51, 65, 85, 0.92) 55%,
+    rgba(15, 23, 42, 0.98) 100%
+  );
+  border-radius: var(--radius-lg);
+  color: #e2e8f0;
 }
 
 .legal-page-header {
