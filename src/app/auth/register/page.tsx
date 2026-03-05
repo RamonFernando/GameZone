@@ -20,6 +20,7 @@ export default function RegisterPage() {
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
+    const acceptTerms = formData.get("acceptTerms") === "on";
 
     if (password !== confirmPassword) {
       setErrorMessage("Las contraseñas no coinciden. Verifica e inténtalo de nuevo.");
@@ -28,6 +29,11 @@ export default function RegisterPage() {
 
     if (!name || !email) {
       setErrorMessage("Completa todos los campos obligatorios.");
+      return;
+    }
+
+    if (!acceptTerms) {
+      setErrorMessage("Debes aceptar los Términos y Condiciones de uso para crear tu cuenta.");
       return;
     }
 
@@ -138,6 +144,23 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+
+              <label className="auth-alt" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input id="acceptTerms" name="acceptTerms" type="checkbox" required />
+                <span>
+                  Acepto los{" "}
+                  <Link href="/terms" className="auth-link">
+                    Términos y Condiciones de uso
+                  </Link>
+                </span>
+              </label>
+
+              <label className="auth-alt" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input id="acceptMarketing" name="acceptMarketing" type="checkbox" />
+                <span>
+                  Quiero recibir correos con novedades, ofertas y actualizaciones de GameZone.
+                </span>
+              </label>
 
               <button
                 type="submit"

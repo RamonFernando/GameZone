@@ -159,6 +159,8 @@ export function AdminProductsPanel() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeleteName, setPendingDeleteName] = useState<string | null>(null);
   const [modalDraft, setModalDraft] = useState<ProductDraft>(emptyDraft);
   const [modalNotice, setModalNotice] = useState<string>("");
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -282,17 +284,16 @@ export function AdminProductsPanel() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const product = products.find((item) => item.id === id);
+  const handleDelete = async () => {
+    if (!pendingDeleteId) return;
+
+    const product = products.find((item) => item.id === pendingDeleteId);
     if (!product) return;
 
-    const accepted = window.confirm(
-      `¿Seguro que quieres eliminar "${product.name}"? Esta acción no se puede deshacer.`
-    );
-    if (!accepted) return;
-
     try {
-      const response = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/admin/products/${pendingDeleteId}`, {
+        method: "DELETE",
+      });
       const payload = (await response.json()) as { message?: string };
       if (!response.ok) {
         pushToast("error", payload.message ?? "No se pudo eliminar producto.");
@@ -302,7 +303,20 @@ export function AdminProductsPanel() {
       await loadProducts();
     } catch {
       pushToast("error", "Error de red eliminando producto.");
+    } finally {
+      setPendingDeleteId(null);
+      setPendingDeleteName(null);
     }
+  };
+
+  const openDeleteModal = (product: ProductRow) => {
+    setPendingDeleteId(product.id);
+    setPendingDeleteName(product.name);
+  };
+
+  const closeDeleteModal = () => {
+    setPendingDeleteId(null);
+    setPendingDeleteName(null);
   };
 
   const openEditModal = (product: ProductRow) => {
@@ -586,7 +600,7 @@ export function AdminProductsPanel() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => openDeleteModal(product)}
                         aria-label={`Eliminar ${product.name}`}
                         title="Eliminar"
                         style={{
@@ -790,19 +804,73 @@ export function AdminProductsPanel() {
                   {modalNotice}
                 </p>
               ) : null}
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <button
                   type="button"
-                  className="button-primary auth-submit-compact admin-center-button btn-padding-site"
+                  className="button-primary auth-submit-compact admin-center-button button-primary-edit-product-save"
                   onClick={handleModalSave}
                   disabled={savingId === editingProductId}
                 >
                   {savingId === editingProductId ? "Guardando..." : "Guardar"}
                 </button>
-                <button type="button" className="button-ghost btn-padding-site" onClick={closeEditModal}>
+                <button
+                  type="button"
+                  className="button-ghost button-ghost-equal admin-center-button button-primary-edit-product-cancel"
+                  onClick={closeEditModal}
+                >
                   Cancelar
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {pendingDeleteId ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={closeDeleteModal}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15,23,42,0.7)",
+            display: "grid",
+            placeItems: "center",
+            zIndex: 1000,
+            padding: 16,
+          }}
+        >
+          <div
+            className="card"
+            onClick={(event) => event.stopPropagation()}
+            style={{ width: "min(420px, 100%)", padding: 16 }}
+          >
+            <h3 className="auth-title" style={{ marginBottom: 8 }}>
+              Eliminar producto
+            </h3>
+            <p className="auth-alt" style={{ marginBottom: 12 }}>
+              {pendingDeleteName
+                ? `¿Seguro que quieres eliminar "${pendingDeleteName}"?`
+                : "¿Seguro que quieres eliminar este producto?"}
+              {" "}
+              Esta acción no se puede deshacer.
+            </p>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="button-ghost admin-center-button button-primary-edit-product-cancel"
+                onClick={closeDeleteModal}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="button-primary admin-center-button button-primary-edit-product-delete"
+                onClick={handleDelete}
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>

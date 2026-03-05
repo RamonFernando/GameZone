@@ -199,7 +199,8 @@
         rgba(15, 23, 42, 0.98),
         rgba(15, 23, 42, 0.94)
     );
-    color: var(--text-main);
+    /* Texto en blanco, igual que el resto de botones principales */
+    color: #e5e7eb;
     font-size: 0.8rem;
     cursor: pointer;
     transform: scale(1);
