@@ -1079,27 +1079,25 @@ img {
   border-radius: 0;
   margin: 0 0 2rem;
   width: 100%;
-  /* 80% del viewport; dvh responde al zoom (fallback vh para navegadores antiguos) */
-  height: 80vh;
-  height: 80dvh;
-  min-height: 80vh;
-  min-height: 80dvh;
+  /* Altura por defecto: se adapta al contenido (como el resto de la página) */
+  height: auto;
+  min-height: 400px;
   background: #020617;
   display: flex;
   align-items: center;
 }
 
-/* Desde 1024px: mismo 80% pero ya definido arriba con dvh/vh */
-@media (min-width: 1024px) {
-  .hero--carousel {
-    height: 80vh;
-    height: 80dvh;
-    min-height: 80vh;
-    min-height: 80dvh;
-  }
+/* Escritorio con zoom ~100%: forzamos que ocupe el 80% de la pantalla.
+   Se activa cuando Hero marca data-hero-zoom="normal" en <html>. */
+html[data-hero-zoom="normal"] .hero--carousel {
+  height: 80vh;
+  height: 80dvh;
+  min-height: 80vh;
+  min-height: 80dvh;
 }
 
-/* Por debajo de 1024px: el banner toma la altura que necesite (puede ser mayor que la pantalla) */
+/* Por debajo de 1024px: el banner toma la altura que necesite (puede ser mayor que la pantalla),
+   independientemente del zoom. */
 @media (max-width: 1023px) {
   .hero--carousel {
     height: auto;
