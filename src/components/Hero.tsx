@@ -106,6 +106,34 @@ export function Hero({ products, headerSlot }: Props) {
     setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
 
+  // Detectar zoom aproximado del navegador:
+  // - Si el ratio outerWidth/innerWidth está cerca de 1, asumimos zoom ~100% (modo "normal").
+  // - Si se aleja, consideramos que el usuario ha cambiado el zoom y pasamos a modo "scaled",
+  //   para que el banner no se quede fijado al 80% de la pantalla y se comporte como el resto.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateZoomFlag = () => {
+      const { innerWidth, outerWidth } = window;
+      if (!innerWidth || !outerWidth) return;
+
+      const ratio = outerWidth / innerWidth;
+      const isNormalZoom = ratio > 0.95 && ratio < 1.05;
+
+      document.documentElement.setAttribute(
+        "data-hero-zoom",
+        isNormalZoom ? "normal" : "scaled"
+      );
+    };
+
+    updateZoomFlag();
+    window.addEventListener("resize", updateZoomFlag);
+
+    return () => {
+      window.removeEventListener("resize", updateZoomFlag);
+    };
+  }, []);
+
   // Al cargar o cambiar datos: centrar el primer slide para que el borde naranja esté en el centro.
   useEffect(() => {
     if (slides.length > 0) {
