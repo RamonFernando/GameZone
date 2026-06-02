@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { games, getGameBySlug, slugify, validateGamesCatalog, type Game } from "@/lib/games";
 
 describe("games helpers", () => {

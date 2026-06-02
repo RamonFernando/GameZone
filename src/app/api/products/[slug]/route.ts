@@ -6,8 +6,9 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
 
-export async function GET(request: Request, context: { params: { slug: string } }) {
-  const product = await getActiveProductBySlug(context.params.slug);
+export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
+  const { slug } = await context.params;
+  const product = await getActiveProductBySlug(slug);
   if (!product) {
     return NextResponse.json(
       { message: "Producto no encontrado.", code: "PRODUCT_NOT_FOUND" },
@@ -83,14 +84,15 @@ export async function GET(request: Request, context: { params: { slug: string } 
   );
 }
 
-export async function POST(request: Request, context: { params: { slug: string } }) {
+export async function POST(request: Request, context: { params: Promise<{ slug: string }> }) {
   const authResult = await requireAuth(request);
   if (!authResult.ok) {
     return authResult.response;
   }
   const { auth } = authResult;
 
-  const slug = String(context.params.slug ?? "").trim().toLowerCase();
+  const { slug: routeSlug } = await context.params;
+  const slug = String(routeSlug ?? "").trim().toLowerCase();
   if (!slug) {
     return NextResponse.json(
       { message: "Slug inválido.", code: "BAD_REQUEST" },

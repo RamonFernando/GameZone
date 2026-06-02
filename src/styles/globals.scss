@@ -1,5 +1,5 @@
 :root {
-  --bg: #d4d8dd;
+  --bg: #f8f9fa;
   --bg-alt: #c8ccd2;
   --accent: #7c3aed;
   --accent-soft: rgba(124, 58, 237, 0.12);
@@ -21,7 +21,7 @@ html,
 body {
   padding: 0;
   margin: 0;
-  background: #d4d8dd;
+  background: #f8f9fa;
   color: var(--text-main);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
@@ -257,6 +257,37 @@ img {
   gap: 1.1rem;
 }
 
+.game-card-reveal {
+  opacity: 0;
+  transform: translate3d(-34px, 0, 0);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease-out;
+  transition-delay: 0ms;
+  will-change: transform, opacity;
+}
+
+.reveal-delay-0 { transition-delay: 0ms; }
+.reveal-delay-1 { transition-delay: 70ms; }
+.reveal-delay-2 { transition-delay: 140ms; }
+.reveal-delay-3 { transition-delay: 210ms; }
+.reveal-delay-4 { transition-delay: 280ms; }
+.reveal-delay-5 { transition-delay: 350ms; }
+.reveal-delay-6 { transition-delay: 420ms; }
+.reveal-delay-7 { transition-delay: 490ms; }
+.reveal-delay-8 { transition-delay: 560ms; }
+
+.game-card-reveal--visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @media (min-width: 768px) {
   .main-wrapper {
     padding: 2rem 1.75rem 3rem;
@@ -267,10 +298,36 @@ img {
   position: sticky;
   top: 0;
   z-index: 40;
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.4), transparent);
   border-bottom: 1px solid rgba(30, 64, 175, 0.5);
   color: #f1f5f9;
+  transition: background 220ms ease-out, border-color 220ms ease-out, backdrop-filter 220ms ease-out, box-shadow 220ms ease-out;
+}
+
+.header-shell--top-transparent {
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0), rgba(15, 23, 42, 0));
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+.header-shell--fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+}
+
+.header-shell--top-transparent.header-shell--scrolled {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.4), transparent);
+  border-bottom-color: rgba(30, 64, 175, 0.5);
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
 }
 
 .navbar {
@@ -945,6 +1002,141 @@ img {
   gap: 0.6rem;
 }
 
+.nav-mobile-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.nav-mobile-toggle-line {
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+.nav-mobile-panel {
+  display: none;
+}
+
+.nav-mobile-account-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.55rem 0.7rem 0.6rem;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+
+  .nav-logo {
+    margin-left: 0;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .nav-logo-mark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .nav-logo-text {
+    margin: 0;
+  }
+
+  .nav-logo-text-1 {
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+  }
+
+  .nav-logo-text-2 {
+    font-size: 0.8rem;
+  }
+
+  .nav-platforms--desktop,
+  .nav-actions--desktop {
+    display: none;
+  }
+
+  .nav-mobile-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .nav-mobile-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 1px);
+    background: rgba(2, 6, 23, 0.96);
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    padding: 0 0.75rem;
+    z-index: 45;
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform-origin: top center;
+    transform: translateY(-8px) scaleY(0.96);
+    pointer-events: none;
+    transition: max-height 0.5s ease, opacity 0.35s ease, transform 0.5s ease, padding 0.5s ease, border-color 0.5s ease;
+  }
+
+  .nav-mobile-panel--open {
+    max-height: 560px;
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    padding: 0.75rem;
+    border-top-color: rgba(30, 64, 175, 0.45);
+    border-bottom-color: rgba(30, 64, 175, 0.45);
+    pointer-events: auto;
+  }
+
+  .nav-mobile-section {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .nav-mobile-search {
+    padding: 0.2rem 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  .nav-mobile-search .nav-search-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .nav-mobile-platforms {
+    //flex-wrap: wrap;
+    display: grid;
+  }
+
+  .nav-mobile-platforms .nav-platform-pill {
+    padding: 0.35rem 0.75rem;
+  }
+
+  .nav-mobile-actions {
+    margin-bottom: 0;
+    justify-content: space-between;
+  }
+}
+
 .nav-locale-select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1104,6 +1296,11 @@ html[data-hero-zoom="normal"] .hero--carousel {
     min-height: 400px;
   }
 
+  html[data-hero-zoom="normal"] .hero--carousel {
+    height: auto;
+    min-height: 400px;
+  }
+
   .hero-inner {
     width: 98%;
     height: auto;
@@ -1140,6 +1337,10 @@ html[data-hero-zoom="normal"] .hero--carousel {
   min-height: 0;
 }
 
+.hero--with-header .header-shell--fixed + .hero-inner {
+  padding-top: calc(2.5rem + 4.25rem);
+}
+
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -1149,9 +1350,9 @@ html[data-hero-zoom="normal"] .hero--carousel {
 .hero-bg img {
   object-fit: cover;
   object-position: center center;
-  transform: scale(1.08);
+  transform: scale(1.01);
   will-change: transform;
-  animation: heroZoom 20s ease-in-out infinite alternate;
+  animation: heroZoom 22s ease-in-out infinite alternate;
 }
 
 .hero-bg-gradient {
@@ -1686,6 +1887,11 @@ html[data-hero-zoom="normal"] .hero--carousel {
     min-height: 240px;
   }
 
+  .hero-bg img {
+    transform: scale(1);
+    animation: none;
+  }
+
   .hero-thumb {
     min-width: 160px;
   }
@@ -1772,10 +1978,10 @@ html[data-hero-zoom="normal"] .hero--carousel {
 
 @keyframes heroZoom {
   from {
-    transform: scale(1.08);
+    transform: scale(1.01);
   }
   to {
-    transform: scale(1.18);
+    transform: scale(1.05);
   }
 }
 

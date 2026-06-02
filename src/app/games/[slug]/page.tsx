@@ -2,15 +2,11 @@
 
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
 import type { ProductPreview } from "@/types/product";
-
-type Props = {
-  params: { slug: string };
-};
 
 type ProductView = {
   id: string;
@@ -23,13 +19,17 @@ type ProductView = {
   priceFinal: number;
 };
 
-export default function GameDetailPage({ params }: Props) {
+export default function GameDetailPage() {
   const router = useRouter();
+  const routeParams = useParams<{ slug: string | string[] }>();
   const { addToCart } = useCart();
   const [game, setGame] = useState<ProductView | null>(null);
   const [suggestions, setSuggestions] = useState<ProductView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lang, setLang] = useState<"es" | "en">("es");
+
+  const slugParam = routeParams?.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -44,10 +44,12 @@ export default function GameDetailPage({ params }: Props) {
   }, []);
 
   useEffect(() => {
+    if (!slug) return;
+
     const loadProduct = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/products/${params.slug}`);
+        const response = await fetch(`/api/products/${slug}`);
         if (!response.ok) {
           setGame(null);
           return;
@@ -66,7 +68,17 @@ export default function GameDetailPage({ params }: Props) {
     };
 
     void loadProduct();
-  }, [params.slug]);
+  }, [slug]);
+
+  if (!slug) {
+    return (
+      <main className="main-wrapper">
+        <p className="section-subtitle">
+          {lang === "en" ? "Loading game details..." : "Cargando detalle del juego..."}
+        </p>
+      </main>
+    );
+  }
 
   if (!isLoading && !game) {
     return notFound();
@@ -120,20 +132,10 @@ export default function GameDetailPage({ params }: Props) {
             alt={game.name}
             fill
             sizes="(max-width: 1024px) 100vw, 960px"
+            quality={100}
+            unoptimized
             style={{ objectFit: "cover" }}
           />
-          <button
-            type="button"
-            className="game-detail-cart-button"
-            onClick={() => addToCart(mainPreview)}
-          >
-            <Image
-              src="/iconos_platforms/carritoCompra2.svg"
-              alt={lang === "en" ? "Add to cart" : "Añadir al carrito"}
-              width={20}
-              height={20}
-            />
-          </button>
         </div>
 
         {/* INFO */}
@@ -162,6 +164,21 @@ export default function GameDetailPage({ params }: Props) {
 
           {/* 🔥 BOTÓN VOLVER ABAJO DERECHA */}
           <div className="game-detail-back">
+            <button
+              type="button"
+              className="game-detail-cart-button"
+              onClick={() => addToCart(mainPreview)}
+              aria-label={lang === "en" ? "Add to cart" : "Añadir al carrito"}
+              title={lang === "en" ? "Add to cart" : "Añadir al carrito"}
+            >
+              <Image
+                src="/iconos_platforms/carritoCompra2.svg"
+                alt=""
+                width={16}
+                height={16}
+                aria-hidden="true"
+              />
+            </button>
             <button
               type="button"
               className="button-ghost btn-padding-site"
@@ -227,6 +244,9 @@ export default function GameDetailPage({ params }: Props) {
                     alt={g.name}
                     width={500}
                     height={160}
+                    quality={100}
+                    unoptimized
+                    sizes="(max-width: 768px) 100vw, 500px"
                     className="game-suggestion-cover"
                   />
                   <div className="game-suggestion-body">

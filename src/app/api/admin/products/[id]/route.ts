@@ -24,7 +24,7 @@ type ProductPayload = {
 
 export async function PATCH(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_PRODUCTS_WRITE);
   if (!authResult.ok) {
@@ -76,9 +76,11 @@ export async function PATCH(
     );
   }
 
+  const { id } = await context.params;
+
   try {
     const product = await prisma.product.update({
-      where: { id: context.params.id },
+      where: { id },
       data: updateData,
     });
 
@@ -111,16 +113,18 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_PRODUCTS_WRITE);
   if (!authResult.ok) {
     return authResult.response;
   }
 
+  const { id } = await context.params;
+
   try {
     await prisma.product.delete({
-      where: { id: context.params.id },
+      where: { id },
     });
 
     const response = NextResponse.json(

@@ -10,6 +10,7 @@ type Props = {
 
 export function GameGrid({ games }: Props) {
   const [lang, setLang] = useState<"es" | "en">("es");
+  const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -22,6 +23,53 @@ export function GameGrid({ games }: Props) {
     const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
     setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const cardNodes = Array.from(
+      document.querySelectorAll<HTMLElement>(".game-card-reveal[data-reveal-slug]")
+    );
+
+    if (cardNodes.length === 0) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setVisibleCards(new Set(games.map((game) => game.slug)));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const nextVisible = new Set<string>();
+
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const slug = entry.target.getAttribute("data-reveal-slug");
+          if (!slug) return;
+          nextVisible.add(slug);
+          observer.unobserve(entry.target);
+        });
+
+        if (nextVisible.size > 0) {
+          setVisibleCards((current) => {
+            const merged = new Set(current);
+            nextVisible.forEach((slug) => merged.add(slug));
+            return merged;
+          });
+        }
+      },
+      {
+        threshold: 0.16,
+        rootMargin: "0px 0px -10% 0px",
+      }
+    );
+
+    cardNodes.forEach((node) => observer.observe(node));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [games]);
 
   return (
     <section>
@@ -46,8 +94,18 @@ export function GameGrid({ games }: Props) {
           </p>
         ) : (
           <div className="grid-games">
-            {games.map((game) => (
-              <GameCard key={game.slug} game={game} />
+            {games.map((game, index) => (
+              <div
+                key={game.slug}
+                className={
+                  "game-card-reveal" +
+                  ` reveal-delay-${Math.min(index, 8)}` +
+                  (visibleCards.has(game.slug) ? " game-card-reveal--visible" : "")
+                }
+                data-reveal-slug={game.slug}
+              >
+                <GameCard game={game} />
+              </div>
             ))}
           </div>
         )}

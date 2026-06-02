@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:reset": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ports = @(3000,3001); foreach ($port in $ports) { $procIds = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($procId in $procIds) { Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue } }; if (Test-Path '.next') { Remove-Item -LiteralPath '.next' -Recurse -Force }; npm run dev\"",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -23,25 +24,26 @@
     "stripe:webhook:test:async": "stripe trigger checkout.session.async_payment_succeeded"
   },
   "dependencies": {
-    "@prisma/client": "6.10.1",
-    "next": "14.1.0",
+    "@prisma/client": "^6.10.1",
+    "next": "16.2.7",
     "nodemailer": "^8.0.1",
-    "otplib": "^13.3.0",
+    "otplib": "^13.4.1",
     "qrcode": "^1.5.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "stripe": "^20.4.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "stripe": "^22.2.0"
   },
   "devDependencies": {
-    "@types/node": "20.10.6",
+    "@types/node": "25.9.1",
     "@types/nodemailer": "^7.0.11",
-    "@types/react": "18.2.37",
-    "@types/react-dom": "^18.2.15",
-    "eslint": "8.56.0",
-    "eslint-config-next": "14.1.0",
-    "prisma": "6.10.1",
-    "sass": "1.69.5",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "@types/react": "19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "10.4.1",
+    "eslint-config-next": "16.2.7",
+    "prisma": "^6.10.1",
+    "sass": "1.100.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }

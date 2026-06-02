@@ -88,6 +88,8 @@ export function GameCard({ game }: Props) {
           alt={game.name}
           fill
           sizes="(max-width: 768px) 100vw, 240px"
+          quality={100}
+          unoptimized
           style={{ objectFit: "cover" }}
         />
         {game.cashbackPercent > 0 ? (

@@ -6,7 +6,7 @@ import { getActiveSessionFromToken } from "@/lib/auth/session-server";
 import "../../../styles/auth.scss";
 
 export default async function AccountOrdersPage() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   const session = sessionToken ? await getActiveSessionFromToken(sessionToken) : null;
 
