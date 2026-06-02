@@ -52,6 +52,11 @@ export function CartDrawer({ onClose }: Props) {
     router.push("/checkout");
   };
 
+  const openGameDetail = (slug: string) => {
+    onClose();
+    router.push(`/games/${slug}`);
+  };
+
   return (
     <div className="cart-drawer-backdrop" onClick={onClose}>
       <aside
@@ -93,7 +98,23 @@ export function CartDrawer({ onClose }: Props) {
 
             {hasItems &&
               items.map((item) => (
-                <div key={item.slug} className="cart-item">
+                <div
+                  key={item.slug}
+                  className="cart-item cart-item--clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openGameDetail(item.slug)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      openGameDetail(item.slug);
+                    }
+                  }}
+                  aria-label={
+                    (lang === "en" ? "Open details for " : "Abrir detalles de ") +
+                    item.game.name
+                  }
+                >
                   <div
                     style={{
                       position: "relative",
@@ -123,7 +144,10 @@ export function CartDrawer({ onClose }: Props) {
                         <button
                           type="button"
                           className="button-ghost cart-inline-button btn-padding-site"
-                          onClick={() => decreaseFromCart(item.slug)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            decreaseFromCart(item.slug);
+                          }}
                         >
                           −
                         </button>
@@ -135,7 +159,10 @@ export function CartDrawer({ onClose }: Props) {
                         <button
                           type="button"
                           className="button-primary cart-inline-button btn-padding-site"
-                          onClick={() => addToCart(item.game)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            addToCart(item.game);
+                          }}
                         >
                           +
                         </button>
@@ -144,7 +171,10 @@ export function CartDrawer({ onClose }: Props) {
                       <button
                         type="button"
                         className="button-ghost btn-padding-site"
-                        onClick={() => removeFromCart(item.slug)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          removeFromCart(item.slug);
+                        }}
                       >
                         {lang === "en" ? "Remove" : "Quitar"}
                       </button>

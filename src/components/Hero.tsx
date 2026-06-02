@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCart } from "@/contexts/CartContext";
 import type { ProductPreview } from "@/types/product";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
@@ -205,7 +206,7 @@ export function Hero({ products, headerSlot }: Props) {
     return resolveHeroBackgroundImage(current.image);
   }, [slides, activeIndex]);
 
-  const [heroBgSrc, setHeroBgSrc] = useState("");
+  const [heroBgSrc, setHeroBgSrc] = useState(preferredHeroImage);
 
   useEffect(() => {
     if (!preferredHeroImage) return;
@@ -217,6 +218,7 @@ export function Hero({ products, headerSlot }: Props) {
   }
 
   const active = slides[Math.min(activeIndex, slides.length - 1)];
+  const displayedHeroSrc = heroBgSrc || active.image;
 
   const money = (value: number) => formatMoneyWithGeo(value);
 
@@ -225,7 +227,7 @@ export function Hero({ products, headerSlot }: Props) {
       {/* Background: la imagen cubre toda la section, incluida la zona del header */}
       <div className="hero-bg">
         <Image
-          src={heroBgSrc}
+          src={displayedHeroSrc}
           alt={active.title}
           fill
           priority
@@ -248,7 +250,11 @@ export function Hero({ products, headerSlot }: Props) {
         <div className="hero-main">
           {active.badge && <span className="badge-soft">{active.badge}</span>}
 
-          <h1 className="hero-title">{active.title}</h1>
+          <h1 className="hero-title">
+            <Link className="hero-title-link" href={`/games/${active.game.slug}`}>
+              {active.title}
+            </Link>
+          </h1>
 
           <p className="hero-subtitle">{active.subtitle}</p>
 
@@ -319,20 +325,23 @@ export function Hero({ products, headerSlot }: Props) {
                         ? "right"
                         : "off";
                 return (
-                  <button
+                  <div
                     key={`${slide.id}-${index}`}
-                    type="button"
                     className={
                       "hero-thumb hero-thumb--" +
                       position +
                       (realIndex === activeIndex ? " hero-thumb--active" : "")
                     }
-                    onClick={() => {
-                    setActiveIndex(realIndex);
-                    setThumbScrollIndex((realIndex - 1 + slides.length) % slides.length);
-                  }}
                   >
-                    <div className="hero-thumb-image">
+                    <button
+                      type="button"
+                      className="hero-thumb-image hero-thumb-image-button"
+                      onClick={() => {
+                        setActiveIndex(realIndex);
+                        setThumbScrollIndex((realIndex - 1 + slides.length) % slides.length);
+                      }}
+                      aria-label={`${lang === "en" ? "Show" : "Mostrar"} ${slide.title}`}
+                    >
                       <Image
                         src={slide.image}
                         alt={slide.title}
@@ -342,9 +351,11 @@ export function Hero({ products, headerSlot }: Props) {
                         unoptimized
                         style={{ objectFit: "cover", objectPosition: "center center" }}
                       />
-                    </div>
+                    </button>
                     <div className="hero-thumb-info">
-                      <div className="hero-thumb-title">{slide.title}</div>
+                      <Link href={`/games/${slide.game.slug}`} className="hero-thumb-title">
+                        {slide.title}
+                      </Link>
                       <div className="hero-thumb-meta">
                         <span>{money(slide.priceFinal)}</span>
                         {slide.discountPercent > 0 ? (
@@ -352,7 +363,7 @@ export function Hero({ products, headerSlot }: Props) {
                         ) : null}
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
