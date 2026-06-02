@@ -17,9 +17,10 @@ function resolveProvider(rawProvider: string): OAuthProvider | null {
 
 export async function GET(
   request: Request,
-  context: { params: { provider: string } }
+  context: { params: Promise<{ provider: string }> }
 ) {
-  const provider = resolveProvider(context.params.provider);
+  const { provider: rawProvider } = await context.params;
+  const provider = resolveProvider(rawProvider);
   if (!provider) {
     return NextResponse.json(
       { message: "Proveedor OAuth no soportado.", code: "INVALID_OAUTH_PROVIDER" },

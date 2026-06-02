@@ -141,6 +141,8 @@
 .game-detail-back {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 0.55rem;
   margin-top: 1rem;
 }
 
@@ -200,9 +202,7 @@
 }
 
 .game-detail-cart-button {
-  position: absolute;
-  right: 0.9rem;
-  bottom: 0.9rem;
+  position: static;
 }
 
 .game-card-media {
@@ -212,11 +212,31 @@
 }
 
 .game-card-plus {
-  border-color: rgba(185, 28, 28, 0.8);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow:
+    0 1px 0 rgba(226, 232, 240, 0.05) inset,
+    0 2px 5px rgba(15, 23, 42, 0.2),
+    0 10px 12px -10px rgba(2, 6, 23, 0.62);
 }
 
 .card.game-card-plus.card-hover:hover {
-  border-color: rgba(185, 28, 28, 0.8);
+  transform: translateY(-3px);
+  border-color: rgba(129, 140, 248, 0.72);
+  box-shadow:
+    0 1px 0 rgba(226, 232, 240, 0.06) inset,
+    0 4px 10px rgba(15, 23, 42, 0.23),
+    0 12px 14px -10px rgba(2, 6, 23, 0.66),
+    0 0 0 1px rgba(99, 102, 241, 0.32);
+}
+
+.card.game-card-plus.card-hover:focus-within {
+  transform: none;
+  border-color: rgba(129, 140, 248, 0.72);
+  box-shadow:
+    0 1px 0 rgba(226, 232, 240, 0.06) inset,
+    0 4px 10px rgba(15, 23, 42, 0.23),
+    0 12px 14px -10px rgba(2, 6, 23, 0.66),
+    0 0 0 1px rgba(99, 102, 241, 0.32);
 }
 
 .game-card-cashback-badge {
@@ -534,20 +554,48 @@
 /* Móviles hasta 480px: misma estructura y sin huecos entre media queries */
 @media (max-width: 480px) {
   .navbar {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 0.6rem;
     padding: 0.65rem 0.85rem 0.75rem;
+    justify-content: space-between;
   }
 
   .nav-logo {
-    justify-content: center;
+    display: flex;
+    justify-content: space-around;
     margin-left: 0;
+    width: 75%;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .nav-logo-text {
     margin: 0 0 0 0.5rem;
     align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .nav-logo-text-1,
+  .nav-logo-text-2 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-mobile-toggle {
+    width: 34px;
+    height: 34px;
+    max-width: 34px;
+    flex: 0 0 34px;
+    gap: 3px;
+    margin-left: auto;
+  }
+
+  .nav-mobile-toggle-line {
+    width: 12px;
+    height: 1.5px;
   }
 
   .nav-actions {

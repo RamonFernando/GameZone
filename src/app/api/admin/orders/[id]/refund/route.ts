@@ -18,7 +18,7 @@ function resolvePaymentIntentReference(reference: string) {
 
 export async function POST(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_ORDERS_WRITE);
   if (!authResult.ok) {
@@ -40,7 +40,8 @@ export async function POST(
     );
   }
 
-  const orderId = String(context.params.id ?? "").trim();
+  const { id } = await context.params;
+  const orderId = String(id ?? "").trim();
   if (!orderId) {
     return NextResponse.json(
       { message: "Pedido inválido.", code: "BAD_REQUEST" },

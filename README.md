@@ -64,6 +64,26 @@ npm run db:migrate
 npm run dev
 ```
 
+## Comando unico de recuperacion (Windows)
+
+Si vuelve a aparecer un error de runtime en desarrollo como `components.ComponentMod.handler is not a function`, ejecuta este comando:
+
+```bash
+npm run dev:reset
+```
+
+Para que sirve:
+
+- Cierra procesos colgados que esten escuchando en los puertos `3000` y `3001`.
+- Limpia la cache de Next (`.next`) para evitar artefactos inconsistentes.
+- Vuelve a levantar `next dev` desde cero.
+
+Cuando usarlo:
+
+- Cuando el proyecto ya compila (`npm run build` OK) pero en `npm run dev` sigues viendo errores viejos.
+- Cuando hay overlays persistentes de Turbopack/Next despues de cambios grandes.
+- Cuando detectas que hay mas de un servidor dev activo en paralelo.
+
 ## Configuracion OAuth social (sin errores de callback)
 
 ### Google

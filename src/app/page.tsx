@@ -60,7 +60,7 @@ export default function HomePage() {
     <>
       <Hero
         products={filteredGames.length > 0 ? filteredGames : products}
-        headerSlot={<Header />}
+        headerSlot={<Header topTransparentOnTop />}
       />
       <main className="main-wrapper">
         {loading ? (

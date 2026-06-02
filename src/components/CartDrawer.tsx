@@ -109,6 +109,8 @@ export function CartDrawer({ onClose }: Props) {
                       alt={item.game.name}
                       fill
                       sizes="64px"
+                      quality={100}
+                      unoptimized
                       style={{ objectFit: "cover" }}
                     />
                   </div>

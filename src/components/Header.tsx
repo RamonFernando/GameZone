@@ -30,19 +30,25 @@ type UiLocaleOption = {
   currency: string;
 };
 
+type HeaderProps = {
+  topTransparentOnTop?: boolean;
+};
+
 const UI_LOCALE_OPTIONS: UiLocaleOption[] = [
   { value: "es-ES", label: "ES · EUR", currency: "EUR" },
   { value: "en-US", label: "EN · USD", currency: "USD" },
 ];
 
 // Header que envuelve logo, filtros de plataforma, buscador, carrito y avatar.
-export function Header() {
+export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const { totalItems } = useCart();
   const [open, setOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [miniProfile, setMiniProfile] = useState<MiniProfile | null>(null);
   const { query, setQuery, platform, setPlatform } = useSearch();
   const [uiLocale, setUiLocale] = useState<string>("es-ES");
   const [lang, setLang] = useState<"es" | "en">("es");
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Lee el idioma/moneda preferidos (si existen) al montar.
   useEffect(() => {
@@ -93,8 +99,47 @@ export function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!topTransparentOnTop) {
+      setIsScrolled(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [topTransparentOnTop]);
+
+  useEffect(() => {
+    const closeOnDesktop = () => {
+      if (window.innerWidth > 480) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    closeOnDesktop();
+    window.addEventListener("resize", closeOnDesktop);
+
+    return () => {
+      window.removeEventListener("resize", closeOnDesktop);
+    };
+  }, []);
+
+  const headerClassName =
+    "header-shell" +
+    (topTransparentOnTop ? " header-shell--fixed" : "") +
+    (topTransparentOnTop ? " header-shell--top-transparent" : "") +
+    (isScrolled ? " header-shell--scrolled" : "");
+
   return (
-    <header className="header-shell">
+    <header className={headerClassName}>
       <div className="navbar">
 
         {/* LOGO: reset de filtros */}
@@ -122,7 +167,7 @@ export function Header() {
 
         {/* PLATAFORMAS */}
 <nav
-  className="nav-platforms"
+  className="nav-platforms nav-platforms--desktop"
   aria-label={lang === "en" ? "Platforms" : "Plataformas"}
 >
   {PLATFORMS.map((platformName) => {
@@ -144,7 +189,7 @@ export function Header() {
         onClick={() =>
           setPlatform(platform === platformName ? null : platformName)
         }
-        aria-pressed={platform === platformName}
+                 aria-pressed={platform === platformName ? "true" : "false"}
       >
         <Image
           src={iconMap[platformName]}
@@ -163,7 +208,7 @@ export function Header() {
 
 
         {/* ACCIONES DERECHA */}
-        <div className="nav-actions">
+        <div className="nav-actions nav-actions--desktop">
           
           {/* BUSCADOR */}
           <div className="nav-search">
@@ -241,6 +286,132 @@ export function Header() {
             ))}
           </select>
 
+        </div>
+
+        <button
+          type="button"
+          className="nav-mobile-toggle"
+          aria-label={mobileMenuOpen ? (lang === "en" ? "Close menu" : "Cerrar menú") : (lang === "en" ? "Open menu" : "Abrir menú")}
+           aria-expanded={mobileMenuOpen ? "true" : "false"}
+          onClick={() => setMobileMenuOpen((value) => !value)}
+        >
+          <span className="nav-mobile-toggle-line" />
+          <span className="nav-mobile-toggle-line" />
+          <span className="nav-mobile-toggle-line" />
+        </button>
+      </div>
+
+      <div className={"nav-mobile-panel" + (mobileMenuOpen ? " nav-mobile-panel--open" : "")}>
+        <div className="nav-mobile-section nav-mobile-search">
+          <span className="nav-search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="text"
+            placeholder={lang === "en" ? "Search..." : "Buscar..."}
+            className="nav-search-input"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+
+        <nav className="nav-mobile-section nav-mobile-platforms" aria-label={lang === "en" ? "Platforms" : "Plataformas"}>
+          {PLATFORMS.map((platformName) => {
+            const iconMap: Record<string, string> = {
+              PlayStation: "/iconos_platforms/icon-play.svg",
+              Xbox: "/iconos_platforms/icon-xbx.svg",
+              Nintendo: "/iconos_platforms/icon-swt.svg",
+              PC: "/iconos_platforms/icon-pc.svg"
+            };
+
+            return (
+              <button
+                key={`mobile-${platformName}`}
+                type="button"
+                className={
+                  "nav-platform-pill nav-platform-with-icon" +
+                  (platform === platformName ? " nav-platform-pill--active" : "")
+                }
+                onClick={() => {
+                  setPlatform(platform === platformName ? null : platformName);
+                  setMobileMenuOpen(false);
+                }}
+                 aria-pressed={platform === platformName ? "true" : "false"}
+              >
+                <Image
+                  src={iconMap[platformName]}
+                  alt={platformName}
+                  width={16}
+                  height={16}
+                  className="nav-platform-icon"
+                />
+                <span className="nav-platform-text">{platformName}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="nav-mobile-section nav-mobile-actions">
+          <button
+            type="button"
+            className="button-primary button-ghost button-ghost-cart"
+            onClick={() => {
+              setOpen(true);
+              setMobileMenuOpen(false);
+            }}
+          >
+            <Image
+              src="/iconos_platforms/carritoCompra2.svg"
+              alt={lang === "en" ? "Cart" : "Carrito"}
+              width={16}
+              height={16}
+              className="nav-cart-icon"
+            />
+            <span className="nav-cart-badge">{totalItems}</span>
+          </button>
+
+          <Link
+            href="/account"
+            className="nav-mobile-account-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {miniProfile ? (
+              <div
+                className="nav-auth-avatar-circle"
+                style={
+                  miniProfile.avatarUrl && miniProfile.avatarUrl.trim().length > 0
+                    ? {
+                        backgroundImage: `url("${miniProfile.avatarUrl}")`,
+                      }
+                    : undefined
+                }
+              >
+                {!(miniProfile.avatarUrl && miniProfile.avatarUrl.trim().length > 0)
+                  ? (miniProfile.name || miniProfile.email).trim().charAt(0).toUpperCase() ||
+                    "G"
+                  : null}
+              </div>
+            ) : (
+              <Image
+                src="/iconos_platforms/person_avatar_white.svg"
+                alt="avatar"
+                width={39}
+                height={39}
+                className="nav-auth-icon"
+              />
+            )}
+          </Link>
+
+          <select
+            className="nav-locale-select"
+            aria-label="Idioma y moneda"
+            value={uiLocale}
+            onChange={(event) => handleUiLocaleChange(event.target.value)}
+          >
+            {UI_LOCALE_OPTIONS.map((opt) => (
+              <option key={`mobile-${opt.value}`} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

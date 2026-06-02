@@ -29,9 +29,10 @@ function redirectWithError(request: Request, reason: string) {
 
 export async function GET(
   request: Request,
-  context: { params: { provider: string } }
+  context: { params: Promise<{ provider: string }> }
 ) {
-  const provider = resolveProvider(context.params.provider);
+  const { provider: rawProvider } = await context.params;
+  const provider = resolveProvider(rawProvider);
   if (!provider) {
     return redirectWithError(request, "provider");
   }

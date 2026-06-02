@@ -25,6 +25,27 @@ type Slide = {
 // Tiempo de rotación: imagen grande, borde naranja y focus del carrusel a 10 s (sincronizados).
 const BANNER_ROTATE_MS = 10000;
 
+function resolveHeroBackgroundImage(coverImage: string): string {
+  if (!coverImage.startsWith("/games_data/")) {
+    return coverImage;
+  }
+
+  // Primero resolvemos casos específicos cuyo wallpaper usa extensión distinta.
+  if (coverImage.includes("-deluxe-cover.jpeg")) {
+    return coverImage.replace("-deluxe-cover.jpeg", "-deluxe-wallpaper.jpg");
+  }
+
+  if (coverImage.includes("-cover.jpg")) {
+    return coverImage.replace("-cover.jpg", "-wallpaper.jpg");
+  }
+
+  if (coverImage.includes("-cover.jpeg")) {
+    return coverImage.replace("-cover.jpeg", "-wallpaper.jpeg");
+  }
+
+  return coverImage;
+}
+
 // Convierte un ProductPreview en un Slide listo para pintar en el hero.
 function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide {
   const badgeByIndexEs = ["Oferta destacada", "Más vendido", "Top descuento", "Recomendado"];
@@ -176,11 +197,27 @@ export function Hero({ products, headerSlot }: Props) {
   const slidesWithLoop =
     slides.length > 0 ? [...slides, ...slides, ...slides] : [];
 
+  const preferredHeroImage = useMemo(() => {
+    if (slides.length === 0) {
+      return "";
+    }
+    const current = slides[Math.min(activeIndex, slides.length - 1)];
+    return resolveHeroBackgroundImage(current.image);
+  }, [slides, activeIndex]);
+
+  const [heroBgSrc, setHeroBgSrc] = useState("");
+
+  useEffect(() => {
+    if (!preferredHeroImage) return;
+    setHeroBgSrc(preferredHeroImage);
+  }, [preferredHeroImage]);
+
   if (slides.length === 0) {
     return null;
   }
 
   const active = slides[Math.min(activeIndex, slides.length - 1)];
+
   const money = (value: number) => formatMoneyWithGeo(value);
 
   return (
@@ -188,11 +225,16 @@ export function Hero({ products, headerSlot }: Props) {
       {/* Background: la imagen cubre toda la section, incluida la zona del header */}
       <div className="hero-bg">
         <Image
-          src={active.image}
+          src={heroBgSrc}
           alt={active.title}
           fill
           priority
           sizes="100vw"
+          quality={100}
+          unoptimized
+          onError={() => {
+            setHeroBgSrc((current) => (current === active.image ? current : active.image));
+          }}
           style={{ objectFit: "cover", objectPosition: "center center" }}
         />
         <div className="hero-bg-gradient" />
@@ -296,6 +338,8 @@ export function Hero({ products, headerSlot }: Props) {
                         alt={slide.title}
                         fill
                         sizes="160px"
+                        quality={100}
+                        unoptimized
                         style={{ objectFit: "cover", objectPosition: "center center" }}
                       />
                     </div>
