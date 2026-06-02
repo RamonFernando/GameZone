@@ -105,6 +105,84 @@
   max-width: 40rem;
 }
 
+.game-detail-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.55rem 0 0.8rem;
+}
+
+.game-detail-chip {
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 999px;
+  color: #dbeafe;
+  background: rgba(15, 23, 42, 0.72);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.25rem 0.58rem;
+}
+
+.game-detail-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.7rem;
+  margin: 1rem 0 0;
+}
+
+.game-detail-spec {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.55rem;
+  background: rgba(15, 23, 42, 0.48);
+  padding: 0.65rem 0.7rem;
+}
+
+.game-detail-spec dt {
+  color: #94a3b8;
+  font-size: 0.74rem;
+  margin-bottom: 0.25rem;
+}
+
+.game-detail-spec dd {
+  color: #e2e8f0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.game-detail-extra {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.game-detail-screenshots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.game-detail-screenshot {
+  position: relative;
+  min-height: 150px;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.game-detail-info-card {
+  padding: 1rem;
+}
+
+.game-detail-requirements {
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  margin: 0.8rem 0 0;
+ }
+
 .game-detail-price-line {
   display: flex;
   flex-wrap: wrap;

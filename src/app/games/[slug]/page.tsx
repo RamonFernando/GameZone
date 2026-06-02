@@ -14,10 +14,44 @@ type ProductView = {
   slug: string;
   description: string;
   coverImage: string;
+  platform: string;
+  region: string;
+  storeLabel: string;
+  cardSubtitle: string;
+  longDescription: string | null;
+  releaseDate: string | null;
+  developer: string | null;
+  publisher: string | null;
+  genres: string[];
+  platforms: string[];
+  tags: string[];
+  stores: string[];
+  screenshots: string[];
+  backgroundImage: string | null;
+  website: string | null;
+  esrbRating: string | null;
+  metacritic: number | null;
+  rating: number | null;
+  ratingsCount: number;
+  playtimeHours: number | null;
+  requirements: string | null;
+  metadataSource: string | null;
+  metadataUpdatedAt: string | null;
   priceOriginal: number;
   discountPercent: number;
   priceFinal: number;
 };
+
+function formatDate(value: string | null, lang: "es" | "en") {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat(lang === "en" ? "en-US" : "es-ES", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
 
 export default function GameDetailPage() {
   const router = useRouter();
@@ -99,8 +133,32 @@ export default function GameDetailPage() {
   const localizedName =
     isEnglish && isUnchartedLegacySlug ? "Uncharted - Legacy of Thieves Collection" : game.name;
 
-  const detailDescription =
+  const fallbackDescription =
     (isEnglish ? "Digital purchase of " : "Compra digital de ") + localizedName + ".";
+  const detailDescription = game.longDescription || game.description || fallbackDescription;
+  const releaseDate = formatDate(game.releaseDate, lang);
+  const heroImage = game.backgroundImage || game.coverImage;
+  const tagsToShow = [...game.genres, ...game.platforms].slice(0, 8);
+  const specs = [
+    { label: isEnglish ? "Platform" : "Plataforma", value: game.platform },
+    { label: isEnglish ? "Activation" : "Activacion", value: game.region },
+    { label: isEnglish ? "Store" : "Tienda", value: game.storeLabel },
+    { label: isEnglish ? "Type" : "Tipo", value: game.cardSubtitle },
+    { label: isEnglish ? "Developer" : "Desarrollador", value: game.developer },
+    { label: isEnglish ? "Publisher" : "Editor", value: game.publisher },
+    { label: isEnglish ? "Release date" : "Lanzamiento", value: releaseDate },
+    {
+      label: isEnglish ? "Rating" : "Valoracion",
+      value: game.rating ? `${game.rating.toFixed(1)} / 5` : null,
+    },
+    { label: "Metacritic", value: game.metacritic ? String(game.metacritic) : null },
+    {
+      label: isEnglish ? "Playtime" : "Duracion",
+      value: game.playtimeHours
+        ? `${game.playtimeHours} ${isEnglish ? "hours" : "horas"}`
+        : null,
+    },
+  ].filter((item) => item.value);
 
   const mainPreview: ProductPreview = {
     id: game.id,
@@ -127,9 +185,9 @@ export default function GameDetailPage() {
 
         {/* IMAGEN */}
         <div className="game-detail-media">
-          <Image
-            src={game.coverImage}
-            alt={game.name}
+	          <Image
+	            src={heroImage}
+	            alt={game.name}
             fill
             sizes="(max-width: 1024px) 100vw, 960px"
             quality={100}
@@ -140,9 +198,19 @@ export default function GameDetailPage() {
 
         {/* INFO */}
         <div>
-          <h1 className="game-detail-title">{localizedName}</h1>
+	          <h1 className="game-detail-title">{localizedName}</h1>
+	
+	          {tagsToShow.length > 0 ? (
+	            <div className="game-detail-chip-row">
+	              {tagsToShow.map((tag) => (
+	                <span key={tag} className="game-detail-chip">
+	                  {tag}
+	                </span>
+	              ))}
+	            </div>
+	          ) : null}
 
-          <p className="game-detail-copy">{detailDescription}</p>
+	          <p className="game-detail-copy">{detailDescription}</p>
           <p className="game-detail-copy game-detail-price-line">
             {lang === "en" ? "Price: " : "Precio: "}
             {game.discountPercent > 0 ? (
@@ -159,8 +227,19 @@ export default function GameDetailPage() {
               <strong className="game-detail-price-final">
                 {formatMoneyWithGeo(game.priceFinal)}
               </strong>
-            )}
-          </p>
+	            )}
+	          </p>
+
+	          {specs.length > 0 ? (
+	            <dl className="game-detail-specs">
+	              {specs.map((item) => (
+	                <div key={item.label} className="game-detail-spec">
+	                  <dt>{item.label}</dt>
+	                  <dd>{item.value}</dd>
+	                </div>
+	              ))}
+	            </dl>
+	          ) : null}
 
           {/* 🔥 BOTÓN VOLVER ABAJO DERECHA */}
           <div className="game-detail-back">
@@ -189,9 +268,60 @@ export default function GameDetailPage() {
           </div>
         </div>
 
-      </div>
+	      </div>
 
-      {/* SUGERENCIAS */}
+	      {(game.screenshots.length > 0 || game.requirements || game.website) && (
+	        <section className="game-detail-extra">
+	          {game.screenshots.length > 0 ? (
+	            <div>
+	              <div className="section-header">
+	                <h2 className="section-title">{isEnglish ? "Screenshots" : "Capturas"}</h2>
+	                <p className="section-subtitle">
+	                  {isEnglish ? "Images from the game listing." : "Imagenes de la ficha del juego."}
+	                </p>
+	              </div>
+	              <div className="game-detail-screenshots">
+	                {game.screenshots.slice(0, 4).map((screenshot) => (
+	                  <div key={screenshot} className="game-detail-screenshot">
+	                    <Image
+	                      src={screenshot}
+	                      alt={localizedName}
+	                      fill
+	                      sizes="(max-width: 768px) 100vw, 320px"
+	                      quality={90}
+	                      unoptimized
+	                      style={{ objectFit: "cover" }}
+	                    />
+	                  </div>
+	                ))}
+	              </div>
+	            </div>
+	          ) : null}
+
+	          {(game.requirements || game.website) && (
+	            <div className="card game-detail-info-card">
+	              <h2 className="section-title">
+	                {isEnglish ? "Additional information" : "Informacion adicional"}
+	              </h2>
+	              {game.requirements ? (
+	                <pre className="game-detail-requirements">{game.requirements}</pre>
+	              ) : null}
+	              {game.website ? (
+	                <a
+	                  href={game.website}
+	                  target="_blank"
+	                  rel="noreferrer"
+	                  className="auth-link"
+	                >
+	                  {isEnglish ? "Official website" : "Web oficial"}
+	                </a>
+	              ) : null}
+	            </div>
+	          )}
+	        </section>
+	      )}
+	
+	      {/* SUGERENCIAS */}
       {suggestions.length > 0 && (
         <section>
           <div className="section-header">

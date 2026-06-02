@@ -12,6 +12,7 @@
     "test:unit:watch": "vitest",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "enrich:games": "node scripts/enrich-games-from-rawg.mjs",
     "e2e:checkout": "node scripts/e2e-checkout.mjs",
     "e2e:stripe": "node scripts/e2e-stripe.mjs",
     "e2e:paypal": "node scripts/e2e-paypal.mjs",

@@ -55,6 +55,7 @@ Copia `.env.example` a `.env` y completa al menos:
 - `FACEBOOK_CLIENT_SECRET`
 - `TWITTER_CLIENT_ID`
 - `TWITTER_CLIENT_SECRET`
+- `RAWG_API_KEY` (opcional, para enriquecer fichas de juegos con metadata externa)
 
 ## Arranque rapido
 
@@ -63,6 +64,95 @@ npm install
 npm run db:migrate
 npm run dev
 ```
+
+## Metadata de juegos con RAWG
+
+El proyecto puede enriquecer los productos locales con informacion externa de RAWG:
+descripcion larga, desarrollador, editor, fecha de lanzamiento, generos, plataformas,
+capturas, rating, requisitos y web oficial.
+
+### Configurar RAWG
+
+1. Crea o revisa tu API key en RAWG:
+   - `https://rawg.io/apidocs`
+1. En `.env`, agrega:
+
+```env
+RAWG_API_KEY=tu_api_key
+```
+
+No subas `.env` al repositorio. Si una key queda visible en una captura o chat,
+usa `Refresh Key` en RAWG y reemplazala.
+
+### Probar sin guardar cambios
+
+Antes de guardar metadata, prueba siempre con `--dry-run`.
+
+Un juego concreto:
+
+```bash
+npm run enrich:games -- --slug destroy-all-humans-2-reprobed --dry-run
+```
+
+Primeros 3 juegos del catalogo:
+
+```bash
+npm run enrich:games -- --limit 3 --dry-run
+```
+
+El resultado debe mostrar que el juego local apunta al juego correcto de RAWG.
+Si RAWG empareja mal un juego, no ejecutes el guardado todavia.
+
+### Guardar metadata
+
+Guardar un juego concreto:
+
+```bash
+npm run enrich:games -- --slug destroy-all-humans-2-reprobed
+```
+
+Guardar los primeros 3 juegos:
+
+```bash
+npm run enrich:games -- --limit 3
+```
+
+Guardar todo el catalogo activo:
+
+```bash
+npm run enrich:games
+```
+
+Despues de guardar, recarga la ficha del juego, por ejemplo:
+
+```text
+http://localhost:3000/games/destroy-all-humans-2-reprobed
+```
+
+### Overrides de RAWG
+
+Si RAWG devuelve un juego equivocado, usa `scripts/rawg-overrides.json`.
+Ejemplo:
+
+```json
+{
+  "god-of-war-ragnarok": {
+    "rawgSlug": "god-of-war-ragnarok"
+  }
+}
+```
+
+Tambien se puede usar `rawgId` si el ID es mas fiable:
+
+```json
+{
+  "mi-slug-local": {
+    "rawgId": 123456
+  }
+}
+```
+
+Despues de editar overrides, vuelve a probar con `--dry-run`.
 
 ## Comando unico de recuperacion (Windows)
 

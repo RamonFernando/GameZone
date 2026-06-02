@@ -6,6 +6,16 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
 
+function parseJsonList(value: string | null | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
   const product = await getActiveProductBySlug(slug);
@@ -70,6 +80,27 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
         region: product.region,
         storeLabel: product.storeLabel,
         cardSubtitle: product.cardSubtitle,
+        longDescription: product.longDescription,
+        rawgId: product.rawgId,
+        rawgSlug: product.rawgSlug,
+        releaseDate: product.releaseDate?.toISOString() ?? null,
+        developer: product.developer,
+        publisher: product.publisher,
+        genres: parseJsonList(product.genresJson),
+        platforms: parseJsonList(product.platformsJson),
+        tags: parseJsonList(product.tagsJson),
+        stores: parseJsonList(product.storesJson),
+        screenshots: parseJsonList(product.screenshotsJson),
+        backgroundImage: product.backgroundImage,
+        website: product.website,
+        esrbRating: product.esrbRating,
+        metacritic: product.metacritic,
+        rating: product.rating,
+        ratingsCount: product.ratingsCount,
+        playtimeHours: product.playtimeHours,
+        requirements: product.requirements,
+        metadataSource: product.metadataSource,
+        metadataUpdatedAt: product.metadataUpdatedAt?.toISOString() ?? null,
         priceOriginal: product.priceOriginal,
         discountPercent: product.discountPercent,
         cashbackPercent: product.cashbackPercent,

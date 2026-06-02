@@ -90,6 +90,27 @@ model Product {
   region          String   @default("EUROPA")
   storeLabel      String   @default("Steam")
   cardSubtitle    String   @default("Código digital oficial")
+  longDescription String?
+  rawgId          Int?
+  rawgSlug        String?
+  releaseDate     DateTime?
+  developer       String?
+  publisher       String?
+  genresJson      String   @default("[]")
+  platformsJson   String   @default("[]")
+  tagsJson        String   @default("[]")
+  storesJson      String   @default("[]")
+  screenshotsJson String   @default("[]")
+  backgroundImage String?
+  website         String?
+  esrbRating      String?
+  metacritic      Int?
+  rating          Float?
+  ratingsCount    Int      @default(0)
+  playtimeHours   Int?
+  requirements    String?
+  metadataSource  String?
+  metadataUpdatedAt DateTime?
   priceOriginal   Float
   discountPercent Int      @default(0)
   cashbackPercent Int      @default(0)
@@ -102,6 +123,7 @@ model Product {
   likes ProductLike[]
 
   @@index([isActive, createdAt])
+  @@index([rawgId])
 }
 
 model ProductLike {
