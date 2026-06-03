@@ -837,7 +837,7 @@ export function MarketIntelligenceSections() {
             </div>
           </section>
 
-          <section className="market-pulse-source-panel" aria-labelledby="rawg-panel-title">
+          <section className="market-pulse-source-panel market-pulse-source-panel--rawg" aria-labelledby="rawg-panel-title">
             <div className="market-pulse-panel__head">
               <span>RAWG</span>
               <div>
