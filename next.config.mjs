@@ -7,6 +7,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "shared.akamai.steamstatic.com",
       },
+      {
+        protocol: "https",
+        hostname: "**.g2a.com",
+      },
     ],
   },
 };

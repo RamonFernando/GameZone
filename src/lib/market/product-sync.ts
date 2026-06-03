@@ -4,6 +4,13 @@ import { slugify } from "@/lib/games";
 import { listMarketPulse, type MarketPulseItem } from "@/lib/market/pulse";
 
 type SyncAction = "created" | "updated" | "skipped";
+type SyncMode = "dry-run" | "write";
+
+type MarketProductSyncOptions = {
+  dryRun?: boolean;
+};
+
+const CATALOG_MATCH_SYNC_SCORE = 80;
 
 export type MarketProductSyncResult = {
   action: SyncAction;
@@ -18,6 +25,7 @@ function validImage(value: string) {
 
 function inferPrice(item: MarketPulseItem) {
   if (typeof item.gameZonePrice === "number") return item.gameZonePrice;
+  if (typeof item.g2aPrice === "number") return item.g2aPrice;
   if (item.steamIsFree) return 0;
   if (typeof item.steamPrice === "number") return item.steamPrice;
   return null;
@@ -27,19 +35,29 @@ function createDescription(item: MarketPulseItem) {
   return `Ficha sincronizada desde ${item.source}: ${item.signal}. Ranking #${item.rank}.`;
 }
 
-async function syncMatchedProduct(item: MarketPulseItem) {
+async function syncMatchedProduct(item: MarketPulseItem, mode: SyncMode) {
   const slug = item.catalogMatch.slug;
 
-  if (!slug) {
+  if (!slug || item.catalogMatch.matchScore < CATALOG_MATCH_SYNC_SCORE) {
     return null;
   }
 
   const updateData = {
     coverImage: validImage(item.image) ? item.image : undefined,
     platform: item.platform || undefined,
+    priceOriginal: item.source === "G2A" && typeof item.g2aPrice === "number" ? item.g2aPrice : undefined,
     metadataSource: item.source,
     metadataUpdatedAt: new Date(),
   };
+
+  if (mode === "dry-run") {
+    return {
+      action: "updated",
+      title: item.title,
+      slug,
+      reason: "Dry-run: producto existente se actualizaria con imagen/datos del pulso.",
+    } satisfies MarketProductSyncResult;
+  }
 
   await prisma.product.update({
     where: { slug },
@@ -54,7 +72,7 @@ async function syncMatchedProduct(item: MarketPulseItem) {
   } satisfies MarketProductSyncResult;
 }
 
-async function createMissingProduct(item: MarketPulseItem) {
+async function createMissingProduct(item: MarketPulseItem, mode: SyncMode) {
   const price = inferPrice(item);
   const slug = slugify(item.title);
 
@@ -78,6 +96,15 @@ async function createMissingProduct(item: MarketPulseItem) {
 
   const existing = await prisma.product.findUnique({ where: { slug } });
   if (existing) {
+    if (mode === "dry-run") {
+      return {
+        action: "updated",
+        title: item.title,
+        slug,
+        reason: "Dry-run: producto encontrado por slug se actualizaria.",
+      } satisfies MarketProductSyncResult;
+    }
+
     await prisma.product.update({
       where: { slug },
       data: {
@@ -93,6 +120,15 @@ async function createMissingProduct(item: MarketPulseItem) {
       title: item.title,
       slug,
       reason: "Producto encontrado por slug y actualizado.",
+    } satisfies MarketProductSyncResult;
+  }
+
+  if (mode === "dry-run") {
+    return {
+      action: "created",
+      title: item.title,
+      slug,
+      reason: "Dry-run: producto se crearia desde pulso de mercado.",
     } satisfies MarketProductSyncResult;
   }
 
@@ -125,8 +161,9 @@ async function createMissingProduct(item: MarketPulseItem) {
   } satisfies MarketProductSyncResult;
 }
 
-export async function syncProductsFromMarketPulse() {
+export async function syncProductsFromMarketPulse(options: MarketProductSyncOptions = {}) {
   const pulse = await listMarketPulse();
+  const mode: SyncMode = options.dryRun ? "dry-run" : "write";
   const seen = new Set<string>();
   const results: MarketProductSyncResult[] = [];
 
@@ -136,8 +173,8 @@ export async function syncProductsFromMarketPulse() {
       if (seen.has(key)) continue;
       seen.add(key);
 
-      const matchedResult = await syncMatchedProduct(item);
-      results.push(matchedResult ?? (await createMissingProduct(item)));
+      const matchedResult = await syncMatchedProduct(item, mode);
+      results.push(matchedResult ?? (await createMissingProduct(item, mode)));
     }
   }
 
@@ -151,5 +188,6 @@ export async function syncProductsFromMarketPulse() {
     skipped,
     results,
     fallbackUsed: pulse.fallbackUsed,
+    dryRun: options.dryRun ?? false,
   };
 }

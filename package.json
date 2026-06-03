@@ -13,6 +13,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "enrich:games": "node scripts/enrich-games-from-rawg.mjs",
+    "market:sync:dry": "node scripts/sync-market-products.mjs",
+    "market:sync": "node scripts/sync-market-products.mjs --write",
     "e2e:checkout": "node scripts/e2e-checkout.mjs",
     "e2e:stripe": "node scripts/e2e-stripe.mjs",
     "e2e:paypal": "node scripts/e2e-paypal.mjs",

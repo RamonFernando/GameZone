@@ -32,6 +32,8 @@ type MarketPulseItem = {
   sourceUrl: string;
   catalogStatus: string;
   gameZonePrice?: number | null;
+  g2aPrice?: number | null;
+  g2aCurrency?: string | null;
   steamPrice?: number | null;
   steamCurrency?: string | null;
   steamIsFree?: boolean;
@@ -434,13 +436,15 @@ function MarketPulseCarousel({
               <span className="market-pulse-catalog-card__media">
                 <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
                 <span className="market-pulse-catalog-card__store">
-                  <Image
-                    src="/iconos_platforms/icon-steam.svg"
-                    alt=""
-                    width={14}
-                    height={14}
-                  />
-                  Steam
+                  {section.source === "Steam" ? (
+                    <Image
+                      src="/iconos_platforms/icon-steam.svg"
+                      alt=""
+                      width={14}
+                      height={14}
+                    />
+                  ) : null}
+                  {section.source}
                 </span>
               </span>
               <span className="market-pulse-catalog-card__body">
@@ -455,17 +459,21 @@ function MarketPulseCarousel({
                     </strong>
                   </span>
                   <span>
-                    <small>Steam</small>
+                    <small>{section.source === "G2A" ? "G2A" : "Steam"}</small>
                     <strong>
-                      {game.steamIsFree
-                        ? "Gratis"
-                        : typeof game.steamPrice === "number"
-                          ? formatEuro(game.steamPrice)
-                          : "No disponible"}
+                      {section.source === "G2A"
+                        ? typeof game.g2aPrice === "number"
+                          ? formatEuro(game.g2aPrice)
+                          : "No disponible"
+                        : game.steamIsFree
+                          ? "Gratis"
+                          : typeof game.steamPrice === "number"
+                            ? formatEuro(game.steamPrice)
+                            : "No disponible"}
                     </strong>
                   </span>
                 </span>
-                <em>#{game.rank} mas jugado</em>
+                <em>#{game.rank} {section.source === "Steam" ? "mas jugado" : "mas vendido"}</em>
               </span>
             </article>
           ))}
@@ -587,13 +595,10 @@ export function MarketIntelligenceSections() {
   const [marketRecommendations, setMarketRecommendations] =
     useState<RecommendationPreview[]>(fallbackRecommendations);
   const [isLoadingDeals, setIsLoadingDeals] = useState(true);
-  const [isLoadingPulse, setIsLoadingPulse] = useState(true);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
   const [dealsSource, setDealsSource] = useState("mock");
-  const [pulseSource, setPulseSource] = useState("mock");
   const [recommendationsSource, setRecommendationsSource] = useState("mock");
   const [dealsError, setDealsError] = useState("");
-  const [pulseError, setPulseError] = useState("");
   const [recommendationsError, setRecommendationsError] = useState("");
 
   useEffect(() => {
@@ -640,7 +645,6 @@ export function MarketIntelligenceSections() {
 
     async function loadMarketPulse() {
       try {
-        setIsLoadingPulse(true);
         const response = await fetch("/api/market/pulse");
         if (!response.ok) {
           throw new Error("No se pudo cargar el pulso de mercado.");
@@ -657,18 +661,10 @@ export function MarketIntelligenceSections() {
 
         if (!cancelled && nextSections.length > 0) {
           setMarketPulseSections(nextSections);
-          setPulseSource(payload.source ?? "api");
-          setPulseError("");
         }
       } catch {
         if (!cancelled) {
           setMarketPulseSections(fallbackPulseSections);
-          setPulseSource("fallback");
-          setPulseError("Mostrando fallback local");
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingPulse(false);
         }
       }
     }
@@ -725,12 +721,6 @@ export function MarketIntelligenceSections() {
     if (dealsError) return dealsError;
     return dealsSource.includes("gamezone") ? "API + fallback" : "CheapShark";
   }, [dealsError, dealsSource, isLoadingDeals]);
-
-  const pulseStatus = useMemo(() => {
-    if (isLoadingPulse) return "Cargando API";
-    if (pulseError) return pulseError;
-    return pulseSource.includes("fallback") ? "API + snapshots" : "G2A + Steam + RAWG";
-  }, [isLoadingPulse, pulseError, pulseSource]);
 
   const recommendationsStatus = useMemo(() => {
     if (isLoadingRecommendations) return "Cargando API";
@@ -805,7 +795,7 @@ export function MarketIntelligenceSections() {
                   </div>
                   <MarketPulseCarousel
                     section={section}
-                    variant={section.title.toLowerCase().includes("mas vendidos") ? "compact" : "hero"}
+                    variant={section.title.toLowerCase().includes("mas vendidos") ? "catalog" : "hero"}
                     thumbCount={5}
                   />
                 </article>

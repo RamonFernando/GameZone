@@ -286,10 +286,10 @@ export function AdminProductsPanel() {
     }
   };
 
-  const handleMarketSync = async () => {
+  const handleMarketSync = async (dryRun = false) => {
     try {
       setIsSyncingMarket(true);
-      const response = await fetch("/api/admin/products/sync-market", {
+      const response = await fetch(`/api/admin/products/sync-market${dryRun ? "?dryRun=1" : ""}`, {
         method: "POST",
       });
       const payload = (await response.json()) as {
@@ -310,10 +310,12 @@ export function AdminProductsPanel() {
       pushToast(
         "success",
         sync
-          ? `Mercado sincronizado: ${sync.created ?? 0} creados, ${sync.updated ?? 0} actualizados, ${sync.skipped ?? 0} omitidos.`
+          ? `${dryRun ? "Previsualizacion" : "Mercado sincronizado"}: ${sync.created ?? 0} creados, ${sync.updated ?? 0} actualizados, ${sync.skipped ?? 0} omitidos.`
           : payload.message ?? "Mercado sincronizado."
       );
-      await loadProducts();
+      if (!dryRun) {
+        await loadProducts();
+      }
     } catch {
       pushToast("error", "Error de red sincronizando mercado.");
     } finally {
@@ -573,7 +575,15 @@ export function AdminProductsPanel() {
         <button
           type="button"
           className="button-primary btn-padding-site"
-          onClick={handleMarketSync}
+          onClick={() => handleMarketSync(true)}
+          disabled={isSyncingMarket}
+        >
+          {isSyncingMarket ? "Comprobando..." : "Previsualizar sync"}
+        </button>
+        <button
+          type="button"
+          className="button-primary btn-padding-site"
+          onClick={() => handleMarketSync(false)}
           disabled={isSyncingMarket}
         >
           {isSyncingMarket ? "Sincronizando..." : "Sincronizar mercado"}

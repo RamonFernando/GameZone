@@ -3,6 +3,7 @@ import { createCatalogMatch, findBestCatalogMatch, type MarketCatalogMatch } fro
 import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/lib/market/trending";
 
 export const MARKET_PULSE_CACHE_SECONDS = 1800;
+const CATALOG_MATCH_SYNC_SCORE = 80;
 
 type PulseSource = "G2A" | "Steam" | "RAWG";
 
@@ -17,6 +18,8 @@ export type MarketPulseItem = {
   catalogStatus: string;
   catalogMatch: MarketCatalogMatch;
   gameZonePrice: number | null;
+  g2aPrice: number | null;
+  g2aCurrency: string | null;
   steamAppId?: string | null;
   steamPrice: number | null;
   steamCurrency: string | null;
@@ -35,6 +38,7 @@ export type MarketPulseSection = {
 
 const G2A_POPULAR_URL = "https://www.g2a.com/category/games-c189?sort=bestsellers-first";
 const G2A_BESTSELLERS_URL = "https://www.g2a.com/top-list/best-selling-games/";
+const G2A_API_BASE_URL = process.env.G2A_API_BASE_URL ?? "https://sandboxapi.g2a.com";
 const STEAM_TOP_SELLERS_URL = "https://steamdb.info/stats/globaltopsellers/";
 const STEAM_MOST_PLAYED_URL = "https://steamdb.info/charts/";
 const STEAM_APPDETAILS_URL = "https://store.steampowered.com/api/appdetails";
@@ -50,6 +54,23 @@ const g2aPopularSnapshot = [
   "God of War Ragnarok",
   "Resident Evil 4 Remake",
   "Hogwarts Legacy",
+];
+
+const g2aBlockedTitleTerms = [
+  "random",
+  "premium",
+  "subscription",
+  "gift card",
+  "cash card",
+  "currency",
+  "wallet",
+  "points",
+  "account",
+  "bundle",
+  "pack",
+  "keys",
+  "ru/cis",
+  "cis",
 ];
 const g2aBestsellerSnapshot = [
   "Minecraft Java Edition",
@@ -119,6 +140,11 @@ function cleanMarketTitle(value: string) {
 
 type MarketTitleEntry = {
   title: string;
+  image?: string | null;
+  platform?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  productId?: string | null;
   steamAppId?: string | null;
 };
 
@@ -127,6 +153,23 @@ type SteamPrice = {
   currency: string | null;
   isFree: boolean;
   image: string | null;
+};
+
+type G2aApiProduct = {
+  id?: string;
+  name?: string;
+  qty?: number;
+  minPrice?: number;
+  coverImage?: string;
+  smallImage?: string;
+  thumbnail?: string;
+  platform?: string;
+  region?: string;
+  categories?: Array<{ id?: number; name?: string }>;
+};
+
+type G2aApiProductsResponse = {
+  docs?: G2aApiProduct[];
 };
 
 function uniqueTitles(titles: string[]) {
@@ -149,9 +192,88 @@ function uniqueEntries(entries: MarketTitleEntry[]) {
   });
 }
 
-function extractG2aTitles(html: string) {
+function parsePrice(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return Number(value.toFixed(2));
+  if (typeof value !== "string") return null;
+
+  const normalized = value.replace(/\s+/g, "").replace(",", ".");
+  const match = normalized.match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+
+  const price = Number(match[1]);
+  return Number.isFinite(price) ? Number(price.toFixed(2)) : null;
+}
+
+function firstString(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (Array.isArray(value)) return firstString(value[0]);
+  return null;
+}
+
+function offerFrom(value: unknown) {
+  const offer = Array.isArray(value) ? value[0] : value;
+  if (!offer || typeof offer !== "object") {
+    return { price: null, currency: null };
+  }
+
+  const payload = offer as Record<string, unknown>;
+  return {
+    price: parsePrice(payload.price ?? payload.lowPrice),
+    currency: typeof payload.priceCurrency === "string" ? payload.priceCurrency : null,
+  };
+}
+
+function collectG2aProducts(value: unknown, products: MarketTitleEntry[]) {
+  if (!value || typeof value !== "object") return;
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectG2aProducts(item, products));
+    return;
+  }
+
+  const payload = value as Record<string, unknown>;
+  const type = payload["@type"];
+  const types = Array.isArray(type) ? type : [type];
+  const isProduct = types.some((entry) => typeof entry === "string" && entry.toLowerCase() === "product");
+  const name = firstString(payload.name);
+
+  if (isProduct && name) {
+    const offer = offerFrom(payload.offers);
+    products.push({
+      title: cleanMarketTitle(name),
+      image: firstString(payload.image),
+      price: offer.price,
+      currency: offer.currency,
+      productId: firstString(payload.sku) ?? firstString(payload.productID) ?? null,
+    });
+  }
+
+  Object.values(payload).forEach((item) => collectG2aProducts(item, products));
+}
+
+function extractJsonLd(html: string) {
+  const scripts = Array.from(html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
+  const products: MarketTitleEntry[] = [];
+
+  for (const script of scripts) {
+    try {
+      collectG2aProducts(JSON.parse(script[1] ?? ""), products);
+    } catch {
+      // Some marketplace pages ship partial JSON-LD; skip malformed blocks.
+    }
+  }
+
+  return products;
+}
+
+function extractG2aEntries(html: string) {
+  const jsonLdProducts = extractJsonLd(html);
+  if (jsonLdProducts.length > 0) return uniqueEntries(jsonLdProducts).slice(0, 10);
+
   const matches = Array.from(html.matchAll(/Image:\s*([^<\n]+)/g));
-  return uniqueTitles(matches.map((match) => cleanMarketTitle(match[1] ?? ""))).slice(0, 10);
+  return uniqueTitles(matches.map((match) => cleanMarketTitle(match[1] ?? "")))
+    .slice(0, 10)
+    .map((title) => ({ title }));
 }
 
 function extractSteamEntries(html: string) {
@@ -164,33 +286,77 @@ function extractSteamEntries(html: string) {
   ).slice(0, 10);
 }
 
-async function fetchHtmlTitles(
-  url: string,
-  extractor: (html: string) => string[],
-  fallback: string[]
-) {
+function g2aApiCredentials() {
+  const hash = process.env.G2A_API_HASH;
+  const apiKey = process.env.G2A_API_KEY;
+  if (!hash || !apiKey) return null;
+
+  return {
+    baseUrl: G2A_API_BASE_URL.replace(/\/$/, ""),
+    authorization: `${hash}, ${apiKey}`,
+  };
+}
+
+function normalizeG2aApiProduct(product: G2aApiProduct): MarketTitleEntry | null {
+  if (!product.name) return null;
+  const normalizedName = product.name.toLowerCase();
+  const isBlocked = g2aBlockedTitleTerms.some((term) => normalizedName.includes(term));
+  if (isBlocked) return null;
+
+  const isGame =
+    !product.categories ||
+    product.categories.length === 0 ||
+    product.categories.some((category) => category.name?.toLowerCase() === "games" || category.id === 189);
+
+  if (!isGame) return null;
+  if (typeof product.minPrice !== "number" || product.minPrice <= 0) return null;
+
+  return {
+    title: cleanMarketTitle(product.name),
+    image: product.coverImage ?? product.smallImage ?? product.thumbnail ?? null,
+    platform: product.platform || "PC / Marketplace",
+    price: parsePrice(product.minPrice),
+    currency: "EUR",
+    productId: product.id ?? null,
+  };
+}
+
+async function fetchG2aApiEntries(page: number, fallbackUrl: string, fallback: string[]) {
+  const credentials = g2aApiCredentials();
+  if (!credentials) {
+    return fetchHtmlEntries(fallbackUrl, extractG2aEntries, fallback);
+  }
+
   try {
-    const response = await fetch(url, {
+    const params = new URLSearchParams({
+      page: String(page),
+      min_qty: "1",
+    });
+    const response = await fetch(`${credentials.baseUrl}/v1/products?${params}`, {
       headers: {
-        "accept-language": "en-US,en;q=0.9",
-        "user-agent": "GameZoneMarketPulse/1.0",
+        accept: "application/json",
+        authorization: credentials.authorization,
       },
       next: { revalidate: MARKET_PULSE_CACHE_SECONDS },
       signal: AbortSignal.timeout(8000),
     });
 
-    if (!response.ok) throw new Error(`Market pulse responded with ${response.status}`);
+    if (!response.ok) throw new Error(`G2A API responded with ${response.status}`);
 
-    const titles = extractor(await response.text());
+    const payload = (await response.json()) as G2aApiProductsResponse;
+    const entries = uniqueEntries(
+      (payload.docs ?? [])
+        .filter((product) => typeof product.qty !== "number" || product.qty > 0)
+        .map(normalizeG2aApiProduct)
+        .filter((entry): entry is MarketTitleEntry => Boolean(entry))
+    ).slice(0, 10);
+
     return {
-      fallbackUsed: titles.length === 0,
-      titles: titles.length > 0 ? titles : fallback,
+      fallbackUsed: entries.length === 0,
+      entries: entries.length > 0 ? entries : fallback.map((title) => ({ title })),
     };
   } catch {
-    return {
-      fallbackUsed: true,
-      titles: fallback,
-    };
+    return fetchHtmlEntries(fallbackUrl, extractG2aEntries, fallback);
   }
 }
 
@@ -291,20 +457,22 @@ function createPulseItems(input: {
   return input.entries.map((entry, index) => {
     const title = entry.title;
     const match = findBestCatalogMatch(input.products, title);
-    const product = match?.product;
+    const product = match && match.matchScore >= CATALOG_MATCH_SYNC_SCORE ? match.product : null;
     const steamPrice = entry.steamAppId ? input.steamPrices?.get(entry.steamAppId) : null;
 
     return {
       rank: index + 1,
       title,
-      image: product?.coverImage ?? steamPrice?.image ?? fallbackImage(input.products, index),
-      platform: product?.platform ?? "PC / Marketplace",
+      image: product?.coverImage ?? entry.image ?? steamPrice?.image ?? fallbackImage(input.products, index),
+      platform: entry.platform ?? product?.platform ?? "PC / Marketplace",
       signal: input.signal,
       source: input.source,
       sourceUrl: input.sourceUrl,
       catalogStatus: product ? "En catalogo" : "Oportunidad de inventario",
-      catalogMatch: createCatalogMatch(product, match?.matchScore ?? 0),
+      catalogMatch: createCatalogMatch(product, product ? match?.matchScore ?? 0 : 0),
       gameZonePrice: product ? computeDiscountedPrice(product.priceOriginal, product.discountPercent) : null,
+      g2aPrice: input.source === "G2A" ? (entry.price ?? null) : null,
+      g2aCurrency: input.source === "G2A" ? (entry.currency ?? null) : null,
       steamAppId: entry.steamAppId ?? null,
       steamPrice: steamPrice?.price ?? null,
       steamCurrency: steamPrice?.currency ?? null,
@@ -317,11 +485,11 @@ export async function listMarketPulse() {
   const products = await listActiveProducts();
   const [g2aPopular, g2aBestsellers, steamTopSellers, steamMostPlayed, rawgTrending] =
     await Promise.all([
-      fetchHtmlTitles(G2A_POPULAR_URL, extractG2aTitles, g2aPopularSnapshot),
-      fetchHtmlTitles(G2A_BESTSELLERS_URL, extractG2aTitles, g2aBestsellerSnapshot),
+      fetchG2aApiEntries(1, G2A_POPULAR_URL, g2aPopularSnapshot),
+      fetchG2aApiEntries(2, G2A_BESTSELLERS_URL, g2aBestsellerSnapshot),
       fetchHtmlEntries(STEAM_TOP_SELLERS_URL, extractSteamEntries, steamTopSellerSnapshot),
       fetchHtmlEntries(STEAM_MOST_PLAYED_URL, extractSteamEntries, steamMostPlayedSnapshot),
-    listMarketTrendingGames(10),
+      listMarketTrendingGames(10),
     ]);
   const [steamTopSellerPrices, steamMostPlayedPrices] = await Promise.all([
     fetchSteamPrices(steamTopSellers.entries),
@@ -342,6 +510,8 @@ export async function listMarketPulse() {
       item.catalogMatch.priceOriginal !== null && item.catalogMatch.discountPercent !== null
         ? computeDiscountedPrice(item.catalogMatch.priceOriginal, item.catalogMatch.discountPercent)
         : null,
+    g2aPrice: null,
+    g2aCurrency: null,
     steamAppId: null,
     steamPrice: null,
     steamCurrency: null,
@@ -364,7 +534,7 @@ export async function listMarketPulse() {
         signal: "Ranking publico de marketplace",
         fallbackUsed: g2aPopular.fallbackUsed,
         items: createPulseItems({
-          entries: g2aPopular.titles.map((title) => ({ title })),
+          entries: g2aPopular.entries,
           products,
           source: "G2A",
           sourceUrl: G2A_POPULAR_URL,
@@ -379,7 +549,7 @@ export async function listMarketPulse() {
         signal: "Bestsellers de G2A",
         fallbackUsed: g2aBestsellers.fallbackUsed,
         items: createPulseItems({
-          entries: g2aBestsellers.titles.map((title) => ({ title })),
+          entries: g2aBestsellers.entries,
           products,
           source: "G2A",
           sourceUrl: G2A_BESTSELLERS_URL,

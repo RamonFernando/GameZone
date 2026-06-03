@@ -10,10 +10,14 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  const sync = await syncProductsFromMarketPulse();
+  const { searchParams } = new URL(request.url);
+  const dryRun = searchParams.get("dryRun") === "1";
+  const sync = await syncProductsFromMarketPulse({ dryRun });
   const response = NextResponse.json(
     {
-      message: "Productos sincronizados desde pulso de mercado.",
+      message: dryRun
+        ? "Previsualizacion de sincronizacion de mercado."
+        : "Productos sincronizados desde pulso de mercado.",
       sync,
     },
     { status: 200 }
