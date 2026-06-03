@@ -7,6 +7,7 @@ import {
 
 const CHEAPSHARK_DEALS_URL = "https://www.cheapshark.com/api/1.0/deals";
 const CHEAPSHARK_REDIRECT_URL = "https://www.cheapshark.com/redirect";
+export const CHEAPSHARK_CACHE_SECONDS = 1800;
 
 export type MarketDeal = {
   title: string;
@@ -59,7 +60,7 @@ export async function fetchCheapSharkDealForProduct(product: StoreProduct) {
   });
 
   const response = await fetch(`${CHEAPSHARK_DEALS_URL}?${params}`, {
-    next: { revalidate: 1800 },
+    next: { revalidate: CHEAPSHARK_CACHE_SECONDS },
     signal: AbortSignal.timeout(8000),
   });
 

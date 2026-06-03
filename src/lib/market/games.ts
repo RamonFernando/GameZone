@@ -2,6 +2,7 @@ import { type StoreProduct, getActiveProductBySlug, listActiveProducts } from "@
 import { createCatalogMatch, type MarketCatalogMatch } from "@/lib/market/catalog-match";
 
 const RAWG_BASE_URL = "https://api.rawg.io/api";
+export const RAWG_METADATA_CACHE_SECONDS = 3600;
 
 type RawgGame = {
   id?: number;
@@ -31,6 +32,12 @@ type RawgRequirements = {
 
 type RawgSearchResponse = {
   results?: RawgGame[];
+};
+
+export type MarketGameMetadataResult = {
+  source: "gamezone" | "rawg";
+  fallbackUsed: boolean;
+  game: MarketGameMetadata;
 };
 
 export type MarketGameMetadata = {
@@ -103,7 +110,7 @@ async function rawgFetch<T>(path: string, params: Record<string, string | number
   });
 
   const response = await fetch(url, {
-    next: { revalidate: 3600 },
+    next: { revalidate: RAWG_METADATA_CACHE_SECONDS },
     signal: AbortSignal.timeout(8000),
   });
 
@@ -184,9 +191,15 @@ export async function getMarketGameMetadata(slug: string) {
 
   try {
     const rawg = await findRawgGame(product);
-    if (!rawg?.id) return fallback;
+    if (!rawg?.id) {
+      return {
+        source: "gamezone",
+        fallbackUsed: true,
+        game: fallback,
+      } satisfies MarketGameMetadataResult;
+    }
 
-    return {
+    const game = {
       title: rawg.name ?? fallback.title,
       slug: product.slug,
       cover: product.coverImage,
@@ -211,8 +224,18 @@ export async function getMarketGameMetadata(slug: string) {
       updatedAt: new Date().toISOString(),
       catalogMatch: createCatalogMatch(product, 100, "RAWG"),
     } satisfies MarketGameMetadata;
+
+    return {
+      source: "rawg",
+      fallbackUsed: false,
+      game,
+    } satisfies MarketGameMetadataResult;
   } catch {
-    return fallback;
+    return {
+      source: "gamezone",
+      fallbackUsed: true,
+      game: fallback,
+    } satisfies MarketGameMetadataResult;
   }
 }
 

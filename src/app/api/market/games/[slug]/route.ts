@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { getMarketGameMetadata } from "@/lib/market/games";
+import { getMarketGameMetadata, RAWG_METADATA_CACHE_SECONDS } from "@/lib/market/games";
+import { createMarketMeta } from "@/lib/market/response";
 
 export async function GET(_request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug: routeSlug } = await context.params;
@@ -14,9 +15,9 @@ export async function GET(_request: Request, context: { params: Promise<{ slug: 
     );
   }
 
-  const game = await getMarketGameMetadata(slug);
+  const result = await getMarketGameMetadata(slug);
 
-  if (!game) {
+  if (!result) {
     return NextResponse.json(
       { message: "Juego no encontrado.", code: "MARKET_GAME_NOT_FOUND" },
       { status: 404 }
@@ -26,8 +27,13 @@ export async function GET(_request: Request, context: { params: Promise<{ slug: 
   return NextResponse.json(
     {
       message: "Metadata de juego cargada.",
-      source: game.source,
-      game,
+      source: result.source,
+      meta: createMarketMeta({
+        externalSource: "RAWG",
+        fallbackUsed: result.fallbackUsed,
+        cachedForSeconds: RAWG_METADATA_CACHE_SECONDS,
+      }),
+      game: result.game,
     },
     { status: 200 }
   );

@@ -265,6 +265,24 @@ Para que sirve:
 - Devuelve `catalogMatch` consistente en deals, metadata y tendencias.
 - Expone senales preparadas para recomendaciones: `priceSignal`, `trendSignal` y `metadataSignal`.
 
+### Fallback y cache
+
+Todas las rutas de market devuelven un bloque `meta`:
+
+```json
+{
+  "externalSource": "RAWG",
+  "fallbackUsed": false,
+  "cachedForSeconds": 3600
+}
+```
+
+Para que sirve:
+
+- `externalSource`: indica la fuente externa principal (`CheapShark`, `RAWG` o `GameZone`).
+- `fallbackUsed`: indica si la respuesta uso fallback local.
+- `cachedForSeconds`: indica durante cuantos segundos se cachea el fetch externo.
+
 ## Comando unico de recuperacion (Windows)
 
 Si vuelve a aparecer un error de runtime en desarrollo como `components.ComponentMod.handler is not a function`, ejecuta este comando:

@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { listMarketTrendingGames } from "@/lib/market/trending";
+import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/lib/market/trending";
+import { createMarketMeta } from "@/lib/market/response";
 
 function parseLimit(request: Request) {
   const url = new URL(request.url);
@@ -13,12 +14,17 @@ function parseLimit(request: Request) {
 
 export async function GET(request: Request) {
   const limit = parseLimit(request);
-  const { source, trending } = await listMarketTrendingGames(limit);
+  const { source, fallbackUsed, trending } = await listMarketTrendingGames(limit);
 
   return NextResponse.json(
     {
       message: "Tendencias de mercado cargadas.",
       source,
+      meta: createMarketMeta({
+        externalSource: "RAWG",
+        fallbackUsed,
+        cachedForSeconds: RAWG_TRENDING_CACHE_SECONDS,
+      }),
       trending,
     },
     { status: 200 }

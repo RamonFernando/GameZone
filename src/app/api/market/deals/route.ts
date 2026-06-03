@@ -3,10 +3,12 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { listActiveProducts } from "@/lib/products";
 import {
+  CHEAPSHARK_CACHE_SECONDS,
   createCatalogFallbackDeal,
   fetchCheapSharkDealForProduct,
   type MarketDeal,
 } from "@/lib/market/deals";
+import { createMarketMeta } from "@/lib/market/response";
 
 function parseLimit(request: Request) {
   const url = new URL(request.url);
@@ -43,6 +45,11 @@ export async function GET(request: Request) {
         ? "Ofertas cargadas con fallback de catalogo."
         : "Ofertas de mercado cargadas.",
       source: usedFallback ? "cheapshark+gamezone" : "cheapshark",
+      meta: createMarketMeta({
+        externalSource: "CheapShark",
+        fallbackUsed: usedFallback || fallbackDeals.length > 0,
+        cachedForSeconds: CHEAPSHARK_CACHE_SECONDS,
+      }),
       deals: [...normalizedDeals, ...fallbackDeals],
     },
     { status: 200 }

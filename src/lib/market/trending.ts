@@ -6,6 +6,7 @@ import {
 } from "@/lib/market/catalog-match";
 
 const RAWG_BASE_URL = "https://api.rawg.io/api";
+export const RAWG_TRENDING_CACHE_SECONDS = 3600;
 
 type RawgTrendingGame = {
   id?: number;
@@ -71,7 +72,7 @@ async function rawgFetchTrending() {
   url.searchParams.set("page_size", "12");
 
   const response = await fetch(url, {
-    next: { revalidate: 3600 },
+    next: { revalidate: RAWG_TRENDING_CACHE_SECONDS },
     signal: AbortSignal.timeout(8000),
   });
 
@@ -106,6 +107,7 @@ export async function listMarketTrendingGames(limit = 3) {
     if (rawgGames.length === 0) {
       return {
         source: "gamezone",
+        fallbackUsed: true,
         trending: createCatalogFallbackTrending(products, safeLimit),
       };
     }
@@ -129,11 +131,13 @@ export async function listMarketTrendingGames(limit = 3) {
 
     return {
       source: "rawg",
+      fallbackUsed: false,
       trending,
     };
   } catch {
     return {
       source: "gamezone-fallback",
+      fallbackUsed: true,
       trending: createCatalogFallbackTrending(products, safeLimit),
     };
   }

@@ -130,7 +130,7 @@ Para recomendaciones:
 6. Conectar metadata con RAWG o IGDB. Hecho con RAWG y fallback GameZone.
 7. Conectar tendencias con Steam, RAWG, IGDB o una combinacion. Hecho con RAWG y fallback GameZone.
 8. Cruzar los datos externos con el catalogo de GameZone. Hecho con helper comun `catalog-match`.
-9. Anadir fallback y cache para que la web no dependa totalmente de APIs externas.
+9. Anadir fallback y cache para que la web no dependa totalmente de APIs externas. Hecho con `meta` comun.
 10. Preparar recomendaciones con datos de precio, popularidad y catalogo.
 11. Pulir UI, responsive, estados de carga y rendimiento.
 
@@ -149,6 +149,8 @@ Para recomendaciones:
 - `MarketIntelligenceSections` ya consume `/api/market/trending` y reemplaza los mocks de tendencias.
 - Creado `src/lib/market/catalog-match.ts` para unificar el cruce entre datos externos y productos GameZone.
 - `deals`, `metadata` y `trending` devuelven `catalogMatch` con `matched`, `matchScore`, `slug`, `productId`, `priceSignal`, `trendSignal` y `metadataSignal`.
+- Creado `src/lib/market/response.ts` para estandarizar `meta.externalSource`, `meta.fallbackUsed` y `meta.cachedForSeconds`.
+- Las rutas de market declaran cache y fallback de forma consistente.
 
 ## Pendiente tecnico antes de seguir
 
