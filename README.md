@@ -266,6 +266,59 @@ Para que sirve:
 - Usa cache y snapshots de respaldo si una fuente publica bloquea o cambia el HTML.
 - `MarketIntelligenceSections` ya consume esta ruta en el tablero Market Intelligence v2.
 
+#### G2A Integration API
+
+G2A se consulta mediante la Integration API con cabecera:
+
+```text
+Authorization: G2A_API_HASH, G2A_API_KEY
+```
+
+Variables necesarias en `.env`:
+
+```env
+G2A_API_BASE_URL=https://sandboxapi.g2a.com
+G2A_API_HASH=tu_client_id_o_hash
+G2A_API_KEY=tu_api_key
+```
+
+Notas:
+
+- El sandbox sirve para probar integracion, pero devuelve productos de prueba.
+- Para catalogo real hay que usar credenciales de produccion.
+- No subas `.env` al repositorio.
+- Si las credenciales quedan expuestas, rotalas antes de pasar a produccion.
+
+La capa de G2A filtra productos no deseados como random keys, gift cards, cash cards,
+wallets, accounts, bundles/packs y regiones raras antes de alimentar las cards o la BD.
+
+### Sincronizacion de productos desde mercado
+
+Endpoint admin:
+
+```text
+POST /api/admin/products/sync-market
+POST /api/admin/products/sync-market?dryRun=1
+```
+
+Para que sirve:
+
+- `dryRun=1` previsualiza creados, actualizados y omitidos sin escribir en BD.
+- Sin `dryRun`, actualiza productos existentes y crea oportunidades nuevas.
+- G2A solo actualiza un producto existente si el match de catalogo es fuerte (`matchScore >= 80`).
+- Si el match es debil, se crea/omite por slug para evitar cruces falsos.
+
+Tambien hay scripts locales:
+
+```bash
+npm.cmd run market:sync:dry
+npm.cmd run market:sync
+```
+
+- `market:sync:dry`: previsualiza sincronizacion G2A sin escribir.
+- `market:sync`: escribe en la BD local usando los datos filtrados de G2A.
+- Ambos scripts esperan el servidor dev levantado, porque consumen `GET /api/market/pulse`.
+
 ### Cruce con catalogo GameZone
 
 Las rutas de mercado comparten una capa de matching en:
