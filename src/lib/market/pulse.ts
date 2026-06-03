@@ -33,14 +33,54 @@ const G2A_BESTSELLERS_URL = "https://www.g2a.com/top-list/best-selling-games/";
 const STEAM_TOP_SELLERS_URL = "https://steamdb.info/stats/globaltopsellers/";
 const STEAM_MOST_PLAYED_URL = "https://steamdb.info/charts/";
 
-const g2aPopularSnapshot = ["Forza Horizon 6", "Minecraft: Java & Bedrock Edition", "Red Dead Redemption 2"];
+const g2aPopularSnapshot = [
+  "Forza Horizon 6",
+  "Minecraft: Java & Bedrock Edition",
+  "Red Dead Redemption 2",
+  "Grand Theft Auto V Enhanced",
+  "Elden Ring",
+  "Skyrim Special Edition",
+  "Cyberpunk 2077",
+  "God of War Ragnarok",
+  "Resident Evil 4 Remake",
+  "Hogwarts Legacy",
+];
 const g2aBestsellerSnapshot = [
   "Minecraft Java Edition",
   "The Elder Scrolls V: Skyrim Special Edition",
   "Grand Theft Auto V Enhanced",
+  "Elden Ring",
+  "Red Dead Redemption 2",
+  "Forza Horizon 6",
+  "Call of Duty Black Ops 6",
+  "Cyberpunk 2077",
+  "F1 24",
+  "Hogwarts Legacy",
 ];
-const steamTopSellerSnapshot = ["Counter-Strike 2", "Forza Horizon 6", "Apex Legends"];
-const steamMostPlayedSnapshot = ["Counter-Strike 2", "PUBG: BATTLEGROUNDS", "Apex Legends"];
+const steamTopSellerSnapshot = [
+  "Counter-Strike 2",
+  "Forza Horizon 6",
+  "Apex Legends",
+  "Path of Exile 2",
+  "007 First Light",
+  "Rainbow Six Siege",
+  "Fatekeeper",
+  "Paralives",
+  "Marathon",
+  "Subnautica 2",
+];
+const steamMostPlayedSnapshot = [
+  "Counter-Strike 2",
+  "PUBG: BATTLEGROUNDS",
+  "Apex Legends",
+  "Dota 2",
+  "Baldur's Gate 3",
+  "Grand Theft Auto V Enhanced",
+  "Marvel Rivals",
+  "Rust",
+  "Destiny 2",
+  "Elden Ring",
+];
 
 function fallbackImage(products: StoreProduct[], index: number) {
   return products[index % products.length]?.coverImage ?? "/games_data/Hogwarts Legacy/hogwarts-legacy-cover.jpg";
@@ -66,12 +106,12 @@ function uniqueTitles(titles: string[]) {
 
 function extractG2aTitles(html: string) {
   const matches = Array.from(html.matchAll(/Image:\s*([^<\n]+)/g));
-  return uniqueTitles(matches.map((match) => cleanMarketTitle(match[1] ?? ""))).slice(0, 3);
+  return uniqueTitles(matches.map((match) => cleanMarketTitle(match[1] ?? ""))).slice(0, 10);
 }
 
 function extractSteamTitles(html: string) {
   const matches = Array.from(html.matchAll(/href="\/app\/\d+\/[^"]*">([^<]+)<\/a>/g));
-  return uniqueTitles(matches.map((match) => cleanMarketTitle(match[1] ?? ""))).slice(0, 3);
+  return uniqueTitles(matches.map((match) => cleanMarketTitle(match[1] ?? ""))).slice(0, 10);
 }
 
 async function fetchHtmlTitles(
@@ -137,7 +177,7 @@ export async function listMarketPulse() {
       fetchHtmlTitles(G2A_BESTSELLERS_URL, extractG2aTitles, g2aBestsellerSnapshot),
       fetchHtmlTitles(STEAM_TOP_SELLERS_URL, extractSteamTitles, steamTopSellerSnapshot),
       fetchHtmlTitles(STEAM_MOST_PLAYED_URL, extractSteamTitles, steamMostPlayedSnapshot),
-      listMarketTrendingGames(3),
+    listMarketTrendingGames(10),
     ]);
 
   const rawgItems = rawgTrending.trending.map((item) => ({

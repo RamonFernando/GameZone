@@ -291,6 +291,242 @@ function formatEuro(value: number) {
   });
 }
 
+const PULSE_ROTATE_MS = 8000;
+
+function MarketPulseCarousel({
+  section,
+  variant = "hero",
+  thumbCount = 5,
+}: {
+  section: MarketPulseSection;
+  variant?: "hero" | "compact";
+  thumbCount?: 3 | 5;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [thumbsEntering, setThumbsEntering] = useState(false);
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setThumbsEntering(false);
+  }, [section.id, section.items.length]);
+
+  useEffect(() => {
+    if (variant === "compact") {
+      return;
+    }
+
+    if (section.items.length < 2) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((index) => (index + 1) % section.items.length);
+      setThumbsEntering(true);
+    }, PULSE_ROTATE_MS);
+
+    return () => window.clearInterval(timer);
+  }, [section.id, section.items.length, variant]);
+
+  useEffect(() => {
+    if (!thumbsEntering) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setThumbsEntering(false);
+    }, 600);
+
+    return () => window.clearTimeout(timer);
+  }, [thumbsEntering]);
+
+  const active = section.items[activeIndex] ?? section.items[0];
+  const visibleThumbs = useMemo(() => {
+    if (section.items.length === 0) {
+      return [];
+    }
+
+    const positions =
+      thumbCount === 3
+        ? ([
+            { name: "left", offset: -1 },
+            { name: "center", offset: 0 },
+            { name: "right", offset: 1 },
+          ] as const)
+        : ([
+            { name: "far-left", offset: -2 },
+            { name: "left", offset: -1 },
+            { name: "center", offset: 0 },
+            { name: "right", offset: 1 },
+            { name: "far-right", offset: 2 },
+          ] as const);
+
+    return positions.map(({ name, offset }) => {
+      const realIndex = (activeIndex + offset + section.items.length) % section.items.length;
+
+      return {
+        ...section.items[realIndex],
+        position: name,
+        realIndex,
+      };
+    });
+  }, [activeIndex, section.items, thumbCount]);
+  const [heroLayers, setHeroLayers] = useState<{
+    current: string;
+    previous: string;
+    animate: boolean;
+  }>({
+    current: active?.image ?? "",
+    previous: "",
+    animate: true,
+  });
+
+  useEffect(() => {
+    if (variant !== "hero" || !active) {
+      return;
+    }
+
+    let cancelled = false;
+
+    setHeroLayers((current) => ({
+      current: active.image,
+      previous: current.current,
+      animate: false,
+    }));
+
+    const enterTimer = window.setTimeout(() => {
+      if (cancelled) return;
+      setHeroLayers((current) => ({
+        ...current,
+        animate: true,
+      }));
+    }, 16);
+
+    const cleanupTimer = window.setTimeout(() => {
+      if (cancelled) return;
+      setHeroLayers((current) => ({
+        current: current.current,
+        previous: "",
+        animate: true,
+      }));
+    }, 520);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(enterTimer);
+      window.clearTimeout(cleanupTimer);
+    };
+  }, [active?.image, variant]);
+
+  if (!active) {
+    return null;
+  }
+
+  if (variant === "compact") {
+    const compactCount = Math.min(4, section.items.length);
+    const centeredItems = Array.from({ length: compactCount }, (_, offset) => {
+      const realIndex = (activeIndex + offset) % section.items.length;
+      return { ...section.items[realIndex], realIndex };
+    });
+
+    return (
+      <article className="market-pulse-carousel market-pulse-carousel--compact">
+        <div className="market-pulse-carousel__compact-strip" aria-label={`${section.title} cards`}>
+          {centeredItems.map((game) => (
+            <article
+              key={`${section.id}-${game.rank}-${game.title}`}
+              className="market-pulse-compact-card"
+            >
+              <span className="market-pulse-compact-card__media">
+                <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
+              </span>
+              <span className="market-pulse-compact-card__copy">
+                <strong>{game.title}</strong>
+                <small>{game.platform}</small>
+              </span>
+            </article>
+          ))}
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="market-pulse-carousel">
+      <div className="market-pulse-carousel__hero">
+        {heroLayers.previous ? (
+          <div className="market-pulse-carousel__media market-pulse-carousel__media--previous is-visible">
+            <Image src={heroLayers.previous} alt="" fill sizes="(min-width: 1280px) 1200px, 100vw" />
+          </div>
+        ) : null}
+        <div
+          className={`market-pulse-carousel__media market-pulse-carousel__media--current${
+            heroLayers.animate ? " is-visible" : ""
+          }`}
+        >
+          <Image
+            src={heroLayers.current || active.image}
+            alt=""
+            fill
+            sizes="(min-width: 1280px) 1200px, 100vw"
+          />
+        </div>
+        <div className="market-pulse-carousel__overlay">
+          <div className="market-pulse-carousel__topline">
+            <span>{section.source}</span>
+            <strong>{active.catalogStatus}</strong>
+          </div>
+          <h4>{active.title}</h4>
+          <p>{active.signal}</p>
+          <div className="market-pulse-carousel__meta">
+            <span>{active.platform}</span>
+            <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="market-pulse-carousel__thumbs-wrap">
+        <div
+          className={
+            "market-pulse-carousel__thumbs market-pulse-carousel__thumbs--slider" +
+            (thumbCount === 3 ? " market-pulse-carousel__thumbs--three" : "") +
+            (thumbsEntering && thumbCount === 5 ? " is-entering-left" : "")
+          }
+          aria-label={`${section.title} thumbnails`}
+        >
+          {visibleThumbs.map((game) => {
+            const isActiveThumb = game.realIndex === activeIndex;
+
+            return (
+              <button
+                key={`${section.id}-${game.position}-${game.rank}-${game.title}`}
+                type="button"
+                className={
+                  `market-pulse-thumb market-pulse-thumb--${game.position}` +
+                  (isActiveThumb ? " is-active" : "")
+                }
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  setActiveIndex(game.realIndex);
+                  setThumbsEntering(true);
+                }}
+                aria-label={`Mostrar ${game.title}`}
+              >
+                <span className="market-pulse-thumb__media">
+                  <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 240px, 45vw" />
+                </span>
+                <span className="market-pulse-thumb__copy">
+                  <strong>{game.title}</strong>
+                  <small>{game.platform}</small>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function MarketIntelligenceSections() {
   const [marketDeals, setMarketDeals] = useState<DealPreview[]>(fallbackDeals);
   const [marketPulseSections, setMarketPulseSections] =
@@ -449,6 +685,10 @@ export function MarketIntelligenceSections() {
     return recommendationsSource.includes("rawg") ? "Catalogo + RAWG" : "Catalogo GameZone";
   }, [isLoadingRecommendations, recommendationsError, recommendationsSource]);
 
+  const g2aSections = marketPulseSections.filter((section) => section.source === "G2A");
+  const steamSections = marketPulseSections.filter((section) => section.source === "Steam");
+  const rawgSections = marketPulseSections.filter((section) => section.source === "RAWG");
+
   return (
     <div className="market-intel-stack">
       <section className="market-intel market-intel--intro" aria-labelledby="market-intel-title">
@@ -499,39 +739,84 @@ export function MarketIntelligenceSections() {
           </div>
         </div>
 
-        <div className="market-pulse-grid">
-          {marketPulseSections.map((section) => (
-            <article className="market-pulse-panel" key={section.id}>
-              <div className="market-pulse-panel__head">
-                <span>{section.source}</span>
-                <div>
-                  <h3>{section.title}</h3>
-                  <p>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</p>
-                </div>
+        <div className="market-pulse-source-stack">
+          <section className="market-pulse-source-panel market-pulse-source-panel--g2a" aria-labelledby="g2a-panel-title">
+            <div className="market-pulse-panel__head">
+              <span>G2A</span>
+              <div>
+                <h3 id="g2a-panel-title">G2A</h3>
+                <p>Populares y mas vendidos</p>
               </div>
+            </div>
 
-              <div className="market-pulse-list">
-                {section.items.map((game) => (
-                  <div className="market-pulse-row" key={`${section.id}-${game.rank}-${game.title}`}>
-                    <div className="market-pulse-cover">
-                      <Image src={game.image} alt="" fill sizes="56px" />
-                    </div>
-                    <div className="market-pulse-body">
-                      <div className="market-pulse-title">
-                        <strong>#{game.rank}</strong>
-                        <h4>{game.title}</h4>
-                      </div>
-                      <p>{game.signal}</p>
-                      <div className="market-pulse-meta">
-                        <span>{game.platform}</span>
-                        <span>{game.catalogStatus}</span>
-                      </div>
-                    </div>
+            <div className="market-pulse-section-stack">
+              {g2aSections.map((section) => (
+                <article
+                  className={
+                    "market-pulse-subsection" +
+                    (section.title.toLowerCase().includes("mas vendidos")
+                      ? " market-pulse-subsection--bestsellers"
+                      : " market-pulse-subsection--featured")
+                  }
+                  key={section.id}
+                >
+                  <div className="market-pulse-subsection__head">
+                    <h4>{section.title}</h4>
+                    <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
-                ))}
+                  <MarketPulseCarousel
+                    section={section}
+                    variant={section.title.toLowerCase().includes("mas vendidos") ? "compact" : "hero"}
+                    thumbCount={5}
+                  />
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="market-pulse-source-panel" aria-labelledby="steam-panel-title">
+            <div className="market-pulse-panel__head">
+              <span>Steam</span>
+              <div>
+                <h3 id="steam-panel-title">Steam</h3>
+                <p>Top sellers y mas jugados</p>
               </div>
-            </article>
-          ))}
+            </div>
+
+            <div className="market-pulse-section-stack">
+              {steamSections.map((section) => (
+                <article className="market-pulse-subsection" key={section.id}>
+                  <div className="market-pulse-subsection__head">
+                    <h4>{section.title}</h4>
+                    <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
+                  </div>
+                  <MarketPulseCarousel section={section} />
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="market-pulse-source-panel" aria-labelledby="rawg-panel-title">
+            <div className="market-pulse-panel__head">
+              <span>RAWG</span>
+              <div>
+                <h3 id="rawg-panel-title">RAWG</h3>
+                <p>Radar de popularidad y metadata</p>
+              </div>
+            </div>
+
+            <div className="market-pulse-section-stack">
+              {rawgSections.map((section) => (
+                <article className="market-pulse-subsection" key={section.id}>
+                  <div className="market-pulse-subsection__head">
+                    <h4>{section.title}</h4>
+                    <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
+                  </div>
+                  <MarketPulseCarousel section={section} />
+                </article>
+              ))}
+            </div>
+          </section>
         </div>
       </section>
 
