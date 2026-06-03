@@ -198,7 +198,7 @@ export function AdminOrdersPanel() {
 
       {!isLoading && !errorMessage && orders.length > 0 ? (
         <div style={{ overflowX: "auto", border: "1px solid rgba(148,163,184,0.25)", borderRadius: 12 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 920, fontSize: "0.82rem" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1080, fontSize: "0.82rem" }}>
             <thead>
               <tr>
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>Pedido</th>
@@ -208,7 +208,7 @@ export function AdminOrdersPanel() {
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>Fecha</th>
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>Referencia</th>
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>Reembolso</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Items</th>
+                <th style={{ textAlign: "left", padding: "8px 10px", minWidth: 260 }}>Items</th>
                 <th style={{ textAlign: "left", padding: "8px 10px" }}>Acciones</th>
               </tr>
             </thead>
@@ -241,7 +241,7 @@ export function AdminOrdersPanel() {
                       <span className="auth-alt">-</span>
                     )}
                   </td>
-                  <td style={{ padding: "8px 10px", lineHeight: 1.35 }}>
+                  <td style={{ padding: "8px 10px", lineHeight: 1.35, minWidth: 260 }}>
                     {order.items.map((item) => `${item.title} x${item.quantity}`).join(", ")}
                   </td>
                   <td style={{ padding: "8px 10px" }}>

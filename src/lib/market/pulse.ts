@@ -161,6 +161,7 @@ type G2aApiProduct = {
   qty?: number;
   minPrice?: number;
   coverImage?: string;
+  image?: string;
   smallImage?: string;
   thumbnail?: string;
   platform?: string;
@@ -313,12 +314,21 @@ function normalizeG2aApiProduct(product: G2aApiProduct): MarketTitleEntry | null
 
   return {
     title: cleanMarketTitle(product.name),
-    image: product.coverImage ?? product.smallImage ?? product.thumbnail ?? null,
+    image: getBestG2aImage(product),
     platform: product.platform || "PC / Marketplace",
     price: parsePrice(product.minPrice),
     currency: "EUR",
     productId: product.id ?? null,
   };
+}
+
+function enhanceG2aImageUrl(image: string) {
+  return image.replace(/\/images\/(?:58x58|230x336)\//, "/images/600x876/");
+}
+
+function getBestG2aImage(product: G2aApiProduct) {
+  const image = product.coverImage ?? product.image ?? product.smallImage ?? product.thumbnail ?? null;
+  return image ? enhanceG2aImageUrl(image) : null;
 }
 
 async function fetchG2aApiEntries(page: number, fallbackUrl: string, fallback: string[]) {

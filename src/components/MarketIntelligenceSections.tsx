@@ -516,7 +516,14 @@ function MarketPulseCarousel({
       <div className="market-pulse-carousel__hero">
         {heroLayers.previous ? (
           <div className="market-pulse-carousel__media market-pulse-carousel__media--previous is-visible">
-            <Image src={heroLayers.previous} alt="" fill sizes="(min-width: 1280px) 1200px, 100vw" />
+            <Image
+              src={heroLayers.previous}
+              alt=""
+              fill
+              sizes="(min-width: 1280px) 1200px, 100vw"
+              quality={95}
+              unoptimized={section.source === "G2A"}
+            />
           </div>
         ) : null}
         <div
@@ -529,6 +536,8 @@ function MarketPulseCarousel({
             alt=""
             fill
             sizes="(min-width: 1280px) 1200px, 100vw"
+            quality={95}
+            unoptimized={section.source === "G2A"}
           />
         </div>
         <div className="market-pulse-carousel__overlay">
@@ -803,7 +812,7 @@ export function MarketIntelligenceSections() {
             </div>
           </section>
 
-          <section className="market-pulse-source-panel" aria-labelledby="steam-panel-title">
+          <section className="market-pulse-source-panel market-pulse-source-panel--steam" aria-labelledby="steam-panel-title">
             <div className="market-pulse-panel__head">
               <span>Steam</span>
               <div>
