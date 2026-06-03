@@ -24,6 +24,7 @@ Despues se conectan APIs externas mediante rutas internas de Next.js. No se llam
 
 - `/api/market/deals`
 - `/api/market/trending`
+- `/api/market/pulse`
 - `/api/market/games`
 - `/api/market/games/:slug`
 - `/api/recommendations`
@@ -128,10 +129,10 @@ Para recomendaciones:
 4. Conectar primero `/api/market/deals` con CheapShark. Hecho con fallback al catalogo.
 5. Sustituir los mocks de precios por datos reales. Hecho con fallback local.
 6. Conectar metadata con RAWG o IGDB. Hecho con RAWG y fallback GameZone.
-7. Conectar tendencias con Steam, RAWG, IGDB o una combinacion. Hecho con RAWG y fallback GameZone.
+7. Conectar tendencias con Steam, RAWG, IGDB o una combinacion. Hecho con RAWG y ampliado con `/api/market/pulse` para separar G2A, Steam y RAWG.
 8. Cruzar los datos externos con el catalogo de GameZone. Hecho con helper comun `catalog-match`.
 9. Anadir fallback y cache para que la web no dependa totalmente de APIs externas. Hecho con `meta` comun.
-10. Preparar recomendaciones con datos de precio, popularidad y catalogo.
+10. Preparar recomendaciones con datos de precio, popularidad y catalogo. Hecho con `/api/recommendations`.
 11. Pulir UI, responsive, estados de carga y rendimiento.
 
 ## Avance aplicado - 2026-06-03
@@ -151,6 +152,11 @@ Para recomendaciones:
 - `deals`, `metadata` y `trending` devuelven `catalogMatch` con `matched`, `matchScore`, `slug`, `productId`, `priceSignal`, `trendSignal` y `metadataSignal`.
 - Creado `src/lib/market/response.ts` para estandarizar `meta.externalSource`, `meta.fallbackUsed` y `meta.cachedForSeconds`.
 - Las rutas de market declaran cache y fallback de forma consistente.
+- Creada `/api/recommendations` para recomendaciones con `score`, `reason`, `catalogMatch`, `priceSignal`, `trendScore` y `nextAction`.
+- `MarketIntelligenceSections` ya consume `/api/recommendations` y muestra recomendaciones reales con fallback local.
+- Creada `/api/market/pulse` para separar fuentes de tendencia: G2A populares, G2A mas vendidos, Steam top sellers, Steam mas jugados y RAWG radar.
+- `MarketIntelligenceSections` ya consume `/api/market/pulse` y muestra cada fuente en paneles separados con estado de catalogo.
+- La ruta usa cache y snapshots de respaldo cuando G2A o Steam bloquean/cambian el HTML publico.
 
 ## Pendiente tecnico antes de seguir
 
@@ -158,12 +164,12 @@ Revisar rendimiento del servidor de desarrollo:
 
 - `.next/dev/logs/next-development.log` tenia errores repetidos del import anterior de `MarketIntelligenceSections`.
 - `node_modules/.prisma/client` tenia archivos temporales `query_engine-windows.dll.node.tmp...`.
-- `npm run build` fallo con `EPERM` al renombrar el DLL de Prisma. Resuelto parando el proceso que ocupaba `localhost:3000` antes del build.
+- `npm run build` puede fallar con `EPERM` al renombrar el DLL de Prisma si el servidor de desarrollo mantiene bloqueado `node_modules/.prisma/client/query_engine-windows.dll.node`.
 
 Recomendacion para retomar:
 
-1. Parar el servidor de desarrollo. Hecho para liberar Prisma.
-2. Ejecutar `npm run build`. Hecho correctamente.
+1. Parar el servidor de desarrollo para liberar Prisma si aparece `EPERM`.
+2. Ejecutar `npm run build`.
 3. Comprobar `http://localhost:3000`.
 4. Verificar que las secciones cargan sin error.
 5. Conectar `MarketIntelligenceSections` a `/api/market/deals`. Hecho.

@@ -66,4 +66,8 @@ La app base esta sana, pero no todo queda cerrado al 100%.
 - Creada `/api/market/trending` y conectada en `MarketIntelligenceSections` con fallback GameZone.
 - Unificado el cruce con catalogo GameZone en `src/lib/market/catalog-match.ts`.
 - Estandarizado `meta.externalSource`, `meta.fallbackUsed` y `meta.cachedForSeconds` en rutas market.
+- Creada `/api/recommendations` con score, motivo, senales de precio/tendencia y accion siguiente.
+- Conectada `/api/recommendations` a `MarketIntelligenceSections`.
+- Creada `/api/market/pulse` para separar G2A, Steam y RAWG en paneles de mercado.
+- `MarketIntelligenceSections` ya muestra G2A populares, G2A mas vendidos, Steam top sellers, Steam mas jugados y RAWG radar con cruce de catalogo.
 - Validado con `npm run lint`, `npx tsc --noEmit`, `npm run test:unit` y `npm run build`.

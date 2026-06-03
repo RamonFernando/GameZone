@@ -250,6 +250,22 @@ Para que sirve:
 - Si RAWG falla o no hay clave, responde con fallback basado en productos activos de GameZone.
 - `MarketIntelligenceSections` ya consume esta ruta para sustituir los mocks de tendencias.
 
+### Pulso de mercado por fuente
+
+Ruta implementada:
+
+```text
+GET /api/market/pulse
+```
+
+Para que sirve:
+
+- Separa G2A, Steam y RAWG para no mezclar ventas, actividad y metadata.
+- Devuelve G2A populares, G2A mas vendidos, Steam top sellers, Steam mas jugados y RAWG radar.
+- Cruza cada item con el catalogo GameZone y marca `En catalogo` u `Oportunidad de inventario`.
+- Usa cache y snapshots de respaldo si una fuente publica bloquea o cambia el HTML.
+- `MarketIntelligenceSections` ya consume esta ruta en el tablero Market Intelligence v2.
+
 ### Cruce con catalogo GameZone
 
 Las rutas de mercado comparten una capa de matching en:
@@ -282,6 +298,23 @@ Para que sirve:
 - `externalSource`: indica la fuente externa principal (`CheapShark`, `RAWG` o `GameZone`).
 - `fallbackUsed`: indica si la respuesta uso fallback local.
 - `cachedForSeconds`: indica durante cuantos segundos se cachea el fetch externo.
+
+### Recomendaciones
+
+Ruta implementada:
+
+```text
+GET /api/recommendations
+GET /api/recommendations?limit=6
+```
+
+Para que sirve:
+
+- Combina catalogo GameZone, descuentos, popularidad y tendencias.
+- Devuelve `score`, `reason`, `catalogMatch`, `priceSignal`, `trendScore` y `nextAction`.
+- Usa RAWG trending como senal externa cuando esta disponible.
+- Si RAWG falla, sigue recomendando con senales del catalogo local.
+- `MarketIntelligenceSections` ya consume esta ruta y muestra recomendaciones visibles en la home.
 
 ## Comando unico de recuperacion (Windows)
 
