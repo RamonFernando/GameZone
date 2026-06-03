@@ -1,4 +1,9 @@
 import { type StoreProduct, listActiveProducts } from "@/lib/products";
+import {
+  createCatalogMatch,
+  findBestCatalogMatch,
+  type MarketCatalogMatch,
+} from "@/lib/market/catalog-match";
 
 const RAWG_BASE_URL = "https://api.rawg.io/api";
 
@@ -27,39 +32,8 @@ export type MarketTrendingGame = {
   source: string;
   trendScore: number;
   gameZoneMatch: string;
-  catalogMatch: {
-    id: string;
-    slug: string;
-  } | null;
+  catalogMatch: MarketCatalogMatch;
 };
-
-function normalizeTitle(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function scoreTitleMatch(product: StoreProduct, title: string) {
-  const productTitle = normalizeTitle(product.name);
-  const externalTitle = normalizeTitle(title);
-
-  if (!externalTitle) return 0;
-  if (externalTitle === productTitle) return 100;
-  if (externalTitle.includes(productTitle) || productTitle.includes(externalTitle)) return 80;
-
-  const productTerms = new Set(productTitle.split(" ").filter((term) => term.length > 2));
-  return externalTitle
-    .split(" ")
-    .filter((term) => productTerms.has(term) && term.length > 2).length * 10;
-}
-
-function findCatalogMatch(products: StoreProduct[], title: string) {
-  return products
-    .map((product) => ({ product, score: scoreTitleMatch(product, title) }))
-    .filter(({ score }) => score >= 20)
-    .sort((a, b) => b.score - a.score)[0]?.product;
-}
 
 function platformLabel(rawgGame: RawgTrendingGame, catalogProduct: StoreProduct | undefined) {
   const rawgPlatforms = (rawgGame.platforms ?? [])
@@ -118,10 +92,7 @@ function createCatalogFallbackTrending(products: StoreProduct[], limit: number) 
     source: "GameZone catalog",
     trendScore: Math.min(100, Math.round(product.likesCount / 20 + product.discountPercent)),
     gameZoneMatch: "Disponible en catalogo",
-    catalogMatch: {
-      id: product.id,
-      slug: product.slug,
-    },
+    catalogMatch: createCatalogMatch(product),
   })) satisfies MarketTrendingGame[];
 }
 
@@ -140,7 +111,8 @@ export async function listMarketTrendingGames(limit = 3) {
     }
 
     const trending = rawgGames.slice(0, safeLimit).map((rawgGame, index) => {
-      const catalogProduct = findCatalogMatch(products, rawgGame.name ?? "");
+      const catalogMatchResult = findBestCatalogMatch(products, rawgGame.name ?? "");
+      const catalogProduct = catalogMatchResult?.product;
 
       return {
         rank: index + 1,
@@ -151,12 +123,7 @@ export async function listMarketTrendingGames(limit = 3) {
         source: "RAWG trending",
         trendScore: trendScore(rawgGame),
         gameZoneMatch: catalogProduct ? "Disponible en catalogo" : "Sin coincidencia directa",
-        catalogMatch: catalogProduct
-          ? {
-              id: catalogProduct.id,
-              slug: catalogProduct.slug,
-            }
-          : null,
+        catalogMatch: createCatalogMatch(catalogProduct, catalogMatchResult?.matchScore ?? 0),
       } satisfies MarketTrendingGame;
     });
 

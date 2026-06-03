@@ -64,4 +64,5 @@ La app base esta sana, pero no todo queda cerrado al 100%.
 - `MarketIntelligenceSections` ya consume `/api/market/deals` y mantiene fallback local si la API no responde.
 - Creada `/api/market/games` y `/api/market/games/:slug` para metadata con RAWG y fallback GameZone.
 - Creada `/api/market/trending` y conectada en `MarketIntelligenceSections` con fallback GameZone.
+- Unificado el cruce con catalogo GameZone en `src/lib/market/catalog-match.ts`.
 - Validado con `npm run lint`, `npx tsc --noEmit`, `npm run test:unit` y `npm run build`.

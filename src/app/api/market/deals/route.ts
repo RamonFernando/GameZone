@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const products = (await listActiveProducts()).slice(0, limit);
   let usedFallback = false;
 
-  const deals = await Promise.all(
+  const deals: Array<MarketDeal | null> = await Promise.all(
     products.map(async (product) => {
       try {
         return await fetchCheapSharkDealForProduct(product);

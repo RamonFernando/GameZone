@@ -1,4 +1,5 @@
 import { type StoreProduct, getActiveProductBySlug, listActiveProducts } from "@/lib/products";
+import { createCatalogMatch, type MarketCatalogMatch } from "@/lib/market/catalog-match";
 
 const RAWG_BASE_URL = "https://api.rawg.io/api";
 
@@ -55,6 +56,7 @@ export type MarketGameMetadata = {
   source: "GameZone" | "RAWG" | "GameZone+RAWG";
   sourceId: string;
   updatedAt: string | null;
+  catalogMatch: MarketCatalogMatch;
 };
 
 function parseJsonList(value: string | null | undefined) {
@@ -155,6 +157,7 @@ export function createCatalogGameMetadata(product: NonNullable<Awaited<ReturnTyp
     source: product.metadataSource === "RAWG" ? "GameZone+RAWG" : "GameZone",
     sourceId: product.rawgId ? `rawg:${product.rawgId}` : `gamezone:${product.slug}`,
     updatedAt: product.metadataUpdatedAt?.toISOString() ?? product.updatedAt.toISOString(),
+    catalogMatch: createCatalogMatch(product, 100, product.metadataSource),
   } satisfies MarketGameMetadata;
 }
 
@@ -169,6 +172,7 @@ export function createCatalogGameSummary(product: StoreProduct) {
     rating: null,
     tags: [] as string[],
     source: "GameZone" as const,
+    catalogMatch: createCatalogMatch(product),
   };
 }
 
@@ -205,6 +209,7 @@ export async function getMarketGameMetadata(slug: string) {
       source: "GameZone+RAWG",
       sourceId: `rawg:${rawg.id}`,
       updatedAt: new Date().toISOString(),
+      catalogMatch: createCatalogMatch(product, 100, "RAWG"),
     } satisfies MarketGameMetadata;
   } catch {
     return fallback;

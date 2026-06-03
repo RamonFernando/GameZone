@@ -1,4 +1,9 @@
 import { computeDiscountedPrice, type StoreProduct } from "@/lib/products";
+import {
+  createCatalogMatch,
+  scoreTitleMatch,
+  type MarketCatalogMatch,
+} from "@/lib/market/catalog-match";
 
 const CHEAPSHARK_DEALS_URL = "https://www.cheapshark.com/api/1.0/deals";
 const CHEAPSHARK_REDIRECT_URL = "https://www.cheapshark.com/redirect";
@@ -13,12 +18,7 @@ export type MarketDeal = {
   saving: number;
   sourceId: string;
   sourceUrl: string;
-  catalogMatch: {
-    id: string;
-    slug: string;
-    priceOriginal: number;
-    discountPercent: number;
-  };
+  catalogMatch: MarketCatalogMatch;
 };
 
 type CheapSharkDeal = {
@@ -36,27 +36,8 @@ function toNumber(value: string | undefined) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function normalizeTitle(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
 function scoreDealMatch(product: StoreProduct, deal: CheapSharkDeal) {
-  const productTitle = normalizeTitle(product.name);
-  const dealTitle = normalizeTitle(deal.title ?? "");
-
-  if (!dealTitle) return 0;
-  if (dealTitle === productTitle) return 100;
-  if (dealTitle.includes(productTitle) || productTitle.includes(dealTitle)) return 80;
-
-  const productTerms = new Set(productTitle.split(" ").filter((term) => term.length > 2));
-  const matchingTerms = dealTitle
-    .split(" ")
-    .filter((term) => productTerms.has(term) && term.length > 2);
-
-  return matchingTerms.length * 10;
+  return scoreTitleMatch(product.name, deal.title ?? "");
 }
 
 function pickBestDeal(product: StoreProduct, deals: CheapSharkDeal[]) {
@@ -107,12 +88,7 @@ export async function fetchCheapSharkDealForProduct(product: StoreProduct) {
     saving,
     sourceId: `cheapshark:${bestDeal.dealID}`,
     sourceUrl: `${CHEAPSHARK_REDIRECT_URL}?dealID=${encodeURIComponent(bestDeal.dealID)}`,
-    catalogMatch: {
-      id: product.id,
-      slug: product.slug,
-      priceOriginal: product.priceOriginal,
-      discountPercent: product.discountPercent,
-    },
+    catalogMatch: createCatalogMatch(product, scoreDealMatch(product, bestDeal)),
   } satisfies MarketDeal;
 }
 
@@ -129,11 +105,6 @@ export function createCatalogFallbackDeal(product: StoreProduct) {
     saving: product.discountPercent,
     sourceId: `gamezone:${product.slug}`,
     sourceUrl: `/games/${product.slug}`,
-    catalogMatch: {
-      id: product.id,
-      slug: product.slug,
-      priceOriginal: product.priceOriginal,
-      discountPercent: product.discountPercent,
-    },
+    catalogMatch: createCatalogMatch(product),
   } satisfies MarketDeal;
 }

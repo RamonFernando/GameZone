@@ -250,6 +250,21 @@ Para que sirve:
 - Si RAWG falla o no hay clave, responde con fallback basado en productos activos de GameZone.
 - `MarketIntelligenceSections` ya consume esta ruta para sustituir los mocks de tendencias.
 
+### Cruce con catalogo GameZone
+
+Las rutas de mercado comparten una capa de matching en:
+
+```text
+src/lib/market/catalog-match.ts
+```
+
+Para que sirve:
+
+- Normaliza titulos externos y productos GameZone.
+- Calcula `matchScore`.
+- Devuelve `catalogMatch` consistente en deals, metadata y tendencias.
+- Expone senales preparadas para recomendaciones: `priceSignal`, `trendSignal` y `metadataSignal`.
+
 ## Comando unico de recuperacion (Windows)
 
 Si vuelve a aparecer un error de runtime en desarrollo como `components.ComponentMod.handler is not a function`, ejecuta este comando:
