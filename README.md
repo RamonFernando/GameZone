@@ -129,6 +129,37 @@ Despues de guardar, recarga la ficha del juego, por ejemplo:
 http://localhost:3000/games/destroy-all-humans-2-reprobed
 ```
 
+### Anadir juegos nuevos
+
+Puedes seguir anadiendo productos nuevos sin metadata RAWG. La ficha funciona con
+los datos basicos del producto:
+
+- nombre
+- slug
+- descripcion corta
+- imagen principal
+- precio
+- plataforma
+- region
+- tienda
+- tipo de producto
+
+La metadata RAWG es opcional. Para enriquecer un juego nuevo, primero prueba el
+emparejamiento sin guardar:
+
+```bash
+npm run enrich:games -- --slug slug-del-juego --dry-run
+```
+
+Si RAWG devuelve el juego correcto, guarda la metadata:
+
+```bash
+npm run enrich:games -- --slug slug-del-juego
+```
+
+Si RAWG devuelve un juego equivocado, agrega un override en
+`scripts/rawg-overrides.json` y repite el `--dry-run`.
+
 ### Overrides de RAWG
 
 Si RAWG devuelve un juego equivocado, usa `scripts/rawg-overrides.json`.

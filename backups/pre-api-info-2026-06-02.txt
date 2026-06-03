@@ -1,0 +1,14 @@
+Backup antes de integrar informacion externa de juegos
+
+Fecha: 2026-06-02
+Commit base: fa4875651b058c58dcedf795793bb9140c644a18
+Rama backup: backup/pre-api-info-2026-06-02
+Etiqueta backup: backup-pre-api-info-2026-06-02
+Base de datos local: backups/dev-pre-api-info-2026-06-02.db
+
+Para volver al codigo de este punto:
+git switch main
+git reset --hard backup-pre-api-info-2026-06-02
+
+Para restaurar la base local:
+Copy-Item -LiteralPath backups/dev-pre-api-info-2026-06-02.db -Destination prisma/dev.db -Force

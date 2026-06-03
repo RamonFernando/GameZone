@@ -84,12 +84,54 @@
   padding: 1.25rem;
 }
 
+.game-detail-media-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .game-detail-media {
   border-radius: 0.9rem;
   overflow: hidden;
   border: 1px solid rgba(31, 41, 55, 0.9);
   position: relative;
   height: 420px;
+}
+
+.game-detail-media-thumbs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(96px, 136px);
+  gap: 0.65rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.1rem 0 0.35rem;
+  scrollbar-width: thin;
+}
+
+.game-detail-media-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border: 2px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.74);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.72;
+  transform: translateY(0);
+  transition: border-color 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
+}
+
+.game-detail-media-thumb:hover,
+.game-detail-media-thumb:focus-visible {
+  border-color: rgba(249, 115, 22, 0.72);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.game-detail-media-thumb--active {
+  border-color: rgba(249, 115, 22, 0.95);
+  opacity: 1;
 }
 
 .game-detail-title {

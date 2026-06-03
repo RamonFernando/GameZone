@@ -61,6 +61,7 @@ export default function GameDetailPage() {
   const [suggestions, setSuggestions] = useState<ProductView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lang, setLang] = useState<"es" | "en">("es");
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
   const slugParam = routeParams?.slug;
   const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
@@ -77,8 +78,8 @@ export default function GameDetailPage() {
     setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
 
-  useEffect(() => {
-    if (!slug) return;
+	  useEffect(() => {
+	    if (!slug) return;
 
     const loadProduct = async () => {
       try {
@@ -100,9 +101,25 @@ export default function GameDetailPage() {
         setIsLoading(false);
       }
     };
+	
+	    void loadProduct();
+	  }, [slug]);
 
-    void loadProduct();
-  }, [slug]);
+  useEffect(() => {
+    setSelectedMediaIndex(0);
+  }, [game?.slug]);
+
+  useEffect(() => {
+    if (!game) return;
+    const mediaCount = [game.backgroundImage || game.coverImage, ...game.screenshots].filter(Boolean).length;
+    if (mediaCount < 2) return;
+
+    const timer = window.setInterval(() => {
+      setSelectedMediaIndex((current) => (current + 1) % mediaCount);
+    }, 6000);
+
+    return () => window.clearInterval(timer);
+  }, [game]);
 
   if (!slug) {
     return (
@@ -135,10 +152,12 @@ export default function GameDetailPage() {
 
   const fallbackDescription =
     (isEnglish ? "Digital purchase of " : "Compra digital de ") + localizedName + ".";
-  const detailDescription = game.longDescription || game.description || fallbackDescription;
-  const releaseDate = formatDate(game.releaseDate, lang);
-  const heroImage = game.backgroundImage || game.coverImage;
-  const tagsToShow = [...game.genres, ...game.platforms].slice(0, 8);
+	  const detailDescription = game.longDescription || game.description || fallbackDescription;
+	  const releaseDate = formatDate(game.releaseDate, lang);
+	  const heroImage = game.backgroundImage || game.coverImage;
+  const mediaImages = Array.from(new Set([heroImage, ...game.screenshots].filter(Boolean)));
+  const selectedMedia = mediaImages[selectedMediaIndex] ?? heroImage;
+	  const tagsToShow = [...game.genres, ...game.platforms].slice(0, 8);
   const specs = [
     { label: isEnglish ? "Platform" : "Plataforma", value: game.platform },
     { label: isEnglish ? "Activation" : "Activacion", value: game.region },
@@ -183,17 +202,46 @@ export default function GameDetailPage() {
     <div className="game-detail-shell">
       <div className="card game-detail-card">
 
-        {/* IMAGEN */}
-        <div className="game-detail-media">
-	          <Image
-	            src={heroImage}
-	            alt={game.name}
-            fill
-            sizes="(max-width: 1024px) 100vw, 960px"
-            quality={100}
-            unoptimized
-            style={{ objectFit: "cover" }}
-          />
+	        {/* IMAGEN */}
+        <div className="game-detail-media-stack">
+          <div className="game-detail-media">
+            <Image
+              src={selectedMedia}
+              alt={game.name}
+              fill
+              sizes="(max-width: 1024px) 100vw, 960px"
+              quality={100}
+              unoptimized
+              style={{ objectFit: "cover" }}
+            />
+          </div>
+
+          {mediaImages.length > 1 ? (
+            <div className="game-detail-media-thumbs" aria-label={isEnglish ? "Game images" : "Imagenes del juego"}>
+              {mediaImages.map((image, index) => (
+                <button
+                  key={image}
+                  type="button"
+                  className={
+                    "game-detail-media-thumb" +
+                    (index === selectedMediaIndex ? " game-detail-media-thumb--active" : "")
+                  }
+                  onClick={() => setSelectedMediaIndex(index)}
+                  aria-label={`${isEnglish ? "Show image" : "Mostrar imagen"} ${index + 1}`}
+                >
+                  <Image
+                    src={image}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    quality={80}
+                    unoptimized
+                    style={{ objectFit: "cover" }}
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {/* INFO */}
@@ -270,54 +318,26 @@ export default function GameDetailPage() {
 
 	      </div>
 
-	      {(game.screenshots.length > 0 || game.requirements || game.website) && (
+	      {(game.requirements || game.website) && (
 	        <section className="game-detail-extra">
-	          {game.screenshots.length > 0 ? (
-	            <div>
-	              <div className="section-header">
-	                <h2 className="section-title">{isEnglish ? "Screenshots" : "Capturas"}</h2>
-	                <p className="section-subtitle">
-	                  {isEnglish ? "Images from the game listing." : "Imagenes de la ficha del juego."}
-	                </p>
-	              </div>
-	              <div className="game-detail-screenshots">
-	                {game.screenshots.slice(0, 4).map((screenshot) => (
-	                  <div key={screenshot} className="game-detail-screenshot">
-	                    <Image
-	                      src={screenshot}
-	                      alt={localizedName}
-	                      fill
-	                      sizes="(max-width: 768px) 100vw, 320px"
-	                      quality={90}
-	                      unoptimized
-	                      style={{ objectFit: "cover" }}
-	                    />
-	                  </div>
-	                ))}
-	              </div>
-	            </div>
-	          ) : null}
-
-	          {(game.requirements || game.website) && (
-	            <div className="card game-detail-info-card">
-	              <h2 className="section-title">
-	                {isEnglish ? "Additional information" : "Informacion adicional"}
-	              </h2>
-	              {game.requirements ? (
-	                <pre className="game-detail-requirements">{game.requirements}</pre>
-	              ) : null}
-	              {game.website ? (
-	                <a
-	                  href={game.website}
-	                  target="_blank"
-	                  rel="noreferrer"
-	                  className="auth-link"
-	                >
-	                  {isEnglish ? "Official website" : "Web oficial"}
-	                </a>
-	              ) : null}
-	            </div>
-	          )}
+	          <div className="card game-detail-info-card">
+	            <h2 className="section-title">
+	              {isEnglish ? "Additional information" : "Informacion adicional"}
+	            </h2>
+	            {game.requirements ? (
+	              <pre className="game-detail-requirements">{game.requirements}</pre>
+	            ) : null}
+	            {game.website ? (
+	              <a
+	                href={game.website}
+	                target="_blank"
+	                rel="noreferrer"
+	                className="auth-link"
+	              >
+	                {isEnglish ? "Official website" : "Web oficial"}
+	              </a>
+	            ) : null}
+	          </div>
 	        </section>
 	      )}
 	
