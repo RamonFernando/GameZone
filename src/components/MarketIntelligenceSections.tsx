@@ -31,6 +31,10 @@ type MarketPulseItem = {
   source: string;
   sourceUrl: string;
   catalogStatus: string;
+  gameZonePrice?: number | null;
+  steamPrice?: number | null;
+  steamCurrency?: string | null;
+  steamIsFree?: boolean;
 };
 
 type MarketPulseSection = {
@@ -299,7 +303,7 @@ function MarketPulseCarousel({
   thumbCount = 5,
 }: {
   section: MarketPulseSection;
-  variant?: "hero" | "compact";
+  variant?: "hero" | "compact" | "catalog";
   thumbCount?: 3 | 5;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -419,6 +423,55 @@ function MarketPulseCarousel({
 
   if (!active) {
     return null;
+  }
+
+  if (variant === "catalog") {
+    return (
+      <article className="market-pulse-carousel market-pulse-carousel--catalog">
+        <div className="market-pulse-catalog-grid" aria-label={`${section.title} cards`}>
+          {section.items.slice(0, 5).map((game) => (
+            <article className="market-pulse-catalog-card" key={`${section.id}-${game.rank}-${game.title}`}>
+              <span className="market-pulse-catalog-card__media">
+                <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
+                <span className="market-pulse-catalog-card__store">
+                  <Image
+                    src="/iconos_platforms/icon-steam.svg"
+                    alt=""
+                    width={14}
+                    height={14}
+                  />
+                  Steam
+                </span>
+              </span>
+              <span className="market-pulse-catalog-card__body">
+                <strong>{game.title}</strong>
+                <span>Codigo digital oficial</span>
+                <small>{game.platform}</small>
+                <span className="market-pulse-catalog-card__prices">
+                  <span>
+                    <small>GameZone</small>
+                    <strong>
+                      {typeof game.gameZonePrice === "number" ? formatEuro(game.gameZonePrice) : "Sin match"}
+                    </strong>
+                  </span>
+                  <span>
+                    <small>Steam</small>
+                    <strong>
+                      {game.steamIsFree
+                        ? "Gratis"
+                        : typeof game.steamPrice === "number"
+                          ? formatEuro(game.steamPrice)
+                          : "No disponible"}
+                    </strong>
+                  </span>
+                </span>
+                <em>#{game.rank} mas jugado</em>
+              </span>
+            </article>
+          ))}
+        </div>
+      </article>
+    );
   }
 
   if (variant === "compact") {
@@ -724,27 +777,13 @@ export function MarketIntelligenceSections() {
         </div>
       </section>
 
-      <section className="market-intel market-intel--popular" aria-labelledby="popular-games-title">
-        <div className="market-intel-head market-intel-head--compact">
-          <span className="market-intel-kicker">Market Intelligence v2</span>
-          <div>
-            <h2 id="popular-games-title" className="section-title market-intel-title">
-              Pulso real separado por fuente
-            </h2>
-            <p className="market-panel-status">{pulseStatus}</p>
-            <p className="section-subtitle market-intel-copy">
-              G2A, Steam y RAWG se leen por separado para saber que es venta,
-              actividad o metadata antes de cruzarlo con el catalogo GameZone.
-            </p>
-          </div>
-        </div>
-
+      <section className="market-intel market-intel--popular" aria-label="Fuentes de tendencias de mercado">
         <div className="market-pulse-source-stack">
           <section className="market-pulse-source-panel market-pulse-source-panel--g2a" aria-labelledby="g2a-panel-title">
             <div className="market-pulse-panel__head">
               <span>G2A</span>
               <div>
-                <h3 id="g2a-panel-title">G2A</h3>
+                <h2 id="g2a-panel-title">G2A</h2>
                 <p>Populares y mas vendidos</p>
               </div>
             </div>
@@ -778,7 +817,7 @@ export function MarketIntelligenceSections() {
             <div className="market-pulse-panel__head">
               <span>Steam</span>
               <div>
-                <h3 id="steam-panel-title">Steam</h3>
+                <h2 id="steam-panel-title">Steam</h2>
                 <p>Top sellers y mas jugados</p>
               </div>
             </div>
@@ -790,7 +829,10 @@ export function MarketIntelligenceSections() {
                     <h4>{section.title}</h4>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
-                  <MarketPulseCarousel section={section} />
+                  <MarketPulseCarousel
+                    section={section}
+                    variant={section.title.toLowerCase().includes("mas jugados") ? "catalog" : "hero"}
+                  />
                 </article>
               ))}
             </div>
@@ -800,7 +842,7 @@ export function MarketIntelligenceSections() {
             <div className="market-pulse-panel__head">
               <span>RAWG</span>
               <div>
-                <h3 id="rawg-panel-title">RAWG</h3>
+                <h2 id="rawg-panel-title">RAWG</h2>
                 <p>Radar de popularidad y metadata</p>
               </div>
             </div>

@@ -157,6 +157,7 @@ export function AdminProductsPanel() {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSyncingMarket, setIsSyncingMarket] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -282,6 +283,41 @@ export function AdminProductsPanel() {
       pushToast("error", "Error de red creando producto.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleMarketSync = async () => {
+    try {
+      setIsSyncingMarket(true);
+      const response = await fetch("/api/admin/products/sync-market", {
+        method: "POST",
+      });
+      const payload = (await response.json()) as {
+        message?: string;
+        sync?: {
+          created?: number;
+          updated?: number;
+          skipped?: number;
+        };
+      };
+
+      if (!response.ok) {
+        pushToast("error", payload.message ?? "No se pudo sincronizar mercado.");
+        return;
+      }
+
+      const sync = payload.sync;
+      pushToast(
+        "success",
+        sync
+          ? `Mercado sincronizado: ${sync.created ?? 0} creados, ${sync.updated ?? 0} actualizados, ${sync.skipped ?? 0} omitidos.`
+          : payload.message ?? "Mercado sincronizado."
+      );
+      await loadProducts();
+    } catch {
+      pushToast("error", "Error de red sincronizando mercado.");
+    } finally {
+      setIsSyncingMarket(false);
     }
   };
 
@@ -533,6 +569,14 @@ export function AdminProductsPanel() {
         </button>
         <button type="button" className="button-ghost btn-padding-site" onClick={() => toggleSort("createdAt")}>
           Ordenar por fecha {sortColumn === "createdAt" ? `(${sortDirection})` : ""}
+        </button>
+        <button
+          type="button"
+          className="button-primary btn-padding-site"
+          onClick={handleMarketSync}
+          disabled={isSyncingMarket}
+        >
+          {isSyncingMarket ? "Sincronizando..." : "Sincronizar mercado"}
         </button>
       </div>
 
