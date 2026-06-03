@@ -1,11 +1,27 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";
+
+const MarketIntelligenceSections = dynamic(
+  () =>
+    import("../components/MarketIntelligenceSections").then(
+      (module) => module.MarketIntelligenceSections
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <section className="market-intel market-intel--loading" aria-label="Cargando datos de mercado">
+        <p className="section-subtitle">Preparando datos de mercado...</p>
+      </section>
+    ),
+  }
+);
 
 export default function HomePage() {
   const { query, platform } = useSearch();
@@ -68,6 +84,7 @@ export default function HomePage() {
             {lang === "en" ? "Loading products..." : "Cargando productos..."}
           </p>
         ) : null}
+        <MarketIntelligenceSections />
         <GameGrid games={filteredGames} />
       </main>
     </>
