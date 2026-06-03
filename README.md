@@ -15,7 +15,10 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 Con el servidor corriendo (`npm run dev`), puedes ejecutar:
 
 ```bash
+npm run lint
+npx tsc --noEmit
 npm run test:unit
+npm run build
 npm run e2e:all
 npm run e2e:all:continue
 npm run e2e:checkout
@@ -23,7 +26,10 @@ npm run e2e:stripe
 npm run e2e:paypal
 ```
 
+- `lint`: revisa el codigo con ESLint (`eslint .`).
+- `tsc --noEmit`: comprueba TypeScript sin generar archivos.
 - `test:unit`: ejecuta pruebas unitarias con Vitest.
+- `build`: genera la build de produccion; incluye `prisma generate`.
 - `e2e:all`: ejecuta los 3 tests en secuencia.
 - `e2e:all:continue`: ejecuta los 3 tests aunque uno falle y muestra resumen final.
 - `e2e:checkout`: login + compra manual + verificacion en panel admin.
@@ -184,6 +190,65 @@ Tambien se puede usar `rawgId` si el ID es mas fiable:
 ```
 
 Despues de editar overrides, vuelve a probar con `--dry-run`.
+
+## Datos externos y market intelligence
+
+GameZone prepara rutas internas para consumir datos externos sin llamar APIs de terceros
+directamente desde los componentes del frontend.
+
+### Ofertas de mercado
+
+Primera ruta implementada:
+
+```text
+GET /api/market/deals
+GET /api/market/deals?limit=4
+```
+
+Para que sirve:
+
+- Consulta CheapShark por titulo de producto.
+- Cruza las ofertas encontradas con productos activos de GameZone.
+- Normaliza `title`, `image`, `store`, `dealPrice`, `normalPrice`, `gameZonePrice`, `saving`, `sourceId`, `sourceUrl` y `catalogMatch`.
+- Si CheapShark falla o no encuentra coincidencias, usa fallback del catalogo interno.
+- Usa cache de 30 minutos para reducir dependencia de la API externa.
+
+Pendiente inmediato:
+
+- Conectar `MarketIntelligenceSections` a `/api/market/deals` y reemplazar los mocks visuales de precios. Hecho; conserva fallback local si la API falla.
+
+### Metadata de mercado
+
+Rutas implementadas:
+
+```text
+GET /api/market/games
+GET /api/market/games/{slug}
+```
+
+Para que sirve:
+
+- `/api/market/games` devuelve resumenes del catalogo preparados para metadata.
+- `/api/market/games/{slug}` cruza el producto local con RAWG usando `RAWG_API_KEY`.
+- Si RAWG no responde o no hay clave, la ruta devuelve fallback de GameZone.
+- Normaliza campos como `title`, `slug`, `cover`, `genres`, `platforms`, `released`, `rating`, `tags`, `stores`, `developer`, `publisher` y `source`.
+
+### Tendencias de mercado
+
+Ruta implementada:
+
+```text
+GET /api/market/trending
+GET /api/market/trending?limit=3
+```
+
+Para que sirve:
+
+- Usa RAWG como primera fuente de tendencias.
+- Cruza cada resultado con el catalogo local de GameZone por titulo.
+- Devuelve `rank`, `title`, `image`, `platform`, `signal`, `source`, `trendScore`, `gameZoneMatch` y `catalogMatch`.
+- Si RAWG falla o no hay clave, responde con fallback basado en productos activos de GameZone.
+- `MarketIntelligenceSections` ya consume esta ruta para sustituir los mocks de tendencias.
 
 ## Comando unico de recuperacion (Windows)
 

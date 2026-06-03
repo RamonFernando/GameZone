@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+
 type DataSourcePreview = {
   name: string;
   source: string;
@@ -14,17 +17,32 @@ type TrendingGamePreview = {
   platform: string;
   signal: string;
   source: string;
+  trendScore?: number;
   gameZoneMatch: string;
+};
+
+type MarketTrendingResponse = {
+  source?: string;
+  trending?: TrendingGamePreview[];
 };
 
 type DealPreview = {
   title: string;
   image: string;
   store: string;
-  dealPrice: string;
-  gameZonePrice: string;
-  saving: string;
+  dealPrice: number;
+  gameZonePrice: number;
+  saving: number;
   sourceId: string;
+  sourceUrl?: string;
+  catalogMatch?: {
+    slug: string;
+  };
+};
+
+type MarketDealsResponse = {
+  source?: string;
+  deals?: DealPreview[];
 };
 
 type PipelinePreview = {
@@ -61,7 +79,7 @@ const dataSources: DataSourcePreview[] = [
   },
 ];
 
-const trendingGames: TrendingGamePreview[] = [
+const fallbackTrendingGames: TrendingGamePreview[] = [
   {
     rank: 1,
     title: "Hogwarts Legacy",
@@ -91,32 +109,32 @@ const trendingGames: TrendingGamePreview[] = [
   },
 ];
 
-const dealPreviews: DealPreview[] = [
+const fallbackDeals: DealPreview[] = [
   {
     title: "Hogwarts Legacy",
     image: "/games_data/Hogwarts Legacy/hogwarts-legacy-cover.jpg",
     store: "Steam",
-    dealPrice: "21,49 EUR",
-    gameZonePrice: "24,99 EUR",
-    saving: "-14%",
+    dealPrice: 21.49,
+    gameZonePrice: 24.99,
+    saving: 14,
     sourceId: "cheapshark:612",
   },
   {
     title: "Resident Evil 4 Deluxe Edition",
     image: "/games_data/Resident Evil 4 Deluxe Edition/resident-evil-4-deluxe-edition-deluxe-cover.jpeg",
     store: "External Store",
-    dealPrice: "34,79 EUR",
-    gameZonePrice: "39,99 EUR",
-    saving: "-13%",
+    dealPrice: 34.79,
+    gameZonePrice: 39.99,
+    saving: 13,
     sourceId: "cheapshark:887",
   },
   {
     title: "Marvel's Spider-Man - Miles Morales",
     image: "/games_data/Marvel's Spider-Man - Miles Morales/marvel-s-spider-man-miles-morales-cover.jpg",
     store: "PC marketplace",
-    dealPrice: "27,95 EUR",
-    gameZonePrice: "29,99 EUR",
-    saving: "-7%",
+    dealPrice: 27.95,
+    gameZonePrice: 29.99,
+    saving: 7,
     sourceId: "cheapshark:430",
   },
 ];
@@ -142,7 +160,115 @@ const pipeline: PipelinePreview[] = [
   },
 ];
 
+function formatEuro(value: number) {
+  return value.toLocaleString("es-ES", {
+    style: "currency",
+    currency: "EUR",
+  });
+}
+
 export function MarketIntelligenceSections() {
+  const [marketDeals, setMarketDeals] = useState<DealPreview[]>(fallbackDeals);
+  const [marketTrendingGames, setMarketTrendingGames] =
+    useState<TrendingGamePreview[]>(fallbackTrendingGames);
+  const [isLoadingDeals, setIsLoadingDeals] = useState(true);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(true);
+  const [dealsSource, setDealsSource] = useState("mock");
+  const [trendingSource, setTrendingSource] = useState("mock");
+  const [dealsError, setDealsError] = useState("");
+  const [trendingError, setTrendingError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMarketDeals() {
+      try {
+        setIsLoadingDeals(true);
+        const response = await fetch("/api/market/deals?limit=3");
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar ofertas de mercado.");
+        }
+
+        const payload = (await response.json()) as MarketDealsResponse;
+        const nextDeals = payload.deals?.filter((deal) => deal.title && deal.image) ?? [];
+
+        if (!cancelled && nextDeals.length > 0) {
+          setMarketDeals(nextDeals);
+          setDealsSource(payload.source ?? "api");
+          setDealsError("");
+        }
+      } catch {
+        if (!cancelled) {
+          setMarketDeals(fallbackDeals);
+          setDealsSource("fallback");
+          setDealsError("Mostrando fallback local");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingDeals(false);
+        }
+      }
+    }
+
+    void loadMarketDeals();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMarketTrending() {
+      try {
+        setIsLoadingTrending(true);
+        const response = await fetch("/api/market/trending?limit=3");
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar tendencias de mercado.");
+        }
+
+        const payload = (await response.json()) as MarketTrendingResponse;
+        const nextTrending =
+          payload.trending?.filter((game) => game.title && game.image) ?? [];
+
+        if (!cancelled && nextTrending.length > 0) {
+          setMarketTrendingGames(nextTrending);
+          setTrendingSource(payload.source ?? "api");
+          setTrendingError("");
+        }
+      } catch {
+        if (!cancelled) {
+          setMarketTrendingGames(fallbackTrendingGames);
+          setTrendingSource("fallback");
+          setTrendingError("Mostrando fallback local");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingTrending(false);
+        }
+      }
+    }
+
+    void loadMarketTrending();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const dealStatus = useMemo(() => {
+    if (isLoadingDeals) return "Cargando API";
+    if (dealsError) return dealsError;
+    return dealsSource.includes("gamezone") ? "API + fallback" : "CheapShark";
+  }, [dealsError, dealsSource, isLoadingDeals]);
+
+  const trendingStatus = useMemo(() => {
+    if (isLoadingTrending) return "Cargando API";
+    if (trendingError) return trendingError;
+    return trendingSource.includes("rawg") ? "RAWG" : "GameZone fallback";
+  }, [isLoadingTrending, trendingError, trendingSource]);
+
   return (
     <div className="market-intel-stack">
       <section className="market-intel market-intel--intro" aria-labelledby="market-intel-title">
@@ -185,6 +311,7 @@ export function MarketIntelligenceSections() {
             <h2 id="popular-games-title" className="section-title market-intel-title">
               Populares para cruzar con el catalogo
             </h2>
+            <p className="market-panel-status">{trendingStatus}</p>
             <p className="section-subtitle market-intel-copy">
               Cards compactas con campos que puede devolver una API de tendencias:
               ranking, fuente, plataforma y coincidencia con GameZone.
@@ -193,10 +320,10 @@ export function MarketIntelligenceSections() {
         </div>
 
         <div className="trending-grid">
-          {trendingGames.map((game) => (
+          {marketTrendingGames.map((game) => (
             <article className="trending-card" key={game.title}>
               <div className="trending-cover">
-                <img src={game.image} alt="" loading="lazy" decoding="async" />
+                <Image src={game.image} alt="" fill sizes="(min-width: 720px) 33vw, 96px" />
               </div>
               <div className="trending-body">
                 <div className="trending-rank">#{game.rank}</div>
@@ -210,6 +337,12 @@ export function MarketIntelligenceSections() {
                     <dt>Senal</dt>
                     <dd>{game.signal}</dd>
                   </div>
+                  {typeof game.trendScore === "number" ? (
+                    <div>
+                      <dt>Score</dt>
+                      <dd>{game.trendScore}</dd>
+                    </div>
+                  ) : null}
                   <div>
                     <dt>Plataforma</dt>
                     <dd>{game.platform}</dd>
@@ -240,14 +373,17 @@ export function MarketIntelligenceSections() {
           <div className="deals-panel">
             <div className="market-panel-header">
               <span className="market-panel-label">Comparador</span>
-              <h3>Ofertas normalizadas</h3>
+              <div>
+                <h3>Ofertas normalizadas</h3>
+                <p className="market-panel-status">{dealStatus}</p>
+              </div>
             </div>
 
             <div className="deal-list">
-              {dealPreviews.map((deal) => (
+              {marketDeals.map((deal) => (
                 <article className="deal-row" key={deal.title}>
                   <div className="deal-cover">
-                    <img src={deal.image} alt="" loading="lazy" decoding="async" />
+                    <Image src={deal.image} alt="" fill sizes="64px" />
                   </div>
                   <div className="deal-info">
                     <h4>{deal.title}</h4>
@@ -255,9 +391,9 @@ export function MarketIntelligenceSections() {
                     <code>{deal.sourceId}</code>
                   </div>
                   <div className="deal-price">
-                    <span className="deal-discount">{deal.saving}</span>
-                    <strong>{deal.dealPrice}</strong>
-                    <small>GameZone {deal.gameZonePrice}</small>
+                    <span className="deal-discount">-{deal.saving}%</span>
+                    <strong>{formatEuro(deal.dealPrice)}</strong>
+                    <small>GameZone {formatEuro(deal.gameZonePrice)}</small>
                   </div>
                 </article>
               ))}

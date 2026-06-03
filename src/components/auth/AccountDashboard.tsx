@@ -1,7 +1,6 @@
 // Panel principal de "Mi cuenta": perfil, pedidos recientes y sesiones activas.
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 

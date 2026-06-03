@@ -122,17 +122,31 @@ Para recomendaciones:
 
 ## Pasos acordados
 
-1. Dejar las secciones bien preparadas.
+1. Dejar las secciones bien preparadas. Hecho.
 2. Definir el modelo de datos definitivo.
-3. Crear rutas internas de API.
-4. Conectar primero `/api/market/deals` con CheapShark.
-5. Sustituir los mocks de precios por datos reales.
-6. Conectar metadata con RAWG o IGDB.
-7. Conectar tendencias con Steam, RAWG, IGDB o una combinacion.
+3. Crear rutas internas de API. Iniciado con `/api/market/deals`, `/api/market/trending`, `/api/market/games` y `/api/market/games/:slug`.
+4. Conectar primero `/api/market/deals` con CheapShark. Hecho con fallback al catalogo.
+5. Sustituir los mocks de precios por datos reales. Hecho con fallback local.
+6. Conectar metadata con RAWG o IGDB. Hecho con RAWG y fallback GameZone.
+7. Conectar tendencias con Steam, RAWG, IGDB o una combinacion. Hecho con RAWG y fallback GameZone.
 8. Cruzar los datos externos con el catalogo de GameZone.
 9. Anadir fallback y cache para que la web no dependa totalmente de APIs externas.
 10. Preparar recomendaciones con datos de precio, popularidad y catalogo.
 11. Pulir UI, responsive, estados de carga y rendimiento.
+
+## Avance aplicado - 2026-06-03
+
+- Creada la ruta interna `/api/market/deals`.
+- La ruta cruza productos activos de GameZone con ofertas de CheapShark por titulo.
+- Se normaliza la respuesta a `title`, `image`, `store`, `dealPrice`, `normalPrice`, `gameZonePrice`, `saving`, `sourceId`, `sourceUrl` y `catalogMatch`.
+- Se anadio fallback de catalogo para que la API siga respondiendo aunque CheapShark falle o no encuentre coincidencias.
+- Se anadio cache de fetch de 30 minutos para CheapShark.
+- `MarketIntelligenceSections` ya consume esta API y reemplaza `dealPreviews` por datos reales con fallback local.
+- Creada `/api/market/games` para resumenes de metadata del catalogo.
+- Creada `/api/market/games/:slug` para metadata enriquecida con RAWG y fallback GameZone.
+- La ruta de metadata normaliza `title`, `slug`, `cover`, `genres`, `platforms`, `released`, `rating`, `tags`, `stores`, `developer`, `publisher` y senales de fuente.
+- Creada `/api/market/trending` para tendencias con RAWG y fallback GameZone.
+- `MarketIntelligenceSections` ya consume `/api/market/trending` y reemplaza los mocks de tendencias.
 
 ## Pendiente tecnico antes de seguir
 
@@ -140,17 +154,16 @@ Revisar rendimiento del servidor de desarrollo:
 
 - `.next/dev/logs/next-development.log` tenia errores repetidos del import anterior de `MarketIntelligenceSections`.
 - `node_modules/.prisma/client` tenia archivos temporales `query_engine-windows.dll.node.tmp...`.
-- `npm run build` fallo con `EPERM` al renombrar el DLL de Prisma.
+- `npm run build` fallo con `EPERM` al renombrar el DLL de Prisma. Resuelto parando el proceso que ocupaba `localhost:3000` antes del build.
 
 Recomendacion para retomar:
 
-1. Parar el servidor de desarrollo.
-2. Ejecutar `npm run dev:reset`.
+1. Parar el servidor de desarrollo. Hecho para liberar Prisma.
+2. Ejecutar `npm run build`. Hecho correctamente.
 3. Comprobar `http://localhost:3000`.
 4. Verificar que las secciones cargan sin error.
-5. Despues empezar con `/api/market/deals`.
+5. Conectar `MarketIntelligenceSections` a `/api/market/deals`. Hecho.
 
 ## Despues de esto
 
 Cuando terminemos las secciones, APIs y la integracion inicial de datos externos, volveremos a lo pendiente de la auditoria del proyecto.
-

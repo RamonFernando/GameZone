@@ -7,7 +7,7 @@
     "dev:reset": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ports = @(3000,3001); foreach ($port in $ports) { $procIds = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($procId in $procIds) { Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue } }; if (Test-Path '.next') { Remove-Item -LiteralPath '.next' -Recurse -Force }; npm run dev\"",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "db:generate": "prisma generate",

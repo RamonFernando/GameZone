@@ -28,7 +28,7 @@ La app base esta sana, pero no todo queda cerrado al 100%.
 
 ## Pendientes para dejarlo 100% listo
 
-- Corregir el script de lint.
+- Corregir el script de lint. Hecho: ahora usa `eslint .` con config flat.
 - Configurar credenciales PayPal sandbox.
 - Renovar Stripe CLI con `stripe login` o una API key valida.
 - Probar webhooks Stripe con `stripe listen` y `stripe trigger`.
@@ -54,3 +54,14 @@ La app base esta sana, pero no todo queda cerrado al 100%.
 - Se mantiene el estilo visual del titulo y se anadio hover/focus accesible.
 - Se quito el subrayado del titulo y se sustituyo por un efecto tipo boton con brillo, sombra y escala.
 - Validado con `npm run test:unit`, `npx tsc --noEmit`, `npm run build` y home local `200`.
+
+## Avance aplicado a market intelligence
+
+- Creada `/api/market/deals` como primera ruta interna de datos externos.
+- La ruta consulta CheapShark, normaliza ofertas y cruza cada resultado con productos activos del catalogo.
+- Si CheapShark falla o no devuelve coincidencias, responde con fallback de GameZone para no romper la experiencia.
+- `MarketIntelligenceSections` cambio sus imagenes internas a `next/image`.
+- `MarketIntelligenceSections` ya consume `/api/market/deals` y mantiene fallback local si la API no responde.
+- Creada `/api/market/games` y `/api/market/games/:slug` para metadata con RAWG y fallback GameZone.
+- Creada `/api/market/trending` y conectada en `MarketIntelligenceSections` con fallback GameZone.
+- Validado con `npm run lint`, `npx tsc --noEmit`, `npm run test:unit` y `npm run build`.
