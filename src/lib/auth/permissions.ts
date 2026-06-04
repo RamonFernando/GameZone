@@ -14,6 +14,7 @@ export const PERMISSIONS = {
   ADMIN_ORDERS_WRITE: "admin.orders.write",
   ADMIN_PRODUCTS_READ: "admin.products.read",
   ADMIN_PRODUCTS_WRITE: "admin.products.write",
+  ADMIN_CATALOG_SYNC: "admin.catalog.sync",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -34,6 +35,7 @@ const DEFAULT_PERMISSIONS: Array<{ key: PermissionKey; description: string }> = 
   { key: PERMISSIONS.ADMIN_ORDERS_WRITE, description: "Gestionar pedidos y reembolsos" },
   { key: PERMISSIONS.ADMIN_PRODUCTS_READ, description: "Ver productos del catálogo" },
   { key: PERMISSIONS.ADMIN_PRODUCTS_WRITE, description: "Gestionar productos del catálogo" },
+  { key: PERMISSIONS.ADMIN_CATALOG_SYNC, description: "Sincronizar catalogos externos" },
 ];
 
 const USER_ROLE_PERMISSIONS: PermissionKey[] = [
@@ -57,6 +59,7 @@ const ADMIN_ROLE_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.ADMIN_ORDERS_WRITE,
   PERMISSIONS.ADMIN_PRODUCTS_READ,
   PERMISSIONS.ADMIN_PRODUCTS_WRITE,
+  PERMISSIONS.ADMIN_CATALOG_SYNC,
 ];
 const SUPER_ADMIN_ROLE_PERMISSIONS: PermissionKey[] = DEFAULT_PERMISSIONS.map(
   (permission) => permission.key

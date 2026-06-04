@@ -53,6 +53,31 @@ type ToastItem = {
   text: string;
 };
 
+type AdminRole = "ADMIN" | "SUPER_ADMIN";
+
+type CatalogSyncRun = {
+  id: string;
+  status: string;
+  mode: string;
+  triggeredBy: string;
+  startedAt: string;
+  finishedAt: string | null;
+  createdCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  fallbackUsed: boolean;
+  dryRun: boolean;
+  error: string | null;
+};
+
+type CatalogSyncStatus = {
+  latestRun: CatalogSyncRun | null;
+  runningRun: CatalogSyncRun | null;
+  lastWriteSuccess: CatalogSyncRun | null;
+  canRunToday: boolean;
+  canForce: boolean;
+};
+
 // Número de productos por página en el listado principal.
 const PAGE_SIZE = 6;
 
@@ -146,7 +171,7 @@ function TrashIcon() {
   );
 }
 
-export function AdminProductsPanel() {
+export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
   const [createErrors, setCreateErrors] = useState<string[]>([]);
@@ -158,6 +183,8 @@ export function AdminProductsPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncingMarket, setIsSyncingMarket] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<CatalogSyncStatus | null>(null);
+  const [forceSync, setForceSync] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -178,7 +205,7 @@ export function AdminProductsPanel() {
   const loadProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/products");
+      const response = await fetch("/api/admin/products", { cache: "no-store" });
       const payload = (await response.json()) as { products?: ProductRow[]; message?: string };
       if (!response.ok) {
         pushToast("error", payload.message ?? "No se pudieron cargar productos.");
@@ -192,9 +219,24 @@ export function AdminProductsPanel() {
     }
   }, [pushToast]);
 
+  const loadSyncStatus = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/products/sync-market", { cache: "no-store" });
+      const payload = (await response.json()) as CatalogSyncStatus & { message?: string };
+      if (!response.ok) {
+        pushToast("error", payload.message ?? "No se pudo cargar estado de sincronizacion.");
+        return;
+      }
+      setSyncStatus(payload);
+    } catch {
+      pushToast("error", "Error de red cargando estado de sincronizacion.");
+    }
+  }, [pushToast]);
+
   useEffect(() => {
     void loadProducts();
-  }, [loadProducts]);
+    void loadSyncStatus();
+  }, [loadProducts, loadSyncStatus]);
 
   const sortedFilteredProducts = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -289,7 +331,11 @@ export function AdminProductsPanel() {
   const handleMarketSync = async (dryRun = false) => {
     try {
       setIsSyncingMarket(true);
-      const response = await fetch(`/api/admin/products/sync-market${dryRun ? "?dryRun=1" : ""}`, {
+      const params = new URLSearchParams();
+      if (dryRun) params.set("dryRun", "1");
+      if (!dryRun && forceSync && role === "SUPER_ADMIN") params.set("force", "1");
+      const query = params.toString();
+      const response = await fetch(`/api/admin/products/sync-market${query ? `?${query}` : ""}`, {
         method: "POST",
       });
       const payload = (await response.json()) as {
@@ -316,12 +362,21 @@ export function AdminProductsPanel() {
       if (!dryRun) {
         await loadProducts();
       }
+      await loadSyncStatus();
     } catch {
       pushToast("error", "Error de red sincronizando mercado.");
     } finally {
       setIsSyncingMarket(false);
     }
   };
+
+  const latestSync = syncStatus?.latestRun ?? null;
+  const lastWriteSync = syncStatus?.lastWriteSuccess ?? null;
+  const canForceSync = role === "SUPER_ADMIN" && (syncStatus?.canForce ?? true);
+  const isWriteSyncDisabled =
+    isSyncingMarket ||
+    Boolean(syncStatus?.runningRun) ||
+    (syncStatus?.canRunToday === false && !(canForceSync && forceSync));
 
   const handleDelete = async () => {
     if (!pendingDeleteId) return;
@@ -584,10 +639,42 @@ export function AdminProductsPanel() {
           type="button"
           className="button-primary btn-padding-site"
           onClick={() => handleMarketSync(false)}
-          disabled={isSyncingMarket}
+          disabled={isWriteSyncDisabled}
         >
           {isSyncingMarket ? "Sincronizando..." : "Sincronizar mercado"}
         </button>
+      </div>
+
+      <div className="auth-alt" style={{ display: "grid", gap: 4 }}>
+        {latestSync ? (
+          <p style={{ margin: 0 }}>
+            Ultima sync: {latestSync.status} · {new Date(latestSync.startedAt).toLocaleString("es-ES")} ·{" "}
+            {latestSync.createdCount} creados, {latestSync.updatedCount} actualizados,{" "}
+            {latestSync.skippedCount} omitidos.
+          </p>
+        ) : (
+          <p style={{ margin: 0 }}>Todavia no hay sincronizaciones registradas.</p>
+        )}
+        {lastWriteSync && !syncStatus?.canRunToday ? (
+          <p style={{ margin: 0 }}>
+            Sync diaria ya ejecutada: {new Date(lastWriteSync.finishedAt ?? lastWriteSync.startedAt).toLocaleString("es-ES")}.
+          </p>
+        ) : null}
+        {syncStatus?.runningRun ? (
+          <p style={{ margin: 0 }} role="status" aria-live="polite">
+            Hay una sincronizacion en curso.
+          </p>
+        ) : null}
+        {canForceSync ? (
+          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input
+              type="checkbox"
+              checked={forceSync}
+              onChange={(event) => setForceSync(event.target.checked)}
+            />
+            Forzar aunque ya se haya sincronizado hoy
+          </label>
+        ) : null}
       </div>
 
       {isLoading ? <p className="auth-alt">Cargando productos...</p> : null}

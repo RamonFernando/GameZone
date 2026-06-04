@@ -32,7 +32,7 @@ export default async function AdminControlPage() {
             </p>
           </header>
 
-          <AdminProductsPanel />
+          <AdminProductsPanel role={session.role} />
           {session.role === "SUPER_ADMIN" ? (
             <AdminUsersPanel />
           ) : (

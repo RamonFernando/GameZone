@@ -297,16 +297,42 @@ wallets, accounts, bundles/packs y regiones raras antes de alimentar las cards o
 Endpoint admin:
 
 ```text
+GET /api/admin/products/sync-market
 POST /api/admin/products/sync-market
 POST /api/admin/products/sync-market?dryRun=1
+POST /api/admin/products/sync-market?force=1
 ```
 
 Para que sirve:
 
+- `GET` devuelve la ultima sincronizacion, si hay una en curso y si se puede ejecutar hoy.
 - `dryRun=1` previsualiza creados, actualizados y omitidos sin escribir en BD.
 - Sin `dryRun`, actualiza productos existentes y crea oportunidades nuevas.
+- `force=1` solo funciona para `SUPER_ADMIN` y permite saltar el limite de 24 horas.
+- El endpoint exige permiso `admin.catalog.sync`, asignado por defecto a `ADMIN` y `SUPER_ADMIN`.
+- La ejecucion queda registrada en `CatalogSyncRun` con estado, origen, conteos y errores.
+- Hay bloqueo anti-duplicado: si una sincronizacion reciente sigue `running`, no arranca otra.
+- La sincronizacion admin consume G2A, Steam y RAWG desde `listMarketPulse()`.
 - G2A solo actualiza un producto existente si el match de catalogo es fuerte (`matchScore >= 80`).
 - Si el match es debil, se crea/omite por slug para evitar cruces falsos.
+
+Cron diario protegido:
+
+```text
+GET /api/cron/sync-catalogs
+POST /api/cron/sync-catalogs
+```
+
+- Requiere `Authorization: Bearer ${CRON_SECRET}`.
+- En Vercel queda programado en `vercel.json` para ejecutarse cada dia a las `05:00 UTC`.
+- Vercel invoca cron con `GET`; `POST` queda disponible para cron externo o pruebas manuales.
+- Si ya hubo una sincronizacion de escritura exitosa en las ultimas 24 horas, responde `409`.
+
+Variable necesaria:
+
+```env
+CRON_SECRET=un_secreto_largo_y_aleatorio
+```
 
 Tambien hay scripts locales:
 

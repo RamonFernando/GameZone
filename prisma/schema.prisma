@@ -226,3 +226,25 @@ model UserPermission {
   @@unique([userId, permissionId])
   @@index([permissionId])
 }
+
+model CatalogSyncRun {
+  id                String    @id @default(cuid())
+  status            String    @default("running")
+  mode              String    @default("write")
+  triggeredBy       String
+  triggeredByUserId String?
+  sourcesJson       String    @default("[]")
+  startedAt         DateTime  @default(now())
+  finishedAt        DateTime?
+  createdCount      Int       @default(0)
+  updatedCount      Int       @default(0)
+  skippedCount      Int       @default(0)
+  fallbackUsed      Boolean   @default(false)
+  dryRun            Boolean   @default(false)
+  error             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status, startedAt])
+  @@index([startedAt])
+}
