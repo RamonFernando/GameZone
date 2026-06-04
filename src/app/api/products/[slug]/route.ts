@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { computeDiscountedPrice, getActiveProductBySlug, listActiveProducts } from "@/lib/products";
+import {
+  computeDiscountedPrice,
+  getActiveProductBySlug,
+  listActiveProducts,
+  resolveStoreLabel,
+} from "@/lib/products";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
@@ -58,7 +63,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
       coverImage: item.coverImage,
       platform: item.platform,
       region: item.region,
-      storeLabel: item.storeLabel,
+      storeLabel: resolveStoreLabel(item),
       cardSubtitle: item.cardSubtitle,
       priceOriginal: item.priceOriginal,
       discountPercent: item.discountPercent,
@@ -78,7 +83,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
         coverImage: product.coverImage,
         platform: product.platform,
         region: product.region,
-        storeLabel: product.storeLabel,
+        storeLabel: resolveStoreLabel(product),
         cardSubtitle: product.cardSubtitle,
         longDescription: product.longDescription,
         rawgId: product.rawgId,

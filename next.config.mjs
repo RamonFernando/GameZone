@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.g2a.com",
       },
+      {
+        protocol: "https",
+        hostname: "media.rawg.io",
+      },
     ],
   },
 };

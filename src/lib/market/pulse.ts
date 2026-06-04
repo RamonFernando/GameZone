@@ -42,6 +42,7 @@ const G2A_API_BASE_URL = process.env.G2A_API_BASE_URL ?? "https://sandboxapi.g2a
 const STEAM_TOP_SELLERS_URL = "https://steamdb.info/stats/globaltopsellers/";
 const STEAM_MOST_PLAYED_URL = "https://steamdb.info/charts/";
 const STEAM_APPDETAILS_URL = "https://store.steampowered.com/api/appdetails";
+const STEAM_PLACEHOLDER_IMAGE = "/iconos_platforms/icon-steam.svg";
 
 const g2aPopularSnapshot = [
   "Forza Horizon 6",
@@ -97,6 +98,10 @@ const steamSnapshotAppIds: Record<string, string> = {
   "Elden Ring": "1245620",
   "Path of Exile 2": "2694490",
   "Rainbow Six Siege": "359550",
+  "Forza Horizon 6": "2483190",
+  "007 First Light": "3768760",
+  Fatekeeper: "2186990",
+  Paralives: "1118520",
   Marathon: "2453150",
   "Subnautica 2": "1962700",
 };
@@ -125,10 +130,6 @@ const steamMostPlayedSnapshot = [
   "Destiny 2",
   "Elden Ring",
 ];
-
-function fallbackImage(products: StoreProduct[], index: number) {
-  return products[index % products.length]?.coverImage ?? "/games_data/Hogwarts Legacy/hogwarts-legacy-cover.jpg";
-}
 
 function cleanMarketTitle(value: string) {
   return value
@@ -469,11 +470,15 @@ function createPulseItems(input: {
     const match = findBestCatalogMatch(input.products, title);
     const product = match && match.matchScore >= CATALOG_MATCH_SYNC_SCORE ? match.product : null;
     const steamPrice = entry.steamAppId ? input.steamPrices?.get(entry.steamAppId) : null;
+    const sourceImage =
+      input.source === "Steam"
+        ? steamPrice?.image ?? entry.image ?? STEAM_PLACEHOLDER_IMAGE
+        : entry.image;
 
     return {
       rank: index + 1,
       title,
-      image: product?.coverImage ?? entry.image ?? steamPrice?.image ?? fallbackImage(input.products, index),
+      image: sourceImage ?? product?.coverImage ?? "",
       platform: entry.platform ?? product?.platform ?? "PC / Marketplace",
       signal: input.signal,
       source: input.source,

@@ -10,6 +10,8 @@ import {
   ensureProductsSeeded,
 } from "@/lib/products";
 
+export const dynamic = "force-dynamic";
+
 type ProductPayload = {
   name?: string;
   slug?: string;

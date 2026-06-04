@@ -37,6 +37,19 @@ export function clampCashbackPercent(value: number) {
   return Math.min(50, Math.max(0, Math.floor(value)));
 }
 
+export function resolveStoreLabel(input: {
+  storeLabel?: string | null;
+  metadataSource?: string | null;
+}) {
+  const source = input.metadataSource?.trim().toLowerCase();
+  if (source === "g2a") return "G2A";
+  if (source === "steam") return "Steam";
+  if (source === "rawg") return "RAWG";
+
+  const storeLabel = input.storeLabel?.trim();
+  return storeLabel || "GameZone";
+}
+
 function inferPlatformFromTitle(title: string) {
   const lower = title.toLowerCase();
   if (lower.includes("xbox")) return "Xbox";

@@ -72,7 +72,7 @@ export function GameGrid({ games }: Props) {
   }, [games]);
 
   return (
-    <section>
+    <section id="game-results">
       <div className="section-header">
         <div>
           <h2 className="section-title">

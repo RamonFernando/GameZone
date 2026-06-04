@@ -62,6 +62,11 @@ function signalLabel(rawgGame: RawgTrendingGame) {
   return "Tendencia detectada";
 }
 
+function imageFromRawg(rawgGame: RawgTrendingGame) {
+  const image = rawgGame.background_image?.trim();
+  return image && (image.startsWith("https://") || image.startsWith("http://")) ? image : null;
+}
+
 async function rawgFetchTrending() {
   const apiKey = process.env.RAWG_API_KEY;
   if (!apiKey) return null;
@@ -119,7 +124,11 @@ export async function listMarketTrendingGames(limit = 3) {
       return {
         rank: index + 1,
         title: rawgGame.name ?? catalogProduct?.name ?? "Juego destacado",
-        image: catalogProduct?.coverImage ?? products[index % products.length]?.coverImage ?? "/hero/hogwarts-legacy-cover.jpg",
+        image:
+          imageFromRawg(rawgGame) ??
+          catalogProduct?.coverImage ??
+          products[index % products.length]?.coverImage ??
+          "/hero/hogwarts-legacy-cover.jpg",
         platform: platformLabel(rawgGame, catalogProduct),
         signal: signalLabel(rawgGame),
         source: "RAWG trending",

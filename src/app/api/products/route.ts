@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { computeDiscountedPrice, listActiveProducts } from "@/lib/products";
+import { computeDiscountedPrice, listActiveProducts, resolveStoreLabel } from "@/lib/products";
 import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
 
 export async function GET(request: Request) {
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
         coverImage: product.coverImage,
         platform: product.platform,
         region: product.region,
-        storeLabel: product.storeLabel,
+        storeLabel: resolveStoreLabel(product),
         cardSubtitle: product.cardSubtitle,
         priceOriginal: product.priceOriginal,
         discountPercent: product.discountPercent,

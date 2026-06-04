@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { clampDiscountPercent } from "@/lib/products";
+import { clampDiscountPercent, resolveStoreLabel } from "@/lib/products";
 import { slugify } from "@/lib/games";
 import { listMarketPulse, type MarketPulseItem } from "@/lib/market/pulse";
 
@@ -46,6 +46,7 @@ async function syncMatchedProduct(item: MarketPulseItem, mode: SyncMode) {
     coverImage: validImage(item.image) ? item.image : undefined,
     platform: item.platform || undefined,
     priceOriginal: item.source === "G2A" && typeof item.g2aPrice === "number" ? item.g2aPrice : undefined,
+    storeLabel: resolveStoreLabel({ metadataSource: item.source }),
     metadataSource: item.source,
     metadataUpdatedAt: new Date(),
   };
@@ -110,6 +111,7 @@ async function createMissingProduct(item: MarketPulseItem, mode: SyncMode) {
       data: {
         coverImage: item.image,
         platform: item.platform,
+        storeLabel: resolveStoreLabel({ metadataSource: item.source }),
         metadataSource: item.source,
         metadataUpdatedAt: new Date(),
       },
@@ -140,7 +142,7 @@ async function createMissingProduct(item: MarketPulseItem, mode: SyncMode) {
       coverImage: item.image,
       platform: item.platform || "PC",
       region: "EUROPA",
-      storeLabel: item.source === "Steam" ? "Steam" : "Marketplace",
+      storeLabel: resolveStoreLabel({ metadataSource: item.source }),
       cardSubtitle: "Codigo digital oficial",
       priceOriginal: price,
       discountPercent: clampDiscountPercent(0),
@@ -165,16 +167,29 @@ export async function syncProductsFromMarketPulse(options: MarketProductSyncOpti
   const pulse = await listMarketPulse();
   const mode: SyncMode = options.dryRun ? "dry-run" : "write";
   const seen = new Set<string>();
+  const skippedSourceImageMatches: MarketPulseItem[] = [];
   const results: MarketProductSyncResult[] = [];
 
   for (const section of pulse.sections) {
     for (const item of section.items) {
       const key = item.catalogMatch.slug ?? slugify(item.title);
-      if (seen.has(key)) continue;
+      if (seen.has(key)) {
+        if ((section.source === "RAWG" || section.source === "Steam") && item.catalogMatch.slug) {
+          skippedSourceImageMatches.push(item);
+        }
+        continue;
+      }
       seen.add(key);
 
       const matchedResult = await syncMatchedProduct(item, mode);
       results.push(matchedResult ?? (await createMissingProduct(item, mode)));
+    }
+  }
+
+  for (const item of skippedSourceImageMatches) {
+    const matchedResult = await syncMatchedProduct(item, mode);
+    if (matchedResult) {
+      results.push(matchedResult);
     }
   }
 

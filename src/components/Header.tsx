@@ -137,6 +137,31 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     (topTransparentOnTop ? " header-shell--top-transparent" : "") +
     (isScrolled ? " header-shell--scrolled" : "");
 
+  const handleSearchEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") return;
+
+    event.preventDefault();
+    event.currentTarget.blur();
+  };
+
+  const scrollToSearchResults = () => {
+    window.requestAnimationFrame(() => {
+      document.getElementById("game-results")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
+
+  const handleSearchChange = (value: string) => {
+    const shouldScrollToResults = !query.trim() && value.trim();
+    setQuery(value);
+
+    if (shouldScrollToResults) {
+      scrollToSearchResults();
+    }
+  };
+
   return (
     <header className={headerClassName}>
       <div className="navbar">
@@ -217,13 +242,8 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
               placeholder={lang === "en" ? "Search..." : "Buscar..."}
               className="nav-search-input"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.currentTarget.blur();
-                  setQuery("");
-                }
-              }}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              onKeyDown={handleSearchEnter}
             />
           </div>
 
@@ -308,7 +328,8 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
             placeholder={lang === "en" ? "Search..." : "Buscar..."}
             className="nav-search-input"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            onKeyDown={handleSearchEnter}
           />
         </div>
 

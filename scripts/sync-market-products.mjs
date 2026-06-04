@@ -33,6 +33,14 @@ function createDescription(item) {
   return `Ficha sincronizada desde ${item.source}: ${item.signal}. Ranking #${item.rank}.`;
 }
 
+function resolveStoreLabel(item) {
+  const source = String(item.source ?? "").trim().toLowerCase();
+  if (source === "g2a") return "G2A";
+  if (source === "steam") return "Steam";
+  if (source === "rawg") return "RAWG";
+  return "GameZone";
+}
+
 async function syncItem(item) {
   const matchedSlug =
     item.catalogMatch?.matchScore >= catalogMatchSyncScore ? item.catalogMatch?.slug : null;
@@ -50,6 +58,7 @@ async function syncItem(item) {
           coverImage: validImage(item.image) ? item.image : existing.coverImage,
           platform: item.platform || existing.platform,
           priceOriginal: item.source === "G2A" && typeof item.g2aPrice === "number" ? item.g2aPrice : existing.priceOriginal,
+          storeLabel: resolveStoreLabel(item),
           metadataSource: item.source,
           metadataUpdatedAt: new Date(),
         },
@@ -81,7 +90,7 @@ async function syncItem(item) {
         coverImage: item.image,
         platform: item.platform || "PC",
         region: "EUROPA",
-        storeLabel: item.source === "Steam" ? "Steam" : "Marketplace",
+        storeLabel: resolveStoreLabel(item),
         cardSubtitle: "Codigo digital oficial",
         priceOriginal: price,
         discountPercent: 0,
@@ -114,15 +123,25 @@ async function main() {
     ? pulse.sections ?? []
     : (pulse.sections ?? []).filter((section) => section.source === "G2A");
   const seen = new Set();
+  const skippedSourceImageMatches = [];
   const results = [];
 
   for (const section of sections) {
     for (const item of section.items ?? []) {
       const key = item.catalogMatch?.slug ?? slugify(item.title);
-      if (seen.has(key)) continue;
+      if (seen.has(key)) {
+        if ((section.source === "RAWG" || section.source === "Steam") && item.catalogMatch?.slug) {
+          skippedSourceImageMatches.push(item);
+        }
+        continue;
+      }
       seen.add(key);
       results.push(await syncItem(item));
     }
+  }
+
+  for (const item of skippedSourceImageMatches) {
+    results.push(await syncItem(item));
   }
 
   const summary = {
