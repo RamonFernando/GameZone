@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
 import type { ProductPreview } from "@/types/product";
 
 export type CartItem = {
@@ -23,18 +24,19 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
-const STORAGE_KEY = "next-gaming-cart-v1";
+const LEGACY_STORAGE_KEY = "next-gaming-cart-v1";
+const FALLBACK_STORAGE_KEY = "next-gaming-cart-v1:anonymous";
 
 function computeSlug(game: ProductPreview): string {
   return game.slug;
 }
 
-function loadInitialCart(): CartItem[] {
+function loadInitialCart(storageKey: string): CartItem[] {
   if (typeof window === "undefined") {
     return [];
   }
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as CartItem[];
     if (!Array.isArray(parsed)) return [];
@@ -55,22 +57,75 @@ type ProviderProps = {
 };
 
 export function CartProvider({ children }: ProviderProps) {
+  const pathname = usePathname();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [storageKey, setStorageKey] = useState<string | null>(null);
+  const storageKeyRef = useRef<string | null>(null);
+  const itemsRef = useRef<CartItem[]>([]);
 
-  // Hydrate from localStorage only on the client.
   useEffect(() => {
-    setItems(loadInitialCart());
-  }, []);
+    itemsRef.current = items;
+  }, [items]);
+
+  // Hydrate from the cart scope assigned by the server for this browser/session.
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadScopedCart = async () => {
+      let nextStorageKey = FALLBACK_STORAGE_KEY;
+
+      try {
+        const response = await fetch("/api/cart/scope", { cache: "no-store" });
+        const payload = (await response.json()) as { cartStorageKey?: string };
+
+        if (response.ok && payload.cartStorageKey) {
+          nextStorageKey = payload.cartStorageKey;
+        }
+      } catch {
+        // Fallback keeps the cart usable in memory/localStorage if the API is unavailable.
+      }
+
+      if (cancelled) {
+        return;
+      }
+
+      const previousStorageKey = storageKeyRef.current;
+
+      if (previousStorageKey !== nextStorageKey) {
+        const scopedItems = loadInitialCart(nextStorageKey);
+        const nextItems =
+          previousStorageKey === null && itemsRef.current.length > 0 && scopedItems.length === 0
+            ? itemsRef.current
+            : scopedItems;
+
+        storageKeyRef.current = nextStorageKey;
+        setStorageKey(nextStorageKey);
+        setItems(nextItems);
+      }
+
+      try {
+        window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+      } catch {
+        // Ignore storage cleanup failures.
+      }
+    };
+
+    void loadScopedCart();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   // Keep localStorage in sync with state.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !storageKey) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      window.localStorage.setItem(storageKey, JSON.stringify(items));
     } catch {
       // Fail silently: carrito sigue funcionando en memoria.
     }
-  }, [items]);
+  }, [items, storageKey]);
 
   const totalItems = useMemo(
     () => items.reduce((acc, item) => acc + item.quantity, 0),
