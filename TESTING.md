@@ -125,6 +125,8 @@ Requiere en `.env`:
 - `PAYPAL_CLIENT_SECRET`
 - `PAYPAL_ENV=sandbox` o `PAYPAL_ENV=live`
 
+Con credenciales sandbox configuradas, el script debe crear una orden y devolver una URL `sandbox.paypal.com/checkoutnow?...`. `PAYPAL_WEBHOOK_ID` se configura aparte al probar webhooks.
+
 ## OAuth Social
 
 Con `npm run dev` activo, probar los inicios OAuth desde el navegador:

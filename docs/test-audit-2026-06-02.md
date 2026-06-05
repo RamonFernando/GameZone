@@ -17,7 +17,7 @@ La app base esta sana, pero no todo queda cerrado al 100%.
 ## Problemas encontrados
 
 - `npm run lint` falla porque `next lint` no funciona correctamente con Next `16.2.7`; interpreta `lint` como directorio.
-- `npm run e2e:paypal` falla porque faltan `PAYPAL_CLIENT_ID` y `PAYPAL_CLIENT_SECRET` en `.env`.
+- `npm run e2e:paypal`: OK tras configurar credenciales sandbox; crea orden y devuelve checkout URL de PayPal.
 - Webhook Stripe no se pudo probar porque Stripe CLI tiene una API key local caducada (`401 api_key_expired`).
 - OAuth parcial: Google esta configurado, pero Facebook y Twitter/X tienen `client id` y `secret` vacios.
 
@@ -29,7 +29,7 @@ La app base esta sana, pero no todo queda cerrado al 100%.
 ## Pendientes para dejarlo 100% listo
 
 - Corregir el script de lint. Hecho: ahora usa `eslint .` con config flat.
-- Configurar credenciales PayPal sandbox.
+- Configurar webhook PayPal sandbox/live y guardar `PAYPAL_WEBHOOK_ID`.
 - Renovar Stripe CLI con `stripe login` o una API key valida.
 - Probar webhooks Stripe con `stripe listen` y `stripe trigger`.
 - Completar credenciales Facebook y Twitter/X si se van a usar.
