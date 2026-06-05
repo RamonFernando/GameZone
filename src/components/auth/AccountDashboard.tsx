@@ -93,7 +93,10 @@ export function AccountDashboard() {
   const [lang, setLang] = useState<"es" | "en">("es");
 
   const totalSpent = useMemo(
-    () => orders.reduce((sum, order) => sum + order.totalAmount, 0),
+    () =>
+      orders
+        .filter((order) => order.status === "paid")
+        .reduce((sum, order) => sum + order.totalAmount, 0),
     [orders]
   );
   const hasProfileChanges = useMemo(() => {

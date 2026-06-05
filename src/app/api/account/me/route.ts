@@ -45,6 +45,7 @@ export async function GET(request: Request) {
         country: user.country,
         province: user.province,
         twoFactorEnabled: user.twoFactorEnabled,
+        totpEnabled: user.totpEnabled,
         pushAuthEnabled: user.pushAuthEnabled,
       },
     },
@@ -123,6 +124,9 @@ export async function PATCH(request: Request) {
           postalCode: updatedUser.postalCode,
           country: updatedUser.country,
           province: updatedUser.province,
+          twoFactorEnabled: updatedUser.twoFactorEnabled,
+          totpEnabled: updatedUser.totpEnabled,
+          pushAuthEnabled: updatedUser.pushAuthEnabled,
         },
       },
       { status: 200 }

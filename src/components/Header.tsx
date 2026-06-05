@@ -1,9 +1,10 @@
 // Header principal del sitio: logo, filtros de plataforma, buscador, carrito y avatar.
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
 import { useSearch } from "@/contexts/SearchContext";
@@ -40,6 +41,7 @@ const UI_LOCALE_OPTIONS: UiLocaleOption[] = [
 
 // Header que envuelve logo, filtros de plataforma, buscador, carrito y avatar.
 export function Header({ topTransparentOnTop = false }: HeaderProps) {
+  const pathname = usePathname();
   const { totalItems } = useCart();
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -162,6 +164,16 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     }
   };
 
+  const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    setQuery("");
+    setPlatform(null);
+
+    if (pathname === "/") {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <header className={headerClassName}>
       <div className="navbar">
@@ -170,10 +182,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
         <Link
           href="/"
           className="nav-logo"
-          onClick={() => {
-            setQuery("");
-            setPlatform(null);
-          }}
+          onClick={handleLogoClick}
         >
           <div className="nav-logo-mark">
             <span>

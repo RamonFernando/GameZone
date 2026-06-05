@@ -13,6 +13,9 @@ export async function GET(request: Request) {
   const orders = await prisma.order.findMany({
     where: {
       userId: authResult.auth.userId,
+      status: {
+        in: ["paid", "refunded"],
+      },
     },
     include: {
       items: true,

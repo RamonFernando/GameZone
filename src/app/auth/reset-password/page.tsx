@@ -59,9 +59,9 @@ function ResetPasswordContent() {
   };
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-form-panel" style={{ margin: "0 auto" }}>
+    <section className="auth-shell auth-shell--center">
+      <div className="card card-hover auth-card auth-card--single">
+        <div className="auth-form-panel">
           <header className="auth-header">
             <p className="auth-kicker">GameZone Access</p>
             <h1 className="auth-title">Nueva contraseña</h1>

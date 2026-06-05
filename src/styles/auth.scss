@@ -7,9 +7,18 @@
     margin-top: 1.75rem;
     }
 
+    .auth-shell--center {
+    display: flex;
+    justify-content: center;
+    }
+
     /* Card de login: reutiliza .card, pero ajustamos padding interno */
     .auth-card {
     padding: 0;
+    }
+
+    .auth-card--single .auth-form-panel {
+    width: min(100%, 560px);
     }
 
     /* Grid principal: formulario + imagen lateral */

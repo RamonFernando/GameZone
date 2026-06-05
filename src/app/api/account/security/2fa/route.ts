@@ -30,9 +30,8 @@ export async function PATCH(request: Request) {
     data: {
       twoFactorEnabled: enabled,
       twoFactorChannel: enabled ? "email" : null,
-      // Si desactivamos 2FA, limpiar cualquier reto pendiente
-      twoFactorCodeHash: enabled ? undefined : null,
-      twoFactorCodeExpiresAt: enabled ? undefined : null,
+      twoFactorCodeHash: null,
+      twoFactorCodeExpiresAt: null,
     },
     select: {
       id: true,
@@ -53,4 +52,3 @@ export async function PATCH(request: Request) {
     { status: 200 }
   );
 }
-

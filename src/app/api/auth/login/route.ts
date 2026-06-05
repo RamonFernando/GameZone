@@ -148,11 +148,42 @@ export async function POST(request: Request) {
         );
       }
 
-      await sendTwoFactorCodeEmail({
-        to: challenge.email,
-        username: challenge.name || challenge.email,
-        code: rawCode,
-      });
+      try {
+        await sendTwoFactorCodeEmail({
+          to: challenge.email,
+          username: challenge.name || challenge.email,
+          code: rawCode,
+        });
+      } catch (error) {
+        const isLocalRequest = new URL(request.url).hostname === "localhost";
+        if (!isLocalRequest) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              twoFactorCodeHash: null,
+              twoFactorCodeExpiresAt: null,
+            },
+          });
+          console.error("No se pudo enviar código 2FA por email.", error);
+          return NextResponse.json(
+            {
+              message: "No se pudo enviar el código 2FA por email.",
+              code: "TWO_FACTOR_EMAIL_FAILED",
+            },
+            { status: 502 }
+          );
+        }
+
+        return NextResponse.json(
+          {
+            message: `Modo local: usa este código 2FA de prueba: ${rawCode}`,
+            code: "TWO_FACTOR_REQUIRED",
+            challengeId: challenge.id,
+            devCode: rawCode,
+          },
+          { status: 200 }
+        );
+      }
 
       return NextResponse.json(
         {
