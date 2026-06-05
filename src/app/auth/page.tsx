@@ -392,7 +392,7 @@ return (
                                 required
                             />
                             <div className="auth-field-helper">
-                                <Link href="#" className="auth-link">
+                                <Link href="/auth/forgot-password" className="auth-link">
                                   {lang === "en" ? "Forgot your password?" : "¿Olvidaste la contraseña?"}
                                 </Link>
                             </div>

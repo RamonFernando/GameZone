@@ -132,6 +132,40 @@ export async function sendTwoFactorCodeEmail(input: {
   }
 }
 
+export async function sendPasswordResetEmail(input: {
+  to: string;
+  username: string;
+  resetUrl: string;
+}) {
+  const { transporter, from, isTestTransport } = await getMailerConfig();
+  const info = await transporter.sendMail({
+    from,
+    to: input.to,
+    subject: "Restablece tu contraseña de GameZone",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h1>Restablecer contraseña</h1>
+        <p>Hola ${input.username},</p>
+        <p>Hemos recibido una solicitud para cambiar la contraseña de tu cuenta.</p>
+        <p>
+          <a href="${input.resetUrl}" target="_blank" rel="noopener noreferrer">
+            Crear nueva contraseña
+          </a>
+        </p>
+        <p>Si no has solicitado este cambio, puedes ignorar este correo.</p>
+      </div>
+    `,
+    text: `Hola ${input.username}, restablece tu contraseña aquí: ${input.resetUrl}`,
+  });
+
+  if (isTestTransport) {
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`Vista previa email de recuperación: ${previewUrl}`);
+    }
+  }
+}
+
 export async function sendPurchaseConfirmationEmail(input: {
   to: string;
   username: string;

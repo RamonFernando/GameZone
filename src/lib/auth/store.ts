@@ -33,6 +33,8 @@ export class VerificationTokenExpiredError extends Error {}
 export class InvalidCredentialsError extends Error {}
 export class AccountNotVerifiedError extends Error {}
 export class AccountAlreadyVerifiedError extends Error {}
+export class PasswordResetTokenExpiredError extends Error {}
+export class InvalidPasswordResetTokenError extends Error {}
 
 export function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -56,6 +58,10 @@ export async function verifyPassword(password: string, storedHash: string) {
 export function createRawVerificationToken() {
   const token = randomUUID().replaceAll("-", "") + randomUUID().replaceAll("-", "");
   return token;
+}
+
+export function createRawPasswordResetToken() {
+  return createRawVerificationToken();
 }
 
 export async function createUserWithVerificationToken(input: {
@@ -100,6 +106,45 @@ export async function getUserByEmail(email: string) {
   return prisma.user.findUnique({
     where: {
       email: email.trim().toLowerCase(),
+    },
+  });
+}
+
+export async function setPasswordResetToken(input: {
+  email: string;
+  resetToken: string;
+  resetTokenExpiresAt: Date;
+}) {
+  const normalizedEmail = input.email.trim().toLowerCase();
+  return prisma.user.update({
+    where: { email: normalizedEmail },
+    data: {
+      passwordResetTokenHash: hashToken(input.resetToken),
+      passwordResetTokenExpiresAt: input.resetTokenExpiresAt,
+    },
+  });
+}
+
+export async function resetPasswordWithToken(input: { token: string; password: string }) {
+  const tokenHash = hashToken(input.token);
+  const user = await prisma.user.findUnique({
+    where: { passwordResetTokenHash: tokenHash },
+  });
+
+  if (!user) {
+    throw new InvalidPasswordResetTokenError("Invalid password reset token");
+  }
+
+  if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt.getTime() < Date.now()) {
+    throw new PasswordResetTokenExpiredError("Password reset token expired");
+  }
+
+  return prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash: await hashPassword(input.password),
+      passwordResetTokenHash: null,
+      passwordResetTokenExpiresAt: null,
     },
   });
 }

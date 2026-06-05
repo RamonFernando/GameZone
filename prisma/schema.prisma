@@ -22,6 +22,8 @@ model User {
   isVerified                 Boolean        @default(false)
   verificationTokenHash      String?        @unique
   verificationTokenExpiresAt DateTime?
+  passwordResetTokenHash     String?        @unique
+  passwordResetTokenExpiresAt DateTime?
   avatarUrl                  String?
   phone                      String?
   addressLine1               String?
