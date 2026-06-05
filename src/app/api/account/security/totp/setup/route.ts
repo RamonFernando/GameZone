@@ -30,6 +30,17 @@ export async function POST(request: Request) {
     );
   }
 
+  if (user.twoFactorEnabled) {
+    return NextResponse.json(
+      {
+        message:
+          "Ya tienes 2FA por email activado. Para usar 2FA con app, primero desactiva 2FA por email.",
+        code: "EMAIL_2FA_ALREADY_ENABLED",
+      },
+      { status: 409 }
+    );
+  }
+
   const secret = generateSecret();
   const label = user.email || user.name || "usuario";
   const issuer = "GameZone";

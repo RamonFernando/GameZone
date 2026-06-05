@@ -99,6 +99,8 @@ export function AccountDashboard() {
         .reduce((sum, order) => sum + order.totalAmount, 0),
     [orders]
   );
+  const emailTwoFactorBlockedByTotp = totpEnabled && !twoFactorEnabled;
+  const totpBlockedByEmail = twoFactorEnabled && !totpEnabled;
   const hasProfileChanges = useMemo(() => {
     if (!profile) {
       return false;
@@ -317,6 +319,15 @@ export function AccountDashboard() {
 
   const handleToggleTwoFactor = async () => {
     setTwoFactorMessage("");
+    if (!twoFactorEnabled && emailTwoFactorBlockedByTotp) {
+      setTwoFactorMessage(
+        lang === "en"
+          ? "Button disabled: you already have 2FA with app enabled. Disable 2FA with app first if you want to use email codes."
+          : "Botón desactivado: ya tienes 2FA con app activado. Desactiva primero 2FA con app si quieres usar códigos por email."
+      );
+      return;
+    }
+
     try {
       setIsUpdatingTwoFactor(true);
       const response = await fetch("/api/account/security/2fa", {
@@ -351,6 +362,14 @@ export function AccountDashboard() {
     setTotpSecret("");
     setTotpQrDataUrl("");
     setTotpCodeDraft("");
+    if (totpBlockedByEmail) {
+      setTotpMessage(
+        lang === "en"
+          ? "Button disabled: you already have 2FA by email enabled. Disable email 2FA first if you want to use an authenticator app."
+          : "Botón desactivado: ya tienes 2FA por email activado. Desactiva primero 2FA por email si quieres usar una app autenticadora."
+      );
+      return;
+    }
 
     try {
       setIsUpdatingTotp(true);
@@ -797,7 +816,7 @@ export function AccountDashboard() {
               "button-primary auth-submit-compact auth-center-button btn-padding-site"
             }
             onClick={handleToggleTwoFactor}
-            disabled={isUpdatingTwoFactor}
+            disabled={isUpdatingTwoFactor || emailTwoFactorBlockedByTotp}
           >
             {isUpdatingTwoFactor
               ? lang === "en"
@@ -811,6 +830,14 @@ export function AccountDashboard() {
                   ? "Enable 2FA by email"
                   : "Activar 2FA por email"}
           </button>
+
+          {emailTwoFactorBlockedByTotp ? (
+            <p className="auth-alt" role="status" aria-live="polite">
+              {lang === "en"
+                ? "Button disabled: you already have 2FA with app enabled. Disable 2FA with app first if you want to use email codes."
+                : "Botón desactivado: ya tienes 2FA con app activado. Desactiva primero 2FA con app si quieres usar códigos por email."}
+            </p>
+          ) : null}
 
           <p className="auth-alt">
             {lang === "en" ? "Current status:" : "Estado actual:"}{" "}
@@ -852,7 +879,7 @@ export function AccountDashboard() {
                 type="button"
                 className="button-primary auth-submit-compact auth-center-button btn-padding-site"
                 onClick={handleStartTotpSetup}
-                disabled={isUpdatingTotp}
+                disabled={isUpdatingTotp || totpBlockedByEmail}
               >
                 {isUpdatingTotp
                   ? lang === "en"
@@ -862,6 +889,14 @@ export function AccountDashboard() {
                     ? "Start setup with app (QR)"
                     : "Iniciar configuración con app (QR)"}
               </button>
+
+              {totpBlockedByEmail ? (
+                <p className="auth-alt" role="status" aria-live="polite">
+                  {lang === "en"
+                    ? "Button disabled: you already have 2FA by email enabled. Disable email 2FA first if you want to use an authenticator app."
+                    : "Botón desactivado: ya tienes 2FA por email activado. Desactiva primero 2FA por email si quieres usar una app autenticadora."}
+                </p>
+              ) : null}
 
               {totpSecret && (
                 <div className="auth-field" style={{ marginTop: "0.75rem" }}>

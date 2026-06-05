@@ -25,6 +25,24 @@ export async function PATCH(request: Request) {
 
   const enabled = Boolean(payload.enabled);
 
+  if (enabled) {
+    const user = await prisma.user.findUnique({
+      where: { id: authResult.auth.userId },
+      select: { totpEnabled: true },
+    });
+
+    if (user?.totpEnabled) {
+      return NextResponse.json(
+        {
+          message:
+            "Ya tienes 2FA con app activado. Para usar 2FA por email, primero desactiva 2FA con app.",
+          code: "TOTP_ALREADY_ENABLED",
+        },
+        { status: 409 }
+      );
+    }
+  }
+
   const updatedUser = await prisma.user.update({
     where: { id: authResult.auth.userId },
     data: {

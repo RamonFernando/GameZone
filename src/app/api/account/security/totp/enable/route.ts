@@ -35,6 +35,22 @@ export async function POST(request: Request) {
     );
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: authResult.auth.userId },
+    select: { twoFactorEnabled: true },
+  });
+
+  if (user?.twoFactorEnabled) {
+    return NextResponse.json(
+      {
+        message:
+          "Ya tienes 2FA por email activado. Para usar 2FA con app, primero desactiva 2FA por email.",
+        code: "EMAIL_2FA_ALREADY_ENABLED",
+      },
+      { status: 409 }
+    );
+  }
+
   const { valid: isValid } = await verify({ secret, token: code, epochTolerance: 30 });
   if (!isValid) {
     return NextResponse.json(

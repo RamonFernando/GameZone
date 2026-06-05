@@ -144,6 +144,29 @@
     align-self: center;
     }
 
+    .auth-shell .button-primary:disabled,
+    .auth-shell .button-ghost:disabled {
+    background: rgba(30, 41, 59, 0.75);
+    border-color: rgba(148, 163, 184, 0.22);
+    color: #94a3b8;
+    cursor: not-allowed;
+    filter: grayscale(0.55) brightness(0.82);
+    box-shadow: none;
+    opacity: 0.72;
+    transform: none;
+    }
+
+    .auth-shell .button-primary:disabled:hover,
+    .auth-shell .button-ghost:disabled:hover {
+    background: rgba(30, 41, 59, 0.75);
+    border-color: rgba(148, 163, 184, 0.22);
+    color: #94a3b8;
+    cursor: not-allowed;
+    filter: grayscale(0.55) brightness(0.82);
+    box-shadow: none;
+    transform: none;
+    }
+
     /* Mismo color de letra que el resto en Mi cuenta (visible en todos los dispositivos) */
     .auth-form-panel .button-ghost {
       color: #cbd5e1;
