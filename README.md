@@ -437,6 +437,7 @@ Cuando usarlo:
 1. Copia en `.env`:
    - `FACEBOOK_CLIENT_ID`
    - `FACEBOOK_CLIENT_SECRET`
+   - `FACEBOOK_CONFIG_ID` si tu app usa Facebook Login con configuracion/caso de uso.
 1. Opcional: fija `FACEBOOK_REDIRECT_URI` si usas otro dominio/puerto.
 
 ### Twitter/X

@@ -6,6 +6,7 @@ type OAuthProviderConfig = {
   clientId: string;
   clientSecret: string;
   redirectUri: string;
+  configId?: string;
 };
 
 type OAuthCookiePayload = {
@@ -232,10 +233,11 @@ function getGoogleConfig(requestUrl: string): OAuthProviderConfig {
 function getFacebookConfig(requestUrl: string): OAuthProviderConfig {
   const clientId = process.env.FACEBOOK_CLIENT_ID ?? "";
   const clientSecret = process.env.FACEBOOK_CLIENT_SECRET ?? "";
+  const configId = process.env.FACEBOOK_CONFIG_ID?.trim() || undefined;
   const redirectUri =
     process.env.FACEBOOK_REDIRECT_URI ??
     `${getBaseUrl(requestUrl)}/api/auth/oauth/facebook/callback`;
-  return { clientId, clientSecret, redirectUri };
+  return { clientId, clientSecret, redirectUri, configId };
 }
 
 function getTwitterConfig(requestUrl: string): OAuthProviderConfig {
@@ -285,7 +287,11 @@ export function buildOAuthAuthorizationUrl(input: {
     url.searchParams.set("client_id", config.clientId);
     url.searchParams.set("redirect_uri", config.redirectUri);
     url.searchParams.set("response_type", "code");
-    url.searchParams.set("scope", "email,public_profile");
+    if (config.configId) {
+      url.searchParams.set("config_id", config.configId);
+    } else {
+      url.searchParams.set("scope", "email");
+    }
     url.searchParams.set("state", input.state);
     return url.toString();
   }
