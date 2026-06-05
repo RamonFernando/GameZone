@@ -869,6 +869,7 @@ export function AccountDashboard() {
                         alt="Código QR para app de autenticación"
                         width={180}
                         height={180}
+                        unoptimized
                         style={{ maxWidth: 180, height: "auto", margin: "0 auto" }}
                       />
                     </div>

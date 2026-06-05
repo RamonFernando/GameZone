@@ -44,6 +44,7 @@ export async function POST(request: Request) {
   const { valid: isValid } = await verify({
     secret: user.totpSecret,
     token: code,
+    epochTolerance: 30,
   });
   if (!isValid) {
     return NextResponse.json(
@@ -76,4 +77,3 @@ export async function POST(request: Request) {
 
   return response;
 }
-

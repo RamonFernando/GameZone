@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { valid: isValid } = await verify({ secret, token: code });
+  const { valid: isValid } = await verify({ secret, token: code, epochTolerance: 30 });
   if (!isValid) {
     return NextResponse.json(
       { message: "El código de la app no es válido. Revisa que el reloj del dispositivo esté ajustado.", code: "TOTP_CODE_INVALID" },
@@ -67,4 +67,3 @@ export async function POST(request: Request) {
     { status: 200 }
   );
 }
-
