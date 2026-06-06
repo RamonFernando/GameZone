@@ -23,6 +23,7 @@ export function LogoutButton() {
         return;
       }
 
+      window.dispatchEvent(new Event("gamezone:auth-changed"));
       router.push("/auth");
       router.refresh();
     } catch {

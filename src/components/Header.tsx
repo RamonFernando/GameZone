@@ -39,6 +39,8 @@ const UI_LOCALE_OPTIONS: UiLocaleOption[] = [
   { value: "en-US", label: "EN · USD", currency: "USD" },
 ];
 
+const AUTH_CHANGED_EVENT = "gamezone:auth-changed";
+
 // Header que envuelve logo, filtros de plataforma, buscador, carrito y avatar.
 export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const pathname = usePathname();
@@ -82,21 +84,33 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     let cancelled = false;
     const loadProfile = async () => {
       try {
-        const res = await fetch("/api/account/me");
+        const res = await fetch("/api/account/me", { cache: "no-store" });
         if (!res.ok) {
+          if (!cancelled) {
+            setMiniProfile(null);
+          }
           return;
         }
         const payload = (await res.json()) as { user?: MiniProfile };
-        if (!cancelled && payload.user) {
-          setMiniProfile(payload.user);
+        if (!cancelled) {
+          setMiniProfile(payload.user ?? null);
         }
       } catch {
-        // Si falla, simplemente dejamos el icono genérico.
+        if (!cancelled) {
+          setMiniProfile(null);
+        }
       }
     };
+
+    const handleAuthChanged = () => {
+      void loadProfile();
+    };
+
     void loadProfile();
+    window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     return () => {
       cancelled = true;
+      window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     };
   }, []);
 
