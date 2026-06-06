@@ -201,6 +201,8 @@ npm run enrich:games -- --limit 3
 - `market:sync:dry`: sincronizacion de catalogos en modo simulacion.
 - `market:sync`: sincronizacion de catalogos con escritura en base de datos.
 - `--all`: incluye todas las fuentes disponibles del pulso de mercado.
+- Para simular mejor el boton admin desde CLI, levantar antes `npm run dev` y ejecutar `npm run market:sync:dry -- --all`.
+- El boton admin y el cron piden datos frescos a G2A, Steam y RAWG; los scripts consumen `GET /api/market/pulse`, que puede conservar cache del dashboard.
 - `enrich:games`: enriquece datos de juegos desde RAWG.
 - `enrich:games -- --slug slug-del-juego --dry-run`: prueba el emparejamiento RAWG de un juego sin guardar.
 - `enrich:games -- --slug slug-del-juego`: guarda metadata RAWG para un juego concreto.

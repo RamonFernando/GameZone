@@ -339,11 +339,15 @@ Tambien hay scripts locales:
 ```bash
 npm.cmd run market:sync:dry
 npm.cmd run market:sync
+npm.cmd run market:sync:dry -- --all
+npm.cmd run market:sync -- --all
 ```
 
 - `market:sync:dry`: previsualiza sincronizacion G2A sin escribir.
 - `market:sync`: escribe en la BD local usando los datos filtrados de G2A.
+- `--all`: incluye todas las fuentes del pulso de mercado: G2A, Steam y RAWG.
 - Ambos scripts esperan el servidor dev levantado, porque consumen `GET /api/market/pulse`.
+- El boton admin y el cron usan `runCatalogSync()` directamente y piden datos frescos a G2A, Steam y RAWG; la ruta publica `GET /api/market/pulse` conserva cache para lecturas del dashboard.
 
 ### Cruce con catalogo GameZone
 
