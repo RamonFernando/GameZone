@@ -80,6 +80,7 @@ export function AccountDashboard() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"account" | "details" | "security">("account");
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [isUpdatingTwoFactor, setIsUpdatingTwoFactor] = useState(false);
@@ -101,6 +102,36 @@ export function AccountDashboard() {
   );
   const emailTwoFactorBlockedByTotp = totpEnabled && !twoFactorEnabled;
   const totpBlockedByEmail = twoFactorEnabled && !totpEnabled;
+  const personalDataRows = useMemo(
+    () => [
+      {
+        label: lang === "en" ? "Phone" : "Teléfono",
+        value: profile?.phone,
+      },
+      {
+        label: lang === "en" ? "Address" : "Dirección",
+        value: profile?.addressLine1,
+      },
+      {
+        label: lang === "en" ? "City" : "Ciudad",
+        value: profile?.city,
+      },
+      {
+        label: lang === "en" ? "Postal code" : "Código postal",
+        value: profile?.postalCode,
+      },
+      {
+        label: lang === "en" ? "Province" : "Provincia",
+        value: profile?.province,
+      },
+      {
+        label: lang === "en" ? "Country" : "País",
+        value: profile?.country,
+      },
+    ],
+    [lang, profile]
+  );
+  const hasPersonalData = personalDataRows.some((row) => Boolean(row.value?.trim()));
   const hasProfileChanges = useMemo(() => {
     if (!profile) {
       return false;
@@ -243,6 +274,7 @@ export function AccountDashboard() {
         setPostalCodeDraft(payload.user.postalCode ?? "");
         setCountryDraft(payload.user.country ?? "");
         setProvinceDraft(payload.user.province ?? "");
+        setIsEditingDetails(false);
       }
       setProfileMessageType("success");
       setProfileMessage(payload.message ?? "Perfil actualizado.");
@@ -292,6 +324,28 @@ export function AccountDashboard() {
     } finally {
       setIsUploadingAvatar(false);
     }
+  };
+
+  const resetDetailsDrafts = () => {
+    setAvatarUrlDraft(profile?.avatarUrl ?? "");
+    setPhoneDraft(profile?.phone ?? "");
+    setAddressDraft(profile?.addressLine1 ?? "");
+    setCityDraft(profile?.city ?? "");
+    setPostalCodeDraft(profile?.postalCode ?? "");
+    setCountryDraft(profile?.country ?? "");
+    setProvinceDraft(profile?.province ?? "");
+  };
+
+  const openDetailsEditor = () => {
+    resetDetailsDrafts();
+    setProfileMessage("");
+    setIsEditingDetails(true);
+  };
+
+  const closeDetailsEditor = () => {
+    resetDetailsDrafts();
+    setProfileMessage("");
+    setIsEditingDetails(false);
   };
 
   const handleLogoutAll = async () => {
@@ -652,140 +706,201 @@ export function AccountDashboard() {
 
       {activeTab === "details" ? (
         <>
-          <div className="auth-field">
-            <label htmlFor="profile-avatar-url" className="auth-label">
-              {lang === "en" ? "Avatar URL (optional)" : "URL de avatar (opcional)"}
-            </label>
-            <input
-              id="profile-avatar-url"
-              type="url"
-              className="auth-input"
-              placeholder="https://.../mi-foto.png"
-              value={avatarUrlDraft}
-              onChange={(event) => setAvatarUrlDraft(event.target.value)}
-            />
-          </div>
+          {!isEditingDetails ? (
+            <>
+              <div className="account-details-summary">
+                <div className="account-details-summary-head">
+                  <div>
+                    <span className="auth-label">
+                      {lang === "en" ? "Saved personal data" : "Datos personales guardados"}
+                    </span>
+                    <p className="auth-alt">
+                      {lang === "en"
+                        ? "This information can be used for receipts, order support and account management."
+                        : "Esta información puede usarse para recibos, soporte de pedidos y gestión de tu cuenta."}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="button-primary auth-submit-compact btn-padding-site"
+                    onClick={openDetailsEditor}
+                  >
+                    {hasPersonalData
+                      ? lang === "en"
+                        ? "Edit data"
+                        : "Editar datos"
+                      : lang === "en"
+                        ? "Add data"
+                        : "Añadir datos"}
+                  </button>
+                </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-avatar-file" className="auth-label">
-              {lang === "en" ? "Upload profile image" : "Subir imagen de perfil"}
-            </label>
-            <input
-              id="profile-avatar-file"
-              type="file"
-              accept="image/*"
-              className="auth-input"
-              onChange={handleAvatarFileChange}
-            />
-            {isUploadingAvatar ? (
-              <p className="auth-alt">
-                {lang === "en" ? "Uploading avatar..." : "Subiendo avatar..."}
-              </p>
-            ) : (
-              <p className="auth-alt">
-                {lang === "en"
-                  ? "You can choose an image from your computer. We will save it as your profile picture."
-                  : "Puedes elegir una imagen de tu ordenador. La guardaremos como tu foto de perfil."}
-              </p>
-            )}
-          </div>
+                {hasPersonalData ? (
+                  <dl className="account-details-list">
+                    {personalDataRows.map((row) => (
+                      <div className="account-details-row" key={row.label}>
+                        <dt>{row.label}</dt>
+                        <dd>{row.value?.trim() || (lang === "en" ? "Not set" : "Sin completar")}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p className="auth-alt">
+                    {lang === "en"
+                      ? "You have not added personal data yet."
+                      : "Todavía no has añadido datos personales."}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="auth-field">
+                <label htmlFor="profile-avatar-url" className="auth-label">
+                  {lang === "en" ? "Avatar URL (optional)" : "URL de avatar (opcional)"}
+                </label>
+                <input
+                  id="profile-avatar-url"
+                  type="url"
+                  className="auth-input"
+                  placeholder="https://.../mi-foto.png"
+                  value={avatarUrlDraft}
+                  onChange={(event) => setAvatarUrlDraft(event.target.value)}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-phone" className="auth-label">
-              {lang === "en" ? "Phone" : "Teléfono"}
-            </label>
-            <input
-              id="profile-phone"
-              type="tel"
-              className="auth-input"
-              value={phoneDraft}
-              onChange={(event) => setPhoneDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-avatar-file" className="auth-label">
+                  {lang === "en" ? "Upload profile image" : "Subir imagen de perfil"}
+                </label>
+                <input
+                  id="profile-avatar-file"
+                  type="file"
+                  accept="image/*"
+                  className="auth-input"
+                  onChange={handleAvatarFileChange}
+                />
+                {isUploadingAvatar ? (
+                  <p className="auth-alt">
+                    {lang === "en" ? "Uploading avatar..." : "Subiendo avatar..."}
+                  </p>
+                ) : (
+                  <p className="auth-alt">
+                    {lang === "en"
+                      ? "You can choose an image from your computer. We will save it as your profile picture."
+                      : "Puedes elegir una imagen de tu ordenador. La guardaremos como tu foto de perfil."}
+                  </p>
+                )}
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-address" className="auth-label">
-              {lang === "en" ? "Address" : "Dirección"}
-            </label>
-            <input
-              id="profile-address"
-              type="text"
-              className="auth-input"
-              value={addressDraft}
-              onChange={(event) => setAddressDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-phone" className="auth-label">
+                  {lang === "en" ? "Phone" : "Teléfono"}
+                </label>
+                <input
+                  id="profile-phone"
+                  type="tel"
+                  className="auth-input"
+                  value={phoneDraft}
+                  onChange={(event) => setPhoneDraft(event.target.value)}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-city" className="auth-label">
-              {lang === "en" ? "City" : "Ciudad"}
-            </label>
-            <input
-              id="profile-city"
-              type="text"
-              className="auth-input"
-              value={cityDraft}
-              onChange={(event) => setCityDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-address" className="auth-label">
+                  {lang === "en" ? "Address" : "Dirección"}
+                </label>
+                <input
+                  id="profile-address"
+                  type="text"
+                  className="auth-input"
+                  value={addressDraft}
+                  onChange={(event) => setAddressDraft(event.target.value)}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-postal" className="auth-label">
-              {lang === "en" ? "Postal code" : "Código postal"}
-            </label>
-            <input
-              id="profile-postal"
-              type="text"
-              className="auth-input"
-              value={postalCodeDraft}
-              onChange={(event) => setPostalCodeDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-city" className="auth-label">
+                  {lang === "en" ? "City" : "Ciudad"}
+                </label>
+                <input
+                  id="profile-city"
+                  type="text"
+                  className="auth-input"
+                  value={cityDraft}
+                  onChange={(event) => setCityDraft(event.target.value)}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-country" className="auth-label">
-              {lang === "en" ? "Country" : "País"}
-            </label>
-            <input
-              id="profile-country"
-              type="text"
-              className="auth-input"
-              value={countryDraft}
-              onChange={(event) => setCountryDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-postal" className="auth-label">
+                  {lang === "en" ? "Postal code" : "Código postal"}
+                </label>
+                <input
+                  id="profile-postal"
+                  type="text"
+                  className="auth-input"
+                  value={postalCodeDraft}
+                  onChange={(event) => setPostalCodeDraft(event.target.value)}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-province" className="auth-label">
-              {lang === "en" ? "Province" : "Provincia"}
-            </label>
-            <input
-              id="profile-province"
-              type="text"
-              className="auth-input"
-              value={provinceDraft}
-              onChange={(event) => setProvinceDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-country" className="auth-label">
+                  {lang === "en" ? "Country" : "País"}
+                </label>
+                <input
+                  id="profile-country"
+                  type="text"
+                  className="auth-input"
+                  value={countryDraft}
+                  onChange={(event) => setCountryDraft(event.target.value)}
+                />
+              </div>
 
-          <button
-            type="button"
-            className="button-primary auth-submit-compact auth-center-button btn-padding-site"
-            onClick={handleSaveProfile}
-            disabled={isSavingProfile}
-          >
-            {isSavingProfile
-              ? lang === "en"
-                ? "Saving..."
-                : "Guardando..."
-              : hasProfileChanges
-                ? lang === "en"
-                  ? "Save changes"
-                  : "Guardar cambios"
-                : lang === "en"
-                  ? "No changes"
-                  : "Sin cambios"}
-          </button>
+              <div className="auth-field">
+                <label htmlFor="profile-province" className="auth-label">
+                  {lang === "en" ? "Province" : "Provincia"}
+                </label>
+                <input
+                  id="profile-province"
+                  type="text"
+                  className="auth-input"
+                  value={provinceDraft}
+                  onChange={(event) => setProvinceDraft(event.target.value)}
+                />
+              </div>
+
+              <div className="account-details-actions">
+                <button
+                  type="button"
+                  className="button-primary auth-submit-compact auth-center-button btn-padding-site"
+                  onClick={handleSaveProfile}
+                  disabled={isSavingProfile}
+                >
+                  {isSavingProfile
+                    ? lang === "en"
+                      ? "Saving..."
+                      : "Guardando..."
+                    : hasProfileChanges
+                      ? lang === "en"
+                        ? "Save changes"
+                        : "Guardar cambios"
+                      : lang === "en"
+                        ? "No changes"
+                        : "Sin cambios"}
+                </button>
+                <button
+                  type="button"
+                  className="button-ghost auth-submit-compact auth-center-button btn-padding-site"
+                  onClick={closeDetailsEditor}
+                  disabled={isSavingProfile}
+                >
+                  {lang === "en" ? "Cancel" : "Cancelar"}
+                </button>
+              </div>
+            </>
+          )}
 
           {profileMessage ? (
             <p
@@ -801,6 +916,36 @@ export function AccountDashboard() {
 
       {activeTab === "security" ? (
         <>
+          <div className="account-recovery-panel">
+            <div>
+              <span className="auth-label">
+                {lang === "en" ? "Account recovery" : "Recuperación de cuenta"}
+              </span>
+              <p className="auth-alt">
+                {lang === "en"
+                  ? "Your current recovery flow uses your main email and the password reset link."
+                  : "Ahora mismo la recuperación usa tu email principal y el enlace de restablecimiento de contraseña."}
+              </p>
+            </div>
+
+            <dl className="account-recovery-list">
+              <div className="account-recovery-row">
+                <dt>{lang === "en" ? "Main email" : "Email principal"}</dt>
+                <dd>{profile?.email ?? "—"}</dd>
+              </div>
+              <div className="account-recovery-row">
+                <dt>{lang === "en" ? "Recovery email" : "Email de recuperación"}</dt>
+                <dd>{lang === "en" ? "Not configured yet" : "Aún no configurado"}</dd>
+              </div>
+              <div className="account-recovery-row">
+                <dt>{lang === "en" ? "Recovery codes" : "Códigos de recuperación"}</dt>
+                <dd>{lang === "en" ? "Not generated yet" : "Aún no generados"}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <hr className="auth-divider-rule" />
+
           <div className="auth-field">
             <span className="auth-label">Acceso en dos pasos (2FA)</span>
             <p className="auth-alt">

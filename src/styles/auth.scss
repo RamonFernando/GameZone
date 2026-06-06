@@ -462,6 +462,121 @@
   border-color: rgba(191, 219, 254, 0.9);
 }
 
+.account-details-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.38);
+}
+
+.account-details-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-details-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 0;
+}
+
+.account-details-row {
+  min-width: 0;
+}
+
+.account-details-row dt {
+  margin: 0 0 0.2rem;
+  color: #b8c4d4;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-details-row dd {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.account-details-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.account-recovery-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.32);
+}
+
+.account-recovery-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.account-recovery-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.account-recovery-row dt {
+  margin: 0;
+  color: #b8c4d4;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-recovery-row dd {
+  margin: 0;
+  color: #dbeafe;
+  font-size: 0.92rem;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .account-details-summary-head {
+    flex-direction: column;
+  }
+
+  .account-details-summary-head .button-primary {
+    width: 100%;
+  }
+
+  .account-details-list {
+    grid-template-columns: 1fr;
+  }
+
+  .account-recovery-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .account-recovery-row dd {
+    text-align: left;
+  }
+}
+
 /* Panel de control y Pedidos globales: mismo estilo blanco que las cartas */
 .auth-shell .auth-title {
   color: #cbd5e1;
