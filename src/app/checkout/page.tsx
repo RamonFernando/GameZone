@@ -15,6 +15,8 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [requiresLogin, setRequiresLogin] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
   const [lang, setLang] = useState<"es" | "en">("es");
 
@@ -35,6 +37,17 @@ export default function CheckoutPage() {
     [items]
   );
 
+  const showLoginRequiredPrompt = () => {
+    const message =
+      lang === "en"
+        ? "You need to log in or create an account before you can buy games."
+        : "Necesitas iniciar sesión o crear una cuenta para poder comprar juegos.";
+
+    setRequiresLogin(true);
+    setShowLoginPrompt(true);
+    setErrorMessage(message);
+  };
+
   const handleCheckout = async () => {
     if (items.length === 0) {
       setErrorMessage(
@@ -45,9 +58,21 @@ export default function CheckoutPage() {
 
     setErrorMessage("");
     setSuccessMessage("");
+    setRequiresLogin(false);
+    setShowLoginPrompt(false);
 
     try {
       setIsSubmitting(true);
+
+      const cartScopeResponse = await fetch("/api/cart/scope", { cache: "no-store" });
+      const cartScope = cartScopeResponse.ok
+        ? ((await cartScopeResponse.json()) as { authenticated?: boolean })
+        : null;
+
+      if (!cartScope?.authenticated) {
+        showLoginRequiredPrompt();
+        return;
+      }
 
       const endpointByMethod: Record<PaymentMethod, string> = {
         stripe: "/api/payments/stripe/create-session",
@@ -70,11 +95,17 @@ export default function CheckoutPage() {
 
       const payload = (await response.json()) as {
         message?: string;
+        code?: string;
         order?: { id?: string };
         checkoutUrl?: string;
       };
 
       if (!response.ok) {
+        if (response.status === 401 || payload.code === "UNAUTHORIZED") {
+          showLoginRequiredPrompt();
+          return;
+        }
+
         setErrorMessage(
           payload.message ??
             (lang === "en" ? "We couldn't complete your purchase." : "No se pudo completar la compra.")
@@ -106,6 +137,43 @@ export default function CheckoutPage() {
 
   return (
     <section className="auth-shell">
+      {showLoginPrompt ? (
+        <div className="checkout-login-backdrop" role="presentation">
+          <div
+            className="checkout-login-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="checkout-login-title"
+            aria-describedby="checkout-login-description"
+          >
+            <button
+              type="button"
+              className="checkout-login-close"
+              aria-label={lang === "en" ? "Close" : "Cerrar"}
+              onClick={() => setShowLoginPrompt(false)}
+            >
+              x
+            </button>
+            <p className="auth-kicker">GameZone Checkout</p>
+            <h2 id="checkout-login-title" className="checkout-login-title">
+              {lang === "en" ? "Account required" : "Cuenta necesaria"}
+            </h2>
+            <p id="checkout-login-description" className="checkout-login-text">
+              {lang === "en"
+                ? "To protect your purchase and save the order history, log in or create an account before paying."
+                : "Para proteger tu compra y guardar el historial del pedido, inicia sesión o crea una cuenta antes de pagar."}
+            </p>
+            <div className="checkout-login-actions">
+              <Link href="/auth?next=/checkout" className="button-primary btn-padding-site">
+                {lang === "en" ? "Log in" : "Iniciar sesión"}
+              </Link>
+              <Link href="/auth/register" className="button-ghost btn-padding-site">
+                {lang === "en" ? "Create account" : "Crear cuenta"}
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="card card-hover auth-card">
         <div className="auth-grid">
           <div className="auth-form-panel">
@@ -198,9 +266,21 @@ export default function CheckoutPage() {
               </div>
 
               {errorMessage ? (
-                <p className="auth-alt" role="alert" aria-live="assertive">
-                  {errorMessage}
-                </p>
+                <div className="auth-alt" role="alert" aria-live="assertive">
+                  <span>{errorMessage}</span>
+                  {requiresLogin ? (
+                    <>
+                      {" "}
+                      <Link href="/auth?next=/checkout" className="auth-link">
+                        {lang === "en" ? "Log in" : "Iniciar sesión"}
+                      </Link>
+                      {" · "}
+                      <Link href="/auth/register" className="auth-link">
+                        {lang === "en" ? "Create account" : "Crear cuenta"}
+                      </Link>
+                    </>
+                  ) : null}
+                </div>
               ) : null}
 
               {successMessage ? (

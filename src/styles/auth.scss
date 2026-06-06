@@ -611,6 +611,85 @@
   color: #94a3b8;
 }
 
+.checkout-login-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.checkout-login-dialog {
+  position: relative;
+  width: min(100%, 430px);
+  padding: 1.4rem;
+  border: 1px solid rgba(165, 180, 252, 0.28);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98)),
+    radial-gradient(circle at top left, rgba(129, 140, 248, 0.2), transparent 42%);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.55);
+  color: #cbd5e1;
+}
+
+.checkout-login-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.checkout-login-close:hover,
+.checkout-login-close:focus-visible {
+  border-color: rgba(165, 180, 252, 0.65);
+  color: #f8fafc;
+  outline: none;
+}
+
+.checkout-login-title {
+  margin: 0.25rem 2.25rem 0.55rem 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.checkout-login-text {
+  margin: 0;
+  color: #b8c4d4;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.checkout-login-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+
+.checkout-login-actions .button-primary,
+.checkout-login-actions .button-ghost {
+  justify-content: center;
+  min-height: 2.75rem;
+}
+
+@media (max-width: 480px) {
+  .checkout-login-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Tabla de Pedidos del sistema: mismo blanco que las cartas */
 .auth-shell .auth-form table {
   color: #cbd5e1;
