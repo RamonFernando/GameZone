@@ -121,7 +121,7 @@ function scoreProductSearch(game: ProductPreview, queryText: string) {
 }
 
 export default function HomePage() {
-  const { query, platform } = useSearch();
+  const { query, setQuery, platform } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<"es" | "en">("es");
@@ -137,6 +137,21 @@ export default function HomePage() {
     const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
     setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlQuery = params.get("q") ?? "";
+
+    if (urlQuery) {
+      setQuery(urlQuery);
+      window.requestAnimationFrame(() => {
+        document.getElementById("game-results")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+  }, [setQuery]);
 
   useEffect(() => {
     const loadProducts = async () => {

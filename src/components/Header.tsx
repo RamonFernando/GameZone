@@ -4,7 +4,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
 import { useSearch } from "@/contexts/SearchContext";
@@ -44,6 +44,7 @@ const AUTH_CHANGED_EVENT = "gamezone:auth-changed";
 // Header que envuelve logo, filtros de plataforma, buscador, carrito y avatar.
 export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { totalItems } = useCart();
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -172,6 +173,12 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const handleSearchChange = (value: string) => {
     const shouldScrollToResults = !query.trim() && value.trim();
     setQuery(value);
+
+    if (pathname !== "/" && value.trim()) {
+      router.push(`/?q=${encodeURIComponent(value)}#game-results`);
+      setMobileMenuOpen(false);
+      return;
+    }
 
     if (shouldScrollToResults) {
       scrollToSearchResults();
