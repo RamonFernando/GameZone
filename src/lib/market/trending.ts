@@ -8,6 +8,10 @@ import {
 const RAWG_BASE_URL = "https://api.rawg.io/api";
 export const RAWG_TRENDING_CACHE_SECONDS = 3600;
 
+type MarketTrendingOptions = {
+  fresh?: boolean;
+};
+
 type RawgTrendingGame = {
   id?: number;
   name?: string;
@@ -67,7 +71,13 @@ function imageFromRawg(rawgGame: RawgTrendingGame) {
   return image && (image.startsWith("https://") || image.startsWith("http://")) ? image : null;
 }
 
-async function rawgFetchTrending() {
+function rawgFetchCacheOptions(options: MarketTrendingOptions) {
+  return options.fresh
+    ? { cache: "no-store" as const }
+    : { next: { revalidate: RAWG_TRENDING_CACHE_SECONDS } };
+}
+
+async function rawgFetchTrending(options: MarketTrendingOptions = {}) {
   const apiKey = process.env.RAWG_API_KEY;
   if (!apiKey) return null;
 
@@ -77,7 +87,7 @@ async function rawgFetchTrending() {
   url.searchParams.set("page_size", "12");
 
   const response = await fetch(url, {
-    next: { revalidate: RAWG_TRENDING_CACHE_SECONDS },
+    ...rawgFetchCacheOptions(options),
     signal: AbortSignal.timeout(8000),
   });
 
@@ -102,12 +112,12 @@ function createCatalogFallbackTrending(products: StoreProduct[], limit: number) 
   })) satisfies MarketTrendingGame[];
 }
 
-export async function listMarketTrendingGames(limit = 3) {
+export async function listMarketTrendingGames(limit = 3, options: MarketTrendingOptions = {}) {
   const products = await listActiveProducts();
   const safeLimit = Math.min(12, Math.max(1, Math.floor(limit)));
 
   try {
-    const rawg = await rawgFetchTrending();
+    const rawg = await rawgFetchTrending(options);
     const rawgGames = rawg?.results ?? [];
     if (rawgGames.length === 0) {
       return {

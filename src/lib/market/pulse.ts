@@ -5,6 +5,10 @@ import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/lib/mark
 export const MARKET_PULSE_CACHE_SECONDS = 1800;
 const CATALOG_MATCH_SYNC_SCORE = 80;
 
+type MarketPulseOptions = {
+  fresh?: boolean;
+};
+
 type PulseSource = "G2A" | "Steam" | "RAWG";
 
 export type MarketPulseItem = {
@@ -170,6 +174,12 @@ type G2aApiProduct = {
   categories?: Array<{ id?: number; name?: string }>;
 };
 
+function marketPulseFetchCacheOptions(options: MarketPulseOptions = {}) {
+  return options.fresh
+    ? { cache: "no-store" as const }
+    : { next: { revalidate: MARKET_PULSE_CACHE_SECONDS } };
+}
+
 type G2aApiProductsResponse = {
   docs?: G2aApiProduct[];
 };
@@ -332,10 +342,15 @@ function getBestG2aImage(product: G2aApiProduct) {
   return image ? enhanceG2aImageUrl(image) : null;
 }
 
-async function fetchG2aApiEntries(page: number, fallbackUrl: string, fallback: string[]) {
+async function fetchG2aApiEntries(
+  page: number,
+  fallbackUrl: string,
+  fallback: string[],
+  options: MarketPulseOptions = {}
+) {
   const credentials = g2aApiCredentials();
   if (!credentials) {
-    return fetchHtmlEntries(fallbackUrl, extractG2aEntries, fallback);
+    return fetchHtmlEntries(fallbackUrl, extractG2aEntries, fallback, options);
   }
 
   try {
@@ -348,7 +363,7 @@ async function fetchG2aApiEntries(page: number, fallbackUrl: string, fallback: s
         accept: "application/json",
         authorization: credentials.authorization,
       },
-      next: { revalidate: MARKET_PULSE_CACHE_SECONDS },
+      ...marketPulseFetchCacheOptions(options),
       signal: AbortSignal.timeout(8000),
     });
 
@@ -367,14 +382,15 @@ async function fetchG2aApiEntries(page: number, fallbackUrl: string, fallback: s
       entries: entries.length > 0 ? entries : fallback.map((title) => ({ title })),
     };
   } catch {
-    return fetchHtmlEntries(fallbackUrl, extractG2aEntries, fallback);
+    return fetchHtmlEntries(fallbackUrl, extractG2aEntries, fallback, options);
   }
 }
 
 async function fetchHtmlEntries(
   url: string,
   extractor: (html: string) => MarketTitleEntry[],
-  fallback: string[]
+  fallback: string[],
+  options: MarketPulseOptions = {}
 ) {
   try {
     const response = await fetch(url, {
@@ -382,7 +398,7 @@ async function fetchHtmlEntries(
         "accept-language": "en-US,en;q=0.9",
         "user-agent": "GameZoneMarketPulse/1.0",
       },
-      next: { revalidate: MARKET_PULSE_CACHE_SECONDS },
+      ...marketPulseFetchCacheOptions(options),
       signal: AbortSignal.timeout(8000),
     });
 
@@ -401,7 +417,7 @@ async function fetchHtmlEntries(
   }
 }
 
-async function fetchSteamPrice(appId: string): Promise<SteamPrice> {
+async function fetchSteamPrice(appId: string, options: MarketPulseOptions = {}): Promise<SteamPrice> {
   try {
     const params = new URLSearchParams({
       appids: appId,
@@ -410,7 +426,7 @@ async function fetchSteamPrice(appId: string): Promise<SteamPrice> {
       filters: "basic,price_overview",
     });
     const response = await fetch(`${STEAM_APPDETAILS_URL}?${params}`, {
-      next: { revalidate: MARKET_PULSE_CACHE_SECONDS },
+      ...marketPulseFetchCacheOptions(options),
       signal: AbortSignal.timeout(8000),
     });
 
@@ -449,11 +465,11 @@ async function fetchSteamPrice(appId: string): Promise<SteamPrice> {
   }
 }
 
-async function fetchSteamPrices(entries: MarketTitleEntry[]) {
+async function fetchSteamPrices(entries: MarketTitleEntry[], options: MarketPulseOptions = {}) {
   const appIds = Array.from(
     new Set(entries.map((entry) => entry.steamAppId).filter((appId): appId is string => Boolean(appId)))
   );
-  const pairs = await Promise.all(appIds.map(async (appId) => [appId, await fetchSteamPrice(appId)] as const));
+  const pairs = await Promise.all(appIds.map(async (appId) => [appId, await fetchSteamPrice(appId, options)] as const));
   return new Map(pairs);
 }
 
@@ -496,19 +512,19 @@ function createPulseItems(input: {
   });
 }
 
-export async function listMarketPulse() {
+export async function listMarketPulse(options: MarketPulseOptions = {}) {
   const products = await listActiveProducts();
   const [g2aPopular, g2aBestsellers, steamTopSellers, steamMostPlayed, rawgTrending] =
     await Promise.all([
-      fetchG2aApiEntries(1, G2A_POPULAR_URL, g2aPopularSnapshot),
-      fetchG2aApiEntries(2, G2A_BESTSELLERS_URL, g2aBestsellerSnapshot),
-      fetchHtmlEntries(STEAM_TOP_SELLERS_URL, extractSteamEntries, steamTopSellerSnapshot),
-      fetchHtmlEntries(STEAM_MOST_PLAYED_URL, extractSteamEntries, steamMostPlayedSnapshot),
-      listMarketTrendingGames(10),
+      fetchG2aApiEntries(1, G2A_POPULAR_URL, g2aPopularSnapshot, options),
+      fetchG2aApiEntries(2, G2A_BESTSELLERS_URL, g2aBestsellerSnapshot, options),
+      fetchHtmlEntries(STEAM_TOP_SELLERS_URL, extractSteamEntries, steamTopSellerSnapshot, options),
+      fetchHtmlEntries(STEAM_MOST_PLAYED_URL, extractSteamEntries, steamMostPlayedSnapshot, options),
+      listMarketTrendingGames(10, options),
     ]);
   const [steamTopSellerPrices, steamMostPlayedPrices] = await Promise.all([
-    fetchSteamPrices(steamTopSellers.entries),
-    fetchSteamPrices(steamMostPlayed.entries),
+    fetchSteamPrices(steamTopSellers.entries, options),
+    fetchSteamPrices(steamMostPlayed.entries, options),
   ]);
 
   const rawgItems = rawgTrending.trending.map((item) => ({

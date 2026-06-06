@@ -8,6 +8,7 @@ type SyncMode = "dry-run" | "write";
 
 type MarketProductSyncOptions = {
   dryRun?: boolean;
+  fresh?: boolean;
 };
 
 const CATALOG_MATCH_SYNC_SCORE = 80;
@@ -164,7 +165,7 @@ async function createMissingProduct(item: MarketPulseItem, mode: SyncMode) {
 }
 
 export async function syncProductsFromMarketPulse(options: MarketProductSyncOptions = {}) {
-  const pulse = await listMarketPulse();
+  const pulse = await listMarketPulse({ fresh: options.fresh ?? true });
   const mode: SyncMode = options.dryRun ? "dry-run" : "write";
   const seen = new Set<string>();
   const skippedSourceImageMatches: MarketPulseItem[] = [];
