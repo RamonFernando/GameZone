@@ -78,8 +78,20 @@ export async function GET(request: Request) {
           status: finalized.order.status,
           paidAt: finalized.order.paidAt,
         };
-      } catch {
-        // Si falla el fallback, mantenemos el polling normal de estado.
+      } catch (error) {
+        console.error("Stripe confirmó el pago, pero no se pudo cerrar el pedido.", error);
+        return NextResponse.json(
+          {
+            message:
+              "Stripe confirmó el pago, pero no pudimos registrar el pedido. Revisa el servidor antes de repetir la compra.",
+            status: "error",
+            code: "ORDER_FINALIZATION_ERROR",
+            order: {
+              id: order.id,
+            },
+          },
+          { status: 500 }
+        );
       }
     }
 

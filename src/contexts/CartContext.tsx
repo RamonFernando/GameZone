@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
 import type { ProductPreview } from "@/types/product";
 
 export type CartItem = {
@@ -193,10 +193,8 @@ export function CartProvider({ children }: ProviderProps) {
         if (nextIsAuthenticatedCart) {
           const persistedItems = await loadPersistedCart();
           const shouldMergeCurrentCart = previousStorageKey !== null && previousStorageKey !== nextStorageKey;
-          const scopedItemsToMigrate = persistedItems.length === 0 ? scopedItems : [];
           nextItems = mergeCartItems(
             persistedItems,
-            scopedItemsToMigrate,
             shouldMergeCurrentCart ? itemsRef.current : []
           );
 
@@ -287,7 +285,7 @@ export function CartProvider({ children }: ProviderProps) {
     setItems((prev) => prev.filter((item) => item.slug !== slug));
   };
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     const currentStorageKey = storageKeyRef.current;
     clearRequestedRef.current = currentStorageKey === null;
 
@@ -305,7 +303,18 @@ export function CartProvider({ children }: ProviderProps) {
     if (isAuthenticatedCart) {
       void clearPersistedCart();
     }
-  };
+  }, [isAuthenticatedCart]);
+
+  useEffect(() => {
+    const handleExternalCartClear = () => {
+      clearCart();
+    };
+
+    window.addEventListener("gamezone:cart-cleared", handleExternalCartClear);
+    return () => {
+      window.removeEventListener("gamezone:cart-cleared", handleExternalCartClear);
+    };
+  }, [clearCart]);
 
   const value: CartContextValue = {
     items,

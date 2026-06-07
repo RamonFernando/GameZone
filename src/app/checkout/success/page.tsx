@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
+import {
+  createPaymentProgressStorageKey,
+  PAYMENT_PROGRESS_STEP_DELAY_MS,
+} from "@/lib/checkout/payment-progress";
 import "../../../styles/auth.scss";
 
 type FinalizationState = "loading" | "success" | "error";
-type StripeStatus = "processing" | "paid" | "failed";
-type ValidationStep = "returned" | "checking" | "confirmed";
+type StripeStatus = "processing" | "paid" | "failed" | "error";
+type ValidationStep = "returned" | "checking" | "paymentConfirmed" | "orderSaved" | "cartCleared" | "complete";
 
 const MAX_STATUS_POLLS = 30;
 const POLL_INTERVAL_MS = 1500;
@@ -32,7 +36,6 @@ export default function CheckoutSuccessPage() {
 function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const hasFinalizedRef = useRef(false);
   const { clearCart } = useCart();
   const [state, setState] = useState<FinalizationState>("loading");
   const [message, setMessage] = useState("Validando pago...");
@@ -41,13 +44,11 @@ function CheckoutSuccessContent() {
   const [validationAttempt, setValidationAttempt] = useState(0);
 
   useEffect(() => {
-    if (hasFinalizedRef.current) {
-      return;
-    }
-    hasFinalizedRef.current = true;
-
     let cancelled = false;
     let settled = false;
+
+    setValidationAttempt(0);
+    setValidationStep("returned");
 
     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -62,11 +63,41 @@ function CheckoutSuccessContent() {
       if (nextOrderId) {
         setOrderId(nextOrderId);
       }
-      if (nextState === "success") {
-        setValidationStep("confirmed");
-      }
       setState(nextState);
       setMessage(nextMessage);
+    };
+
+    const playSuccessSequence = async (successMessage: string, nextOrderId = "") => {
+      if (cancelled || settled) return;
+      settled = true;
+      clearTimeout(overallTimeoutId);
+
+      if (nextOrderId) {
+        setOrderId(nextOrderId);
+        window.sessionStorage.setItem(
+          createPaymentProgressStorageKey(nextOrderId),
+          String(Date.now())
+        );
+      }
+
+      setValidationStep("paymentConfirmed");
+      setMessage("Pago confirmado. Estamos guardando tu pedido...");
+      await sleep(PAYMENT_PROGRESS_STEP_DELAY_MS);
+      if (cancelled) return;
+
+      setValidationStep("orderSaved");
+      setMessage("Pedido guardado en tu cuenta. Estamos limpiando el carrito...");
+      await sleep(PAYMENT_PROGRESS_STEP_DELAY_MS);
+      if (cancelled) return;
+
+      setValidationStep("cartCleared");
+      setMessage("Carrito limpiado. Tu compra está lista.");
+      clearCart();
+      await sleep(PAYMENT_PROGRESS_STEP_DELAY_MS);
+      if (cancelled) return;
+
+      setState("success");
+      setMessage(successMessage);
     };
 
     const fetchJsonWithTimeout = async (input: string, init?: RequestInit) => {
@@ -121,15 +152,14 @@ function CheckoutSuccessContent() {
             }
 
             if (payload.status === "paid") {
-              finish(
-                "success",
+              await playSuccessSequence(
                 payload.message ?? "Pago con Stripe confirmado.",
                 payload.order?.id ?? ""
               );
               return;
             }
 
-            if (payload.status === "failed") {
+            if (payload.status === "failed" || payload.status === "error") {
               finish("error", payload.message ?? "El pago con Stripe no se completó.");
               return;
             }
@@ -167,8 +197,7 @@ function CheckoutSuccessContent() {
             return;
           }
 
-          finish(
-            "success",
+          await playSuccessSequence(
             payload.message ?? "Pago con PayPal confirmado.",
             payload.order?.id ?? ""
           );
@@ -190,6 +219,18 @@ function CheckoutSuccessContent() {
       clearTimeout(overallTimeoutId);
     };
   }, [clearCart, searchParams]);
+
+  const completedSteps = {
+    checking: ["paymentConfirmed", "orderSaved", "cartCleared", "complete"].includes(validationStep),
+    paymentConfirmed: ["paymentConfirmed", "orderSaved", "cartCleared", "complete"].includes(validationStep),
+    orderSaved: ["orderSaved", "cartCleared", "complete"].includes(validationStep),
+    cartCleared: ["cartCleared", "complete"].includes(validationStep),
+  };
+
+  const progressClass = (isDone: boolean, isActive: boolean) =>
+    "checkout-progress-item" +
+    (isDone ? " checkout-progress-item--done" : "") +
+    (isActive ? " checkout-progress-item--active" : "");
 
   return (
     <section className="auth-shell">
@@ -220,10 +261,10 @@ function CheckoutSuccessContent() {
                     <span>Pago recibido desde la pasarela</span>
                   </li>
                   <li
-                    className={
-                      "checkout-progress-item" +
-                      (validationStep === "checking" ? " checkout-progress-item--active" : "")
-                    }
+                    className={progressClass(
+                      completedSteps.checking,
+                      validationStep === "checking"
+                    )}
                   >
                     <span className="checkout-progress-marker" aria-hidden="true" />
                     <span>
@@ -231,15 +272,38 @@ function CheckoutSuccessContent() {
                       {validationAttempt > 0 ? ` (${validationAttempt}/${MAX_STATUS_POLLS})` : ""}
                     </span>
                   </li>
-                  <li className="checkout-progress-item">
+                  <li
+                    className={progressClass(
+                      completedSteps.paymentConfirmed,
+                      validationStep === "paymentConfirmed"
+                    )}
+                  >
                     <span className="checkout-progress-marker" aria-hidden="true" />
-                    <span>Registrar pedido y limpiar carrito</span>
+                    <span>Pago confirmado</span>
+                  </li>
+                  <li
+                    className={progressClass(
+                      completedSteps.orderSaved,
+                      validationStep === "orderSaved"
+                    )}
+                  >
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Pedido guardado en tu cuenta</span>
+                  </li>
+                  <li
+                    className={progressClass(
+                      completedSteps.cartCleared,
+                      validationStep === "cartCleared"
+                    )}
+                  >
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Carrito limpiado</span>
                   </li>
                 </ol>
 
                 <button
                   type="button"
-                  className="button-primary auth-submit btn-padding-site"
+                  className="button-primary auth-submit checkout-account-button btn-padding-site"
                   onClick={() => router.push("/account?tab=payment")}
                 >
                   Ir a mi cuenta mientras valida

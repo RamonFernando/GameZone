@@ -3,6 +3,11 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import {
+  createPaymentProgressStorageKey,
+  getPaymentProgressStepFromStartedAt,
+  type PaymentProgressStep,
+} from "@/lib/checkout/payment-progress";
 
 // Datos completos del perfil editable del usuario.
 type Profile = {
@@ -47,6 +52,15 @@ type PendingPayment = {
   currency: string;
   createdAt: string;
   items: OrderItem[];
+  validationStatus?: "processing" | "error" | "failed";
+  validationMessage?: string;
+  stripeSessionStatus?: string | null;
+  stripePaymentStatus?: string | null;
+};
+
+type PaymentStatusPayload = {
+  pendingPayment?: PendingPayment | null;
+  paymentResult?: PendingPayment | null;
 };
 
 type AccountTab = "account" | "details" | "security" | "payment";
@@ -75,11 +89,14 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [pendingPayment, setPendingPayment] = useState<PendingPayment | null>(null);
+  const [paymentResult, setPaymentResult] = useState<PendingPayment | null>(null);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isRefreshingPendingPayment, setIsRefreshingPendingPayment] = useState(false);
   const [pendingPaymentPollCount, setPendingPaymentPollCount] = useState(0);
+  const [paymentProgressStep, setPaymentProgressStep] =
+    useState<PaymentProgressStep>("checking");
   const [isRevokingAll, setIsRevokingAll] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [emailDraft, setEmailDraft] = useState("");
@@ -180,8 +197,8 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const fetchPendingPayment = async () => {
     const response = await fetch("/api/orders/pending-payment", { cache: "no-store" });
     if (!response.ok) return null;
-    const payload = (await response.json()) as { pendingPayment?: PendingPayment | null };
-    return payload.pendingPayment ?? null;
+    const payload = (await response.json()) as PaymentStatusPayload;
+    return payload;
   };
 
   const loadDashboardData = async () => {
@@ -207,8 +224,8 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       const ordersPayload = (await ordersRes.json()) as { orders?: Order[] };
       const sessionsPayload = (await sessionsRes.json()) as { sessions?: SessionRow[] };
       const pendingPaymentPayload = pendingPaymentRes.ok
-        ? ((await pendingPaymentRes.json()) as { pendingPayment?: PendingPayment | null })
-        : { pendingPayment: null };
+        ? ((await pendingPaymentRes.json()) as PaymentStatusPayload)
+        : { pendingPayment: null, paymentResult: null };
 
       const nextProfile = mePayload.user ?? null;
       setProfile(nextProfile);
@@ -225,6 +242,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       setTotpEnabled(Boolean(nextProfile?.totpEnabled));
       setOrders(ordersPayload.orders ?? []);
       setPendingPayment(pendingPaymentPayload.pendingPayment ?? null);
+      setPaymentResult(pendingPaymentPayload.paymentResult ?? null);
       setPendingPaymentPollCount(pendingPaymentPayload.pendingPayment ? 1 : 0);
       setSessions(sessionsPayload.sessions ?? []);
     } catch {
@@ -238,16 +256,42 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
     void loadDashboardData();
   }, []);
 
+  const pendingPaymentReachedLimit = pendingPaymentPollCount >= MAX_PENDING_PAYMENT_POLLS;
+  const pendingPaymentHasProblem =
+    pendingPayment?.validationStatus === "error" ||
+    pendingPayment?.validationStatus === "failed" ||
+    pendingPaymentReachedLimit;
+  const paymentIsPaid = paymentResult?.status === "paid";
+  const paymentProgressIsComplete = paymentProgressStep === "complete";
+  const paymentIsAnimatingConfirmation = paymentIsPaid && !paymentProgressIsComplete;
+  const accountPaymentSteps = {
+    validationDone:
+      paymentIsPaid &&
+      ["orderSaved", "cartCleared", "complete"].includes(paymentProgressStep),
+    registerDone:
+      paymentIsPaid &&
+      ["cartCleared", "complete"].includes(paymentProgressStep),
+    cartDone:
+      paymentIsPaid &&
+      paymentProgressStep === "complete",
+  };
+  const accountProgressClass = (isDone: boolean, isActive: boolean) =>
+    "checkout-progress-item" +
+    (isDone ? " checkout-progress-item--done" : "") +
+    (isActive ? " checkout-progress-item--active" : "");
+
   useEffect(() => {
-    if (!pendingPayment) return;
+    if (!pendingPayment || pendingPaymentHasProblem) return;
 
     const intervalId = window.setInterval(async () => {
       setPendingPaymentPollCount((count) =>
         Math.min(MAX_PENDING_PAYMENT_POLLS, count + 1)
       );
-      const nextPendingPayment = await fetchPendingPayment();
-      setPendingPayment(nextPendingPayment);
-      if (!nextPendingPayment) {
+      const nextPaymentStatus = await fetchPendingPayment();
+      setPendingPayment(nextPaymentStatus?.pendingPayment ?? null);
+      setPaymentResult(nextPaymentStatus?.paymentResult ?? null);
+      if (!nextPaymentStatus?.pendingPayment) {
+        window.dispatchEvent(new Event("gamezone:cart-cleared"));
         void loadDashboardData();
       }
     }, 5000);
@@ -255,19 +299,19 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [pendingPayment]);
+  }, [pendingPayment, pendingPaymentHasProblem]);
 
   useEffect(() => {
-    if (pendingPayment && initialTab === "payment") {
+    if ((pendingPayment || paymentResult) && initialTab === "payment") {
       setActiveTab("payment");
     }
-  }, [initialTab, pendingPayment]);
+  }, [initialTab, pendingPayment, paymentResult]);
 
   useEffect(() => {
-    if (!isLoading && !pendingPayment && activeTab === "payment") {
+    if (!isLoading && !pendingPayment && !paymentResult && activeTab === "payment") {
       setActiveTab("account");
     }
-  }, [activeTab, isLoading, pendingPayment]);
+  }, [activeTab, isLoading, pendingPayment, paymentResult]);
 
   const handleRefreshPendingPayment = async () => {
     setIsRefreshingPendingPayment(true);
@@ -275,9 +319,11 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       setPendingPaymentPollCount((count) =>
         Math.min(MAX_PENDING_PAYMENT_POLLS, count + 1)
       );
-      const nextPendingPayment = await fetchPendingPayment();
-      setPendingPayment(nextPendingPayment);
-      if (!nextPendingPayment) {
+      const nextPaymentStatus = await fetchPendingPayment();
+      setPendingPayment(nextPaymentStatus?.pendingPayment ?? null);
+      setPaymentResult(nextPaymentStatus?.paymentResult ?? null);
+      if (!nextPaymentStatus?.pendingPayment) {
+        window.dispatchEvent(new Event("gamezone:cart-cleared"));
         await loadDashboardData();
       }
     } finally {
@@ -288,6 +334,48 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   useEffect(() => {
     setPendingPaymentPollCount(pendingPayment ? 1 : 0);
   }, [pendingPayment?.id]);
+
+  useEffect(() => {
+    if (pendingPayment) {
+      setPaymentProgressStep("checking");
+      return;
+    }
+
+    if (paymentResult?.status !== "paid") {
+      setPaymentProgressStep("complete");
+      return;
+    }
+
+    const storageKey = createPaymentProgressStorageKey(paymentResult.id);
+    const storedStartedAt = window.sessionStorage.getItem(storageKey);
+    const startedAt = storedStartedAt ? Number(storedStartedAt) : 0;
+
+    if (!Number.isFinite(startedAt) || startedAt <= 0) {
+      setPaymentProgressStep("complete");
+      return;
+    }
+
+    const updateProgressStep = () => {
+      const nextStep = getPaymentProgressStepFromStartedAt(startedAt);
+      setPaymentProgressStep(nextStep);
+      if (nextStep === "complete") {
+        window.sessionStorage.removeItem(storageKey);
+      }
+      return nextStep;
+    };
+
+    if (updateProgressStep() === "complete") return;
+
+    const intervalId = window.setInterval(() => {
+      if (updateProgressStep() === "complete") {
+        window.clearInterval(intervalId);
+      }
+    }, 500);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [paymentResult?.id, paymentResult?.status, pendingPayment]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -648,7 +736,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
         >
           {lang === "en" ? "Security" : "Seguridad"}
         </button>
-        {pendingPayment ? (
+        {pendingPayment || paymentResult ? (
           <button
             type="button"
             className={
@@ -656,12 +744,18 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
             }
             onClick={() => setActiveTab("payment")}
           >
-            {lang === "en" ? "Payment validation" : "Pago en validación"}
+            {pendingPayment
+              ? lang === "en"
+                ? "Payment validation"
+                : "Pago en validación"
+              : lang === "en"
+                ? "Payment result"
+                : "Resultado del pago"}
           </button>
         ) : null}
       </div>
 
-      {activeTab === "payment" && pendingPayment ? (
+      {activeTab === "payment" && (pendingPayment || paymentResult) ? (
         <section className="account-pending-payment account-payment-validation" aria-live="polite">
           <div className="account-pending-payment-head">
             <div>
@@ -669,28 +763,68 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                 {lang === "en" ? "Checkout status" : "Estado del pago"}
               </span>
               <h3 className="account-pending-payment-title">
-                {lang === "en"
-                  ? "We are confirming your purchase"
-                  : "Estamos confirmando tu compra"}
+                {paymentIsAnimatingConfirmation
+                  ? lang === "en"
+                    ? "We are confirming your purchase"
+                    : "Estamos confirmando tu compra"
+                  : paymentResult?.status === "paid"
+                  ? lang === "en"
+                    ? "Your purchase was confirmed"
+                    : "Tu compra fue confirmada"
+                  : pendingPaymentHasProblem
+                  ? lang === "en"
+                    ? "We could not confirm this payment automatically"
+                    : "No pudimos confirmar este pago automáticamente"
+                  : lang === "en"
+                    ? "We are confirming your purchase"
+                    : "Estamos confirmando tu compra"}
               </h3>
             </div>
             <span className="account-pending-payment-badge">
-              {pendingPayment.paymentProvider === "paypal" ? "PayPal" : "Stripe"}
+              {(pendingPayment ?? paymentResult)?.paymentProvider === "paypal" ? "PayPal" : "Stripe"}
             </span>
           </div>
 
           <div className="checkout-status-panel" role="status" aria-live="polite">
-            <div className="checkout-status-spinner" aria-hidden="true" />
+            {!paymentProgressIsComplete && !pendingPaymentHasProblem ? (
+              <div className="checkout-status-spinner" aria-hidden="true" />
+            ) : null}
             <div className="checkout-status-copy">
               <p className="checkout-status-title">
-                {lang === "en"
-                  ? "Your payment is still being validated"
-                  : "Tu pago sigue en validación"}
+                {paymentIsPaid && paymentProgressIsComplete
+                  ? lang === "en"
+                    ? "Payment confirmed, order saved and cart cleared"
+                    : "Pago confirmado, pedido guardado y carrito limpiado"
+                  : paymentIsPaid
+                    ? lang === "en"
+                      ? "We are confirming your purchase"
+                      : "Estamos confirmando tu compra"
+                  : pendingPaymentHasProblem
+                  ? lang === "en"
+                    ? "This needs a manual check"
+                    : "Esto necesita una revisión manual"
+                  : lang === "en"
+                    ? "Your payment is still being validated"
+                    : "Tu pago sigue en validación"}
               </p>
               <p className="auth-alt">
-                {lang === "en"
-                  ? "The cart will be cleared when the payment provider confirms the transaction."
-                  : "El carrito se limpiará cuando la pasarela confirme la transacción."}
+                {paymentIsPaid && paymentProgressIsComplete
+                  ? lang === "en"
+                    ? "Your order is already available in purchase history."
+                    : "Tu pedido ya está disponible en el historial de compras."
+                  : paymentIsPaid
+                    ? lang === "en"
+                      ? "We are showing the final steps so you can see exactly what happened."
+                      : "Estamos mostrando los pasos finales para que veas exactamente qué ocurrió."
+                  : pendingPayment?.validationMessage
+                  ? pendingPayment.validationMessage
+                  : pendingPaymentReachedLimit
+                    ? lang === "en"
+                      ? "The automatic check reached its limit. Use the button to retry or review Stripe before charging again."
+                      : "La comprobación automática llegó al límite. Usa el botón para reintentar o revisa Stripe antes de volver a cobrar."
+                    : lang === "en"
+                      ? "The cart will be cleared when the payment provider confirms the transaction."
+                      : "El carrito se limpiará cuando la pasarela confirme la transacción."}
               </p>
             </div>
           </div>
@@ -700,16 +834,42 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               <span className="checkout-progress-marker" aria-hidden="true" />
               <span>{lang === "en" ? "Payment received by provider" : "Pago recibido desde la pasarela"}</span>
             </li>
-            <li className="checkout-progress-item checkout-progress-item--active">
+            <li
+              className={
+                pendingPaymentHasProblem
+                  ? "checkout-progress-item checkout-progress-item--error"
+                  : accountProgressClass(
+                      accountPaymentSteps.validationDone,
+                      (paymentIsPaid && paymentProgressStep === "paymentConfirmed") ||
+                        (!paymentIsPaid && !pendingPaymentHasProblem)
+                    )
+              }
+            >
               <span className="checkout-progress-marker" aria-hidden="true" />
               <span>
                 {lang === "en" ? "Validating secure confirmation" : "Validando confirmación segura"}{" "}
-                ({Math.max(1, pendingPaymentPollCount)}/{MAX_PENDING_PAYMENT_POLLS})
+                {!paymentIsPaid
+                  ? `(${Math.max(1, pendingPaymentPollCount)}/${MAX_PENDING_PAYMENT_POLLS})`
+                  : null}
               </span>
             </li>
-            <li className="checkout-progress-item">
+            <li
+              className={accountProgressClass(
+                accountPaymentSteps.registerDone,
+                paymentIsPaid && paymentProgressStep === "orderSaved"
+              )}
+            >
               <span className="checkout-progress-marker" aria-hidden="true" />
-              <span>{lang === "en" ? "Register order and clear cart" : "Registrar pedido y limpiar carrito"}</span>
+              <span>{lang === "en" ? "Register order" : "Registrar pedido"}</span>
+            </li>
+            <li
+              className={accountProgressClass(
+                accountPaymentSteps.cartDone,
+                paymentIsPaid && paymentProgressStep === "cartCleared"
+              )}
+            >
+              <span className="checkout-progress-marker" aria-hidden="true" />
+              <span>{lang === "en" ? "Clear cart" : "Limpiar carrito"}</span>
             </li>
           </ol>
 
@@ -722,20 +882,44 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
           <div className="account-pending-payment-grid">
             <div>
               <span className="auth-label">{lang === "en" ? "Order" : "Pedido"}</span>
-              <strong>#{pendingPayment.id.slice(0, 8)}</strong>
+              <strong>#{(pendingPayment ?? paymentResult)?.id.slice(0, 8)}</strong>
             </div>
             <div>
               <span className="auth-label">{lang === "en" ? "Total" : "Total"}</span>
-              <strong>{formatMoney(pendingPayment.totalAmount, pendingPayment.currency)}</strong>
+              <strong>
+                {formatMoney(
+                  (pendingPayment ?? paymentResult)?.totalAmount ?? 0,
+                  (pendingPayment ?? paymentResult)?.currency
+                )}
+              </strong>
             </div>
             <div>
               <span className="auth-label">{lang === "en" ? "Status" : "Estado"}</span>
-              <strong>{lang === "en" ? "Validating" : "Validando"}</strong>
+              <strong>
+                {paymentResult?.status === "paid"
+                  ? lang === "en"
+                    ? "Paid"
+                    : "Pagado"
+                  : pendingPaymentHasProblem
+                  ? lang === "en"
+                    ? "Needs review"
+                    : "Revisar"
+                  : lang === "en"
+                    ? "Validating"
+                    : "Validando"}
+              </strong>
             </div>
           </div>
 
+          {pendingPayment?.stripeSessionStatus || pendingPayment?.stripePaymentStatus ? (
+            <p className="auth-alt">
+              Stripe: sesión {pendingPayment.stripeSessionStatus ?? "desconocida"}, pago{" "}
+              {pendingPayment.stripePaymentStatus ?? "desconocido"}.
+            </p>
+          ) : null}
+
           <ul className="account-pending-payment-items">
-            {pendingPayment.items.map((item) => (
+            {(pendingPayment ?? paymentResult)?.items.map((item) => (
               <li key={item.id}>
                 <span>{item.title}</span>
                 <strong>x{item.quantity}</strong>
@@ -743,20 +927,26 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
             ))}
           </ul>
 
-          <button
-            type="button"
-            className="button-primary auth-submit-compact btn-padding-site"
-            onClick={handleRefreshPendingPayment}
-            disabled={isRefreshingPendingPayment}
-          >
-            {isRefreshingPendingPayment
-              ? lang === "en"
-                ? "Checking..."
-                : "Comprobando..."
-              : lang === "en"
-                ? "Update payment status"
-                : "Actualizar estado del pago"}
-          </button>
+          {pendingPayment ? (
+            <button
+              type="button"
+              className="button-primary auth-submit-compact btn-padding-site"
+              onClick={handleRefreshPendingPayment}
+              disabled={isRefreshingPendingPayment}
+            >
+              {isRefreshingPendingPayment
+                ? lang === "en"
+                  ? "Checking..."
+                  : "Comprobando..."
+                : pendingPaymentHasProblem
+                  ? lang === "en"
+                    ? "Retry payment check"
+                    : "Reintentar validación del pago"
+                  : lang === "en"
+                    ? "Update payment status"
+                    : "Actualizar estado del pago"}
+            </button>
+          ) : null}
         </section>
       ) : null}
 

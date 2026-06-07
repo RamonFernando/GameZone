@@ -847,6 +847,16 @@
   box-shadow: 0 0 0 5px rgba(129, 140, 248, 0.12);
 }
 
+.checkout-progress-item--error {
+  color: #fecaca;
+}
+
+.checkout-progress-item--error .checkout-progress-marker {
+  border-color: rgba(248, 113, 113, 0.95);
+  background: rgba(127, 29, 29, 0.72);
+  box-shadow: 0 0 0 5px rgba(248, 113, 113, 0.12);
+}
+
 .checkout-progress-item--done {
   color: #cbd5e1;
 }
@@ -863,6 +873,11 @@
   background: rgba(20, 83, 45, 0.16);
 }
 
+.checkout-account-button {
+  justify-self: center;
+  width: auto;
+}
+
 @keyframes checkout-status-spin {
   to {
     transform: rotate(360deg);
@@ -876,6 +891,11 @@
 
   .checkout-status-panel {
     align-items: flex-start;
+  }
+
+  .checkout-account-button {
+    justify-self: stretch;
+    width: 100%;
   }
 }
 

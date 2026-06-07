@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { sendPurchaseConfirmationEmail } from "@/lib/auth/email";
+import { clearUserCartItems } from "@/lib/cart/persistent-cart";
 import { computeDiscountedPrice, ensureProductsSeeded } from "@/lib/products";
 
 type CheckoutItemInput = {
@@ -170,6 +171,8 @@ export async function completePaidOrder(input: {
         },
         include: { items: true },
       });
+
+  await clearUserCartItems(input.userId);
 
   if (paidOrder.confirmationEmailSentAt) {
     return {
