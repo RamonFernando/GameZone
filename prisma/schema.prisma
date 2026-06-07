@@ -47,6 +47,7 @@ model User {
   orders                     Order[]
   userPermissions            UserPermission[]
   likes                      ProductLike[]
+  cartItems                  UserCartItem[]
   pushDevices                PushDevice[]
   loginChallenges            LoginChallenge[]
 }
@@ -123,9 +124,26 @@ model Product {
   updatedAt       DateTime @updatedAt
 
   likes ProductLike[]
+  cartItems UserCartItem[]
 
   @@index([isActive, createdAt])
   @@index([rawgId])
+}
+
+model UserCartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
 }
 
 model ProductLike {

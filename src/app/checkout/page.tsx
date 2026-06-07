@@ -11,7 +11,7 @@ type PaymentMethod = "stripe" | "paypal" | "manual";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items } = useCart();
+  const { items, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -123,6 +123,7 @@ export default function CheckoutPage() {
           (lang === "en" ? "Purchase completed." : "Compra completada.")
       );
       const orderId = payload.order?.id;
+      clearCart();
       router.push(orderId ? `/account?order=${orderId}` : "/account");
     } catch {
       setErrorMessage(

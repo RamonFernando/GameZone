@@ -27,6 +27,15 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 const LEGACY_STORAGE_KEY = "next-gaming-cart-v1";
 const FALLBACK_STORAGE_KEY = "next-gaming-cart-v1:anonymous";
 
+type CartScopePayload = {
+  authenticated?: boolean;
+  cartStorageKey?: string;
+};
+
+type PersistedCartPayload = {
+  items?: CartItem[];
+};
+
 function computeSlug(game: ProductPreview): string {
   return game.slug;
 }
@@ -52,6 +61,66 @@ function loadInitialCart(storageKey: string): CartItem[] {
   }
 }
 
+function mergeCartItems(...groups: CartItem[][]) {
+  const merged = new Map<string, CartItem>();
+
+  for (const group of groups) {
+    for (const item of group) {
+      if (!item?.slug || !item.game) continue;
+      const existing = merged.get(item.slug);
+      if (!existing) {
+        merged.set(item.slug, {
+          ...item,
+          quantity: Math.max(1, Math.floor(item.quantity)),
+        });
+        continue;
+      }
+
+      merged.set(item.slug, {
+        ...existing,
+        quantity: Math.max(1, existing.quantity + Math.floor(item.quantity)),
+      });
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
+function cartItemsHaveSameQuantities(left: CartItem[], right: CartItem[]) {
+  if (left.length !== right.length) return false;
+  const rightQuantityBySlug = new Map(right.map((item) => [item.slug, item.quantity]));
+  return left.every((item) => rightQuantityBySlug.get(item.slug) === item.quantity);
+}
+
+async function loadPersistedCart() {
+  const response = await fetch("/api/cart", { cache: "no-store" });
+  if (!response.ok) return [];
+  const payload = (await response.json()) as PersistedCartPayload;
+  return Array.isArray(payload.items) ? payload.items : [];
+}
+
+async function savePersistedCart(items: CartItem[]) {
+  await fetch("/api/cart", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      items: items.map((item) => ({
+        slug: item.slug,
+        quantity: item.quantity,
+      })),
+    }),
+  });
+}
+
+async function clearPersistedCart() {
+  await fetch("/api/cart", {
+    method: "DELETE",
+    cache: "no-store",
+  });
+}
+
 type ProviderProps = {
   children: ReactNode;
 };
@@ -60,8 +129,10 @@ export function CartProvider({ children }: ProviderProps) {
   const pathname = usePathname();
   const [items, setItems] = useState<CartItem[]>([]);
   const [storageKey, setStorageKey] = useState<string | null>(null);
+  const [isAuthenticatedCart, setIsAuthenticatedCart] = useState(false);
   const storageKeyRef = useRef<string | null>(null);
   const itemsRef = useRef<CartItem[]>([]);
+  const clearRequestedRef = useRef(false);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -73,13 +144,15 @@ export function CartProvider({ children }: ProviderProps) {
 
     const loadScopedCart = async () => {
       let nextStorageKey = FALLBACK_STORAGE_KEY;
+      let nextIsAuthenticatedCart = false;
 
       try {
         const response = await fetch("/api/cart/scope", { cache: "no-store" });
-        const payload = (await response.json()) as { cartStorageKey?: string };
+        const payload = (await response.json()) as CartScopePayload;
 
         if (response.ok && payload.cartStorageKey) {
           nextStorageKey = payload.cartStorageKey;
+          nextIsAuthenticatedCart = Boolean(payload.authenticated);
         }
       } catch {
         // Fallback keeps the cart usable in memory/localStorage if the API is unavailable.
@@ -92,15 +165,60 @@ export function CartProvider({ children }: ProviderProps) {
       const previousStorageKey = storageKeyRef.current;
 
       if (previousStorageKey !== nextStorageKey) {
+        if (clearRequestedRef.current) {
+          try {
+            window.localStorage.removeItem(nextStorageKey);
+          } catch {
+            // Ignore storage cleanup failures.
+          }
+
+          if (nextIsAuthenticatedCart) {
+            await clearPersistedCart();
+          }
+
+          clearRequestedRef.current = false;
+          storageKeyRef.current = nextStorageKey;
+          setStorageKey(nextStorageKey);
+          setIsAuthenticatedCart(nextIsAuthenticatedCart);
+          setItems([]);
+          return;
+        }
+
         const scopedItems = loadInitialCart(nextStorageKey);
-        const nextItems =
+        let nextItems =
           previousStorageKey === null && itemsRef.current.length > 0 && scopedItems.length === 0
             ? itemsRef.current
             : scopedItems;
 
+        if (nextIsAuthenticatedCart) {
+          const persistedItems = await loadPersistedCart();
+          const shouldMergeCurrentCart = previousStorageKey !== null && previousStorageKey !== nextStorageKey;
+          const scopedItemsToMigrate = persistedItems.length === 0 ? scopedItems : [];
+          nextItems = mergeCartItems(
+            persistedItems,
+            scopedItemsToMigrate,
+            shouldMergeCurrentCart ? itemsRef.current : []
+          );
+
+          if (!cartItemsHaveSameQuantities(nextItems, persistedItems)) {
+            await savePersistedCart(nextItems);
+          }
+
+          if (shouldMergeCurrentCart && previousStorageKey) {
+            try {
+              window.localStorage.removeItem(previousStorageKey);
+            } catch {
+              // Ignore storage cleanup failures.
+            }
+          }
+        }
+
         storageKeyRef.current = nextStorageKey;
         setStorageKey(nextStorageKey);
+        setIsAuthenticatedCart(nextIsAuthenticatedCart);
         setItems(nextItems);
+      } else {
+        setIsAuthenticatedCart(nextIsAuthenticatedCart);
       }
 
       try {
@@ -117,7 +235,7 @@ export function CartProvider({ children }: ProviderProps) {
     };
   }, [pathname]);
 
-  // Keep localStorage in sync with state.
+  // Keep localStorage and the authenticated server cart in sync with state.
   useEffect(() => {
     if (typeof window === "undefined" || !storageKey) return;
     try {
@@ -125,7 +243,17 @@ export function CartProvider({ children }: ProviderProps) {
     } catch {
       // Fail silently: carrito sigue funcionando en memoria.
     }
-  }, [items, storageKey]);
+
+    if (!isAuthenticatedCart) return;
+
+    const timeoutId = window.setTimeout(() => {
+      void savePersistedCart(items);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isAuthenticatedCart, items, storageKey]);
 
   const totalItems = useMemo(
     () => items.reduce((acc, item) => acc + item.quantity, 0),
@@ -159,7 +287,25 @@ export function CartProvider({ children }: ProviderProps) {
     setItems((prev) => prev.filter((item) => item.slug !== slug));
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = () => {
+    const currentStorageKey = storageKeyRef.current;
+    clearRequestedRef.current = currentStorageKey === null;
+
+    if (typeof window !== "undefined" && currentStorageKey) {
+      try {
+        window.localStorage.removeItem(currentStorageKey);
+      } catch {
+        // Ignore storage cleanup failures.
+      }
+    }
+
+    itemsRef.current = [];
+    setItems([]);
+
+    if (isAuthenticatedCart) {
+      void clearPersistedCart();
+    }
+  };
 
   const value: CartContextValue = {
     items,

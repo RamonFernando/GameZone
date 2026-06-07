@@ -16,7 +16,8 @@ export async function GET(request: Request) {
 
   if (activeSession) {
     return NextResponse.json({
-      cartStorageKey: createCartStorageKey(`session:${activeSession.sessionId}`),
+      authenticated: true,
+      cartStorageKey: createCartStorageKey(`user:${activeSession.userId}`),
     });
   }
 
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
     : randomUUID();
 
   const response = NextResponse.json({
+    authenticated: false,
     cartStorageKey: createCartStorageKey(`anonymous:${cartSessionId}`),
   });
 
