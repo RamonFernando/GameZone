@@ -55,6 +55,8 @@ Copia `.env.example` a `.env` y completa al menos:
 - `PAYPAL_CLIENT_SECRET`
 - `PAYPAL_ENV` (`sandbox` o `live`)
 - `PAYPAL_WEBHOOK_ID`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+- `MAIL_BRAND_NAME`, `MAIL_SUPPORT_EMAIL`, `MAIL_LOGO_URL`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 - `FACEBOOK_CLIENT_ID`
@@ -571,6 +573,30 @@ npm run stripe:webhook:test:async
 4. Usa credenciales correctas segun ambiente:
    - Sandbox -> `PAYPAL_ENV=sandbox`
    - Live -> `PAYPAL_ENV=live`
+
+### Emails de confirmacion de compra
+
+Cuando un pedido pasa a `paid`, la app envia un email de confirmacion al correo
+del usuario que hizo la compra. El email incluye el nombre de la tienda, numero
+de pedido, enlace a la cuenta, productos comprados, cantidades, subtotales y
+total.
+
+Para enviar a correos reales, configura SMTP en `.env`:
+
+```env
+SMTP_HOST=smtp.tu-proveedor.com
+SMTP_PORT=587
+SMTP_USER=tu_usuario
+SMTP_PASS=tu_password_o_app_password
+SMTP_FROM=no-reply@tudominio.com
+MAIL_BRAND_NAME=GameZone Store
+MAIL_SUPPORT_EMAIL=soporte@tudominio.com
+MAIL_LOGO_URL=
+```
+
+Si no hay SMTP real, la app usa Ethereal de prueba. En ese modo el email no
+llega a Gmail/Outlook: revisa la consola del servidor y abre la URL que aparece
+como `Vista previa email de compra: https://ethereal.email/message/...`.
 
 ## Seguridad de pagos aplicada
 

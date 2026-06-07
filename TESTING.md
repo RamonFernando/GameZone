@@ -69,6 +69,11 @@ npm run e2e:all:continue
 - `e2e:all`: ejecuta checkout, Stripe y PayPal; se detiene al primer fallo.
 - `e2e:all:continue`: ejecuta checkout, Stripe y PayPal aunque alguno falle; muestra resumen final.
 
+El checkout manual, Stripe y PayPal envian email de confirmacion cuando el
+pedido queda `paid`. Con SMTP real configurado, el correo llega al usuario. Sin
+SMTP real, revisar la consola del servidor y abrir la URL `Vista previa email de
+compra: https://ethereal.email/message/...`.
+
 ## Variables E2E
 
 Defaults:

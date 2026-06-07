@@ -186,6 +186,7 @@ export async function completePaidOrder(input: {
 
   const recipientEmail = user?.email ?? input.fallbackEmail;
   const recipientName = user?.name ?? input.fallbackUsername;
+  let emailSent = false;
 
   try {
     await sendPurchaseConfirmationEmail({
@@ -207,6 +208,7 @@ export async function completePaidOrder(input: {
       where: { id: paidOrder.id },
       data: { confirmationEmailSentAt: new Date() },
     });
+    emailSent = true;
   } catch (error) {
     // No bloqueamos la confirmación de pago si falla el email.
     console.error("No se pudo enviar el email de confirmación de compra.", error);
@@ -214,6 +216,6 @@ export async function completePaidOrder(input: {
 
   return {
     order: paidOrder,
-    emailSent: true,
+    emailSent,
   };
 }
