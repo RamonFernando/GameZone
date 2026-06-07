@@ -8,6 +8,7 @@ import "../../../styles/auth.scss";
 
 type FinalizationState = "loading" | "success" | "error";
 type StripeStatus = "processing" | "paid" | "failed";
+type ValidationStep = "returned" | "checking" | "confirmed";
 
 const MAX_STATUS_POLLS = 30;
 const POLL_INTERVAL_MS = 1500;
@@ -36,6 +37,8 @@ function CheckoutSuccessContent() {
   const [state, setState] = useState<FinalizationState>("loading");
   const [message, setMessage] = useState("Validando pago...");
   const [orderId, setOrderId] = useState("");
+  const [validationStep, setValidationStep] = useState<ValidationStep>("returned");
+  const [validationAttempt, setValidationAttempt] = useState(0);
 
   useEffect(() => {
     if (hasFinalizedRef.current) {
@@ -58,6 +61,9 @@ function CheckoutSuccessContent() {
       }
       if (nextOrderId) {
         setOrderId(nextOrderId);
+      }
+      if (nextState === "success") {
+        setValidationStep("confirmed");
       }
       setState(nextState);
       setMessage(nextMessage);
@@ -96,9 +102,11 @@ function CheckoutSuccessContent() {
 
       try {
         if (provider === "stripe" && sessionId) {
+          setValidationStep("checking");
           setMessage("Comprobando confirmación segura de Stripe...");
 
           for (let attempt = 1; attempt <= MAX_STATUS_POLLS; attempt += 1) {
+            setValidationAttempt(attempt);
             const { response, payload } = await fetchJsonWithTimeout(
               `/api/payments/stripe/status?session_id=${encodeURIComponent(sessionId)}`,
               {
@@ -127,7 +135,10 @@ function CheckoutSuccessContent() {
             }
 
             if (!cancelled && !settled) {
-              setMessage(payload.message ?? "Esperando confirmación del pago...");
+              setMessage(
+                payload.message ??
+                  `Pago recibido. Stripe sigue confirmando la transacción (${attempt}/${MAX_STATUS_POLLS})...`
+              );
             }
 
             if (attempt < MAX_STATUS_POLLS) {
@@ -143,6 +154,8 @@ function CheckoutSuccessContent() {
         }
 
         if (provider === "paypal" && paypalToken) {
+          setValidationStep("checking");
+          setMessage("Confirmando pago con PayPal...");
           const { response, payload } = await fetchJsonWithTimeout("/api/payments/paypal/finalize", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -191,11 +204,43 @@ function CheckoutSuccessContent() {
 
             {state === "loading" ? (
               <>
-                <p className="auth-alt">Un momento, estamos validando la transacción...</p>
+                <div className="checkout-status-panel" role="status" aria-live="polite">
+                  <div className="checkout-status-spinner" aria-hidden="true" />
+                  <div className="checkout-status-copy">
+                    <p className="checkout-status-title">Estamos confirmando tu compra</p>
+                    <p className="auth-alt">
+                      No cierres esta ventana. El carrito se limpiará cuando la pasarela confirme el pago.
+                    </p>
+                  </div>
+                </div>
+
+                <ol className="checkout-progress-list" aria-label="Estado de la compra">
+                  <li className="checkout-progress-item checkout-progress-item--done">
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Pago recibido desde la pasarela</span>
+                  </li>
+                  <li
+                    className={
+                      "checkout-progress-item" +
+                      (validationStep === "checking" ? " checkout-progress-item--active" : "")
+                    }
+                  >
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>
+                      Validando confirmación segura
+                      {validationAttempt > 0 ? ` (${validationAttempt}/${MAX_STATUS_POLLS})` : ""}
+                    </span>
+                  </li>
+                  <li className="checkout-progress-item">
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Registrar pedido y limpiar carrito</span>
+                  </li>
+                </ol>
+
                 <button
                   type="button"
                   className="button-primary auth-submit btn-padding-site"
-                  onClick={() => router.push("/account")}
+                  onClick={() => router.push("/account?tab=payment")}
                 >
                   Ir a mi cuenta mientras valida
                 </button>
@@ -204,6 +249,20 @@ function CheckoutSuccessContent() {
 
             {state === "success" ? (
               <>
+                <ol className="checkout-progress-list checkout-progress-list--complete" aria-label="Compra confirmada">
+                  <li className="checkout-progress-item checkout-progress-item--done">
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Pago confirmado</span>
+                  </li>
+                  <li className="checkout-progress-item checkout-progress-item--done">
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Pedido guardado en tu cuenta</span>
+                  </li>
+                  <li className="checkout-progress-item checkout-progress-item--done">
+                    <span className="checkout-progress-marker" aria-hidden="true" />
+                    <span>Carrito limpiado</span>
+                  </li>
+                </ol>
                 <p className="auth-alt">Tu compra fue validada y el pedido quedó registrado.</p>
                 <button
                   type="button"

@@ -13,7 +13,7 @@ import "../../styles/auth.scss";
 export default async function AccountPage({
   searchParams,
 }: {
-  searchParams?: { order?: string };
+  searchParams?: { order?: string; tab?: string };
 }) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
@@ -120,7 +120,7 @@ export default async function AccountPage({
               ) : null}
             </div>
 
-            <AccountDashboard />
+            <AccountDashboard initialTab={searchParams?.tab === "payment" ? "payment" : "account"} />
             <LogoutButton />
             <SessionRefresher />
           </div>

@@ -480,6 +480,12 @@
   gap: 1rem;
 }
 
+.account-details-edit-button {
+  min-width: 10.5rem;
+  padding-inline: 1rem;
+  white-space: nowrap;
+}
+
 .account-details-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -524,6 +530,80 @@
   background: rgba(15, 23, 42, 0.32);
 }
 
+.account-pending-payment {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(165, 180, 252, 0.28);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.account-pending-payment-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-pending-payment-title {
+  margin: 0.25rem 0 0;
+  color: #f8fafc;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.account-pending-payment-badge {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  border-radius: 999px;
+  color: #dbeafe;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.account-pending-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.account-pending-payment-grid > div {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.account-pending-payment-grid strong {
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+}
+
+.account-pending-payment-items {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-pending-payment-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #b8c4d4;
+  font-size: 0.86rem;
+}
+
+.account-pending-payment-items strong {
+  color: #cbd5e1;
+}
+
+.account-pending-payment .auth-submit-compact {
+  justify-self: center;
+  width: auto;
+}
+
 .account-recovery-list {
   display: grid;
   gap: 0.75rem;
@@ -563,8 +643,26 @@
     width: 100%;
   }
 
+  .account-details-edit-button {
+    min-width: 0;
+  }
+
   .account-details-list {
     grid-template-columns: 1fr;
+  }
+
+  .account-pending-payment-head,
+  .account-pending-payment-items li {
+    flex-direction: column;
+  }
+
+  .account-pending-payment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-pending-payment .auth-submit-compact {
+    justify-self: stretch;
+    width: 100%;
   }
 
   .account-recovery-row {
@@ -684,9 +782,100 @@
   min-height: 2.75rem;
 }
 
+.checkout-status-panel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.checkout-status-spinner {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  border: 3px solid rgba(148, 163, 184, 0.28);
+  border-top-color: rgba(165, 180, 252, 0.95);
+  border-radius: 50%;
+  animation: checkout-status-spin 0.9s linear infinite;
+}
+
+.checkout-status-copy {
+  min-width: 0;
+}
+
+.checkout-status-title {
+  margin: 0 0 0.25rem;
+  color: #f8fafc;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.checkout-progress-list {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkout-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.checkout-progress-marker {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: 0 0 auto;
+  border: 2px solid rgba(148, 163, 184, 0.45);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.checkout-progress-item--active {
+  color: #dbeafe;
+}
+
+.checkout-progress-item--active .checkout-progress-marker {
+  border-color: rgba(165, 180, 252, 0.95);
+  box-shadow: 0 0 0 5px rgba(129, 140, 248, 0.12);
+}
+
+.checkout-progress-item--done {
+  color: #cbd5e1;
+}
+
+.checkout-progress-item--done .checkout-progress-marker {
+  border-color: rgba(34, 197, 94, 0.85);
+  background: rgba(34, 197, 94, 0.85);
+}
+
+.checkout-progress-list--complete {
+  padding: 1rem;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  background: rgba(20, 83, 45, 0.16);
+}
+
+@keyframes checkout-status-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 480px) {
   .checkout-login-actions {
     grid-template-columns: 1fr;
+  }
+
+  .checkout-status-panel {
+    align-items: flex-start;
   }
 }
 

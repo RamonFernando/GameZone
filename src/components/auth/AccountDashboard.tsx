@@ -39,6 +39,20 @@ type Order = {
   items: OrderItem[];
 };
 
+type PendingPayment = {
+  id: string;
+  status: string;
+  paymentProvider: string | null;
+  totalAmount: number;
+  currency: string;
+  createdAt: string;
+  items: OrderItem[];
+};
+
+type AccountTab = "account" | "details" | "security" | "payment";
+
+const MAX_PENDING_PAYMENT_POLLS = 30;
+
 // Fila que representa una sesión activa (o anterior) del usuario.
 type SessionRow = {
   id: string;
@@ -57,12 +71,15 @@ function formatMoney(amount: number, currency = "EUR") {
 }
 
 // Componente de dashboard de cuenta: perfil, historial resumido y gestión de sesiones.
-export function AccountDashboard() {
+export function AccountDashboard({ initialTab = "account" }: { initialTab?: AccountTab }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pendingPayment, setPendingPayment] = useState<PendingPayment | null>(null);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isRefreshingPendingPayment, setIsRefreshingPendingPayment] = useState(false);
+  const [pendingPaymentPollCount, setPendingPaymentPollCount] = useState(0);
   const [isRevokingAll, setIsRevokingAll] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [emailDraft, setEmailDraft] = useState("");
@@ -79,7 +96,7 @@ export function AccountDashboard() {
   );
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"account" | "details" | "security">("account");
+  const [activeTab, setActiveTab] = useState<AccountTab>(initialTab);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -160,6 +177,13 @@ export function AccountDashboard() {
     provinceDraft,
   ]);
 
+  const fetchPendingPayment = async () => {
+    const response = await fetch("/api/orders/pending-payment", { cache: "no-store" });
+    if (!response.ok) return null;
+    const payload = (await response.json()) as { pendingPayment?: PendingPayment | null };
+    return payload.pendingPayment ?? null;
+  };
+
   const loadDashboardData = async () => {
     setProfileMessage("");
     setErrorMessage("");
@@ -167,10 +191,11 @@ export function AccountDashboard() {
 
     try {
       setIsLoading(true);
-      const [meRes, ordersRes, sessionsRes] = await Promise.all([
+      const [meRes, ordersRes, sessionsRes, pendingPaymentRes] = await Promise.all([
         fetch("/api/account/me"),
         fetch("/api/orders"),
         fetch("/api/account/sessions"),
+        fetch("/api/orders/pending-payment", { cache: "no-store" }),
       ]);
 
       if (!meRes.ok || !ordersRes.ok || !sessionsRes.ok) {
@@ -181,6 +206,9 @@ export function AccountDashboard() {
       const mePayload = (await meRes.json()) as { user?: Profile };
       const ordersPayload = (await ordersRes.json()) as { orders?: Order[] };
       const sessionsPayload = (await sessionsRes.json()) as { sessions?: SessionRow[] };
+      const pendingPaymentPayload = pendingPaymentRes.ok
+        ? ((await pendingPaymentRes.json()) as { pendingPayment?: PendingPayment | null })
+        : { pendingPayment: null };
 
       const nextProfile = mePayload.user ?? null;
       setProfile(nextProfile);
@@ -196,6 +224,8 @@ export function AccountDashboard() {
       setTwoFactorEnabled(Boolean(nextProfile?.twoFactorEnabled));
       setTotpEnabled(Boolean(nextProfile?.totpEnabled));
       setOrders(ordersPayload.orders ?? []);
+      setPendingPayment(pendingPaymentPayload.pendingPayment ?? null);
+      setPendingPaymentPollCount(pendingPaymentPayload.pendingPayment ? 1 : 0);
       setSessions(sessionsPayload.sessions ?? []);
     } catch {
       setErrorMessage("Error de red al cargar tu cuenta.");
@@ -207,6 +237,57 @@ export function AccountDashboard() {
   useEffect(() => {
     void loadDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (!pendingPayment) return;
+
+    const intervalId = window.setInterval(async () => {
+      setPendingPaymentPollCount((count) =>
+        Math.min(MAX_PENDING_PAYMENT_POLLS, count + 1)
+      );
+      const nextPendingPayment = await fetchPendingPayment();
+      setPendingPayment(nextPendingPayment);
+      if (!nextPendingPayment) {
+        void loadDashboardData();
+      }
+    }, 5000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [pendingPayment]);
+
+  useEffect(() => {
+    if (pendingPayment && initialTab === "payment") {
+      setActiveTab("payment");
+    }
+  }, [initialTab, pendingPayment]);
+
+  useEffect(() => {
+    if (!isLoading && !pendingPayment && activeTab === "payment") {
+      setActiveTab("account");
+    }
+  }, [activeTab, isLoading, pendingPayment]);
+
+  const handleRefreshPendingPayment = async () => {
+    setIsRefreshingPendingPayment(true);
+    try {
+      setPendingPaymentPollCount((count) =>
+        Math.min(MAX_PENDING_PAYMENT_POLLS, count + 1)
+      );
+      const nextPendingPayment = await fetchPendingPayment();
+      setPendingPayment(nextPendingPayment);
+      if (!nextPendingPayment) {
+        await loadDashboardData();
+      }
+    } finally {
+      setIsRefreshingPendingPayment(false);
+    }
+  };
+
+  useEffect(() => {
+    setPendingPaymentPollCount(pendingPayment ? 1 : 0);
+  }, [pendingPayment?.id]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -567,7 +648,117 @@ export function AccountDashboard() {
         >
           {lang === "en" ? "Security" : "Seguridad"}
         </button>
+        {pendingPayment ? (
+          <button
+            type="button"
+            className={
+              "account-tab" + (activeTab === "payment" ? " account-tab--active" : "")
+            }
+            onClick={() => setActiveTab("payment")}
+          >
+            {lang === "en" ? "Payment validation" : "Pago en validación"}
+          </button>
+        ) : null}
       </div>
+
+      {activeTab === "payment" && pendingPayment ? (
+        <section className="account-pending-payment account-payment-validation" aria-live="polite">
+          <div className="account-pending-payment-head">
+            <div>
+              <span className="auth-label">
+                {lang === "en" ? "Checkout status" : "Estado del pago"}
+              </span>
+              <h3 className="account-pending-payment-title">
+                {lang === "en"
+                  ? "We are confirming your purchase"
+                  : "Estamos confirmando tu compra"}
+              </h3>
+            </div>
+            <span className="account-pending-payment-badge">
+              {pendingPayment.paymentProvider === "paypal" ? "PayPal" : "Stripe"}
+            </span>
+          </div>
+
+          <div className="checkout-status-panel" role="status" aria-live="polite">
+            <div className="checkout-status-spinner" aria-hidden="true" />
+            <div className="checkout-status-copy">
+              <p className="checkout-status-title">
+                {lang === "en"
+                  ? "Your payment is still being validated"
+                  : "Tu pago sigue en validación"}
+              </p>
+              <p className="auth-alt">
+                {lang === "en"
+                  ? "The cart will be cleared when the payment provider confirms the transaction."
+                  : "El carrito se limpiará cuando la pasarela confirme la transacción."}
+              </p>
+            </div>
+          </div>
+
+          <ol className="checkout-progress-list" aria-label={lang === "en" ? "Payment status" : "Estado del pago"}>
+            <li className="checkout-progress-item checkout-progress-item--done">
+              <span className="checkout-progress-marker" aria-hidden="true" />
+              <span>{lang === "en" ? "Payment received by provider" : "Pago recibido desde la pasarela"}</span>
+            </li>
+            <li className="checkout-progress-item checkout-progress-item--active">
+              <span className="checkout-progress-marker" aria-hidden="true" />
+              <span>
+                {lang === "en" ? "Validating secure confirmation" : "Validando confirmación segura"}{" "}
+                ({Math.max(1, pendingPaymentPollCount)}/{MAX_PENDING_PAYMENT_POLLS})
+              </span>
+            </li>
+            <li className="checkout-progress-item">
+              <span className="checkout-progress-marker" aria-hidden="true" />
+              <span>{lang === "en" ? "Register order and clear cart" : "Registrar pedido y limpiar carrito"}</span>
+            </li>
+          </ol>
+
+          <p className="auth-alt">
+            {lang === "en"
+              ? "You can stay in your account while the payment provider confirms the transaction. This panel disappears when the order is paid."
+              : "Puedes quedarte en tu cuenta mientras la pasarela confirma la transacción. Este panel desaparece cuando el pedido queda pagado."}
+          </p>
+
+          <div className="account-pending-payment-grid">
+            <div>
+              <span className="auth-label">{lang === "en" ? "Order" : "Pedido"}</span>
+              <strong>#{pendingPayment.id.slice(0, 8)}</strong>
+            </div>
+            <div>
+              <span className="auth-label">{lang === "en" ? "Total" : "Total"}</span>
+              <strong>{formatMoney(pendingPayment.totalAmount, pendingPayment.currency)}</strong>
+            </div>
+            <div>
+              <span className="auth-label">{lang === "en" ? "Status" : "Estado"}</span>
+              <strong>{lang === "en" ? "Validating" : "Validando"}</strong>
+            </div>
+          </div>
+
+          <ul className="account-pending-payment-items">
+            {pendingPayment.items.map((item) => (
+              <li key={item.id}>
+                <span>{item.title}</span>
+                <strong>x{item.quantity}</strong>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            type="button"
+            className="button-primary auth-submit-compact btn-padding-site"
+            onClick={handleRefreshPendingPayment}
+            disabled={isRefreshingPendingPayment}
+          >
+            {isRefreshingPendingPayment
+              ? lang === "en"
+                ? "Checking..."
+                : "Comprobando..."
+              : lang === "en"
+                ? "Update payment status"
+                : "Actualizar estado del pago"}
+          </button>
+        </section>
+      ) : null}
 
       {activeTab === "account" ? (
         <>
@@ -722,7 +913,7 @@ export function AccountDashboard() {
                   </div>
                   <button
                     type="button"
-                    className="button-primary auth-submit-compact btn-padding-site"
+                    className="button-primary auth-submit-compact btn-padding-site account-details-edit-button"
                     onClick={openDetailsEditor}
                   >
                     {hasPersonalData
