@@ -144,6 +144,13 @@ export default function HomePage() {
 
     if (urlQuery) {
       setQuery(urlQuery);
+      params.delete("q");
+      const nextSearch = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}#game-results`
+      );
       window.requestAnimationFrame(() => {
         document.getElementById("game-results")?.scrollIntoView({
           behavior: "smooth",
