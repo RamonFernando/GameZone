@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   createPaymentProgressStorageKey,
   getPaymentProgressStepFromStartedAt,
@@ -126,6 +126,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [totpQrDataUrl, setTotpQrDataUrl] = useState("");
   const [totpCodeDraft, setTotpCodeDraft] = useState("");
   const [lang, setLang] = useState<"es" | "en">("es");
+  const clearedPaidOrderRef = useRef<string | null>(null);
 
   const totalSpent = useMemo(
     () =>
@@ -376,6 +377,19 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       window.clearInterval(intervalId);
     };
   }, [paymentResult?.id, paymentResult?.status, pendingPayment]);
+
+  useEffect(() => {
+    if (!paymentResult?.id || !paymentIsPaid || !paymentProgressIsComplete) {
+      return;
+    }
+
+    if (clearedPaidOrderRef.current === paymentResult.id) {
+      return;
+    }
+
+    clearedPaidOrderRef.current = paymentResult.id;
+    window.dispatchEvent(new Event("gamezone:cart-cleared"));
+  }, [paymentIsPaid, paymentProgressIsComplete, paymentResult?.id]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;

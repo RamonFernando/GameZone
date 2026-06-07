@@ -133,6 +133,17 @@ export function CartProvider({ children }: ProviderProps) {
   const storageKeyRef = useRef<string | null>(null);
   const itemsRef = useRef<CartItem[]>([]);
   const clearRequestedRef = useRef(false);
+  const persistedCartWriteRef = useRef<Promise<void>>(Promise.resolve());
+
+  const queuePersistedCartWrite = useCallback((operation: () => Promise<void>) => {
+    const nextWrite = persistedCartWriteRef.current
+      .catch(() => undefined)
+      .then(operation)
+      .catch(() => undefined);
+
+    persistedCartWriteRef.current = nextWrite;
+    return nextWrite;
+  }, []);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -173,7 +184,7 @@ export function CartProvider({ children }: ProviderProps) {
           }
 
           if (nextIsAuthenticatedCart) {
-            await clearPersistedCart();
+            await queuePersistedCartWrite(clearPersistedCart);
           }
 
           clearRequestedRef.current = false;
@@ -199,7 +210,7 @@ export function CartProvider({ children }: ProviderProps) {
           );
 
           if (!cartItemsHaveSameQuantities(nextItems, persistedItems)) {
-            await savePersistedCart(nextItems);
+            await queuePersistedCartWrite(() => savePersistedCart(nextItems));
           }
 
           if (shouldMergeCurrentCart && previousStorageKey) {
@@ -245,7 +256,7 @@ export function CartProvider({ children }: ProviderProps) {
     if (!isAuthenticatedCart) return;
 
     const timeoutId = window.setTimeout(() => {
-      void savePersistedCart(items);
+      void queuePersistedCartWrite(() => savePersistedCart(items));
     }, 250);
 
     return () => {
@@ -301,9 +312,9 @@ export function CartProvider({ children }: ProviderProps) {
     setItems([]);
 
     if (isAuthenticatedCart) {
-      void clearPersistedCart();
+      void queuePersistedCartWrite(clearPersistedCart);
     }
-  }, [isAuthenticatedCart]);
+  }, [isAuthenticatedCart, queuePersistedCartWrite]);
 
   useEffect(() => {
     const handleExternalCartClear = () => {
