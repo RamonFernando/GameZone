@@ -214,6 +214,10 @@
 
 .game-detail-info-card {
   padding: 1rem;
+
+  .section-title {
+    color: #e2e8f0;
+  }
 }
 
 .game-detail-requirements {
@@ -224,6 +228,64 @@
   line-height: 1.55;
   margin: 0.8rem 0 0;
  }
+
+.game-detail-links {
+  margin-top: 1.1rem;
+}
+
+.game-detail-links-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.55rem;
+}
+
+.game-detail-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.game-detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.55);
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  span[aria-hidden] {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  &:hover {
+    border-color: rgba(129, 140, 248, 0.6);
+    background: rgba(79, 70, 229, 0.18);
+    transform: translateY(-1px);
+  }
+}
+
+.game-detail-link--steam {
+  &:hover {
+    border-color: rgba(102, 192, 244, 0.7);
+    background: rgba(27, 40, 56, 0.85);
+    color: #ffffff;
+  }
+}
 
 .game-detail-price-line {
   display: flex;
@@ -323,6 +385,18 @@
 
 .game-detail-cart-button {
   position: static;
+}
+
+.market-pulse-card-cart.game-detail-cart-button {
+  position: absolute;
+  right: 0.72rem;
+  bottom: 0.72rem;
+  z-index: 4;
+}
+
+.market-pulse-compact-card .market-pulse-card-cart.game-detail-cart-button {
+  right: 0.52rem;
+  bottom: 0.52rem;
 }
 
 .game-card-media {

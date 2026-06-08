@@ -8,6 +8,22 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
 
+function SteamIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658a3.39 3.39 0 0 1 1.912-.59c.063 0 .125.004.188.006l2.861-4.142v-.059a4.526 4.526 0 0 1 4.524-4.524 4.526 4.526 0 0 1 4.524 4.527 4.526 4.526 0 0 1-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159a3.396 3.396 0 0 1-3.39 3.396 3.4 3.4 0 0 1-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61a2.553 2.553 0 0 0 1.314 1.25 2.566 2.566 0 0 0 3.332-1.375 2.55 2.55 0 0 0 .005-1.949 2.554 2.554 0 0 0-1.377-1.383 2.56 2.56 0 0 0-1.878-.03l1.523.63a1.884 1.884 0 0 1 1.009 2.455 1.882 1.882 0 0 1-2.454 1.012zm11.415-9.303a3.018 3.018 0 0 0-3.015-3.015 3.019 3.019 0 0 0-3.015 3.015 3.019 3.019 0 0 0 3.015 3.015 3.018 3.018 0 0 0 3.015-3.015zm-5.273-.005a2.265 2.265 0 0 1 2.265-2.266 2.266 2.266 0 1 1 0 4.531 2.265 2.265 0 0 1-2.265-2.265z" />
+    </svg>
+  );
+}
+
+function StoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 9l1.5-5h15L21 9M3 9v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M8 13h8" />
+    </svg>
+  );
+}
+
 type ProductView = {
   id: string;
   name: string;
@@ -29,6 +45,8 @@ type ProductView = {
   screenshots: string[];
   backgroundImage: string | null;
   website: string | null;
+  externalStoreLabel: string | null;
+  externalStoreUrl: string | null;
   esrbRating: string | null;
   metacritic: number | null;
   rating: number | null;
@@ -318,7 +336,7 @@ export default function GameDetailPage() {
 
 	      </div>
 
-	      {(game.requirements || game.website) && (
+	      {(game.requirements || game.website || game.externalStoreUrl) && (
 	        <section className="game-detail-extra">
 	          <div className="card game-detail-info-card">
 	            <h2 className="section-title">
@@ -327,16 +345,47 @@ export default function GameDetailPage() {
 	            {game.requirements ? (
 	              <pre className="game-detail-requirements">{game.requirements}</pre>
 	            ) : null}
-	            {game.website ? (
-	              <a
-	                href={game.website}
-	                target="_blank"
-	                rel="noreferrer"
-	                className="auth-link"
-	              >
-	                {isEnglish ? "Official website" : "Web oficial"}
-	              </a>
-	            ) : null}
+	            {(game.website || game.externalStoreUrl) && (
+	              <div className="game-detail-links">
+	                <span className="game-detail-links-label">
+	                  {isEnglish ? "Links" : "Enlaces"}
+	                </span>
+	                <div className="game-detail-links-row">
+	                  {game.website ? (
+	                    <a
+	                      href={game.website}
+	                      target="_blank"
+	                      rel="noreferrer"
+	                      className="game-detail-link"
+	                    >
+	                      <span aria-hidden="true">🌐</span>
+	                      {isEnglish ? "Official website" : "Web oficial"}
+	                    </a>
+	                  ) : null}
+	                  {game.externalStoreUrl ? (
+	                    <a
+	                      href={game.externalStoreUrl}
+	                      target="_blank"
+	                      rel="noreferrer"
+	                      className={`game-detail-link${
+	                        game.externalStoreLabel?.toLowerCase().includes("steam")
+	                          ? " game-detail-link--steam"
+	                          : ""
+	                      }`}
+	                    >
+	                      {game.externalStoreLabel?.toLowerCase().includes("steam") ? (
+	                        <SteamIcon />
+	                      ) : (
+	                        <StoreIcon />
+	                      )}
+	                      {isEnglish
+	                        ? `View on ${game.externalStoreLabel ?? "store"}`
+	                        : `Ver en ${game.externalStoreLabel ?? "tienda"}`}
+	                    </a>
+	                  ) : null}
+	                </div>
+	              </div>
+	            )}
 	          </div>
 	        </section>
 	      )}
