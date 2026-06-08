@@ -21,6 +21,27 @@ function parseJsonList(value: string | null | undefined): string[] {
   }
 }
 
+function createExternalStoreLink(product: { name: string; storeLabel: string }) {
+  const store = product.storeLabel.trim().toLowerCase();
+  const query = encodeURIComponent(product.name);
+
+  if (store.includes("g2a")) {
+    return {
+      label: "G2A",
+      url: `https://www.g2a.com/search?query=${query}`,
+    };
+  }
+
+  if (store.includes("steam")) {
+    return {
+      label: "Steam",
+      url: `https://store.steampowered.com/search/?term=${query}`,
+    };
+  }
+
+  return null;
+}
+
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
   const product = await getActiveProductBySlug(slug);
@@ -71,6 +92,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
       likesCount: item.likesCount,
       priceFinal: computeDiscountedPrice(item.priceOriginal, item.discountPercent),
     }));
+  const externalStoreLink = createExternalStoreLink(product);
 
   return NextResponse.json(
     {
@@ -98,6 +120,8 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
         screenshots: parseJsonList(product.screenshotsJson),
         backgroundImage: product.backgroundImage,
         website: product.website,
+        externalStoreLabel: externalStoreLink?.label ?? null,
+        externalStoreUrl: externalStoreLink?.url ?? null,
         esrbRating: product.esrbRating,
         metacritic: product.metacritic,
         rating: product.rating,

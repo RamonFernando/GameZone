@@ -78,8 +78,42 @@ type CatalogSyncStatus = {
   canForce: boolean;
 };
 
+// Diagnostico de calidad del catalogo para encontrar fichas pobres.
+type CatalogQualityIssue =
+  | "short_description"
+  | "missing_long_description"
+  | "missing_background"
+  | "missing_screenshots"
+  | "missing_developer"
+  | "missing_publisher";
+
+type CatalogQualityProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  coverImage: string;
+  storeLabel: string;
+  metadataSource: string | null;
+  issues: CatalogQualityIssue[];
+};
+
+type CatalogQualityReport = {
+  total: number;
+  incomplete: number;
+  products: CatalogQualityProduct[];
+};
+
 // Número de productos por página en el listado principal.
 const PAGE_SIZE = 6;
+
+const CATALOG_ISSUE_LABELS: Record<CatalogQualityIssue, string> = {
+  short_description: "Descripcion corta",
+  missing_long_description: "Sin descripcion larga",
+  missing_background: "Sin fondo",
+  missing_screenshots: "Sin capturas",
+  missing_developer: "Sin developer",
+  missing_publisher: "Sin publisher",
+};
 
 // Borrador vacío que usamos como estado inicial del formulario de producto.
 const emptyDraft: ProductDraft = {
@@ -188,7 +222,10 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncingMarket, setIsSyncingMarket] = useState(false);
+  const [isLoadingQuality, setIsLoadingQuality] = useState(true);
+  const [isEnrichingCatalog, setIsEnrichingCatalog] = useState(false);
   const [syncStatus, setSyncStatus] = useState<CatalogSyncStatus | null>(null);
+  const [catalogQuality, setCatalogQuality] = useState<CatalogQualityReport | null>(null);
   const [forceSync, setForceSync] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -238,10 +275,31 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
     }
   }, [pushToast]);
 
+  const loadCatalogQuality = useCallback(async () => {
+    try {
+      setIsLoadingQuality(true);
+      const response = await fetch("/api/admin/products/enrichment?limit=12", { cache: "no-store" });
+      const payload = (await response.json()) as {
+        report?: CatalogQualityReport;
+        message?: string;
+      };
+      if (!response.ok) {
+        pushToast("error", payload.message ?? "No se pudo cargar auditoria de catalogo.");
+        return;
+      }
+      setCatalogQuality(payload.report ?? null);
+    } catch {
+      pushToast("error", "Error de red cargando auditoria de catalogo.");
+    } finally {
+      setIsLoadingQuality(false);
+    }
+  }, [pushToast]);
+
   useEffect(() => {
     void loadProducts();
     void loadSyncStatus();
-  }, [loadProducts, loadSyncStatus]);
+    void loadCatalogQuality();
+  }, [loadProducts, loadSyncStatus, loadCatalogQuality]);
 
   const sortedFilteredProducts = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -368,12 +426,55 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       );
       if (!dryRun) {
         await loadProducts();
+        await loadCatalogQuality();
       }
       await loadSyncStatus();
     } catch {
       pushToast("error", "Error de red sincronizando mercado.");
     } finally {
       setIsSyncingMarket(false);
+    }
+  };
+
+  const handleCatalogEnrichment = async (dryRun = false) => {
+    try {
+      setIsEnrichingCatalog(true);
+      const params = new URLSearchParams({ limit: "12" });
+      if (dryRun) params.set("dryRun", "1");
+      const response = await fetch(`/api/admin/products/enrichment?${params.toString()}`, {
+        method: "POST",
+      });
+      const payload = (await response.json()) as {
+        message?: string;
+        enrichment?: {
+          enriched?: number;
+          skipped?: number;
+          missingApiKey?: boolean;
+        };
+        report?: CatalogQualityReport;
+      };
+
+      if (!response.ok) {
+        pushToast("error", payload.message ?? "No se pudo enriquecer el catalogo.");
+        return;
+      }
+
+      const enrichment = payload.enrichment;
+      pushToast(
+        "success",
+        enrichment
+          ? `${dryRun ? "Previsualizacion" : "Enriquecimiento"} RAWG: ${enrichment.enriched ?? 0} enriquecidos, ${enrichment.skipped ?? 0} omitidos${enrichment.missingApiKey ? " (falta RAWG_API_KEY)" : ""}.`
+          : payload.message ?? "Enriquecimiento ejecutado."
+      );
+      setCatalogQuality(payload.report ?? null);
+      if (!dryRun) {
+        await loadProducts();
+        await loadCatalogQuality();
+      }
+    } catch {
+      pushToast("error", "Error de red enriqueciendo catalogo.");
+    } finally {
+      setIsEnrichingCatalog(false);
     }
   };
 
@@ -683,6 +784,97 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           </label>
         ) : null}
       </div>
+
+      <section
+        style={{
+          display: "grid",
+          gap: 12,
+          padding: 14,
+          border: "1px solid rgba(45,212,191,0.28)",
+          borderRadius: 12,
+          background: "rgba(15,23,42,0.42)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <h3 className="auth-label" style={{ marginBottom: 4 }}>
+              Catalogo incompleto
+            </h3>
+            <p className="auth-alt" style={{ margin: 0 }}>
+              {isLoadingQuality
+                ? "Revisando metadata..."
+                : catalogQuality
+                  ? `${catalogQuality.incomplete} de ${catalogQuality.total} productos necesitan mas informacion.`
+                  : "No hay auditoria disponible."}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="button-ghost btn-padding-site"
+              onClick={() => loadCatalogQuality()}
+              disabled={isLoadingQuality || isEnrichingCatalog}
+            >
+              Revisar
+            </button>
+            <button
+              type="button"
+              className="button-primary btn-padding-site"
+              onClick={() => handleCatalogEnrichment(false)}
+              disabled={isLoadingQuality || isEnrichingCatalog || catalogQuality?.incomplete === 0}
+            >
+              {isEnrichingCatalog ? "Enriqueciendo..." : "Enriquecer incompletos"}
+            </button>
+          </div>
+        </div>
+
+        {catalogQuality?.products.length ? (
+          <div style={{ display: "grid", gap: 8 }}>
+            {catalogQuality.products.slice(0, 6).map((product) => (
+              <div
+                key={product.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) auto",
+                  gap: 10,
+                  alignItems: "center",
+                  padding: 10,
+                  border: "1px solid rgba(148,163,184,0.18)",
+                  borderRadius: 10,
+                  background: "rgba(2,6,23,0.28)",
+                }}
+              >
+                <div>
+                  <strong>{product.name}</strong>
+                  <div className="auth-alt">
+                    {product.slug} · {product.storeLabel} · {product.metadataSource ?? "sin fuente"}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  {product.issues.slice(0, 3).map((issue) => (
+                    <span
+                      key={`${product.id}-${issue}`}
+                      className="auth-alt"
+                      style={{
+                        padding: "3px 7px",
+                        border: "1px solid rgba(251,191,36,0.3)",
+                        borderRadius: 999,
+                        color: "#fde68a",
+                      }}
+                    >
+                      {CATALOG_ISSUE_LABELS[issue]}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : !isLoadingQuality ? (
+          <p className="auth-alt" style={{ margin: 0 }}>
+            Todos los productos activos tienen metadata suficiente.
+          </p>
+        ) : null}
+      </section>
 
       {isLoading ? <p className="auth-alt">Cargando productos...</p> : null}
 
