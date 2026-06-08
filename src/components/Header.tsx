@@ -40,6 +40,7 @@ const UI_LOCALE_OPTIONS: UiLocaleOption[] = [
 ];
 
 const AUTH_CHANGED_EVENT = "gamezone:auth-changed";
+const CART_OPEN_EVENT = "gamezone:cart-open";
 
 // Header que envuelve logo, filtros de plataforma, buscador, carrito y avatar.
 export function Header({ topTransparentOnTop = false }: HeaderProps) {
@@ -66,6 +67,12 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
     setUiLocale(locale);
     setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
+  }, []);
+
+  useEffect(() => {
+    const openCart = () => setOpen(true);
+    window.addEventListener(CART_OPEN_EVENT, openCart);
+    return () => window.removeEventListener(CART_OPEN_EVENT, openCart);
   }, []);
 
   const handleUiLocaleChange = (value: string) => {

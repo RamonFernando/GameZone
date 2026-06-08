@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
+import type { ProductPreview } from "@/types/product";
 
 type DataSourcePreview = {
   name: string;
@@ -38,6 +40,15 @@ type MarketPulseItem = {
   steamPrice?: number | null;
   steamCurrency?: string | null;
   steamIsFree?: boolean;
+  catalogMatch?: {
+    id?: string | null;
+    slug?: string | null;
+    title?: string | null;
+    image?: string | null;
+    platform?: string | null;
+    priceOriginal?: number | null;
+    discountPercent?: number | null;
+  };
 };
 
 type MarketPulseSection = {
@@ -298,6 +309,42 @@ function formatEuro(value: number) {
   });
 }
 
+function buildCartPreview(game: MarketPulseItem): ProductPreview | null {
+  const match = game.catalogMatch;
+  if (!match?.slug) return null;
+
+  const discountPercent = match.discountPercent ?? 0;
+  const priceOriginal =
+    match.priceOriginal ??
+    (typeof game.gameZonePrice === "number" ? game.gameZonePrice : 0);
+  const priceFinal =
+    typeof game.gameZonePrice === "number"
+      ? game.gameZonePrice
+      : priceOriginal * (1 - discountPercent / 100);
+
+  return {
+    id: match.id ?? match.slug,
+    name: match.title ?? game.title,
+    slug: match.slug,
+    description: `Compra digital de ${match.title ?? game.title}.`,
+    coverImage: match.image ?? game.image,
+    platform: match.platform ?? game.platform,
+    region: "EUROPA",
+    storeLabel: "GameZone",
+    cardSubtitle: "Codigo digital oficial",
+    priceOriginal,
+    discountPercent,
+    cashbackPercent: 0,
+    likesCount: 0,
+    priceFinal,
+    stock: 99,
+  };
+}
+
+function openCartDrawer() {
+  window.dispatchEvent(new Event("gamezone:cart-open"));
+}
+
 const PULSE_ROTATE_MS = 8000;
 
 function MarketPulseCarousel({
@@ -309,6 +356,7 @@ function MarketPulseCarousel({
   variant?: "hero" | "compact" | "catalog";
   thumbCount?: 3 | 5;
 }) {
+  const { addToCart } = useCart();
   const [activeIndex, setActiveIndex] = useState(0);
   const [thumbsEntering, setThumbsEntering] = useState(false);
 
@@ -432,52 +480,90 @@ function MarketPulseCarousel({
     return (
       <article className="market-pulse-carousel market-pulse-carousel--catalog">
         <div className="market-pulse-catalog-grid" aria-label={`${section.title} cards`}>
-          {section.items.slice(0, 5).map((game) => (
-            <article className="market-pulse-catalog-card" key={`${section.id}-${game.rank}-${game.title}`}>
-              <span className="market-pulse-catalog-card__media">
-                <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
-                <span className="market-pulse-catalog-card__store">
-                  {section.source === "Steam" ? (
+          {section.items.slice(0, 5).map((game) => {
+            const href = game.catalogMatch?.slug ? `/games/${game.catalogMatch.slug}` : null;
+            const cartPreview = buildCartPreview(game);
+            const content = (
+              <>
+                <span className="market-pulse-catalog-card__media">
+                  <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
+                  <span className="market-pulse-catalog-card__store">
+                    {section.source === "Steam" ? (
+                      <Image
+                        src="/iconos_platforms/icon-steam.svg"
+                        alt=""
+                        width={14}
+                        height={14}
+                      />
+                    ) : null}
+                    {section.source}
+                  </span>
+                </span>
+                <span className="market-pulse-catalog-card__body">
+                  <strong>{game.title}</strong>
+                  <span>Codigo digital oficial</span>
+                  <small>{game.platform}</small>
+                  <span className="market-pulse-catalog-card__prices">
+                    <span>
+                      <small>GameZone</small>
+                      <strong>
+                        {typeof game.gameZonePrice === "number" ? formatEuro(game.gameZonePrice) : "Sin match"}
+                      </strong>
+                    </span>
+                    <span>
+                      <small>{section.source === "G2A" ? "G2A" : "Steam"}</small>
+                      <strong>
+                        {section.source === "G2A"
+                          ? typeof game.g2aPrice === "number"
+                            ? formatEuro(game.g2aPrice)
+                            : "No disponible"
+                          : game.steamIsFree
+                            ? "Gratis"
+                            : typeof game.steamPrice === "number"
+                              ? formatEuro(game.steamPrice)
+                              : "No disponible"}
+                      </strong>
+                    </span>
+                  </span>
+                  <em>#{game.rank} {section.source === "Steam" ? "mas jugado" : "mas vendido"}</em>
+                </span>
+              </>
+            );
+
+            return href ? (
+              <article
+                className="market-pulse-catalog-card"
+                key={`${section.id}-${game.rank}-${game.title}`}
+              >
+                <Link className="market-pulse-card-link" href={href}>
+                  {content}
+                </Link>
+                {cartPreview ? (
+                  <button
+                    type="button"
+                    className="game-detail-cart-button market-pulse-card-cart"
+                    onClick={() => {
+                      addToCart(cartPreview);
+                      openCartDrawer();
+                    }}
+                    aria-label={`Añadir ${cartPreview.name} al carrito`}
+                    title="Añadir al carrito"
+                  >
                     <Image
-                      src="/iconos_platforms/icon-steam.svg"
+                      src="/iconos_platforms/carritoCompra2.svg"
                       alt=""
-                      width={14}
-                      height={14}
+                      width={18}
+                      height={18}
                     />
-                  ) : null}
-                  {section.source}
-                </span>
-              </span>
-              <span className="market-pulse-catalog-card__body">
-                <strong>{game.title}</strong>
-                <span>Codigo digital oficial</span>
-                <small>{game.platform}</small>
-                <span className="market-pulse-catalog-card__prices">
-                  <span>
-                    <small>GameZone</small>
-                    <strong>
-                      {typeof game.gameZonePrice === "number" ? formatEuro(game.gameZonePrice) : "Sin match"}
-                    </strong>
-                  </span>
-                  <span>
-                    <small>{section.source === "G2A" ? "G2A" : "Steam"}</small>
-                    <strong>
-                      {section.source === "G2A"
-                        ? typeof game.g2aPrice === "number"
-                          ? formatEuro(game.g2aPrice)
-                          : "No disponible"
-                        : game.steamIsFree
-                          ? "Gratis"
-                          : typeof game.steamPrice === "number"
-                            ? formatEuro(game.steamPrice)
-                            : "No disponible"}
-                    </strong>
-                  </span>
-                </span>
-                <em>#{game.rank} {section.source === "Steam" ? "mas jugado" : "mas vendido"}</em>
-              </span>
-            </article>
-          ))}
+                  </button>
+                ) : null}
+              </article>
+            ) : (
+              <article className="market-pulse-catalog-card" key={`${section.id}-${game.rank}-${game.title}`}>
+                {content}
+              </article>
+            );
+          })}
         </div>
       </article>
     );
@@ -493,20 +579,58 @@ function MarketPulseCarousel({
     return (
       <article className="market-pulse-carousel market-pulse-carousel--compact">
         <div className="market-pulse-carousel__compact-strip" aria-label={`${section.title} cards`}>
-          {centeredItems.map((game) => (
-            <article
-              key={`${section.id}-${game.rank}-${game.title}`}
-              className="market-pulse-compact-card"
-            >
-              <span className="market-pulse-compact-card__media">
-                <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
-              </span>
-              <span className="market-pulse-compact-card__copy">
-                <strong>{game.title}</strong>
-                <small>{game.platform}</small>
-              </span>
-            </article>
-          ))}
+          {centeredItems.map((game) => {
+            const href = game.catalogMatch?.slug ? `/games/${game.catalogMatch.slug}` : null;
+            const cartPreview = buildCartPreview(game);
+            const content = (
+              <>
+                <span className="market-pulse-compact-card__media">
+                  <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
+                </span>
+                <span className="market-pulse-compact-card__copy">
+                  <strong>{game.title}</strong>
+                  <small>{game.platform}</small>
+                </span>
+              </>
+            );
+
+            return href ? (
+              <article
+                key={`${section.id}-${game.rank}-${game.title}`}
+                className="market-pulse-compact-card"
+              >
+                <Link className="market-pulse-card-link" href={href}>
+                  {content}
+                </Link>
+                {cartPreview ? (
+                  <button
+                    type="button"
+                    className="game-detail-cart-button market-pulse-card-cart"
+                    onClick={() => {
+                      addToCart(cartPreview);
+                      openCartDrawer();
+                    }}
+                    aria-label={`Añadir ${cartPreview.name} al carrito`}
+                    title="Añadir al carrito"
+                  >
+                    <Image
+                      src="/iconos_platforms/carritoCompra2.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                    />
+                  </button>
+                ) : null}
+              </article>
+            ) : (
+              <article
+                key={`${section.id}-${game.rank}-${game.title}`}
+                className="market-pulse-compact-card"
+              >
+                {content}
+              </article>
+            );
+          })}
         </div>
       </article>
     );
