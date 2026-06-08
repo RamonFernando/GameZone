@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { sendPurchaseConfirmationEmail } from "@/lib/auth/email";
 import { clearUserCartItems } from "@/lib/cart/persistent-cart";
 import { computeDiscountedPrice, ensureProductsSeeded } from "@/lib/products";
+import { logger } from "@/lib/logger";
 
 type CheckoutItemInput = {
   slug?: string;
@@ -87,6 +88,17 @@ export async function normalizeOrderItemsFromDb(
         "INVALID_QUANTITY"
       );
     }
+
+    const product = catalogMap.get(slug)!;
+    if (product.stock < quantity) {
+      throw new CheckoutValidationError(
+        product.stock <= 0
+          ? `${product.name} está agotado.`
+          : `No hay stock suficiente para ${product.name}. Disponibles: ${product.stock}.`,
+        "OUT_OF_STOCK",
+        409
+      );
+    }
   }
 
   return Array.from(consolidated.entries()).map(([slug, quantity]) => {
@@ -158,23 +170,58 @@ export async function completePaidOrder(input: {
     throw new CheckoutValidationError("Pedido no encontrado.", "ORDER_NOT_FOUND", 404);
   }
 
-  const alreadyPaid = existing.status === "paid";
-  const paidOrder = alreadyPaid
-    ? existing
-    : await prisma.order.update({
-        where: { id: existing.id },
-        data: {
-          status: "paid",
-          paidAt: new Date(),
-          paymentProvider: input.paymentProvider,
-          paymentReference: input.paymentReference,
-        },
-        include: { items: true },
-      });
+  // Claim atómico: solo el primer webhook/llamada que gane la transición
+  // pending -> paid descuenta stock. Los duplicados (PayPal envía 2 eventos)
+  // ven count === 0 y no repiten el descuento.
+  const paidOrder = await prisma.$transaction(async (tx) => {
+    const claim = await tx.order.updateMany({
+      where: {
+        id: existing.id,
+        userId: input.userId,
+        status: { not: "paid" },
+      },
+      data: {
+        status: "paid",
+        paidAt: new Date(),
+        paymentProvider: input.paymentProvider,
+        paymentReference: input.paymentReference,
+      },
+    });
+
+    const order = await tx.order.findFirstOrThrow({
+      where: { id: existing.id, userId: input.userId },
+      include: { items: true },
+    });
+
+    // Solo descontamos stock si esta llamada ganó la transición.
+    if (claim.count > 0) {
+      for (const item of order.items) {
+        const product = await tx.product.findUnique({
+          where: { slug: item.gameSlug },
+          select: { id: true, stock: true },
+        });
+        if (product) {
+          await tx.product.update({
+            where: { id: product.id },
+            data: { stock: Math.max(0, product.stock - item.quantity) },
+          });
+        }
+      }
+    }
+
+    return order;
+  });
 
   await clearUserCartItems(input.userId);
 
-  if (paidOrder.confirmationEmailSentAt) {
+  // Claim atómico del email: solo gana quien pasa confirmationEmailSentAt de null
+  // a una fecha. Evita correos duplicados ante webhooks concurrentes.
+  const emailClaim = await prisma.order.updateMany({
+    where: { id: paidOrder.id, confirmationEmailSentAt: null },
+    data: { confirmationEmailSentAt: new Date() },
+  });
+
+  if (emailClaim.count === 0) {
     return {
       order: paidOrder,
       emailSent: true,
@@ -206,15 +253,18 @@ export async function completePaidOrder(input: {
         subtotal: item.subtotal,
       })),
     });
-
-    await prisma.order.update({
-      where: { id: paidOrder.id },
-      data: { confirmationEmailSentAt: new Date() },
-    });
     emailSent = true;
   } catch (error) {
-    // No bloqueamos la confirmación de pago si falla el email.
-    console.error("No se pudo enviar el email de confirmación de compra.", error);
+    // Liberamos el claim para permitir un reintento posterior y no bloqueamos
+    // la confirmación de pago si falla el email.
+    await prisma.order.update({
+      where: { id: paidOrder.id },
+      data: { confirmationEmailSentAt: null },
+    });
+    logger.error("No se pudo enviar el email de confirmación de compra.", {
+      orderId: paidOrder.id,
+      err: error,
+    });
   }
 
   return {
