@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { clampDiscountPercent, resolveStoreLabel } from "@/lib/products";
 import { slugify } from "@/lib/games";
 import { listMarketPulse, type MarketPulseItem } from "@/lib/market/pulse";
+import { enrichCatalogProductsFromRawg } from "@/lib/market/rawg-enrichment";
 
 type SyncAction = "created" | "updated" | "skipped";
 type SyncMode = "dry-run" | "write";
@@ -197,11 +198,19 @@ export async function syncProductsFromMarketPulse(options: MarketProductSyncOpti
   const created = results.filter((result) => result.action === "created").length;
   const updated = results.filter((result) => result.action === "updated").length;
   const skipped = results.filter((result) => result.action === "skipped").length;
+  const enrichment = await enrichCatalogProductsFromRawg({
+    dryRun: options.dryRun,
+    limit: 12,
+  });
 
   return {
     created,
     updated,
     skipped,
+    enriched: enrichment.enriched,
+    enrichmentSkipped: enrichment.skipped,
+    enrichmentMissingApiKey: enrichment.missingApiKey,
+    enrichmentResults: enrichment.results,
     results,
     fallbackUsed: pulse.fallbackUsed,
     dryRun: options.dryRun ?? false,

@@ -119,6 +119,11 @@ function toDraft(product: ProductRow): ProductDraft {
   };
 }
 
+function isValidImagePath(value: string): boolean {
+  const trimmed = value.trim();
+  return trimmed.startsWith("/") || trimmed.startsWith("https://") || trimmed.startsWith("http://");
+}
+
 function validateDraft(draft: ProductDraft): string[] {
   const errors: string[] = [];
   if (draft.name.trim().length < 2) errors.push("Nombre demasiado corto.");
@@ -126,8 +131,8 @@ function validateDraft(draft: ProductDraft): string[] {
     errors.push("Slug inválido (usa minúsculas, números y guiones).");
   }
   if (draft.description.trim().length < 6) errors.push("Descripción demasiado corta.");
-  if (!draft.coverImage.trim().startsWith("/")) {
-    errors.push("La imagen debe empezar por '/'.");
+  if (!isValidImagePath(draft.coverImage)) {
+    errors.push("La imagen debe ser una ruta local '/' o una URL http(s).");
   }
 
   const price = Number(draft.priceOriginal);
@@ -344,6 +349,8 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           created?: number;
           updated?: number;
           skipped?: number;
+          enriched?: number;
+          enrichmentMissingApiKey?: boolean;
         };
       };
 
@@ -356,7 +363,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       pushToast(
         "success",
         sync
-          ? `${dryRun ? "Previsualizacion" : "Mercado sincronizado"}: ${sync.created ?? 0} creados, ${sync.updated ?? 0} actualizados, ${sync.skipped ?? 0} omitidos.`
+          ? `${dryRun ? "Previsualizacion" : "Mercado sincronizado"}: ${sync.created ?? 0} creados, ${sync.updated ?? 0} actualizados, ${sync.skipped ?? 0} omitidos, ${sync.enriched ?? 0} enriquecidos RAWG${sync.enrichmentMissingApiKey ? " (falta RAWG_API_KEY)" : ""}.`
           : payload.message ?? "Mercado sincronizado."
       );
       if (!dryRun) {
