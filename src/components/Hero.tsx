@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/contexts/CartContext";
-import type { ProductPreview } from "@/types/product";
-import { formatMoneyWithGeo } from "@/lib/geo-format";
+import type { HomeHeroSection, ProductPreview } from "@/types/product";
+import { formatPublicPrice } from "@/lib/public-price";
 import type { ReactNode } from "react";
 
 // Estructura interna que usamos para representar cada slide del hero.
@@ -48,7 +48,12 @@ function resolveHeroBackgroundImage(coverImage: string): string {
 }
 
 // Convierte un ProductPreview en un Slide listo para pintar en el hero.
-function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide {
+function toSlide(
+  game: ProductPreview,
+  index: number,
+  lang: "es" | "en",
+  badgeOverride?: string
+): Slide {
   const badgeByIndexEs = ["Oferta destacada", "Más vendido", "Top descuento", "Recomendado"];
   const badgeByIndexEn = ["Featured offer", "Best seller", "Top discount", "Recommended"];
   const badgeByIndex = lang === "en" ? badgeByIndexEn : badgeByIndexEs;
@@ -78,7 +83,7 @@ function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide 
     discountPercent: game.discountPercent,
     cashbackPercent: game.cashbackPercent,
     image: game.coverImage,
-    badge: badgeByIndex[index % badgeByIndex.length],
+    badge: badgeOverride ?? badgeByIndex[index % badgeByIndex.length],
     game,
   };
 }
@@ -86,18 +91,36 @@ function toSlide(game: ProductPreview, index: number, lang: "es" | "en"): Slide 
 // Props que recibe el Hero: lista de productos destacados y opcionalmente el header para meter dentro de la section.
 type Props = {
   products: ProductPreview[];
+  heroSections?: HomeHeroSection[];
   headerSlot?: ReactNode;
 };
 
 // Sección hero/carrousel que muestra el juego destacado y las miniaturas clicables.
-export function Hero({ products, headerSlot }: Props) {
+export function Hero({ products, heroSections = [], headerSlot }: Props) {
   const { addToCart } = useCart();
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [thumbScrollIndex, setThumbScrollIndex] = useState(0);
   const [thumbTransition, setThumbTransition] = useState(true);
   const [lang, setLang] = useState<"es" | "en">("es");
 
-  const slides = useMemo<Slide[]>(() => {
+  const sectionGroups = useMemo(() => {
+    const groups = heroSections
+      .map((section) => {
+        const title = lang === "en" ? section.titleEn : section.title;
+
+        return {
+          id: section.id,
+          title,
+          slides: section.products.map((game) => toSlide(game, 0, lang, title)),
+        };
+      })
+      .filter((section) => section.slides.length > 0);
+
+    if (groups.length > 0) {
+      return groups;
+    }
+
     const featured = [...products]
       .sort((a, b) => {
         if (b.discountPercent !== a.discountPercent) {
@@ -105,14 +128,24 @@ export function Hero({ products, headerSlot }: Props) {
         }
         return b.likesCount - a.likesCount;
       })
-      .slice(0, 4);
+      .slice(0, 5);
 
-    return featured.map((game, index) => toSlide(game, index, lang));
-  }, [products, lang]);
+    return [
+      {
+        id: "featured",
+        title: lang === "en" ? "Featured" : "Destacados",
+        slides: featured.map((game, index) => toSlide(game, index, lang)),
+      },
+    ].filter((section) => section.slides.length > 0);
+  }, [products, heroSections, lang]);
+
+  const activeSection =
+    sectionGroups[Math.min(activeSectionIndex, sectionGroups.length - 1)];
+  const slides = activeSection?.slides ?? [];
 
   // Última posición del carrusel de thumbs (rueda triplicada: 3× slides, ventana de 3).
   const maxThumbScrollIndex = useMemo(
-    () => (slides.length > 0 ? slides.length * 3 - 3 : 0),
+    () => (slides.length > 0 ? slides.length * 2 - 2 : 0),
     [slides.length]
   );
 
@@ -158,14 +191,27 @@ export function Hero({ products, headerSlot }: Props) {
 
   // Al cargar o cambiar datos: centrar el primer slide para que el borde naranja esté en el centro.
   useEffect(() => {
-    if (slides.length > 0) {
-      setActiveIndex(0);
-      setThumbScrollIndex(slides.length - 1);
-    } else {
+    if (sectionGroups.length > 0) {
+      setActiveSectionIndex(0);
+      return;
+    }
+
+    setActiveSectionIndex(0);
+    setActiveIndex(0);
+    setThumbScrollIndex(0);
+  }, [sectionGroups.length]);
+
+  // Al cambiar de sección: empezar por el primer juego de esa sección.
+  useEffect(() => {
+    if (slides.length === 0) {
       setActiveIndex(0);
       setThumbScrollIndex(0);
+      return;
     }
-  }, [slides.length]);
+
+    setActiveIndex(0);
+    setThumbScrollIndex(slides.length - 1);
+  }, [activeSectionIndex, slides.length]);
 
   // Un solo timer a 10 s: avanza carrusel, imagen grande y borde naranja a la vez (mismo tick).
   useEffect(() => {
@@ -176,6 +222,7 @@ export function Hero({ products, headerSlot }: Props) {
         if (next > maxThumbScrollIndex) {
           setThumbTransition(false);
           setActiveIndex(0);
+          setActiveSectionIndex((sectionIndex) => (sectionIndex + 1) % sectionGroups.length);
           return slides.length - 1;
         }
         setThumbTransition(true);
@@ -184,7 +231,7 @@ export function Hero({ products, headerSlot }: Props) {
       });
     }, BANNER_ROTATE_MS);
     return () => window.clearInterval(timer);
-  }, [slides.length, maxThumbScrollIndex]);
+  }, [sectionGroups.length, slides.length, maxThumbScrollIndex]);
 
   // Reactivar transición después de resetear el índice a 0 (evita que se vea el salto).
   useEffect(() => {
@@ -220,7 +267,7 @@ export function Hero({ products, headerSlot }: Props) {
   const active = slides[Math.min(activeIndex, slides.length - 1)];
   const displayedHeroSrc = heroBgSrc || active.image;
 
-  const money = (value: number) => formatMoneyWithGeo(value);
+  const money = (value: number) => formatPublicPrice(value, lang);
 
   return (
     <section className={`hero hero--carousel${headerSlot ? " hero--with-header" : ""}`}>
@@ -298,7 +345,7 @@ export function Hero({ products, headerSlot }: Props) {
         <div className="hero-thumbs-wrapper">
           <div className="hero-thumbs-header">
             <h2 className="section-title">
-              {lang === "en" ? "Featured" : "Destacados"}
+              {activeSection?.title ?? (lang === "en" ? "Featured" : "Destacados")}
             </h2>
             {/* <p className="section-subtitle">Explora juegos recientes de tu catálogo.</p> */}
           </div>
@@ -349,7 +396,7 @@ export function Hero({ products, headerSlot }: Props) {
                         sizes="160px"
                         quality={100}
                         unoptimized
-                        style={{ objectFit: "cover", objectPosition: "center center" }}
+                        style={{ objectFit: "contain", objectPosition: "center center" }}
                       />
                     </button>
                     <div className="hero-thumb-info">

@@ -16,3 +16,10 @@ export type ProductPreview = {
   priceFinal: number;
   stock: number;
 };
+
+export type HomeHeroSection = {
+  id: "featured-offers" | "best-sellers" | "top-discounts";
+  title: string;
+  titleEn: string;
+  products: ProductPreview[];
+};

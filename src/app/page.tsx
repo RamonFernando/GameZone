@@ -6,7 +6,7 @@ import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
 import { useSearch } from "@/contexts/SearchContext";
-import type { ProductPreview } from "@/types/product";
+import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
 const MarketIntelligenceSections = dynamic(
   () =>
@@ -123,6 +123,7 @@ function scoreProductSearch(game: ProductPreview, queryText: string) {
 export default function HomePage() {
   const { query, setQuery, platform } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>([]);
+  const [heroSections, setHeroSections] = useState<HomeHeroSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<"es" | "en">("es");
 
@@ -164,15 +165,28 @@ export default function HomePage() {
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/products", { cache: "no-store" });
-        if (!response.ok) {
+        const [productsResponse, heroResponse] = await Promise.all([
+          fetch("/api/products", { cache: "no-store" }),
+          fetch("/api/home/hero", { cache: "no-store" }),
+        ]);
+
+        if (!productsResponse.ok) {
           setProducts([]);
           return;
         }
-        const payload = (await response.json()) as { products?: ProductPreview[] };
+
+        const payload = (await productsResponse.json()) as { products?: ProductPreview[] };
         setProducts(payload.products ?? []);
+
+        if (heroResponse.ok) {
+          const heroPayload = (await heroResponse.json()) as { sections?: HomeHeroSection[] };
+          setHeroSections(heroPayload.sections ?? []);
+        } else {
+          setHeroSections([]);
+        }
       } catch {
         setProducts([]);
+        setHeroSections([]);
       } finally {
         setLoading(false);
       }
@@ -214,6 +228,7 @@ export default function HomePage() {
     <>
       <Hero
         products={products}
+        heroSections={heroSections}
         headerSlot={<Header topTransparentOnTop />}
       />
       <main className="main-wrapper">
