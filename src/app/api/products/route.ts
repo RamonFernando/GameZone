@@ -40,6 +40,7 @@ export async function GET(request: Request) {
         slug: product.slug,
         description: product.description,
         coverImage: product.coverImage,
+        backgroundImage: product.backgroundImage,
         platform: product.platform,
         region: product.region,
         storeLabel: resolveStoreLabel(product),

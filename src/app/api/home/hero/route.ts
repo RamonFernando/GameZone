@@ -13,6 +13,7 @@ function toProductPreview(product: Product): ProductPreview {
     slug: product.slug,
     description: product.description,
     coverImage: product.coverImage,
+    backgroundImage: product.backgroundImage,
     platform: product.platform,
     region: product.region,
     storeLabel: resolveStoreLabel(product),

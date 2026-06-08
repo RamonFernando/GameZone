@@ -19,6 +19,7 @@ type Slide = {
   discountPercent: number;
   cashbackPercent: number;
   image: string;
+  backgroundImage?: string | null;
   badge: string;
   game: ProductPreview;
 };
@@ -45,6 +46,10 @@ function resolveHeroBackgroundImage(coverImage: string): string {
   }
 
   return coverImage;
+}
+
+function shouldContainHeroBackground(image: string): boolean {
+  return !image.startsWith("/games_data/");
 }
 
 // Convierte un ProductPreview en un Slide listo para pintar en el hero.
@@ -83,6 +88,7 @@ function toSlide(
     discountPercent: game.discountPercent,
     cashbackPercent: game.cashbackPercent,
     image: game.coverImage,
+    backgroundImage: game.backgroundImage,
     badge: badgeOverride ?? badgeByIndex[index % badgeByIndex.length],
     game,
   };
@@ -250,6 +256,9 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
       return "";
     }
     const current = slides[Math.min(activeIndex, slides.length - 1)];
+    if (current.backgroundImage) {
+      return current.backgroundImage;
+    }
     return resolveHeroBackgroundImage(current.image);
   }, [slides, activeIndex]);
 
@@ -266,6 +275,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
 
   const active = slides[Math.min(activeIndex, slides.length - 1)];
   const displayedHeroSrc = heroBgSrc || active.image;
+  const shouldContainHeroBg = shouldContainHeroBackground(displayedHeroSrc);
 
   const money = (value: number) => formatPublicPrice(value, lang);
 
@@ -284,7 +294,10 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
           onError={() => {
             setHeroBgSrc((current) => (current === active.image ? current : active.image));
           }}
-          style={{ objectFit: "cover", objectPosition: "center center" }}
+          style={{
+            objectFit: shouldContainHeroBg ? "contain" : "cover",
+            objectPosition: "center center",
+          }}
         />
         <div className="hero-bg-gradient" />
       </div>

@@ -4,6 +4,7 @@ export type ProductPreview = {
   slug: string;
   description: string;
   coverImage: string;
+  backgroundImage?: string | null;
   platform: string;
   region: string;
   storeLabel: string;
