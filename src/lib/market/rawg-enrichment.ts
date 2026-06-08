@@ -50,6 +50,30 @@ export type RawgCatalogEnrichmentResult = {
   }>;
 };
 
+export type CatalogQualityIssue =
+  | "short_description"
+  | "missing_long_description"
+  | "missing_background"
+  | "missing_screenshots"
+  | "missing_developer"
+  | "missing_publisher";
+
+export type CatalogQualityProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  coverImage: string;
+  storeLabel: string;
+  metadataSource: string | null;
+  issues: CatalogQualityIssue[];
+};
+
+export type CatalogQualityReport = {
+  total: number;
+  incomplete: number;
+  products: CatalogQualityProduct[];
+};
+
 const RAWG_SLUG_OVERRIDES: Record<string, string> = {
   "league-of-legends-rp-pack-gamezone": "league-of-legends",
   "pubg-mobile-uc-pack-gamezone": "pubg-mobile",
@@ -57,9 +81,11 @@ const RAWG_SLUG_OVERRIDES: Record<string, string> = {
   "valorant-points-pack-gamezone": "valorant",
   "call-of-duty-warzone-cp-pack-gamezone": "call-of-duty-warzone",
   "starcraft-remastered-gamezone": "starcraft-remastered",
-  "starcraft-ii-campaign-collection-gamezone": "starcraft-ii",
+  // "starcraft-ii" y "sid-meiers-civilization-vi" son alias que RAWG redirige;
+  // usamos los slugs canónicos para evitar respuestas sin id.
+  "starcraft-ii-campaign-collection-gamezone": "starcraft-2",
   "minecraft-java-bedrock-edition-gamezone": "minecraft",
-  "sid-meiers-civilization-vi-gamezone": "sid-meiers-civilization-vi",
+  "sid-meiers-civilization-vi-gamezone": "civilization-vi",
 };
 
 function toJsonList<T>(items: T[] | undefined, mapper: (item: T) => string | undefined) {
@@ -109,6 +135,23 @@ function shouldEnrichProduct(product: Product) {
   return product.metadataSource !== "RAWG" && product.metadataSource !== "gamezone+rawg";
 }
 
+function getCatalogQualityIssues(product: Product): CatalogQualityIssue[] {
+  const issues: CatalogQualityIssue[] = [];
+
+  if (product.description.trim().length < 80) issues.push("short_description");
+  if (!product.longDescription || product.longDescription.trim().length < 180) {
+    issues.push("missing_long_description");
+  }
+  if (!product.backgroundImage) issues.push("missing_background");
+  if (product.screenshotsJson === "[]" || product.screenshotsJson.trim().length === 0) {
+    issues.push("missing_screenshots");
+  }
+  if (!product.developer) issues.push("missing_developer");
+  if (!product.publisher) issues.push("missing_publisher");
+
+  return issues;
+}
+
 async function rawgFetch<T>(
   path: string,
   params: Record<string, string | number | boolean | null>,
@@ -134,7 +177,13 @@ async function rawgFetch<T>(
 async function findRawgGame(product: Product, apiKey: string) {
   const idOrSlug = product.rawgId ?? product.rawgSlug ?? RAWG_SLUG_OVERRIDES[product.slug];
   if (idOrSlug) {
-    return rawgFetch<RawgGame>(`/games/${idOrSlug}`, {}, apiKey);
+    const game = await rawgFetch<RawgGame>(`/games/${idOrSlug}`, {}, apiKey);
+    // RAWG devuelve { redirect: true, slug } sin id cuando el slug es un alias.
+    // En ese caso seguimos la redirección una vez al slug canónico.
+    if (!game.id && game.slug) {
+      return rawgFetch<RawgGame>(`/games/${game.slug}`, {}, apiKey);
+    }
+    return game;
   }
 
   const search = await rawgFetch<RawgSearchResponse>(
@@ -278,4 +327,33 @@ export async function enrichCatalogProductsFromRawg(options: { dryRun?: boolean;
     missingApiKey,
     results,
   } satisfies RawgCatalogEnrichmentResult;
+}
+
+export async function getCatalogQualityReport(limit = 24) {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    orderBy: [{ metadataUpdatedAt: "asc" }, { createdAt: "desc" }],
+    take: 200,
+  });
+
+  const incompleteProducts = products
+    .map((product) => ({
+      product,
+      issues: getCatalogQualityIssues(product),
+    }))
+    .filter((item) => item.issues.length > 0);
+
+  return {
+    total: products.length,
+    incomplete: incompleteProducts.length,
+    products: incompleteProducts.slice(0, limit).map(({ product, issues }) => ({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      coverImage: product.coverImage,
+      storeLabel: product.storeLabel,
+      metadataSource: product.metadataSource,
+      issues,
+    })),
+  } satisfies CatalogQualityReport;
 }
