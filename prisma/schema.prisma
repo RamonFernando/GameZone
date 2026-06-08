@@ -247,6 +247,15 @@ model UserPermission {
   @@index([permissionId])
 }
 
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}
+
 model CatalogSyncRun {
   id                String    @id @default(cuid())
   status            String    @default("running")

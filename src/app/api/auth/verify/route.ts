@@ -7,7 +7,7 @@ import {
 } from "@/lib/auth/store";
 
 export async function GET(request: Request) {
-  const rateLimit = enforceRateLimit(request, "verify");
+  const rateLimit = await enforceRateLimit(request, "verify");
   if (rateLimit.blocked) {
     return NextResponse.json(
       {

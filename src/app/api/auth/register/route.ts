@@ -17,7 +17,7 @@ type RegisterPayload = {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
-  const rateLimit = enforceRateLimit(request, "register");
+  const rateLimit = await enforceRateLimit(request, "register");
   if (rateLimit.blocked) {
     return NextResponse.json(
       {

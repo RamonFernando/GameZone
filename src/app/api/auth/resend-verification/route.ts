@@ -16,7 +16,7 @@ type ResendPayload = {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
-  const rateLimit = enforceRateLimit(request, "resend");
+  const rateLimit = await enforceRateLimit(request, "resend");
   if (rateLimit.blocked) {
     return NextResponse.json(
       {

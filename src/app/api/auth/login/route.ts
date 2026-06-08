@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth/store";
 import { prisma } from "@/lib/prisma";
 import { sendTwoFactorCodeEmail } from "@/lib/auth/email";
+import { logger } from "@/lib/logger";
 
 type LoginPayload = {
   identifier?: string;
@@ -18,7 +19,7 @@ type LoginPayload = {
 };
 
 export async function POST(request: Request) {
-  const rateLimit = enforceRateLimit(request, "login");
+  const rateLimit = await enforceRateLimit(request, "login");
   if (rateLimit.blocked) {
     return NextResponse.json(
       {
@@ -164,7 +165,7 @@ export async function POST(request: Request) {
               twoFactorCodeExpiresAt: null,
             },
           });
-          console.error("No se pudo enviar código 2FA por email.", error);
+          logger.error("No se pudo enviar código 2FA por email.", { userId: user.id, err: error });
           return NextResponse.json(
             {
               message: "No se pudo enviar el código 2FA por email.",
