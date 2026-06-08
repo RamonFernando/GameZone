@@ -2,8 +2,19 @@ node_modules/
 .next/
 dist/
 out/
+# Variables de entorno: ignoramos todas las variantes salvo el ejemplo.
 .env
-.env.local
+.env.*
+!.env.example
 npm-debug.log
 yarn-error.log
+
+# Base de datos local (datos reales) y artefactos
+prisma/dev.db
 prisma/dev.db-journal
+tsconfig.tsbuildinfo
+
+# Editor / backups / contenido subido
+.vscode/
+backups/
+public/avatars/
