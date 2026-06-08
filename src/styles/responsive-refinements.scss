@@ -329,6 +329,14 @@
   position: relative;
   overflow: hidden;
   height: 240px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(59, 130, 246, 0.18), transparent 58%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.94));
+}
+
+.game-card-media img {
+  object-fit: contain;
+  object-position: center center;
 }
 
 .game-card-plus {

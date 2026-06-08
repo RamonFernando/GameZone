@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ProductPreview } from "@/types/product";
 import { useCart } from "@/contexts/CartContext";
-import { formatMoneyWithGeo } from "@/lib/geo-format";
+import { formatPublicPrice } from "@/lib/public-price";
 
 // Props que recibe la tarjeta de juego (información básica del producto).
 type Props = {
@@ -28,7 +28,7 @@ export function GameCard({ game }: Props) {
   }, [game.likesCount, game.likedByCurrentUser, game.slug]);
 
   // Formatea un número como precio para mostrarlo en la UI (según geo/ui locale).
-  const money = (value: number) => formatMoneyWithGeo(value);
+  const money = (value: number) => formatPublicPrice(value, lang);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -90,7 +90,7 @@ export function GameCard({ game }: Props) {
           sizes="(max-width: 768px) 100vw, 240px"
           quality={100}
           unoptimized
-          style={{ objectFit: "cover" }}
+          style={{ objectFit: "contain", objectPosition: "center center" }}
         />
         {game.cashbackPercent > 0 ? (
           <span className="game-card-cashback-badge">+{game.cashbackPercent}% Cashback</span>

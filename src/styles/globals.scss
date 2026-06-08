@@ -1373,10 +1373,13 @@ img {
 }
 
 .hero-title-link {
-  display: inline-block;
+  display: block;
+  max-width: 100%;
   color: inherit;
   text-decoration: none;
   cursor: pointer;
+  overflow-wrap: anywhere;
+  white-space: normal;
   transform: scale(1);
   transform-origin: left center;
   transition: filter 120ms ease-out, text-shadow 120ms ease-out, transform 0.3s ease-out;
@@ -2128,6 +2131,9 @@ html[data-hero-zoom="normal"] .hero--carousel {
 .hero--carousel .hero-title {
   font-size: clamp(2rem, 4.5vw, 2.75rem);
   color: #f1f5f9;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
   -webkit-text-stroke: 0.8px rgba(2, 6, 23, 0.95);
   text-stroke: 0.8px rgba(2, 6, 23, 0.95);
   text-shadow:
@@ -2468,7 +2474,7 @@ html[data-hero-zoom="normal"] .hero--carousel {
 }
 
 .hero-thumb--center {
-  transform: scale(1.12);
+  transform: scale(1.06);
 }
 
 .hero-thumb--off {
@@ -2482,7 +2488,7 @@ html[data-hero-zoom="normal"] .hero--carousel {
 }
 
 .hero-thumb--center:hover {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .hero-thumb--off:hover {
@@ -2495,11 +2501,11 @@ html[data-hero-zoom="normal"] .hero--carousel {
 }
 
 .hero-thumb--active.hero-thumb--center {
-  transform: scale(1.12);
+  transform: scale(1.06);
 }
 
 .hero-thumb--active.hero-thumb--center:hover {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .hero-thumb-image {
@@ -2508,7 +2514,9 @@ html[data-hero-zoom="normal"] .hero--carousel {
   height: 120px;
   border-radius: 0.85rem;
   overflow: hidden;
-  background: rgba(15, 23, 42, 0.6);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(59, 130, 246, 0.16), transparent 58%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.92));
 }
 
 .hero-thumb-image-button {
@@ -2519,7 +2527,7 @@ html[data-hero-zoom="normal"] .hero--carousel {
 }
 
 .hero-thumb-image img {
-  object-fit: cover;
+  object-fit: contain;
   object-position: center center;
 }
 
@@ -2633,7 +2641,9 @@ html[data-hero-zoom="normal"] .hero--carousel {
   }
 
   .hero--carousel .hero-title {
-    font-size: clamp(1.4rem, 5vw, 1.9rem);
+    max-width: calc(100vw - 2rem);
+    font-size: clamp(1.1rem, 4vw, 1.45rem);
+    line-height: 1.15;
   }
 
   .hero-meta-row {
