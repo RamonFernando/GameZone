@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
-import { formatMoneyWithGeo } from "@/lib/geo-format";
+import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
 
 type ProductView = {
@@ -264,16 +264,16 @@ export default function GameDetailPage() {
             {game.discountPercent > 0 ? (
               <>
                 <span className="game-detail-price-old">
-                  {formatMoneyWithGeo(game.priceOriginal)}
+                  {formatPublicPrice(game.priceOriginal, lang)}
                 </span>
                 <strong className="game-detail-price-final">
-                  {formatMoneyWithGeo(game.priceFinal)}
+                  {formatPublicPrice(game.priceFinal, lang)}
                 </strong>
                 <span className="game-detail-price-discount">-{game.discountPercent}%</span>
               </>
             ) : (
               <strong className="game-detail-price-final">
-                {formatMoneyWithGeo(game.priceFinal)}
+                {formatPublicPrice(game.priceFinal, lang)}
               </strong>
 	            )}
 	          </p>
@@ -417,16 +417,16 @@ export default function GameDetailPage() {
                         {g.discountPercent > 0 ? (
                           <>
                             <span className="game-detail-price-old">
-                              {formatMoneyWithGeo(g.priceOriginal)}
+                              {formatPublicPrice(g.priceOriginal, lang)}
                             </span>
                             <strong className="game-detail-price-final">
-                              {formatMoneyWithGeo(g.priceFinal)}
+                              {formatPublicPrice(g.priceFinal, lang)}
                             </strong>
                             <span className="game-detail-price-discount">-{g.discountPercent}%</span>
                           </>
                         ) : (
                           <strong className="game-detail-price-final">
-                            {formatMoneyWithGeo(g.priceFinal)}
+                            {formatPublicPrice(g.priceFinal, lang)}
                           </strong>
                         )}
                       </p>

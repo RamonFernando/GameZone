@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { formatPublicPrice } from "@/lib/public-price";
 
 type DataSourcePreview = {
   name: string;
@@ -929,7 +930,7 @@ export function MarketIntelligenceSections() {
                     <p>{item.reason}</p>
                     <div className="recommendation-meta">
                       <span>{item.platform}</span>
-                      <span>{formatEuro(item.priceFinal)}</span>
+                      <span>{formatPublicPrice(item.priceFinal)}</span>
                       <span>Trend {item.trendScore}</span>
                     </div>
                     <Link className="recommendation-link" href={item.nextAction.href}>

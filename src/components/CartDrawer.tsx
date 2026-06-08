@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
-import { formatMoneyWithGeo } from "@/lib/geo-format";
+import { formatPublicPrice } from "@/lib/public-price";
 
 // Props mínimos del CartDrawer: callback para cerrarlo.
 type Props = {
@@ -195,7 +195,7 @@ export function CartDrawer({ onClose }: Props) {
 
               <div>
                 {lang === "en" ? "Total:" : "Total:"}{" "}
-                {formatMoneyWithGeo(totalAmount)}
+                {formatPublicPrice(totalAmount, lang)}
               </div>
             </div>
 
