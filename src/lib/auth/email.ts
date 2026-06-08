@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { logger } from "@/lib/logger";
 
 type MailerConfig = {
   transporter: nodemailer.Transporter;
@@ -33,7 +34,7 @@ async function createMailerConfig(): Promise<MailerConfig> {
   }
 
   if (host && user && pass && hasPlaceholderCredentials) {
-    console.warn(
+    logger.warn(
       "SMTP configurado con valores de ejemplo. Usando transporte de prueba Ethereal."
     );
   }
@@ -93,7 +94,7 @@ export async function sendVerificationEmail(input: {
   if (isTestTransport) {
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log(`Vista previa email de verificación: ${previewUrl}`);
+      logger.info("Vista previa email de verificación", { previewUrl });
     }
   }
 }
@@ -127,7 +128,7 @@ export async function sendTwoFactorCodeEmail(input: {
   if (isTestTransport) {
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log(`Vista previa email 2FA: ${previewUrl}`);
+      logger.info("Vista previa email 2FA", { previewUrl });
     }
   }
 }
@@ -161,7 +162,7 @@ export async function sendPasswordResetEmail(input: {
   if (isTestTransport) {
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log(`Vista previa email de recuperación: ${previewUrl}`);
+      logger.info("Vista previa email de recuperación", { previewUrl });
     }
   }
 }
@@ -296,7 +297,7 @@ export async function sendPurchaseConfirmationEmail(input: {
   if (isTestTransport) {
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log(`Vista previa email de compra: ${previewUrl}`);
+      logger.info("Vista previa email de compra", { previewUrl });
     }
   }
 }
@@ -347,7 +348,7 @@ export async function sendRefundConfirmationEmail(input: {
   if (isTestTransport) {
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log(`Vista previa email de reembolso: ${previewUrl}`);
+      logger.info("Vista previa email de reembolso", { previewUrl });
     }
   }
 }

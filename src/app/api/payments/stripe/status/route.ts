@@ -5,6 +5,7 @@ import { getSessionCookieOptions } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { completePaidOrder } from "@/lib/checkout/order-service";
 import { getStripeClient } from "@/lib/payments/stripe";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ORDER_READ);
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
           paidAt: finalized.order.paidAt,
         };
       } catch (error) {
-        console.error("Stripe confirmó el pago, pero no se pudo cerrar el pedido.", error);
+        logger.error("Stripe confirmó el pago, pero no se pudo cerrar el pedido.", { err: error });
         return NextResponse.json(
           {
             message:

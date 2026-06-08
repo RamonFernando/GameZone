@@ -6,6 +6,7 @@ import { getSessionCookieOptions } from "@/lib/auth/session";
 import { completePaidOrder } from "@/lib/checkout/order-service";
 import { getStripeClient } from "@/lib/payments/stripe";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 const PENDING_PAYMENT_LOOKBACK_HOURS = 24;
 type PendingPaymentValidationStatus = "processing" | "error" | "failed";
@@ -99,7 +100,7 @@ export async function GET(request: Request) {
           paymentResult = finalized.order;
           pendingOrder = null;
         } catch (error) {
-          console.error("Stripe confirmó el pago pendiente, pero no se pudo cerrar el pedido.", error);
+          logger.error("Stripe confirmó el pago pendiente, pero no se pudo cerrar el pedido.", { err: error });
           validationStatus = "error";
           validationMessage =
             "Stripe confirmó el pago, pero no pudimos registrar el pedido. Revisa el servidor antes de repetir la compra.";
@@ -124,7 +125,7 @@ export async function GET(request: Request) {
         validationMessage = "Stripe todavía está procesando la confirmación del pago.";
       }
     } catch (error) {
-      console.error("No se pudo consultar el pago pendiente en Stripe.", error);
+      logger.error("No se pudo consultar el pago pendiente en Stripe.", { err: error });
       validationStatus = "error";
       validationMessage =
         "No pudimos consultar Stripe. Revisa la conexión o las claves de Stripe antes de repetir la compra.";

@@ -5,6 +5,7 @@ import {
   getUserByEmail,
   setPasswordResetToken,
 } from "@/lib/auth/store";
+import { logger } from "@/lib/logger";
 
 type ForgotPasswordPayload = {
   email?: string;
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const isLocalRequest = new URL(request.url).hostname === "localhost";
     if (!isLocalRequest) {
-      console.error("No se pudo enviar email de recuperación.", error);
+      logger.error("No se pudo enviar email de recuperación.", { err: error });
       return NextResponse.json(
         { message: "No se pudo enviar el email de recuperación.", code: "EMAIL_SEND_FAILED" },
         { status: 500 }

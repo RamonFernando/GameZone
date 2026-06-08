@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { getStripeClient } from "@/lib/payments/stripe";
 import { sendRefundConfirmationEmail } from "@/lib/auth/email";
+import { logger } from "@/lib/logger";
 
 function resolvePaymentIntentReference(reference: string) {
   if (reference.startsWith("pi_")) {
@@ -172,7 +173,7 @@ export async function POST(
         },
       });
     } catch (error) {
-      console.error("No se pudo enviar email de reembolso.", error);
+      logger.error("No se pudo enviar email de reembolso.", { err: error });
     }
 
     const response = NextResponse.json(
