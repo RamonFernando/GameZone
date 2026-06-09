@@ -2079,20 +2079,21 @@ html[data-hero-zoom="normal"] .hero--carousel {
   max-height: 100vh;
 }
 
-/* Por debajo de 1024px: el banner toma la altura que necesite (puede ser mayor que la pantalla),
-   independientemente del zoom. */
+/* Tablet y móvil horizontal (768–1023px): altura generosa pero no forzosamente full-screen */
 @media (max-width: 1023px) {
   .hero--carousel {
     aspect-ratio: auto;
     height: auto;
-    min-height: 400px;
+    min-height: 60svh;
+    min-height: 60vh; /* fallback navegadores sin svh */
     max-height: none;
   }
 
   html[data-hero-zoom="normal"] .hero--carousel {
     aspect-ratio: auto;
     height: auto;
-    min-height: 400px;
+    min-height: 60svh;
+    min-height: 60vh;
     max-height: none;
   }
 
@@ -2117,6 +2118,20 @@ html[data-hero-zoom="normal"] .hero--carousel {
   }
 }
 
+/* Móvil vertical (≤768px): hero a pantalla completa como Steam / Epic Games */
+@media (max-width: 768px) {
+  .hero--carousel,
+  html[data-hero-zoom="normal"] .hero--carousel {
+    min-height: 100svh;
+    min-height: 100vh; /* fallback */
+  }
+
+  .hero-inner {
+    width: 96%;
+    padding-bottom: 1.5rem;
+  }
+}
+
 /* Con el header dentro de la section: columna, header arriba, contenido centrado en el resto */
 .hero--with-header {
   flex-direction: column;
@@ -2132,9 +2147,20 @@ html[data-hero-zoom="normal"] .hero--carousel {
   min-height: 0;
 }
 
+/* Padding base para 1 fila de header (escritorio) */
 .hero--with-header .header-shell--fixed + .hero-inner {
   padding-top: calc(2.5rem + 4.25rem);
 }
+
+/* 481–1023px: el navbar tiene 3 filas (logo + buscador + plataformas) → header ~160px.
+   El padding base de 6.75rem no cubre esa altura; esta regla va DESPUÉS para ganar en cascade. */
+@media (min-width: 481px) and (max-width: 1023px) {
+  .hero--with-header .header-shell--fixed + .hero-inner {
+    padding-top: 12rem;
+  }
+}
+
+/* ≤480px: header de 1 fila (logo + hamburger), el padding base de 6.75rem es suficiente. */
 
 .hero-bg {
   position: absolute;
