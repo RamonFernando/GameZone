@@ -161,7 +161,7 @@ export function createCatalogGameMetadata(product: NonNullable<Awaited<ReturnTyp
     website: product.website,
     esrbRating: product.esrbRating,
     backgroundImage: product.backgroundImage,
-    source: product.metadataSource === "RAWG" ? "GameZone+RAWG" : "GameZone",
+    source: product.rawgId != null ? "GameZone+RAWG" : "GameZone",
     sourceId: product.rawgId ? `rawg:${product.rawgId}` : `gamezone:${product.slug}`,
     updatedAt: product.metadataUpdatedAt?.toISOString() ?? product.updatedAt.toISOString(),
     catalogMatch: createCatalogMatch(product, 100, product.metadataSource),

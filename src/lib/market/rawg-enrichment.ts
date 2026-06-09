@@ -132,7 +132,8 @@ function shouldEnrichProduct(product: Product) {
   if (!product.backgroundImage) return true;
   if (product.screenshotsJson === "[]" || product.screenshotsJson.trim().length === 0) return true;
   if (!product.longDescription || !product.developer || !product.publisher) return true;
-  return product.metadataSource !== "RAWG" && product.metadataSource !== "gamezone+rawg";
+  // Si aun no tiene rawgId, no se ha enriquecido todavia.
+  return !product.rawgId;
 }
 
 function getCatalogQualityIssues(product: Product): CatalogQualityIssue[] {
@@ -227,7 +228,8 @@ function buildUpdateData(details: RawgGame, screenshots: RawgScreenshotsResponse
     ratingsCount: details.ratings_count ?? 0,
     playtimeHours: details.playtime ?? null,
     requirements: requirementsFromPlatforms(details.platforms),
-    metadataSource: "RAWG",
+    // No sobreescribimos metadataSource: conservamos el origen de sincronizacion
+    // (Steam/G2A/RAWG/gamezone). El enriquecimiento se detecta por rawgId.
     metadataUpdatedAt: new Date(),
   };
 }
@@ -290,7 +292,7 @@ export async function enrichCatalogProductsFromRawg(options: { dryRun?: boolean;
         { longDescription: null },
         { developer: null },
         { publisher: null },
-        { metadataSource: { not: "RAWG" } },
+        { rawgId: null },
       ],
     },
     orderBy: [{ metadataUpdatedAt: "asc" }, { createdAt: "desc" }],
