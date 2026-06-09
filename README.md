@@ -4,6 +4,35 @@ Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticación con 
 
 Documentación de pruebas centralizada en: `TESTING.md`.
 
+## Novedades recientes (09-06-2026)
+
+### Boton flotante "Volver al inicio"
+
+- Componente `ScrollToTop` (`src/components/ScrollToTop.tsx`): aparece al bajar 400 px, lleva al inicio con scroll suave.
+- Disponible en todas las paginas: integrado en `SiteShell` (páginas con Header/Footer) y en la home page directamente.
+- Estilos en `globals.scss` (clase `.scroll-to-top`): posicion fija, radio completo, fondo indigo, responsive (se achica en movil).
+
+### Pagina de catalogo completo (`/games`)
+
+- Nueva ruta `src/app/games/page.tsx`: muestra todos los productos con filtros de busqueda y plataforma activos.
+- `GameGrid` recibe prop `isFiltered` para mostrar todos los resultados sin limite cuando hay filtro activo.
+- Limite de tarjetas en home: 40 en escritorio, 20 en movil. Enlace "Ver todos →" aparece si hay mas juegos.
+
+### Sincronizacion del carrito entre pestanas y dispositivos
+
+- `BroadcastChannel("gamezone-cart")` sincroniza el carrito en tiempo real entre pestanas abiertas del mismo navegador.
+- Para usuarios autenticados: `visibilitychange` y `focus` resincronizan desde la BD al volver a la pestana.
+- Escrituras incrementales al servidor (`POST /api/cart/items`, `PATCH /api/cart/items/[slug]`, `DELETE /api/cart/items/[slug]`) en lugar de reemplazar todo el carrito.
+- Cookie anonima preestablecida en el middleware para evitar race conditions con el carrito anonimo.
+
+### Corrección de layout hero en movil (Surface Duo 549x720)
+
+- Hero a `100svh` en movil para que ocupe pantalla completa.
+- `padding-top` del contenido interno ajustado por rango de breakpoint para evitar solapamiento con el header:
+  - `< 481px`: `calc(2.5rem + 4.25rem)` (header 1 fila).
+  - `481px – 1023px`: `12rem` (header 3 filas).
+  - `>= 1024px`: valor por defecto.
+
 ## Registro y páginas legales
 
 - **Registro** (`/auth/register`): checkbox obligatorio de aceptación de [Términos y condiciones](/terms); checkbox opcional para recibir correos con novedades y ofertas.

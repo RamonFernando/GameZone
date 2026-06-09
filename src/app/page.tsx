@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { useSearch } from "@/contexts/SearchContext";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
@@ -240,6 +241,7 @@ export default function HomePage() {
         <MarketIntelligenceSections />
         <GameGrid games={filteredGames} isFiltered={Boolean(query.trim()) || Boolean(platform)} />
       </main>
+      <ScrollToTop />
     </>
   );
 }

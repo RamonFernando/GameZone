@@ -230,6 +230,44 @@ npm run postinstall
 - `npm install`: instala dependencias y ejecuta `postinstall` automaticamente.
 - `postinstall`: ejecuta `prisma generate`; normalmente no hace falta llamarlo a mano salvo para reparar el cliente Prisma.
 
+## Carrito: endpoints incrementales
+
+Con el servidor corriendo (`npm run dev`) y sesion iniciada, puedes probar los endpoints directamente:
+
+```bash
+# Añadir 1 unidad de un juego al carrito
+curl -X POST http://localhost:3000/api/cart/items \
+  -H "Content-Type: application/json" \
+  -d '{"slug":"nombre-del-juego"}'
+
+# Reducir 1 unidad (elimina el item si llega a 0)
+curl -X PATCH http://localhost:3000/api/cart/items/nombre-del-juego
+
+# Eliminar el item completamente
+curl -X DELETE http://localhost:3000/api/cart/items/nombre-del-juego
+```
+
+Verificacion manual del carrito multi-pestana:
+
+1. Abre la tienda en dos pestanas del mismo navegador.
+2. Añade un juego al carrito en la pestana A.
+3. La pestana B debe actualizarse automaticamente (via `BroadcastChannel`).
+
+Verificacion del carrito entre dispositivos (solo usuarios autenticados):
+
+1. Inicia sesion en el dispositivo A, añade juegos al carrito.
+2. Abre la misma cuenta en el dispositivo B.
+3. Al cambiar a la pestana o dar foco a la ventana, el carrito debe sincronizarse desde la BD.
+
+## Boton flotante Scroll to Top
+
+Verificacion manual:
+
+1. Abre cualquier pagina con contenido largo (home, `/games`).
+2. Desplazate mas de 400 px hacia abajo: debe aparecer el boton indigo circular en la esquina inferior derecha.
+3. Haz clic: la pagina debe volver al inicio con scroll suave.
+4. En movil (< 768px): el boton debe ser ligeramente mas pequeno y pegado a la esquina.
+
 ## Checklist Antes De Push
 
 ```bash
