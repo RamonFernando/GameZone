@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
@@ -357,6 +358,7 @@ function MarketPulseCarousel({
   thumbCount?: 3 | 5;
 }) {
   const { addToCart } = useCart();
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [thumbsEntering, setThumbsEntering] = useState(false);
 
@@ -636,9 +638,16 @@ function MarketPulseCarousel({
     );
   }
 
+  const activeHref = active.catalogMatch?.slug ? `/games/${active.catalogMatch.slug}` : null;
+
   return (
     <article className="market-pulse-carousel">
-      <div className="market-pulse-carousel__hero">
+      <div
+        className={`market-pulse-carousel__hero${
+          activeHref ? " market-pulse-carousel__hero--clickable" : ""
+        }`}
+        onClick={activeHref ? () => router.push(activeHref) : undefined}
+      >
         {heroLayers.previous ? (
           <div className="market-pulse-carousel__media market-pulse-carousel__media--previous is-visible">
             <Image

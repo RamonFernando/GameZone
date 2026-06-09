@@ -326,6 +326,11 @@
   min-height: clamp(300px, 32vw, 405px);
 }
 
+/* La card grande destacada navega al detalle del juego al hacer click */
+.market-pulse-carousel__hero--clickable {
+  cursor: pointer;
+}
+
 .market-pulse-carousel__media {
   position: absolute;
   inset: 0;
