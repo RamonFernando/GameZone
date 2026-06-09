@@ -133,3 +133,45 @@ export async function replaceUserCartItems(userId: string, items: PersistedCartI
 export async function clearUserCartItems(userId: string) {
   await prisma.$executeRaw`DELETE FROM UserCartItem WHERE userId = ${userId}`;
 }
+
+export async function addUserCartItemDelta(userId: string, slug: string, delta: number) {
+  await prisma.$transaction(async (tx) => {
+    const product = await tx.product.findFirst({
+      where: { slug, isActive: true },
+      select: { id: true },
+    });
+    if (!product) return;
+
+    if (delta > 0) {
+      await tx.$executeRaw`
+        INSERT INTO UserCartItem (id, userId, productId, quantity, createdAt, updatedAt)
+        VALUES (${randomUUID()}, ${userId}, ${product.id}, ${Math.min(MAX_CART_QUANTITY, delta)}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT (userId, productId) DO UPDATE SET
+          quantity = MIN(${MAX_CART_QUANTITY}, UserCartItem.quantity + ${delta}),
+          updatedAt = CURRENT_TIMESTAMP
+      `;
+    } else {
+      await tx.$executeRaw`
+        UPDATE UserCartItem SET
+          quantity = quantity + ${delta},
+          updatedAt = CURRENT_TIMESTAMP
+        WHERE userId = ${userId} AND productId = ${product.id}
+      `;
+      await tx.$executeRaw`
+        DELETE FROM UserCartItem
+        WHERE userId = ${userId} AND productId = ${product.id} AND quantity <= 0
+      `;
+    }
+  });
+
+  return getUserCartItems(userId);
+}
+
+export async function deleteUserCartItem(userId: string, slug: string) {
+  await prisma.$executeRaw`
+    DELETE FROM UserCartItem
+    WHERE userId = ${userId}
+      AND productId = (SELECT id FROM Product WHERE slug = ${slug} AND isActive = 1 LIMIT 1)
+  `;
+  return getUserCartItems(userId);
+}
