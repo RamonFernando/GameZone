@@ -1,11 +1,19 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { ProductPreview } from "@/types/product";
 
 export type CartItem = {
-  /** Unique id for the item in the cart */
   slug: string;
   game: ProductPreview;
   quantity: number;
@@ -26,6 +34,7 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 const LEGACY_STORAGE_KEY = "next-gaming-cart-v1";
 const FALLBACK_STORAGE_KEY = "next-gaming-cart-v1:anonymous";
+const BROADCAST_CHANNEL_NAME = "gamezone-cart";
 
 type CartScopePayload = {
   authenticated?: boolean;
@@ -36,26 +45,26 @@ type PersistedCartPayload = {
   items?: CartItem[];
 };
 
+type CartBroadcastMessage = {
+  type: "cart-update";
+  storageKey: string;
+  items: CartItem[];
+};
+
 function computeSlug(game: ProductPreview): string {
   return game.slug;
 }
 
 function loadInitialCart(storageKey: string): CartItem[] {
-  if (typeof window === "undefined") {
-    return [];
-  }
+  if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as CartItem[];
     if (!Array.isArray(parsed)) return [];
-    // Very light validation so we don't crash on malformed data.
     return parsed
       .filter((item) => item && typeof item.slug === "string" && typeof item.quantity === "number")
-      .map((item) => ({
-        ...item,
-        quantity: item.quantity > 0 ? item.quantity : 1,
-      }));
+      .map((item) => ({ ...item, quantity: item.quantity > 0 ? item.quantity : 1 }));
   } catch {
     return [];
   }
@@ -63,26 +72,20 @@ function loadInitialCart(storageKey: string): CartItem[] {
 
 function mergeCartItems(...groups: CartItem[][]) {
   const merged = new Map<string, CartItem>();
-
   for (const group of groups) {
     for (const item of group) {
       if (!item?.slug || !item.game) continue;
       const existing = merged.get(item.slug);
       if (!existing) {
-        merged.set(item.slug, {
-          ...item,
-          quantity: Math.max(1, Math.floor(item.quantity)),
-        });
+        merged.set(item.slug, { ...item, quantity: Math.max(1, Math.floor(item.quantity)) });
         continue;
       }
-
       merged.set(item.slug, {
         ...existing,
         quantity: Math.max(1, existing.quantity + Math.floor(item.quantity)),
       });
     }
   }
-
   return Array.from(merged.values());
 }
 
@@ -102,23 +105,15 @@ async function loadPersistedCart() {
 async function savePersistedCart(items: CartItem[]) {
   await fetch("/api/cart", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      items: items.map((item) => ({
-        slug: item.slug,
-        quantity: item.quantity,
-      })),
+      items: items.map((item) => ({ slug: item.slug, quantity: item.quantity })),
     }),
   });
 }
 
 async function clearPersistedCart() {
-  await fetch("/api/cart", {
-    method: "DELETE",
-    cache: "no-store",
-  });
+  await fetch("/api/cart", { method: "DELETE", cache: "no-store" });
 }
 
 type ProviderProps = {
@@ -134,13 +129,15 @@ export function CartProvider({ children }: ProviderProps) {
   const itemsRef = useRef<CartItem[]>([]);
   const clearRequestedRef = useRef(false);
   const persistedCartWriteRef = useRef<Promise<void>>(Promise.resolve());
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+  // true when the items update came from a broadcast (prevents re-broadcasting)
+  const skipBroadcastRef = useRef(false);
 
   const queuePersistedCartWrite = useCallback((operation: () => Promise<void>) => {
     const nextWrite = persistedCartWriteRef.current
       .catch(() => undefined)
       .then(operation)
       .catch(() => undefined);
-
     persistedCartWriteRef.current = nextWrite;
     return nextWrite;
   }, []);
@@ -149,7 +146,29 @@ export function CartProvider({ children }: ProviderProps) {
     itemsRef.current = items;
   }, [items]);
 
+  // Initialize BroadcastChannel once on mount for real-time cross-tab sync.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+
+    const channel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
+    broadcastChannelRef.current = channel;
+
+    channel.onmessage = (event: MessageEvent<CartBroadcastMessage>) => {
+      if (event.data?.type !== "cart-update" || !Array.isArray(event.data.items)) return;
+      // Only apply if same cart scope (same user / same anonymous session)
+      if (event.data.storageKey !== storageKeyRef.current) return;
+      skipBroadcastRef.current = true;
+      setItems(event.data.items);
+    };
+
+    return () => {
+      channel.close();
+      broadcastChannelRef.current = null;
+    };
+  }, []);
+
   // Hydrate from the cart scope assigned by the server for this browser/session.
+  // Depends on pathname to detect auth state changes (login/logout) during SPA navigation.
   useEffect(() => {
     let cancelled = false;
 
@@ -160,18 +179,15 @@ export function CartProvider({ children }: ProviderProps) {
       try {
         const response = await fetch("/api/cart/scope", { cache: "no-store" });
         const payload = (await response.json()) as CartScopePayload;
-
         if (response.ok && payload.cartStorageKey) {
           nextStorageKey = payload.cartStorageKey;
           nextIsAuthenticatedCart = Boolean(payload.authenticated);
         }
       } catch {
-        // Fallback keeps the cart usable in memory/localStorage if the API is unavailable.
+        // Fallback keeps the cart usable if the API is unavailable.
       }
 
-      if (cancelled) {
-        return;
-      }
+      if (cancelled) return;
 
       const previousStorageKey = storageKeyRef.current;
 
@@ -179,14 +195,8 @@ export function CartProvider({ children }: ProviderProps) {
         if (clearRequestedRef.current) {
           try {
             window.localStorage.removeItem(nextStorageKey);
-          } catch {
-            // Ignore storage cleanup failures.
-          }
-
-          if (nextIsAuthenticatedCart) {
-            await queuePersistedCartWrite(clearPersistedCart);
-          }
-
+          } catch {}
+          if (nextIsAuthenticatedCart) await queuePersistedCartWrite(clearPersistedCart);
           clearRequestedRef.current = false;
           storageKeyRef.current = nextStorageKey;
           setStorageKey(nextStorageKey);
@@ -203,11 +213,9 @@ export function CartProvider({ children }: ProviderProps) {
 
         if (nextIsAuthenticatedCart) {
           const persistedItems = await loadPersistedCart();
-          const shouldMergeCurrentCart = previousStorageKey !== null && previousStorageKey !== nextStorageKey;
-          nextItems = mergeCartItems(
-            persistedItems,
-            shouldMergeCurrentCart ? itemsRef.current : []
-          );
+          const shouldMergeCurrentCart =
+            previousStorageKey !== null && previousStorageKey !== nextStorageKey;
+          nextItems = mergeCartItems(persistedItems, shouldMergeCurrentCart ? itemsRef.current : []);
 
           if (!cartItemsHaveSameQuantities(nextItems, persistedItems)) {
             await queuePersistedCartWrite(() => savePersistedCart(nextItems));
@@ -216,9 +224,7 @@ export function CartProvider({ children }: ProviderProps) {
           if (shouldMergeCurrentCart && previousStorageKey) {
             try {
               window.localStorage.removeItem(previousStorageKey);
-            } catch {
-              // Ignore storage cleanup failures.
-            }
+            } catch {}
           }
         }
 
@@ -232,69 +238,92 @@ export function CartProvider({ children }: ProviderProps) {
 
       try {
         window.localStorage.removeItem(LEGACY_STORAGE_KEY);
-      } catch {
-        // Ignore storage cleanup failures.
-      }
+      } catch {}
     };
 
     void loadScopedCart();
-
     return () => {
       cancelled = true;
     };
-  }, [pathname]);
+  }, [pathname, queuePersistedCartWrite]);
 
-  // Keep localStorage and the authenticated server cart in sync with state.
+  // Sync items to localStorage and broadcast state to other open tabs.
   useEffect(() => {
     if (typeof window === "undefined" || !storageKey) return;
+
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(items));
-    } catch {
-      // Fail silently: carrito sigue funcionando en memoria.
+    } catch {}
+
+    if (!skipBroadcastRef.current && broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({
+        type: "cart-update",
+        storageKey,
+        items,
+      } satisfies CartBroadcastMessage);
     }
-
-    if (!isAuthenticatedCart) return;
-
-    const timeoutId = window.setTimeout(() => {
-      void queuePersistedCartWrite(() => savePersistedCart(items));
-    }, 250);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [isAuthenticatedCart, items, storageKey]);
+    skipBroadcastRef.current = false;
+  }, [items, storageKey]);
 
   const totalItems = useMemo(
     () => items.reduce((acc, item) => acc + item.quantity, 0),
     [items]
   );
 
-  const addToCart = (game: ProductPreview) => {
-    const slug = computeSlug(game);
-    setItems((prev) => {
-      const existing = prev.find((item) => item.slug === slug);
-      if (!existing) {
-        return [...prev, { slug, game, quantity: 1 }];
+  const addToCart = useCallback(
+    (game: ProductPreview) => {
+      const slug = computeSlug(game);
+      setItems((prev) => {
+        const existing = prev.find((item) => item.slug === slug);
+        if (!existing) return [...prev, { slug, game, quantity: 1 }];
+        return prev.map((item) =>
+          item.slug === slug ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      });
+      if (isAuthenticatedCart) {
+        void queuePersistedCartWrite(() =>
+          fetch("/api/cart/items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ slug }),
+          }).then(() => undefined)
+        );
       }
-      return prev.map((item) =>
-        item.slug === slug ? { ...item, quantity: item.quantity + 1 } : item
+    },
+    [isAuthenticatedCart, queuePersistedCartWrite]
+  );
+
+  const decreaseFromCart = useCallback(
+    (slug: string) => {
+      setItems((prev) =>
+        prev
+          .map((item) => (item.slug === slug ? { ...item, quantity: item.quantity - 1 } : item))
+          .filter((item) => item.quantity > 0)
       );
-    });
-  };
+      if (isAuthenticatedCart) {
+        void queuePersistedCartWrite(() =>
+          fetch(`/api/cart/items/${encodeURIComponent(slug)}`, { method: "PATCH" }).then(
+            () => undefined
+          )
+        );
+      }
+    },
+    [isAuthenticatedCart, queuePersistedCartWrite]
+  );
 
-  const decreaseFromCart = (slug: string) => {
-    setItems((prev) =>
-      prev
-        .map((item) =>
-          item.slug === slug ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const removeFromCart = (slug: string) => {
-    setItems((prev) => prev.filter((item) => item.slug !== slug));
-  };
+  const removeFromCart = useCallback(
+    (slug: string) => {
+      setItems((prev) => prev.filter((item) => item.slug !== slug));
+      if (isAuthenticatedCart) {
+        void queuePersistedCartWrite(() =>
+          fetch(`/api/cart/items/${encodeURIComponent(slug)}`, { method: "DELETE" }).then(
+            () => undefined
+          )
+        );
+      }
+    },
+    [isAuthenticatedCart, queuePersistedCartWrite]
+  );
 
   const clearCart = useCallback(() => {
     const currentStorageKey = storageKeyRef.current;
@@ -303,9 +332,7 @@ export function CartProvider({ children }: ProviderProps) {
     if (typeof window !== "undefined" && currentStorageKey) {
       try {
         window.localStorage.removeItem(currentStorageKey);
-      } catch {
-        // Ignore storage cleanup failures.
-      }
+      } catch {}
     }
 
     itemsRef.current = [];
@@ -316,11 +343,38 @@ export function CartProvider({ children }: ProviderProps) {
     }
   }, [isAuthenticatedCart, queuePersistedCartWrite]);
 
+  // Re-sync from DB when the user returns to this tab/window (cross-device sync).
+  useEffect(() => {
+    if (!isAuthenticatedCart) return;
+
+    const syncFromServer = async () => {
+      try {
+        const freshItems = await loadPersistedCart();
+        if (!cartItemsHaveSameQuantities(freshItems, itemsRef.current)) {
+          setItems(freshItems);
+        }
+      } catch {
+        // Ignore — cart stays as-is if the request fails.
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void syncFromServer();
+    };
+
+    window.addEventListener("focus", syncFromServer);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", syncFromServer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [isAuthenticatedCart]);
+
   useEffect(() => {
     const handleExternalCartClear = () => {
       clearCart();
     };
-
     window.addEventListener("gamezone:cart-cleared", handleExternalCartClear);
     return () => {
       window.removeEventListener("gamezone:cart-cleared", handleExternalCartClear);
