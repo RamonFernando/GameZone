@@ -238,7 +238,7 @@ export default function HomePage() {
           </p>
         ) : null}
         <MarketIntelligenceSections />
-        <GameGrid games={filteredGames} />
+        <GameGrid games={filteredGames} isFiltered={Boolean(query.trim()) || Boolean(platform)} />
       </main>
     </>
   );

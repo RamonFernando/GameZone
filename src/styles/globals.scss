@@ -1561,6 +1561,20 @@ img {
   letter-spacing: 0.02em;
 }
 
+.section-view-all {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6366f1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #818cf8;
+  }
+}
+
 .section-subtitle {
   font-size: 0.8rem;
   color: var(--text-soft);

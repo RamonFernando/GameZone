@@ -1,16 +1,32 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ProductPreview } from "@/types/product";
 import { GameCard } from "@/components/GameCard";
 
+const DESKTOP_LIMIT = 40;
+const MOBILE_LIMIT = 20;
+
 type Props = {
   games: ProductPreview[];
+  /** true cuando hay búsqueda o filtro activo → mostrar todos los resultados sin límite */
+  isFiltered?: boolean;
 };
 
-export function GameGrid({ games }: Props) {
+export function GameGrid({ games, isFiltered = false }: Props) {
   const [lang, setLang] = useState<"es" | "en">("es");
+  const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -71,6 +87,10 @@ export function GameGrid({ games }: Props) {
     };
   }, [games]);
 
+  const limit = isFiltered ? undefined : (isMobile ? MOBILE_LIMIT : DESKTOP_LIMIT);
+  const displayedGames = limit ? games.slice(0, limit) : games;
+  const hasMore = !isFiltered && games.length > (limit ?? 0);
+
   return (
     <section id="game-results">
       <div className="section-header">
@@ -84,9 +104,14 @@ export function GameGrid({ games }: Props) {
               : "Juegos lanzados recientemente. ¡Descubre lo último en el mundo gaming!"}
           </p>
         </div>
+        {hasMore && (
+          <Link href="/games" className="section-view-all">
+            {lang === "en" ? "View all →" : "Ver todos →"}
+          </Link>
+        )}
       </div>
       <div className="grid-games">
-        {games.length === 0 ? (
+        {displayedGames.length === 0 ? (
           <p className="section-subtitle">
             {lang === "en"
               ? "We couldn't find games with that title. Try another one."
@@ -94,7 +119,7 @@ export function GameGrid({ games }: Props) {
           </p>
         ) : (
           <div className="grid-games">
-            {games.map((game, index) => (
+            {displayedGames.map((game, index) => (
               <div
                 key={game.slug}
                 className={
