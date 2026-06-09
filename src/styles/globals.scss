@@ -2053,34 +2053,41 @@ img {
   border-radius: 0;
   margin: 0 0 2rem;
   width: 100%;
-  /* Altura por defecto: se adapta al contenido (como el resto de la página) */
+  /* El contenedor mantiene el mismo aspect ratio que las imagenes de fondo
+     (16:9), de modo que object-fit: cover no recorte ni amplie el arte.
+     max-height evita que se desborde en pantallas bajas. */
+  aspect-ratio: 16 / 9;
   height: auto;
   min-height: 400px;
+  max-height: 100vh;
   background: #020617;
   display: flex;
   align-items: center;
 }
 
-/* Escritorio con zoom ~100%: forzamos que ocupe el 80% de la pantalla.
-   Se activa cuando Hero marca data-hero-zoom="normal" en <html>. */
+/* Escritorio con zoom ~100%: el aspect-ratio ya define la altura.
+   Se mantiene el selector por compatibilidad con data-hero-zoom. */
 html[data-hero-zoom="normal"] .hero--carousel {
-  height: 80vh;
-  height: 80dvh;
-  min-height: 80vh;
-  min-height: 80dvh;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  max-height: 100vh;
 }
 
 /* Por debajo de 1024px: el banner toma la altura que necesite (puede ser mayor que la pantalla),
    independientemente del zoom. */
 @media (max-width: 1023px) {
   .hero--carousel {
+    aspect-ratio: auto;
     height: auto;
     min-height: 400px;
+    max-height: none;
   }
 
   html[data-hero-zoom="normal"] .hero--carousel {
+    aspect-ratio: auto;
     height: auto;
     min-height: 400px;
+    max-height: none;
   }
 
   .hero-inner {
