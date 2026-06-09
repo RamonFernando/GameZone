@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useLocale } from "@/hooks/useLocale";
 
 const PAYMENT_METHODS = [
   { name: "PayPal", src: "/payment/paypal.svg", size: "large" as const, wide: false },
@@ -18,22 +19,9 @@ const LOCALE_OPTIONS = [
 ] as const;
 
 export function Footer() {
-  const [lang, setLang] = useState<"es" | "en">("es");
-  const [localeIndex, setLocaleIndex] = useState(0);
+  const lang = useLocale();
+  const localeIndex = lang === "en" ? 1 : 0;
   const [localeOpen, setLocaleOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-    setLocaleIndex(locale.toLowerCase().startsWith("en") ? 1 : 0);
-  }, []);
 
   const year = new Date().getFullYear();
   const currentLocale = LOCALE_OPTIONS[localeIndex];
@@ -109,11 +97,9 @@ export function Footer() {
                           type="button"
                           className="footer-locale-option"
                           onClick={() => {
-                            setLocaleIndex(i);
                             setLocaleOpen(false);
-                            setLang(i === 0 ? "es" : "en");
                             document.cookie = `uiLocale=${i === 0 ? "es-ES" : "en-US"}; path=/; max-age=31536000`;
-                            window.dispatchEvent(new Event("locale-change"));
+                            window.location.reload();
                           }}
                         >
                           {opt.label}

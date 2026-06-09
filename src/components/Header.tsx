@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
+import { useLocale } from "@/hooks/useLocale";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -52,7 +53,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const [miniProfile, setMiniProfile] = useState<MiniProfile | null>(null);
   const { query, setQuery, platform, setPlatform } = useSearch();
   const [uiLocale, setUiLocale] = useState<string>("es-ES");
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Lee el idioma/moneda preferidos (si existen) al montar.
@@ -66,7 +67,6 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     );
     const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
     setUiLocale(locale);
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState, type FormEvent } from "react";
+import { useLocale } from "@/hooks/useLocale";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,19 +37,7 @@ function LoginContent() {
   const [isPushPending, setIsPushPending] = useState(false);
   const [pushChallengeId, setPushChallengeId] = useState<string | null>(null);
   const [twoFactorMode, setTwoFactorMode] = useState<"email" | "totp" | null>(null);
-  const [lang, setLang] = useState<"es" | "en">("es");
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
+  const lang = useLocale();
 
   const baseTitle = lang === "en" ? "Sign in" : "Inicia sesión";
   const baseSubtitle =

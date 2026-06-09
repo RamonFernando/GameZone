@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "@/hooks/useLocale";
 
 // Ítem individual dentro de un pedido del usuario.
 type OrderItem = {
@@ -43,19 +44,7 @@ export function AccountOrdersHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [lang, setLang] = useState<"es" | "en">("es");
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
+  const lang = useLocale();
 
   const rows = useMemo<PurchaseRow[]>(() => {
     return orders

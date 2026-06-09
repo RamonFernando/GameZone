@@ -8,6 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ReactNode } from "react";
+import { useLocale } from "@/hooks/useLocale";
 
 // Estructura interna que usamos para representar cada slide del hero.
 type Slide = {
@@ -104,7 +105,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [thumbScrollIndex, setThumbScrollIndex] = useState(0);
   const [thumbTransition, setThumbTransition] = useState(true);
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
 
   const sectionGroups = useMemo(() => {
     const groups = heroSections
@@ -150,18 +151,6 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
     () => (slides.length > 0 ? slides.length * 2 - 2 : 0),
     [slides.length]
   );
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
 
   // Detectar zoom aproximado del navegador:
   // - Si el ratio outerWidth/innerWidth está cerca de 1, asumimos zoom ~100% (modo "normal").

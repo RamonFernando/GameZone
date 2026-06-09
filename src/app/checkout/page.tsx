@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocale } from "@/hooks/useLocale";
 import { useCart } from "@/contexts/CartContext";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
 import "../../styles/auth.scss";
@@ -18,19 +19,7 @@ export default function CheckoutPage() {
   const [requiresLogin, setRequiresLogin] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
-  const [lang, setLang] = useState<"es" | "en">("es");
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
+  const lang = useLocale();
 
   const totalAmount = useMemo(
     () => items.reduce((sum, item) => sum + item.game.priceFinal * item.quantity, 0),

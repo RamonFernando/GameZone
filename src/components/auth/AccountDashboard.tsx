@@ -3,6 +3,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useLocale } from "@/hooks/useLocale";
 import {
   createPaymentProgressStorageKey,
   getPaymentProgressStepFromStartedAt,
@@ -125,7 +126,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [totpSecret, setTotpSecret] = useState("");
   const [totpQrDataUrl, setTotpQrDataUrl] = useState("");
   const [totpCodeDraft, setTotpCodeDraft] = useState("");
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
   const clearedPaidOrderRef = useRef<string | null>(null);
   const hadActiveCheckoutFlowRef = useRef(false);
 
@@ -402,18 +403,6 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
     clearedPaidOrderRef.current = paymentResult.id;
     window.dispatchEvent(new Event("gamezone:cart-cleared"));
   }, [paymentIsPaid, paymentProgressIsComplete, paymentResult?.id]);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
 
   const handleSaveProfile = async () => {
     setProfileMessage("");

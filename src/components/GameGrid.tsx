@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ProductPreview } from "@/types/product";
 import { GameCard } from "@/components/GameCard";
+import { useLocale } from "@/hooks/useLocale";
 
 const DESKTOP_LIMIT = 40;
 const MOBILE_LIMIT = 20;
@@ -19,7 +20,7 @@ type Props = {
 };
 
 export function GameGrid({ games, isFiltered = false, title, subtitle }: Props) {
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
   const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
 
@@ -30,18 +31,6 @@ export function GameGrid({ games, isFiltered = false, title, subtitle }: Props) 
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
   }, []);
 
   useEffect(() => {

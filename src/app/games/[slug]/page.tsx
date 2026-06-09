@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLocale } from "@/hooks/useLocale";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
@@ -78,23 +79,11 @@ export default function GameDetailPage() {
   const [game, setGame] = useState<ProductView | null>(null);
   const [suggestions, setSuggestions] = useState<ProductView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
   const slugParam = routeParams?.slug;
   const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
 
 	  useEffect(() => {
 	    if (!slug) return;

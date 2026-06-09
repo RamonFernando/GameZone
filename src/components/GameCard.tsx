@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { ProductPreview } from "@/types/product";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
+import { useLocale } from "@/hooks/useLocale";
 
 // Props que recibe la tarjeta de juego (información básica del producto).
 type Props = {
@@ -19,7 +20,7 @@ export function GameCard({ game }: Props) {
   const [likesCount, setLikesCount] = useState(game.likesCount);
   const [isLiking, setIsLiking] = useState(false);
   const [liked, setLiked] = useState(Boolean(game.likedByCurrentUser));
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
 
   // Sincroniza el estado local de likes cuando cambian los datos del juego.
   useEffect(() => {
@@ -29,18 +30,6 @@ export function GameCard({ game }: Props) {
 
   // Formatea un número como precio para mostrarlo en la UI (según geo/ui locale).
   const money = (value: number) => formatPublicPrice(value, lang);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
 
   const displayRegion =
     lang === "en" && game.region === "EUROPA" ? "EUROPE" : game.region;

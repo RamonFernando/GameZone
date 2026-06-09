@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
+import { useLocale } from "@/hooks/useLocale";
 
 // Props mínimos del CartDrawer: callback para cerrarlo.
 type Props = {
@@ -23,7 +24,7 @@ export function CartDrawer({ onClose }: Props) {
     removeFromCart,
     clearCart,
   } = useCart();
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const lang = useLocale();
 
   // Indica si hay productos en el carrito o está vacío.
   const hasItems = items.length > 0;
@@ -33,18 +34,6 @@ export function CartDrawer({ onClose }: Props) {
     (sum, item) => sum + item.game.priceFinal * item.quantity,
     0
   );
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
 
   // Cierra el drawer y navega a la pantalla de checkout.
   const goToCheckout = () => {

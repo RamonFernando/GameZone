@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "@/hooks/useLocale";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
@@ -126,19 +127,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<ProductPreview[]>([]);
   const [heroSections, setHeroSections] = useState<HomeHeroSection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lang, setLang] = useState<"es" | "en">("es");
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const cookieMap = new Map(
-      document.cookie.split(";").map((entry) => {
-        const [key, ...rest] = entry.trim().split("=");
-        return [key, decodeURIComponent(rest.join("=") || "")] as const;
-      })
-    );
-    const locale = cookieMap.get("uiLocale") ?? cookieMap.get("geoLocale") ?? "es-ES";
-    setLang(locale.toLowerCase().startsWith("en") ? "en" : "es");
-  }, []);
+  const lang = useLocale();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
