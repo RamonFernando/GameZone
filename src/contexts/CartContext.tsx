@@ -126,8 +126,10 @@ export function CartProvider({ children }: ProviderProps) {
   const [storageKey, setStorageKey] = useState<string | null>(null);
   const [isAuthenticatedCart, setIsAuthenticatedCart] = useState(false);
   const storageKeyRef = useRef<string | null>(null);
+  const isAuthenticatedCartRef = useRef(false);
   const itemsRef = useRef<CartItem[]>([]);
   const clearRequestedRef = useRef(false);
+  const authChangedRef = useRef(false);
   const persistedCartWriteRef = useRef<Promise<void>>(Promise.resolve());
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
   // true when the items update came from a broadcast (prevents re-broadcasting)
@@ -145,6 +147,10 @@ export function CartProvider({ children }: ProviderProps) {
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
+
+  useEffect(() => {
+    isAuthenticatedCartRef.current = isAuthenticatedCart;
+  }, [isAuthenticatedCart]);
 
   // Initialize BroadcastChannel once on mount for real-time cross-tab sync.
   useEffect(() => {
@@ -167,12 +173,33 @@ export function CartProvider({ children }: ProviderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleAuthChanged = () => {
+      authChangedRef.current = true;
+    };
+    window.addEventListener("gamezone:auth-changed", handleAuthChanged);
+    return () => {
+      window.removeEventListener("gamezone:auth-changed", handleAuthChanged);
+    };
+  }, []);
+
   // Hydrate from the cart scope assigned by the server for this browser/session.
   // Depends on pathname to detect auth state changes (login/logout) during SPA navigation.
   useEffect(() => {
     let cancelled = false;
 
     const loadScopedCart = async () => {
+      // Already authenticated and no explicit auth-change signal → skip scope re-check.
+      // This prevents the race condition where SessionRefresher rotates the token
+      // while loadScopedCart is mid-flight, causing /api/cart/scope to see a revoked
+      // token and return authenticated:false, which would wipe the cart.
+      // Auth changes (login / logout) must dispatch gamezone:auth-changed BEFORE
+      // the pathname changes so authChangedRef.current is true here.
+      if (isAuthenticatedCartRef.current && storageKeyRef.current !== null && !authChangedRef.current) {
+        return;
+      }
+      authChangedRef.current = false;
+
       let nextStorageKey = FALLBACK_STORAGE_KEY;
       let nextIsAuthenticatedCart = false;
 

@@ -127,6 +127,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [totpCodeDraft, setTotpCodeDraft] = useState("");
   const [lang, setLang] = useState<"es" | "en">("es");
   const clearedPaidOrderRef = useRef<string | null>(null);
+  const hadActiveCheckoutFlowRef = useRef(false);
 
   const totalSpent = useMemo(
     () =>
@@ -356,6 +357,9 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       return;
     }
 
+    // Active checkout flow confirmed — allow cart clear on completion.
+    hadActiveCheckoutFlowRef.current = true;
+
     const updateProgressStep = () => {
       const nextStep = getPaymentProgressStepFromStartedAt(startedAt);
       setPaymentProgressStep(nextStep);
@@ -384,6 +388,14 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
     }
 
     if (clearedPaidOrderRef.current === paymentResult.id) {
+      return;
+    }
+
+    // Only clear the cart when completing an active checkout flow started in this
+    // session (sessionStorage key was present with a valid timestamp).
+    // Prevents clearing the cart on normal account visits where the user has
+    // previous paid orders but is not in the middle of a checkout.
+    if (!hadActiveCheckoutFlowRef.current) {
       return;
     }
 
