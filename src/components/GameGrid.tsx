@@ -12,9 +12,13 @@ type Props = {
   games: ProductPreview[];
   /** true cuando hay búsqueda o filtro activo → mostrar todos los resultados sin límite */
   isFiltered?: boolean;
+  /** Sobreescribe el título por defecto "Últimos lanzamientos" */
+  title?: string;
+  /** Sobreescribe el subtítulo por defecto */
+  subtitle?: string;
 };
 
-export function GameGrid({ games, isFiltered = false }: Props) {
+export function GameGrid({ games, isFiltered = false, title, subtitle }: Props) {
   const [lang, setLang] = useState<"es" | "en">("es");
   const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
@@ -96,12 +100,12 @@ export function GameGrid({ games, isFiltered = false }: Props) {
       <div className="section-header">
         <div>
           <h2 className="section-title">
-            {lang === "en" ? "Latest releases" : "Últimos lanzamientos"}
+            {title ?? (lang === "en" ? "Latest releases" : "Últimos lanzamientos")}
           </h2>
           <p className="section-subtitle">
-            {lang === "en"
+            {subtitle ?? (lang === "en"
               ? "Recently released games. Discover the latest in the gaming world!"
-              : "Juegos lanzados recientemente. ¡Descubre lo último en el mundo gaming!"}
+              : "Juegos lanzados recientemente. ¡Descubre lo último en el mundo gaming!")}
           </p>
         </div>
         {hasMore && (
