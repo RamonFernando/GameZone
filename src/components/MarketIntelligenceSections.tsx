@@ -41,6 +41,7 @@ type MarketPulseItem = {
   steamPrice?: number | null;
   steamCurrency?: string | null;
   steamIsFree?: boolean;
+  rawgSlug?: string | null;
   catalogMatch?: {
     id?: string | null;
     slug?: string | null;
@@ -638,7 +639,12 @@ function MarketPulseCarousel({
     );
   }
 
-  const activeHref = active.catalogMatch?.slug ? `/games/${active.catalogMatch.slug}` : null;
+  // Matcheado -> ficha de catalogo (con compra). RAWG sin catalogo -> ficha interna de info.
+  const activeHref = active.catalogMatch?.slug
+    ? `/games/${active.catalogMatch.slug}`
+    : active.rawgSlug
+      ? `/games/rawg/${active.rawgSlug}`
+      : null;
 
   return (
     <article className="market-pulse-carousel">

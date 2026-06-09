@@ -183,9 +183,58 @@ export function createCatalogGameSummary(product: StoreProduct) {
   };
 }
 
+/**
+ * Ficha de solo-informacion para un juego de RAWG que NO esta en el catalogo.
+ * Se usa para que las cards del Radar RAWG sin coincidencia tengan una ficha
+ * interna (sin compra) a la que navegar.
+ */
+export async function getRawgGameMetadataBySlug(
+  slug: string
+): Promise<MarketGameMetadataResult | null> {
+  try {
+    let rawg = await rawgFetch<RawgGame>(`/games/${slug}`, {});
+    // RAWG devuelve { slug } sin id cuando el slug es un alias; seguimos la redireccion.
+    if (rawg && !rawg.id && rawg.slug && rawg.slug !== slug) {
+      rawg = await rawgFetch<RawgGame>(`/games/${rawg.slug}`, {});
+    }
+    if (!rawg?.id) return null;
+
+    const game = {
+      title: rawg.name ?? slug,
+      slug,
+      cover: rawg.background_image ?? "",
+      description: rawg.description_raw ? rawg.description_raw.slice(0, 280) : "",
+      longDescription: rawg.description_raw ?? null,
+      released: formatRawgDate(rawg.released) ?? null,
+      developer: firstName(rawg.developers),
+      publisher: firstName(rawg.publishers),
+      genres: toList(rawg.genres, (item) => item.name),
+      platforms: toList(rawg.platforms, (item) => item.platform?.name),
+      tags: toList(rawg.tags, (item) => item.name).slice(0, 12),
+      stores: toList(rawg.stores, (item) => item.store?.name),
+      rating: rawg.rating ?? null,
+      ratingsCount: rawg.ratings_count ?? 0,
+      metacritic: rawg.metacritic ?? null,
+      playtimeHours: rawg.playtime ?? null,
+      website: rawg.website || null,
+      esrbRating: rawg.esrb_rating?.name ?? null,
+      backgroundImage: rawg.background_image || null,
+      source: "RAWG" as const,
+      sourceId: `rawg:${rawg.id}`,
+      updatedAt: new Date().toISOString(),
+      catalogMatch: createCatalogMatch(undefined),
+    } satisfies MarketGameMetadata;
+
+    return { source: "rawg", fallbackUsed: false, game } satisfies MarketGameMetadataResult;
+  } catch {
+    return null;
+  }
+}
+
 export async function getMarketGameMetadata(slug: string) {
   const product = await getActiveProductBySlug(slug);
-  if (!product) return null;
+  // Si el slug no es un producto del catalogo, intentamos resolverlo como juego RAWG.
+  if (!product) return getRawgGameMetadataBySlug(slug);
 
   const fallback = createCatalogGameMetadata(product);
 

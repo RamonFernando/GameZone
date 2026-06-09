@@ -38,6 +38,7 @@ export type MarketTrendingGame = {
   trendScore: number;
   gameZoneMatch: string;
   catalogMatch: MarketCatalogMatch;
+  slug?: string | null;
 };
 
 function platformLabel(rawgGame: RawgTrendingGame, catalogProduct: StoreProduct | undefined) {
@@ -109,6 +110,7 @@ function createCatalogFallbackTrending(products: StoreProduct[], limit: number) 
     trendScore: Math.min(100, Math.round(product.likesCount / 20 + product.discountPercent)),
     gameZoneMatch: "Disponible en catalogo",
     catalogMatch: createCatalogMatch(product),
+    slug: null,
   })) satisfies MarketTrendingGame[];
 }
 
@@ -145,6 +147,7 @@ export async function listMarketTrendingGames(limit = 3, options: MarketTrending
         trendScore: trendScore(rawgGame),
         gameZoneMatch: catalogProduct ? "Disponible en catalogo" : "Sin coincidencia directa",
         catalogMatch: createCatalogMatch(catalogProduct, catalogMatchResult?.matchScore ?? 0),
+        slug: rawgGame.slug ?? null,
       } satisfies MarketTrendingGame;
     });
 

@@ -28,6 +28,7 @@ export type MarketPulseItem = {
   steamPrice: number | null;
   steamCurrency: string | null;
   steamIsFree: boolean;
+  rawgSlug?: string | null;
 };
 
 export type MarketPulseSection = {
@@ -547,6 +548,7 @@ export async function listMarketPulse(options: MarketPulseOptions = {}) {
     steamPrice: null,
     steamCurrency: null,
     steamIsFree: false,
+    rawgSlug: item.slug ?? null,
   })) satisfies MarketPulseItem[];
 
   return {
