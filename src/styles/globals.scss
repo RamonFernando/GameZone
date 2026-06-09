@@ -220,7 +220,8 @@
   display: grid;
   gap: 0.38rem;
   min-height: 222px;
-  padding: 0.85rem 0.8rem 0.9rem;
+  /* Mas espacio abajo para que el carrito (absoluto) no quede pegado a los precios */
+  padding: 0.85rem 0.8rem 2.6rem;
 }
 
 .market-pulse-catalog-card__body strong {
