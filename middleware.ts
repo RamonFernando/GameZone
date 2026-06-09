@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
 
+const CART_COOKIE_NAME = "gamezone_cart_session";
+const CART_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;
+
 const PROTECTED_ROUTES = ["/account", "/checkout", "/admin"];
 
 async function applyGeoCookies(request: NextRequest, response: NextResponse) {
@@ -82,6 +85,20 @@ export async function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
+
+  // Pre-seed anonymous cart cookie so all tabs share the same key from the first page load.
+  if (!request.cookies.has(CART_COOKIE_NAME)) {
+    response.cookies.set({
+      name: CART_COOKIE_NAME,
+      value: crypto.randomUUID(),
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: CART_COOKIE_TTL_SECONDS,
+    });
+  }
+
   // Aplicar cookies de geolocalización para páginas públicas y protegidas
   return applyGeoCookies(request, response);
 }
