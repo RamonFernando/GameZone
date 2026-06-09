@@ -2140,10 +2140,24 @@ html[data-hero-zoom="normal"] .hero--carousel {
 
 .hero-bg img {
   pointer-events: none;
+  will-change: transform;
+}
+
+/* Capa borrosa de fondo: cubre toda la pantalla y crea profundidad cinematografica.
+   Al desbordar el arte nitido, rellena los lados/bordes con un halo difuminado. */
+.hero-bg-blur {
   object-fit: cover;
   object-position: center center;
+  transform: scale(1.18);
+  filter: blur(30px) saturate(1.3) brightness(0.5);
+  animation: heroZoom 22s ease-in-out infinite alternate;
+}
+
+/* Arte nitido y completo: contain para que nunca se recorte ni se amplie de mas. */
+.hero-bg-art {
+  object-fit: contain;
+  object-position: center center;
   transform: scale(1.01);
-  will-change: transform;
   animation: heroZoom 22s ease-in-out infinite alternate;
 }
 
@@ -2151,13 +2165,16 @@ html[data-hero-zoom="normal"] .hero--carousel {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(15, 23, 42, 0.95) 0%,
-    rgba(15, 23, 42, 0.55) 35%,
-    rgba(15, 23, 42, 0.25) 65%,
-    rgba(15, 23, 42, 0.92) 100%
-  );
+  /* Vineta radial (oscurece bordes = mas cine) + gradiente lateral para legibilidad del texto */
+  background:
+    radial-gradient(125% 125% at 50% 45%, transparent 52%, rgba(2, 6, 23, 0.78) 100%),
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.95) 0%,
+      rgba(15, 23, 42, 0.55) 35%,
+      rgba(15, 23, 42, 0.25) 65%,
+      rgba(15, 23, 42, 0.92) 100%
+    );
 }
 
 /* 90% del ancho y 80% de la altura de .hero--carousel; centrado */

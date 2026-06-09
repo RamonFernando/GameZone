@@ -278,6 +278,19 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
     <section className={`hero hero--carousel${headerSlot ? " hero--with-header" : ""}`}>
       {/* Background: la imagen cubre toda la section, incluida la zona del header */}
       <div className="hero-bg">
+        {/* Capa de fondo borrosa: llena la pantalla y aporta profundidad cinematografica */}
+        <Image
+          src={displayedHeroSrc}
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          quality={50}
+          unoptimized
+          className="hero-bg-blur"
+        />
+        {/* Arte nitido y completo, sin recorte */}
         <Image
           src={displayedHeroSrc}
           alt={active.title}
@@ -289,7 +302,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
           onError={() => {
             setHeroBgSrc((current) => (current === active.image ? current : active.image));
           }}
-          style={{ objectFit: "cover", objectPosition: "center center" }}
+          className="hero-bg-art"
         />
         <div className="hero-bg-gradient" />
       </div>
