@@ -1,4 +1,4 @@
-import { randomUUID, scrypt as scryptCallback, createHash } from "node:crypto";
+import { randomUUID, scrypt as scryptCallback, createHash, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { Prisma } from "@prisma/client";
 import type { UserRole } from "@prisma/client";
@@ -40,6 +40,32 @@ export function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
+// Salted hash for short-lived codes (6-digit email 2FA). SHA-256 alone is
+// brute-forceable offline against the ~900k search space; the salt prevents it.
+export function hashTwoFactorCode(code: string): string {
+  const salt = randomUUID().replaceAll("-", "").slice(0, 16);
+  const hash = createHash("sha256").update(salt + code).digest("hex");
+  return `${salt}:${hash}`;
+}
+
+export function verifyTwoFactorCode(code: string, storedValue: string): boolean {
+  const separatorIndex = storedValue.indexOf(":");
+  if (separatorIndex === -1) {
+    // Legacy unsalted format — timing-safe fallback during rolling deploys.
+    const expected = Buffer.from(createHash("sha256").update(code).digest("hex"));
+    const actual = Buffer.from(storedValue);
+    if (expected.length !== actual.length) return false;
+    return timingSafeEqual(expected, actual);
+  }
+  const salt = storedValue.slice(0, separatorIndex);
+  const storedHash = storedValue.slice(separatorIndex + 1);
+  const expected = createHash("sha256").update(salt + code).digest("hex");
+  const expectedBuf = Buffer.from(expected, "hex");
+  const storedBuf = Buffer.from(storedHash, "hex");
+  if (expectedBuf.length !== storedBuf.length) return false;
+  return timingSafeEqual(expectedBuf, storedBuf);
+}
+
 export async function hashPassword(password: string) {
   const salt = randomUUID().replaceAll("-", "");
   const derivedKey = (await scrypt(password, salt, 64)) as Buffer;
@@ -52,7 +78,11 @@ export async function verifyPassword(password: string, storedHash: string) {
     return false;
   }
   const derivedKey = (await scrypt(password, salt, 64)) as Buffer;
-  return derivedKey.toString("hex") === key;
+  const keyBuffer = Buffer.from(key, "hex");
+  if (derivedKey.length !== keyBuffer.length) {
+    return false;
+  }
+  return timingSafeEqual(derivedKey, keyBuffer);
 }
 
 export function createRawVerificationToken() {
