@@ -765,9 +765,9 @@
 
   .nav-logo {
     display: flex;
-    justify-content: space-around;
+    justify-content: flex-start;
     margin-left: 0;
-    width: 75%;
+    flex: 1 1 0;
     min-width: 0;
     overflow: hidden;
   }
