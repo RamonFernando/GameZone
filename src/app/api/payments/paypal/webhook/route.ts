@@ -47,6 +47,11 @@ export async function POST(request: Request) {
     };
   };
 
+  const HANDLED_TYPES = ["CHECKOUT.ORDER.APPROVED", "PAYMENT.CAPTURE.COMPLETED"] as const;
+  if (!(HANDLED_TYPES as readonly string[]).includes(event.event_type ?? "")) {
+    return NextResponse.json({ received: true }, { status: 200 });
+  }
+
   if (event.event_type === "CHECKOUT.ORDER.APPROVED" && event.resource?.id) {
     // Capturamos automáticamente si el usuario no volvió al return_url.
     const accessToken = await getPaypalAccessToken();

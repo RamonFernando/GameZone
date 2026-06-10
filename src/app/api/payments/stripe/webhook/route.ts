@@ -34,6 +34,17 @@ export async function POST(request: Request) {
     );
   }
 
+  const HANDLED_TYPES = [
+    "checkout.session.completed",
+    "checkout.session.async_payment_succeeded",
+    "checkout.session.expired",
+    "checkout.session.async_payment_failed",
+  ] as const;
+
+  if (!(HANDLED_TYPES as readonly string[]).includes(event.type)) {
+    return NextResponse.json({ received: true }, { status: 200 });
+  }
+
   const session = event.data.object as Stripe.Checkout.Session;
   const orderId = String(session.metadata?.orderId ?? "").trim();
   const userId = String(session.metadata?.userId ?? "").trim();
