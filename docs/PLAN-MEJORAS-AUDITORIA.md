@@ -227,6 +227,38 @@ npm run build
   5. Usar un **dominio propio** (ej. `gamezoneshop.es`) en lugar de `gamezone-digital-store.netlify.app` — mejora el SEO y la credibilidad.
 - **Verificar:** `https://gamezone-digital-store.netlify.app/sitemap.xml` devuelve XML válido; Google Search Console muestra el sitio indexado.
 
+#### Estado a 11/06/2026 — qué está HECHO y qué FALTA
+
+**✅ HECHO (commit `bd2e9e9` + verificación Search Console):**
+- `src/app/sitemap.ts` (dinámico, lee productos activos de Prisma) y `src/app/robots.ts`.
+- Metadatos base + Open Graph + Twitter Card en `src/app/layout.tsx` (`metadataBase`, `title.template`, etc.).
+- Favicon `src/app/icon.svg`.
+- Verificación de propiedad en Google Search Console (etiqueta meta `verification.google` en `layout.tsx`, commit `6d37fa8`). **NO borrar esa etiqueta o se pierde la verificación.**
+- Sitemap enviado en Search Console (a la espera de primer rastreo de Google).
+
+**🔜 FALTA — SEO avanzado (hacer en sesión nueva con Opus, contexto fresco):**
+
+Objetivo: que cada ficha de juego tenga su propio título/descripción en Google y genere *rich snippets* (estrellas + precio). Hoy todas las fichas comparten el metadato genérico del layout porque `games/[slug]` es client component y no puede exportar `generateMetadata`.
+
+1. **`generateMetadata` por juego** en `src/app/games/[slug]`:
+   - Problema arquitectónico: la página es `"use client"`, y `generateMetadata` solo funciona en server components.
+   - Plan: separar en dos. Convertir `page.tsx` en **server component** que (a) lee el producto por slug desde Prisma, (b) exporta `generateMetadata({ params })` con title/description/openGraph propios (nombre del juego, precio, plataforma), y (c) renderiza un componente cliente hijo (mover la UI interactiva actual a `GameDetailClient.tsx` con `"use client"`).
+   - Pasar los datos del producto del server al cliente vía props (ya cargados en el server, evita doble fetch).
+   - `generateMetadata` debe manejar producto inexistente → `notFound()`.
+
+2. **JSON-LD (schema Product)** en esa misma página server:
+   - Inyectar un `<script type="application/ld+json">` con schema.org `Product`: `name`, `image`, `description`, `offers` (`price`, `priceCurrency: "EUR"`, `availability` según stock), y `aggregateRating` si hay `rating`/`ratingsCount`.
+   - Construir el objeto en el server y serializarlo con `JSON.stringify`.
+   - Validar luego en [Rich Results Test](https://search.google.com/test/rich-results).
+
+3. **Precauciones (importante):**
+   - Crear backup branch antes (`git checkout -b backup-pre-seo-avanzado-DDMMYYYY`).
+   - Commits pequeños y separados (uno para el split client/server, otro para JSON-LD).
+   - Verificar que NO se rompe la interactividad actual de la ficha (añadir al carrito, likes, galería) tras mover a `GameDetailClient.tsx`.
+   - `npx tsc --noEmit` limpio en cada paso.
+
+4. **Dominio propio** (ver 4.2) — coste ~10-15 €/año, lo configura el usuario. Mejora posicionamiento y confianza frente a `.netlify.app`.
+
 ### 4.2 — Dominio propio  🟠 ALTA
 - **Problema:** `gamezone-digital-store.netlify.app` no transmite confianza ni es memorable. Los subdominios `.netlify.app` tienen menos peso en SEO.
 - **Acción:**
