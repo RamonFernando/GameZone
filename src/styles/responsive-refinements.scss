@@ -797,6 +797,16 @@
     max-width: 48vw;
   }
 
+  /* El letrero está centrado con translate(-50%,-50%). El efecto :hover global
+     aplica transform: scale(0.92), que SUSTITUIRÍA al translate y haría que el
+     letrero saltara de su sitio al tocarlo en móvil. Forzamos que mantenga el
+     centrado en los estados de pulsación. */
+  .nav-logo-text:hover,
+  .nav-logo-text:focus,
+  .nav-logo-text:active {
+    transform: translate(-50%, -50%);
+  }
+
   .nav-logo-text-1,
   .nav-logo-text-2 {
     white-space: nowrap;
