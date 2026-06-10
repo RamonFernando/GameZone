@@ -107,7 +107,7 @@ const steamSnapshotAppIds: Record<string, string> = {
   "007 First Light": "3768760",
   Fatekeeper: "2186990",
   Paralives: "1118520",
-  Marathon: "2453150",
+  Marathon: "3065800",
   "Subnautica 2": "1962700",
 };
 
