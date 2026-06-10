@@ -5,9 +5,9 @@ import { createPersistedSession } from "@/lib/auth/session-server";
 import {
   authenticateUser,
   AccountNotVerifiedError,
-  ensureMasterAdminUser,
   InvalidCredentialsError,
   hashToken,
+  hashTwoFactorCode,
 } from "@/lib/auth/store";
 import { prisma } from "@/lib/prisma";
 import { sendTwoFactorCodeEmail } from "@/lib/auth/email";
@@ -51,7 +51,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    await ensureMasterAdminUser();
     const user = await authenticateUser({ identifier, password });
 
     // 1) Si el usuario tiene push-style MFA activado, creamos un desafío y pedimos aprobación
@@ -121,8 +120,10 @@ export async function POST(request: Request) {
 
     // 3) Si no tiene push ni TOTP pero sí 2FA por código por email, generamos un código y pedimos verificación
     if (user.twoFactorEnabled) {
-      const rawCode = String(Math.floor(100000 + Math.random() * 900000)); // 6 dígitos
-      const codeHash = hashToken(rawCode);
+      const rawArray = new Uint32Array(1);
+      crypto.getRandomValues(rawArray);
+      const rawCode = String((rawArray[0]! % 900000) + 100000);
+      const codeHash = hashTwoFactorCode(rawCode);
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
 
       const challenge = await prisma.user.update({

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashToken } from "@/lib/auth/store";
+import { verifyTwoFactorCode } from "@/lib/auth/store";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 
@@ -55,8 +55,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const submittedHash = hashToken(code);
-  if (submittedHash !== user.twoFactorCodeHash) {
+  if (!verifyTwoFactorCode(code, user.twoFactorCodeHash)) {
     return NextResponse.json(
       { message: "Código incorrecto.", code: "TWO_FACTOR_CODE_INVALID" },
       { status: 400 }
