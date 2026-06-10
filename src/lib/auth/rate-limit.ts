@@ -9,12 +9,13 @@ function getClientIp(request: Request) {
   return request.headers.get("x-real-ip") ?? "unknown-ip";
 }
 
-function getConfigForScope(scope: "register" | "verify" | "resend" | "login") {
+function getConfigForScope(scope: "register" | "verify" | "resend" | "login" | "2fa-verify") {
   const configs = {
     register: { limit: 5, windowMs: 10 * 60 * 1000 },
     verify: { limit: 12, windowMs: 10 * 60 * 1000 },
     resend: { limit: 4, windowMs: 10 * 60 * 1000 },
     login: { limit: 8, windowMs: 10 * 60 * 1000 },
+    "2fa-verify": { limit: 5, windowMs: 10 * 60 * 1000 },
   } as const;
 
   return configs[scope];
@@ -31,7 +32,7 @@ type RateLimitResult =
  */
 export async function enforceRateLimit(
   request: Request,
-  scope: "register" | "verify" | "resend" | "login"
+  scope: "register" | "verify" | "resend" | "login" | "2fa-verify"
 ): Promise<RateLimitResult> {
   const ip = getClientIp(request);
   const key = `${scope}:${ip}`;

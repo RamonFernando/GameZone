@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyTwoFactorCode } from "@/lib/auth/store";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
+import { enforceRateLimit } from "@/lib/auth/rate-limit";
 
 type VerifyPayload = {
   challengeId?: string;
@@ -17,6 +18,14 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { message: "Solicitud inválida.", code: "BAD_REQUEST" },
       { status: 400 }
+    );
+  }
+
+  const rl = await enforceRateLimit(request, "2fa-verify");
+  if (rl.blocked) {
+    return NextResponse.json(
+      { message: `Demasiados intentos. Intenta de nuevo en ${rl.retryAfterSeconds}s.`, code: "RATE_LIMITED" },
+      { status: 429 }
     );
   }
 
