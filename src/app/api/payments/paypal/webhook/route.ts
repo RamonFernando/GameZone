@@ -6,6 +6,7 @@ import {
   verifyPaypalWebhookSignature,
 } from "@/lib/payments/paypal";
 import { completePaidOrder } from "@/lib/checkout/order-service";
+import { logger } from "@/lib/logger";
 
 function headerValue(headers: Headers, key: string) {
   return headers.get(key) ?? "";
@@ -29,7 +30,10 @@ export async function POST(request: Request) {
       authAlgo: headerValue(request.headers, "paypal-auth-algo"),
     },
     webhookEvent: eventPayload,
-  }).catch(() => false);
+  }).catch((err) => {
+    logger.error("Error verificando firma del webhook de PayPal.", { err });
+    return false;
+  });
 
   if (!isValid) {
     return NextResponse.json({ message: "Webhook de PayPal no verificado." }, { status: 400 });
@@ -58,7 +62,10 @@ export async function POST(request: Request) {
     const capture = await capturePaypalOrder({
       accessToken,
       paypalOrderId: event.resource.id,
-    }).catch(() => null);
+    }).catch((err) => {
+      logger.error("Error capturando orden de PayPal en webhook.", { err, paypalOrderId: event.resource?.id });
+      return null;
+    });
 
     if (capture?.status === "COMPLETED") {
       const order = await prisma.order.findFirst({
