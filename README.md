@@ -4,6 +4,18 @@ Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticación con 
 
 Documentación de pruebas centralizada en: `TESTING.md`.
 
+## Novedades recientes (10-06-2026)
+
+### Auditoría de seguridad y preparación Netlify (Fase 1 + Fase 2 parcial)
+
+- **Geo en middleware sin fetch externo:** `middleware.ts` ya no llama a `ipapi.co`. Lee la cabecera `x-nf-geo-country` que Netlify inyecta; fallback `ES/EUR/es-ES` en local.
+- **Netlify deploy:** creados `netlify.toml` (build command, plugin `@netlify/plugin-nextjs`) y `netlify/functions/sync-catalogs.mts` (Scheduled Function que reemplaza el cron de `vercel.json`, dispara a las 05:00 UTC).
+- **Cabeceras HTTP de seguridad:** `next.config.mjs` añade en todas las rutas `X-Frame-Options: DENY`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS` y `Content-Security-Policy`.
+- **Tolerancia TOTP reducida:** `epochTolerance` bajado de 30 a 1 periodo (±30 s) en `totp/enable` y `totp/verify`.
+- **Rate limit en 2FA/TOTP:** 5 intentos / 10 min por IP en `/api/auth/2fa/verify` y `/api/auth/totp/verify`.
+- **Validación de tipo de evento en webhooks:** Stripe y PayPal retornan 200 inmediatamente para tipos no gestionados; el cast a `Checkout.Session` ocurre solo tras verificar `event.type`.
+- **CI en GitHub Actions:** `.github/workflows/ci.yml` ejecuta `tsc + vitest + build` en cada push/PR a `main`.
+
 ## Novedades recientes (09-06-2026)
 
 ### Boton flotante "Volver al inicio"
@@ -637,12 +649,11 @@ como `Vista previa email de compra: https://ethereal.email/message/...`.
 
 ## Despliegue en Netlify
 
-- **Build command:** `npm run build` (incluye `prisma generate`).
-- **Variables de entorno:** definir al menos `DATABASE_URL` y las que use la app (sesión, Stripe, PayPal, OAuth, etc.) en el panel de Netlify.
+- **Build command:** `npm run build` (incluye `prisma generate`). Configurado en `netlify.toml`.
+- **Plugin:** `@netlify/plugin-nextjs` declarado en `netlify.toml` y en `devDependencies`.
+- **Cron:** `netlify/functions/sync-catalogs.mts` reemplaza `vercel.json`; se dispara a las 05:00 UTC.
+- **Variables de entorno:** definir en el panel de Netlify: `DATABASE_URL`, `SESSION_SECRET`, `CRON_SECRET`, `STRIPE_*`, `PAYPAL_*`, `SMTP_*`, `APP_BASE_URL`.
 
 ### Base de datos en producción
 
-La app usa SQLite por defecto (`prisma/dev.db`). En Netlify tienes dos opciones:
-
-1. **Incluir la base de datos en el repo (solo para pruebas):** quitar `prisma/dev.db` del `.gitignore`, hacer commit de `dev.db` y en Netlify poner `DATABASE_URL=file:./prisma/dev.db`. En entornos serverless SQLite puede tener limitaciones (escritura/lectura).
-2. **Usar una base de datos en la nube (recomendado):** usar un servicio como Supabase, Neon, PlanetScale o Postgres de Netlify, configurar Prisma para ese proveedor y definir `DATABASE_URL` en Netlify con la URL del servicio. Así la web en producción tendrá datos persistentes y correctos.
+SQLite es incompatible con Netlify (filesystem efímero). **Pendiente de migrar a PostgreSQL** (recomendado: [Neon](https://neon.tech), tier gratuito + driver serverless). Ver tarea 1.1 del plan de auditoría en `docs/PLAN-MEJORAS-AUDITORIA.md`.
