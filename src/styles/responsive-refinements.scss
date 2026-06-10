@@ -1291,9 +1291,18 @@
   .nav-logo,
   .nav-logo-mark,
   .nav-logo-text,
-  .nav-mobile-toggle {
+  .nav-mobile-toggle,
+  .scroll-to-top {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+  }
+
+  /* ---- Botón "volver arriba": anular el :hover pegajoso en táctil
+     (se quedaba con el fondo índigo claro = el "azul grisáceo" al tocar) ---- */
+  .scroll-to-top:hover {
+    background: #6366f1;
+    transform: none;
+    opacity: 0.9;
   }
 }
