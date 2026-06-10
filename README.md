@@ -6,14 +6,12 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 
 ## Índice
 
-- [Novedades recientes (11-06-2026)](#novedades-recientes-11-06-2026)
-- [Novedades recientes (10-06-2026)](#novedades-recientes-10-06-2026)
-- [Novedades recientes (09-06-2026)](#novedades-recientes-09-06-2026)
-- [Registro y páginas legales](#registro-y-páginas-legales)
-- [Comandos de tests (ejecucion rapida)](#comandos-de-tests-ejecucion-rapida)
+### Empezar
 - [Requisitos](#requisitos)
 - [Variables de entorno](#variables-de-entorno)
 - [Arranque rapido](#arranque-rapido)
+
+### Documentación
 - [Metadata de juegos con RAWG](#metadata-de-juegos-con-rawg)
 - [Datos externos y market intelligence](#datos-externos-y-market-intelligence)
 - [Comando unico de recuperacion (Windows)](#comando-unico-de-recuperacion-windows)
@@ -22,6 +20,50 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 - [Pagos y webhooks](#pagos-y-webhooks)
 - [Seguridad de pagos aplicada](#seguridad-de-pagos-aplicada)
 - [Despliegue en Netlify](#despliegue-en-netlify)
+- [Registro y páginas legales](#registro-y-páginas-legales)
+- [Comandos de tests (ejecucion rapida)](#comandos-de-tests-ejecucion-rapida)
+
+### Changelog
+- [Novedades recientes (11-06-2026)](#novedades-recientes-11-06-2026)
+- [Novedades recientes (10-06-2026)](#novedades-recientes-10-06-2026)
+- [Novedades recientes (09-06-2026)](#novedades-recientes-09-06-2026)
+
+## Requisitos
+
+- Node.js 18+
+- npm
+- Stripe CLI (opcional, recomendado para pruebas de webhook)
+
+## Variables de entorno
+
+Copia `.env.example` a `.env` y completa al menos:
+
+- `DATABASE_URL`
+- `APP_BASE_URL`
+- `SESSION_SECRET`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET` (se obtiene con Stripe CLI o desde Dashboard)
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_CLIENT_SECRET`
+- `PAYPAL_ENV` (`sandbox` o `live`)
+- `PAYPAL_WEBHOOK_ID`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+- `MAIL_BRAND_NAME`, `MAIL_SUPPORT_EMAIL`, `MAIL_LOGO_URL`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `FACEBOOK_CLIENT_ID`
+- `FACEBOOK_CLIENT_SECRET`
+- `TWITTER_CLIENT_ID`
+- `TWITTER_CLIENT_SECRET`
+- `RAWG_API_KEY` (opcional, para enriquecer fichas de juegos con metadata externa)
+
+## Arranque rapido
+
+```bash
+npm install
+npm run db:migrate
+npm run dev
+```
 
 ## Novedades recientes (11-06-2026)
 
@@ -124,43 +166,6 @@ npm run e2e:paypal
 - `e2e:checkout`: login + compra manual + verificacion en panel admin.
 - `e2e:stripe`: login + creacion de sesion Stripe (devuelve checkout URL).
 - `e2e:paypal`: login + creacion de orden PayPal (devuelve checkout URL).
-
-## Requisitos
-
-- Node.js 18+
-- npm
-- Stripe CLI (opcional, recomendado para pruebas de webhook)
-
-## Variables de entorno
-
-Copia `.env.example` a `.env` y completa al menos:
-
-- `DATABASE_URL`
-- `APP_BASE_URL`
-- `SESSION_SECRET`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET` (se obtiene con Stripe CLI o desde Dashboard)
-- `PAYPAL_CLIENT_ID`
-- `PAYPAL_CLIENT_SECRET`
-- `PAYPAL_ENV` (`sandbox` o `live`)
-- `PAYPAL_WEBHOOK_ID`
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
-- `MAIL_BRAND_NAME`, `MAIL_SUPPORT_EMAIL`, `MAIL_LOGO_URL`
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-- `FACEBOOK_CLIENT_ID`
-- `FACEBOOK_CLIENT_SECRET`
-- `TWITTER_CLIENT_ID`
-- `TWITTER_CLIENT_SECRET`
-- `RAWG_API_KEY` (opcional, para enriquecer fichas de juegos con metadata externa)
-
-## Arranque rapido
-
-```bash
-npm install
-npm run db:migrate
-npm run dev
-```
 
 ## Metadata de juegos con RAWG
 
