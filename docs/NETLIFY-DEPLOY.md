@@ -77,6 +77,10 @@ RAWG_API_KEY=
 G2A_API_BASE_URL=https://sandboxapi.g2a.com
 G2A_API_HASH=
 G2A_API_KEY=
+
+# Sentry (opcional — monitorización de errores en producción)
+# Sin este valor Sentry no se inicializa y no rompe nada.
+SENTRY_DSN=<dashboard Sentry → Project Settings → Client Keys (DSN)>
 ```
 
 ## Checklist del día del deploy
@@ -89,3 +93,4 @@ G2A_API_KEY=
 6. [ ] Crear los webhooks de producción de Stripe y PayPal apuntando al dominio de Netlify.
 7. [ ] Build command (`npm run build`, ya incluye `prisma generate`) y plugin `@netlify/plugin-nextjs` ya están en `netlify.toml`.
 8. [ ] Tras el primer deploy, comprobar que `instrumentation.ts` (`ensureMasterAdminUser`) funcionó o crear el admin de otra forma (ver tarea 1.4 del plan de auditoría).
+9. [ ] (Opcional) Añadir `SENTRY_DSN` para recibir alertas de errores en producción.

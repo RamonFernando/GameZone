@@ -25,6 +25,7 @@ const RECOMMENDED_VARS = [
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "ENCRYPTION_KEY",
+  "SENTRY_DSN",
 ] as const;
 
 function isMissing(name: string): boolean {

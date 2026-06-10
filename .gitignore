@@ -21,3 +21,6 @@ tsconfig.tsbuildinfo
 .vscode/
 backups/
 public/avatars/
+
+# Sentry Config File
+.env.sentry-build-plugin
