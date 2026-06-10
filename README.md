@@ -4,6 +4,25 @@ Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticación con 
 
 Documentación de pruebas centralizada en: `TESTING.md`.
 
+## Índice
+
+- [Novedades recientes (11-06-2026)](#novedades-recientes-11-06-2026)
+- [Novedades recientes (10-06-2026)](#novedades-recientes-10-06-2026)
+- [Novedades recientes (09-06-2026)](#novedades-recientes-09-06-2026)
+- [Registro y páginas legales](#registro-y-páginas-legales)
+- [Comandos de tests (ejecucion rapida)](#comandos-de-tests-ejecucion-rapida)
+- [Requisitos](#requisitos)
+- [Variables de entorno](#variables-de-entorno)
+- [Arranque rapido](#arranque-rapido)
+- [Metadata de juegos con RAWG](#metadata-de-juegos-con-rawg)
+- [Datos externos y market intelligence](#datos-externos-y-market-intelligence)
+- [Comando unico de recuperacion (Windows)](#comando-unico-de-recuperacion-windows)
+- [Configuracion OAuth social (sin errores de callback)](#configuracion-oauth-social-sin-errores-de-callback)
+- [Prueba E2E de checkout (sin UI)](#prueba-e2e-de-checkout-sin-ui)
+- [Pagos y webhooks](#pagos-y-webhooks)
+- [Seguridad de pagos aplicada](#seguridad-de-pagos-aplicada)
+- [Despliegue en Netlify](#despliegue-en-netlify)
+
 ## Novedades recientes (11-06-2026)
 
 ### SEO básico (posicionamiento en Google)
