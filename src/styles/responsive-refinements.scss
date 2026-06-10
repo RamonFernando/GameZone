@@ -784,13 +784,12 @@
   }
 
   /* Letrero "Digital store / GameZone Edition" centrado respecto a la BARRA
-     (no respecto al logo): posición absoluta centrada en .navbar. Así queda
-     logo · izquierda — letrero · centro — hamburguesa · derecha. */
-  /* Centrado del letrero respecto a la BARRA sin usar transform:
-     inset:0 + margin:auto + tamaño intrínseco (fit-content) lo centra en ambos
-     ejes dentro de .navbar. Al dejar libre el transform, el efecto de pulsación
-     (:hover scale 0.92, heredado de escritorio) funciona igual: se encoge en su
-     sitio sin desplazarse. Mantiene clic, efecto y redirección del logo. */
+     (no respecto al logo) y SIN usar transform: inset:0 + margin:auto +
+     tamaño intrínseco (fit-content) lo centra en ambos ejes dentro de .navbar.
+     Al dejar libre el transform, el efecto de pulsación (scale) puede aplicarse
+     sin desplazar el letrero. Queda: logo · izquierda — letrero · centro —
+     hamburguesa · derecha. El feedback de pulsación táctil se define abajo en
+     el bloque @media (hover: none). */
   .nav-logo-text {
     position: absolute;
     inset: 0;
@@ -1205,5 +1204,96 @@
 @media (min-width: 1121px) {
   .nav-logo {
     margin-left: 1rem;
+  }
+}
+
+/* ===================================================================
+   FEEDBACK DE PULSACIÓN EN DISPOSITIVOS TÁCTILES (logo, letrero, hamburguesa)
+   En escritorio el feedback va en :hover (puntero entra → efecto, sale → normal).
+   En táctil el :hover se queda "pegado" tras el toque (no hay puntero que salga),
+   por eso el logo se quedaba encogido y con las letras en azul.
+   Aquí, SOLO en táctil:
+     · anulamos los efectos :hover (que no se queden fijos),
+     · replicamos el efecto en :active (solo dura mientras el dedo pulsa,
+       se suelta al levantarlo → pulsar = efecto, soltar = normal),
+     · quitamos el resaltado azul nativo y la selección de texto.
+   =================================================================== */
+@media (hover: none) {
+  /* ---- Anular el :hover pegajoso del logo (círculo + letras) ---- */
+  .nav-logo-mark:hover {
+    transform: scale(1);
+  }
+  .nav-logo-mark:hover::after {
+    animation-play-state: running;
+    border-color: rgba(148, 163, 184, 0.35);
+    background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  }
+  .nav-logo-mark:hover span {
+    transform: scale(1);
+    text-shadow:
+      0 0 3px rgba(59, 130, 246, 0.4),
+      0 0 6px rgba(37, 99, 235, 0.35);
+  }
+  /* Restaurar los colores por letra (blanco / Z naranja) por encima del hover */
+  .nav-logo-mark:hover .nav-logo-letter:not(.nav-logo-letter-z) {
+    color: #ffffff;
+  }
+  .nav-logo-mark:hover .nav-logo-letter-z {
+    color: #fb923c;
+  }
+
+  /* ---- Anular el :hover pegajoso del letrero ---- */
+  .nav-logo-text:hover {
+    transform: none;
+  }
+  .nav-logo-text:hover .nav-logo-text-1,
+  .nav-logo-text:hover .nav-logo-text-2 {
+    text-shadow: none;
+  }
+
+  /* ---- Efecto al PULSAR (mientras el dedo está encima) ---- */
+  .nav-logo-mark:active {
+    transform: scale(0.92);
+  }
+  .nav-logo-mark:active::after {
+    animation-play-state: paused;
+    border-color: rgba(249, 115, 22, 0.85);
+    background: radial-gradient(circle at top, rgba(249, 115, 22, 0.18), rgba(15, 23, 42, 0.96));
+  }
+  .nav-logo-mark:active span {
+    transform: scale(1.12);
+    text-shadow:
+      0 0 6px rgba(59, 130, 246, 0.8),
+      0 0 14px rgba(37, 99, 235, 0.9);
+  }
+  .nav-logo-mark:active .nav-logo-letter {
+    color: #bfdbfe;
+  }
+  .nav-logo-text:active {
+    transform: scale(0.92);
+  }
+  .nav-logo-text:active .nav-logo-text-1,
+  .nav-logo-text:active .nav-logo-text-2 {
+    text-shadow:
+      0 0 6px rgba(249, 115, 22, 0.12),
+      0 0 14px rgba(234, 88, 12, 0.08);
+  }
+
+  /* ---- Hamburguesa: mismo feedback al pulsar ---- */
+  .nav-mobile-toggle {
+    transition: transform 0.2s ease-out;
+  }
+  .nav-mobile-toggle:active {
+    transform: scale(0.92);
+  }
+
+  /* ---- Sin resaltado azul nativo ni selección de texto en el header ---- */
+  .nav-logo,
+  .nav-logo-mark,
+  .nav-logo-text,
+  .nav-mobile-toggle {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 }
