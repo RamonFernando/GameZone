@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import Image from "next/image";
 import Link from "next/link";
