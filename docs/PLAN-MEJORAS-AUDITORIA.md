@@ -210,3 +210,82 @@ npm run build
 - **Sentry** — observabilidad.
 - **@netlify/plugin-nextjs** — runtime de despliegue.
 - **GitHub Actions** — CI.
+
+---
+
+## FASE 4 — MEJORAS IMPORTANTES (próximas iteraciones)
+
+> Estas mejoras no son bloqueadoras pero son necesarias para que GameZone sea una aplicación real y profesional.
+
+### 4.1 — SEO básico  🟠 ALTA
+- **Problema:** el sitio no aparece en Google ni en buscadores. No hay `sitemap.xml`, `robots.txt` ni metadatos Open Graph.
+- **Acción:**
+  1. Generar `sitemap.xml` dinámico con todas las rutas públicas y productos (Next.js `app/sitemap.ts`).
+  2. Añadir `robots.txt` permitiendo crawlers en rutas públicas y bloqueando `/api/`, `/admin/`, `/account/`.
+  3. Añadir metadatos Open Graph en cada página (título, descripción, imagen) para previews en redes sociales.
+  4. Registrar el sitio en **Google Search Console** y enviar el sitemap.
+  5. Usar un **dominio propio** (ej. `gamezoneshop.es`) en lugar de `gamezone-digital-store.netlify.app` — mejora el SEO y la credibilidad.
+- **Verificar:** `https://gamezone-digital-store.netlify.app/sitemap.xml` devuelve XML válido; Google Search Console muestra el sitio indexado.
+
+### 4.2 — Dominio propio  🟠 ALTA
+- **Problema:** `gamezone-digital-store.netlify.app` no transmite confianza ni es memorable. Los subdominios `.netlify.app` tienen menos peso en SEO.
+- **Acción:**
+  1. Registrar dominio (recomendado: `gamezoneshop.es`, `gamezone.store` o similar).
+  2. Configurarlo en Netlify (DNS + certificado SSL automático).
+  3. Actualizar `APP_BASE_URL`, OAuth redirect URIs (Google, Facebook), webhooks de Stripe y PayPal con el nuevo dominio.
+- **Verificar:** el sitio carga en el dominio propio con HTTPS; los redirects de OAuth funcionan.
+
+### 4.3 — Rate limiting distribuido (Upstash)  🟡 MEDIA
+- Ver tarea 3.2 — ya documentado. Prioritario si el sitio recibe tráfico real.
+
+### 4.4 — Emails transaccionales con plantillas HTML  🟡 MEDIA
+- **Problema:** los emails de confirmación de compra son texto plano. No representan bien la marca.
+- **Acción:** diseñar plantillas HTML responsive para: confirmación de pedido, reset de contraseña, verificación de cuenta, bienvenida.
+- **Verificar:** los emails se renderizan correctamente en Gmail, Outlook y móvil.
+
+### 4.5 — Panel de administración completo  🟡 MEDIA
+- **Problema:** el panel admin actual es básico. Falta gestión de pedidos, usuarios, y catálogo desde la UI.
+- **Acción:** añadir vistas para: gestión de pedidos (estado, reembolsos), gestión de usuarios (ban, roles), edición del catálogo de productos, métricas básicas de ventas.
+- **Verificar:** un admin puede gestionar pedidos y productos sin tocar la base de datos directamente.
+
+---
+
+## FASE 5 — MEJORAS FUTURAS (roadmap a largo plazo)
+
+> Mejoras que añadirían valor significativo pero que requieren más tiempo de desarrollo o dependen de acuerdos con terceros.
+
+### 5.1 — Integración con la API de Xbox (Microsoft Store)  🔵 FUTURO
+- **Descripción:** conectar con la API de Xbox/Microsoft Store para importar catálogo de juegos Xbox, precios actualizados y disponibilidad en tiempo real.
+- **Requisito:** acceso a la [Microsoft Partner Center API](https://docs.microsoft.com/en-us/azure/marketplace/) o acuerdo con Microsoft.
+- **Acción:**
+  1. Crear sección dedicada `/xbox` en la app con catálogo y filtros específicos de Xbox.
+  2. Sincronizar precios y disponibilidad vía cron diario (igual que `sync-catalogs`).
+  3. Mostrar distintivo de plataforma (Xbox Series X/S, Xbox One, Game Pass).
+- **Nota:** evaluar también APIs de PlayStation Store y Nintendo eShop para unificar en una sección "Todas las plataformas".
+
+### 5.2 — Google Analytics / GA4  🔵 FUTURO
+- **Descripción:** integrar Google Analytics 4 para medir tráfico, conversiones y comportamiento de usuarios.
+- **Acción:**
+  1. Crear propiedad GA4 en [analytics.google.com](https://analytics.google.com).
+  2. Añadir el script de GA4 en `layout.tsx` usando `next/script` con `strategy="afterInteractive"`.
+  3. Configurar eventos personalizados: `view_item`, `add_to_cart`, `begin_checkout`, `purchase`.
+  4. Actualizar la CSP en `next.config.mjs` para permitir los dominios de Google Analytics.
+- **Nota:** asegurarse de cumplir con RGPD — mostrar banner de cookies y no activar GA hasta consentimiento.
+
+### 5.3 — Sistema de valoraciones y reseñas  🔵 FUTURO
+- **Descripción:** permitir a usuarios que han comprado un juego dejar una valoración (1-5 estrellas) y reseña de texto.
+- **Acción:** nuevo modelo `Review` en Prisma, endpoints CRUD, componente UI en la página del producto.
+- **Verificar:** solo usuarios con compra confirmada pueden dejar reseña; las reseñas aparecen paginadas en el producto.
+
+### 5.4 — Lista de deseos (Wishlist)  🔵 FUTURO
+- **Descripción:** los usuarios pueden guardar juegos en una lista de deseos y recibir notificación por email cuando bajen de precio.
+- **Acción:** modelo `Wishlist` en Prisma, endpoints, UI en la página del producto y sección `/account/wishlist`.
+
+### 5.5 — PWA (Progressive Web App)  🔵 FUTURO
+- **Descripción:** convertir GameZone en una PWA para que los usuarios puedan instalarla en móvil como app nativa.
+- **Acción:** añadir `manifest.json`, Service Worker con caché offline para el catálogo, iconos de app.
+- **Verificar:** Chrome muestra el prompt "Añadir a pantalla de inicio"; la home carga offline.
+
+### 5.6 — Sistema de afiliados / códigos de descuento  🔵 FUTURO
+- **Descripción:** gestión de cupones y códigos de descuento (porcentaje o cantidad fija) para campañas de marketing.
+- **Acción:** modelo `Coupon` en Prisma, validación en checkout, panel admin para gestión de cupones.
