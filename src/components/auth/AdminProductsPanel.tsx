@@ -235,6 +235,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [modalDraft, setModalDraft] = useState<ProductDraft>(emptyDraft);
   const [modalNotice, setModalNotice] = useState<string>("");
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingModalCover, setUploadingModalCover] = useState(false);
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const pushToast = useCallback((type: ToastItem["type"], text: string) => {
@@ -372,6 +373,32 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       pushToast("error", "Error de red subiendo la imagen.");
     } finally {
       setUploadingCover(false);
+    }
+  };
+
+  // Igual que handleCoverUpload pero para el modal de editar: rellena
+  // modalDraft.coverImage con la URL devuelta por el servidor.
+  const handleModalCoverUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingModalCover(true);
+    try {
+      const body = new FormData();
+      body.append("image", file);
+      const response = await fetch("/api/admin/product-images", {
+        method: "POST",
+        body,
+      });
+      const payload = (await response.json()) as { url?: string; message?: string };
+      if (!response.ok || !payload.url) {
+        pushToast("error", payload.message ?? "No se pudo subir la imagen.");
+        return;
+      }
+      setModalDraft((prev) => ({ ...prev, coverImage: payload.url as string }));
+      pushToast("success", "Imagen subida. URL rellenada automáticamente.");
+    } catch {
+      pushToast("error", "Error de red subiendo la imagen.");
+    } finally {
+      setUploadingModalCover(false);
     }
   };
 
@@ -1101,6 +1128,22 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   setModalDraft((prev) => ({ ...prev, coverImage: event.target.value }))
                 }
               />
+              {/* Alternativa a la URL: subir una imagen desde el equipo. Al
+                  subirla, rellena automáticamente el campo de arriba. */}
+              <input
+                className="auth-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={uploadingModalCover}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  void handleModalCoverUpload(file);
+                }}
+              />
+              {uploadingModalCover ? (
+                <p className="auth-alt">Subiendo imagen...</p>
+              ) : null}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
                 <input
                   className="auth-input"
