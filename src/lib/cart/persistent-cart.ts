@@ -67,21 +67,21 @@ export async function getUserCartItems(userId: string): Promise<PersistedCartIte
       p.name,
       p.slug,
       p.description,
-      p.coverImage,
+      p."coverImage",
       p.platform,
       p.region,
-      p.storeLabel,
-      p.cardSubtitle,
-      p.priceOriginal,
-      p.discountPercent,
-      p.cashbackPercent,
-      p.likesCount,
+      p."storeLabel",
+      p."cardSubtitle",
+      p."priceOriginal",
+      p."discountPercent",
+      p."cashbackPercent",
+      p."likesCount",
       p.stock
-    FROM UserCartItem ci
-    INNER JOIN Product p ON p.id = ci.productId
-    WHERE ci.userId = ${userId}
-      AND p.isActive = 1
-    ORDER BY ci.updatedAt DESC
+    FROM "UserCartItem" ci
+    INNER JOIN "Product" p ON p.id = ci."productId"
+    WHERE ci."userId" = ${userId}
+      AND p."isActive" = true
+    ORDER BY ci."updatedAt" DESC
   `;
 
   return rows.map((row) => ({
@@ -116,12 +116,12 @@ export async function replaceUserCartItems(userId: string, items: PersistedCartI
       : [];
 
   await prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`DELETE FROM UserCartItem WHERE userId = ${userId}`;
+    await tx.$executeRaw`DELETE FROM "UserCartItem" WHERE "userId" = ${userId}`;
 
     for (const product of products) {
       const quantity = Math.min(MAX_CART_QUANTITY, quantityBySlug.get(product.slug) ?? 1);
       await tx.$executeRaw`
-        INSERT INTO UserCartItem (id, userId, productId, quantity, createdAt, updatedAt)
+        INSERT INTO "UserCartItem" (id, "userId", "productId", quantity, "createdAt", "updatedAt")
         VALUES (${randomUUID()}, ${userId}, ${product.id}, ${quantity}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `;
     }
@@ -131,7 +131,7 @@ export async function replaceUserCartItems(userId: string, items: PersistedCartI
 }
 
 export async function clearUserCartItems(userId: string) {
-  await prisma.$executeRaw`DELETE FROM UserCartItem WHERE userId = ${userId}`;
+  await prisma.$executeRaw`DELETE FROM "UserCartItem" WHERE "userId" = ${userId}`;
 }
 
 export async function addUserCartItemDelta(userId: string, slug: string, delta: number) {
@@ -144,22 +144,22 @@ export async function addUserCartItemDelta(userId: string, slug: string, delta: 
 
     if (delta > 0) {
       await tx.$executeRaw`
-        INSERT INTO UserCartItem (id, userId, productId, quantity, createdAt, updatedAt)
+        INSERT INTO "UserCartItem" (id, "userId", "productId", quantity, "createdAt", "updatedAt")
         VALUES (${randomUUID()}, ${userId}, ${product.id}, ${Math.min(MAX_CART_QUANTITY, delta)}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (userId, productId) DO UPDATE SET
-          quantity = MIN(${MAX_CART_QUANTITY}, UserCartItem.quantity + ${delta}),
-          updatedAt = CURRENT_TIMESTAMP
+        ON CONFLICT ("userId", "productId") DO UPDATE SET
+          quantity = LEAST(${MAX_CART_QUANTITY}, "UserCartItem".quantity + ${delta}),
+          "updatedAt" = CURRENT_TIMESTAMP
       `;
     } else {
       await tx.$executeRaw`
-        UPDATE UserCartItem SET
+        UPDATE "UserCartItem" SET
           quantity = quantity + ${delta},
-          updatedAt = CURRENT_TIMESTAMP
-        WHERE userId = ${userId} AND productId = ${product.id}
+          "updatedAt" = CURRENT_TIMESTAMP
+        WHERE "userId" = ${userId} AND "productId" = ${product.id}
       `;
       await tx.$executeRaw`
-        DELETE FROM UserCartItem
-        WHERE userId = ${userId} AND productId = ${product.id} AND quantity <= 0
+        DELETE FROM "UserCartItem"
+        WHERE "userId" = ${userId} AND "productId" = ${product.id} AND quantity <= 0
       `;
     }
   });
@@ -169,9 +169,9 @@ export async function addUserCartItemDelta(userId: string, slug: string, delta: 
 
 export async function deleteUserCartItem(userId: string, slug: string) {
   await prisma.$executeRaw`
-    DELETE FROM UserCartItem
-    WHERE userId = ${userId}
-      AND productId = (SELECT id FROM Product WHERE slug = ${slug} AND isActive = 1 LIMIT 1)
+    DELETE FROM "UserCartItem"
+    WHERE "userId" = ${userId}
+      AND "productId" = (SELECT id FROM "Product" WHERE slug = ${slug} AND "isActive" = true LIMIT 1)
   `;
   return getUserCartItems(userId);
 }

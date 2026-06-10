@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 enum UserRole {
@@ -87,13 +88,13 @@ model Product {
   id              String   @id @default(uuid())
   name            String
   slug            String   @unique
-  description     String
+  description     String   @db.Text
   coverImage      String
   platform        String   @default("PC")
   region          String   @default("EUROPA")
   storeLabel      String   @default("Steam")
   cardSubtitle    String   @default("Código digital oficial")
-  longDescription String?
+  longDescription String?  @db.Text
   rawgId          Int?
   rawgSlug        String?
   releaseDate     DateTime?
@@ -111,7 +112,7 @@ model Product {
   rating          Float?
   ratingsCount    Int      @default(0)
   playtimeHours   Int?
-  requirements    String?
+  requirements    String?  @db.Text
   metadataSource  String?
   metadataUpdatedAt DateTime?
   priceOriginal   Float

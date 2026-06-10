@@ -12,6 +12,9 @@ yarn-error.log
 # Base de datos local (datos reales) y artefactos
 prisma/dev.db
 prisma/dev.db-journal
+prisma/dev.db.backup-*
+prisma/*.db
+prisma/_migrations_sqlite_backup/
 tsconfig.tsbuildinfo
 
 # Editor / backups / contenido subido
