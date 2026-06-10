@@ -8,6 +8,7 @@ import {
 } from "@/lib/auth/session";
 
 const ROTATION_WINDOW_SECONDS = 60 * 60 * 24; // 24h
+const LAST_SEEN_DEBOUNCE_MS = 5 * 60 * 1000; // 5 min
 const MAX_ACTIVE_SESSIONS_PER_USER = 3;
 
 export type ActiveSession = {
@@ -143,10 +144,12 @@ export async function getActiveSessionFromToken(token: string): Promise<ActiveSe
     return null;
   }
 
-  await prisma.session.update({
-    where: { id: session.id },
-    data: { lastSeenAt: now },
-  });
+  if (now.getTime() - session.lastSeenAt.getTime() > LAST_SEEN_DEBOUNCE_MS) {
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { lastSeenAt: now },
+    });
+  }
 
   const secondsLeft = Math.floor((session.expiresAt.getTime() - now.getTime()) / 1000);
 
