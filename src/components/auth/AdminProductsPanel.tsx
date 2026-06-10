@@ -234,6 +234,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [pendingDeleteName, setPendingDeleteName] = useState<string | null>(null);
   const [modalDraft, setModalDraft] = useState<ProductDraft>(emptyDraft);
   const [modalNotice, setModalNotice] = useState<string>("");
+  const [uploadingCover, setUploadingCover] = useState(false);
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const pushToast = useCallback((type: ToastItem["type"], text: string) => {
@@ -346,6 +347,32 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
     }
     setSortColumn(column);
     setSortDirection("desc");
+  };
+
+  // Sube una imagen desde el equipo al endpoint admin y, si va bien, rellena
+  // automáticamente el campo coverImage con la URL devuelta por el servidor.
+  const handleCoverUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const body = new FormData();
+      body.append("image", file);
+      const response = await fetch("/api/admin/product-images", {
+        method: "POST",
+        body,
+      });
+      const payload = (await response.json()) as { url?: string; message?: string };
+      if (!response.ok || !payload.url) {
+        pushToast("error", payload.message ?? "No se pudo subir la imagen.");
+        return;
+      }
+      setDraft((prev) => ({ ...prev, coverImage: payload.url as string }));
+      pushToast("success", "Imagen subida. URL rellenada automáticamente.");
+    } catch {
+      pushToast("error", "Error de red subiendo la imagen.");
+    } finally {
+      setUploadingCover(false);
+    }
   };
 
   const handleCreate = async () => {
@@ -637,6 +664,22 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         value={draft.coverImage}
         onChange={(event) => setDraft((prev) => ({ ...prev, coverImage: event.target.value }))}
       />
+      {/* Alternativa a la URL: subir una imagen desde el equipo. Al subirla,
+          rellena automáticamente el campo de arriba con la URL generada. */}
+      <input
+        className="auth-input"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        disabled={uploadingCover}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          void handleCoverUpload(file);
+        }}
+      />
+      {uploadingCover ? (
+        <p className="auth-alt">Subiendo imagen...</p>
+      ) : null}
       <input
         className="auth-input"
         placeholder="Plataforma (ej: PC, PlayStation)"

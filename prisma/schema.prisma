@@ -66,6 +66,16 @@ model UserAvatar {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// Imagen de producto subida desde el panel admin. Independiente del producto
+// (se sube antes de crear el producto) y se referencia por URL en coverImage.
+// Mismo patrón que UserAvatar: bytes en BD servidos por una ruta /api/.
+model ProductImage {
+  id          String   @id @default(cuid())
+  data        Bytes
+  contentType String   @default("image/webp")
+  createdAt   DateTime @default(now())
+}
+
 model PushDevice {
   id         String   @id @default(cuid())
   userId     String
