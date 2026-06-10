@@ -5,10 +5,14 @@ import { requirePermission } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { createPendingOrder } from "@/lib/checkout/order-service";
 import { createPaypalOrder, getPaypalAccessToken } from "@/lib/payments/paypal";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type CreatePaypalOrderPayload = {
-  items?: Array<{ slug?: string; quantity?: number }>;
-};
+const createPaypalOrderSchema = z.object({
+  items: z
+    .array(z.object({ slug: z.string().optional(), quantity: z.number().optional() }))
+    .optional(),
+});
 
 export async function POST(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.CHECKOUT_CREATE);
@@ -16,15 +20,9 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  let payload: CreatePaypalOrderPayload;
-  try {
-    payload = (await request.json()) as CreatePaypalOrderPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, createPaypalOrderSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   try {
     const pendingOrder = await createPendingOrder({

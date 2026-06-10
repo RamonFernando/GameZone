@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type CreateDevicePayload = {
-  name?: string;
-};
+const createDeviceSchema = z.object({
+  name: z.string().optional(),
+});
 
 export async function GET(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ACCOUNT_READ);
@@ -40,15 +42,9 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  let payload: CreateDevicePayload;
-  try {
-    payload = (await request.json()) as CreateDevicePayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, createDeviceSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const name = (payload.name ?? "").trim() || "Dispositivo móvil";
   const userAgent = request.headers.get("user-agent") ?? null;

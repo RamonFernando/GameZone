@@ -2,21 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type CheckPayload = {
-  challengeId?: string;
-};
+const checkSchema = z.object({
+  challengeId: z.string().optional(),
+});
 
 export async function POST(request: Request) {
-  let payload: CheckPayload;
-  try {
-    payload = (await request.json()) as CheckPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, checkSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const challengeId = (payload.challengeId ?? "").trim();
   if (!challengeId) {

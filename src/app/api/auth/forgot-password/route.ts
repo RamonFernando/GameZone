@@ -6,23 +6,19 @@ import {
   setPasswordResetToken,
 } from "@/lib/auth/store";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type ForgotPasswordPayload = {
-  email?: string;
-};
+const forgotPasswordSchema = z.object({
+  email: z.string().optional(),
+});
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
-  let payload: ForgotPasswordPayload;
-  try {
-    payload = (await request.json()) as ForgotPasswordPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, forgotPasswordSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const email = String(payload.email ?? "").trim().toLowerCase();
   if (!EMAIL_REGEX.test(email)) {

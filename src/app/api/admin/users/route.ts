@@ -4,6 +4,14 @@ import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { hashPassword } from "@/lib/auth/store";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
+
+const createAdminSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().optional(),
+  password: z.string().optional(),
+});
 
 export async function GET(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_USERS_READ);
@@ -44,12 +52,6 @@ export async function GET(request: Request) {
   return response;
 }
 
-type CreateAdminPayload = {
-  name?: string;
-  email?: string;
-  password?: string;
-};
-
 export async function POST(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_USERS_WRITE);
   if (!authResult.ok) {
@@ -63,15 +65,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: CreateAdminPayload;
-  try {
-    payload = (await request.json()) as CreateAdminPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, createAdminSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const name = String(payload.name ?? "").trim();
   const email = String(payload.email ?? "").trim().toLowerCase();

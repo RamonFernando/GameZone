@@ -6,6 +6,9 @@ import { getSessionCookieOptions } from "@/lib/auth/session";
 import { getStripeClient } from "@/lib/payments/stripe";
 import { sendRefundConfirmationEmail } from "@/lib/auth/email";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+const refundSchema = z.object({ reason: z.string().optional() });
 
 function resolvePaymentIntentReference(reference: string) {
   if (reference.startsWith("pi_")) {
@@ -28,7 +31,8 @@ export async function POST(
 
   let body: { reason?: string } = {};
   try {
-    body = (await request.json()) as { reason?: string };
+    const parsed = refundSchema.safeParse(await request.json());
+    if (parsed.success) body = parsed.data;
   } catch {
     // Permitimos body vacío para mantener compatibilidad, pero validamos razón luego.
   }

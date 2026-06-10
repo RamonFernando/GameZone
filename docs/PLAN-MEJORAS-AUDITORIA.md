@@ -29,7 +29,7 @@ Leyenda: ✅ hecho · ⚠️ hecho parcial / pendiente acción manual · ⬜ pen
 | 2.3 — Rate limit en 2FA/TOTP verify | ✅ hecho (scope `2fa-verify`, 5/10min, aplicado en ambos endpoints) |
 | 2.4 — Cabeceras de seguridad HTTP | ✅ hecho (CSP, X-Frame, HSTS, etc. en `next.config.mjs`) |
 | 2.5 — Validar `event.type` en webhooks | ✅ hecho (`HANDLED_TYPES` guard en Stripe y PayPal) |
-| 3.1 — Zod en bodies de API | ⬜ pendiente (no instalado) |
+| 3.1 — Zod en bodies de API | ✅ hecho (zod instalado; helper `src/lib/validation.ts`; aplicado a las 24 rutas con body JSON: auth, account, cart, checkout, payments, admin; webhooks usan body crudo, no aplica; con tests) |
 | 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
 | 3.3 — Logging / Sentry | ⬜ pendiente |
 | 3.4 — CI GitHub Actions | ✅ hecho (`.github/workflows/ci.yml`: tsc + vitest + build) |

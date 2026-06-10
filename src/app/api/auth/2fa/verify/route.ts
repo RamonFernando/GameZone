@@ -4,22 +4,18 @@ import { verifyTwoFactorCode } from "@/lib/auth/store";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { enforceRateLimit } from "@/lib/auth/rate-limit";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type VerifyPayload = {
-  challengeId?: string;
-  code?: string;
-};
+const verifySchema = z.object({
+  challengeId: z.string().optional(),
+  code: z.string().optional(),
+});
 
 export async function POST(request: Request) {
-  let payload: VerifyPayload;
-  try {
-    payload = (await request.json()) as VerifyPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, verifySchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const rl = await enforceRateLimit(request, "2fa-verify");
   if (rl.blocked) {

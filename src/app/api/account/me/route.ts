@@ -3,18 +3,20 @@ import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { DuplicateEmailError, getUserById, updateUserProfile } from "@/lib/auth/store";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type UpdateProfilePayload = {
-  name?: string;
-  email?: string;
-  avatarUrl?: string | null;
-  phone?: string | null;
-  addressLine1?: string | null;
-  city?: string | null;
-  postalCode?: string | null;
-  country?: string | null;
-  province?: string | null;
-};
+const updateProfileSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().optional(),
+  avatarUrl: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  addressLine1: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  postalCode: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  province: z.string().nullable().optional(),
+});
 
 export async function GET(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ACCOUNT_READ);
@@ -68,15 +70,9 @@ export async function PATCH(request: Request) {
     return authResult.response;
   }
 
-  let payload: UpdateProfilePayload;
-  try {
-    payload = (await request.json()) as UpdateProfilePayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, updateProfileSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const name = (payload.name ?? "").trim();
   const email = (payload.email ?? "").trim().toLowerCase();

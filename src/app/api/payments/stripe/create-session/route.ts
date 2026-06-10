@@ -5,10 +5,14 @@ import { requirePermission } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { createPendingOrder } from "@/lib/checkout/order-service";
 import { getStripeClient } from "@/lib/payments/stripe";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type CreateStripeCheckoutPayload = {
-  items?: Array<{ slug?: string; quantity?: number }>;
-};
+const createStripeCheckoutSchema = z.object({
+  items: z
+    .array(z.object({ slug: z.string().optional(), quantity: z.number().optional() }))
+    .optional(),
+});
 
 export async function POST(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.CHECKOUT_CREATE);
@@ -16,15 +20,9 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  let payload: CreateStripeCheckoutPayload;
-  try {
-    payload = (await request.json()) as CreateStripeCheckoutPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, createStripeCheckoutSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   try {
     const pendingOrder = await createPendingOrder({

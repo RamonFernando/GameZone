@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
 import { addUserCartItemDelta } from "@/lib/cart/persistent-cart";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
+
+const addItemSchema = z.object({
+  slug: z.string().optional(),
+});
 
 function unauthenticatedResponse() {
   return NextResponse.json(
@@ -14,12 +20,15 @@ export async function POST(request: Request) {
   const activeSession = sessionToken ? await getActiveSessionFromToken(sessionToken) : null;
   if (!activeSession) return unauthenticatedResponse();
 
-  let slug: string;
-  try {
-    const body = (await request.json()) as { slug?: string };
-    if (!body.slug?.trim()) throw new Error("missing slug");
-    slug = body.slug.trim();
-  } catch {
+  const parsed = await parseJsonBody(request, addItemSchema);
+  if (!parsed.ok) {
+    return NextResponse.json(
+      { message: "Solicitud invalida.", code: "BAD_REQUEST" },
+      { status: 400 }
+    );
+  }
+  const slug = parsed.data.slug?.trim();
+  if (!slug) {
     return NextResponse.json(
       { message: "Solicitud invalida.", code: "BAD_REQUEST" },
       { status: 400 }

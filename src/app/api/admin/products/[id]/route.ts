@@ -4,6 +4,8 @@ import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { clampCashbackPercent, clampDiscountPercent, computeDiscountedPrice } from "@/lib/products";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
 type ProductPayload = {
   name?: string;
@@ -22,6 +24,23 @@ type ProductPayload = {
   isActive?: boolean;
 };
 
+const productSchema = z.object({
+  name: z.string().optional(),
+  slug: z.string().optional(),
+  description: z.string().optional(),
+  coverImage: z.string().optional(),
+  platform: z.string().optional(),
+  region: z.string().optional(),
+  storeLabel: z.string().optional(),
+  cardSubtitle: z.string().optional(),
+  priceOriginal: z.coerce.number().optional(),
+  discountPercent: z.coerce.number().optional(),
+  cashbackPercent: z.coerce.number().optional(),
+  likesCount: z.coerce.number().optional(),
+  stock: z.coerce.number().optional(),
+  isActive: z.boolean().optional(),
+});
+
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
@@ -31,15 +50,9 @@ export async function PATCH(
     return authResult.response;
   }
 
-  let payload: ProductPayload;
-  try {
-    payload = (await request.json()) as ProductPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, productSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const updateData: ProductPayload = {};
   if (payload.name !== undefined) updateData.name = String(payload.name).trim();

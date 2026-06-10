@@ -3,10 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type UpdateRolePayload = {
-  role?: string;
-};
+const updateRoleSchema = z.object({
+  role: z.string().optional(),
+});
 
 export async function PATCH(
   request: Request,
@@ -24,15 +26,14 @@ export async function PATCH(
     );
   }
 
-  let payload: UpdateRolePayload;
-  try {
-    payload = (await request.json()) as UpdateRolePayload;
-  } catch {
+  const parsed = await parseJsonBody(request, updateRoleSchema);
+  if (!parsed.ok) {
     return NextResponse.json(
       { message: "Solicitud invalida.", code: "BAD_REQUEST" },
       { status: 400 }
     );
   }
+  const payload = parsed.data;
 
   const nextRole = payload.role;
   if (nextRole !== "ADMIN" && nextRole !== "USER") {

@@ -4,11 +4,13 @@ import { requirePermission } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
 import { verify } from "otplib";
 import { encryptSecret } from "@/lib/crypto/totp-secret";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type EnableTotpPayload = {
-  secret?: string;
-  code?: string;
-};
+const enableTotpSchema = z.object({
+  secret: z.string().optional(),
+  code: z.string().optional(),
+});
 
 export async function POST(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ACCOUNT_UPDATE);
@@ -16,15 +18,9 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  let payload: EnableTotpPayload;
-  try {
-    payload = (await request.json()) as EnableTotpPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, enableTotpSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const secret = (payload.secret ?? "").trim();
   const code = (payload.code ?? "").trim();

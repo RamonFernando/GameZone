@@ -4,10 +4,12 @@ import { requirePermission } from "@/lib/auth/require-auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { completePaidOrder } from "@/lib/checkout/order-service";
 import { getStripeClient } from "@/lib/payments/stripe";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type FinalizeStripePayload = {
-  sessionId?: string;
-};
+const finalizeStripeSchema = z.object({
+  sessionId: z.string().optional(),
+});
 
 export async function POST(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.CHECKOUT_CREATE);
@@ -15,15 +17,9 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  let payload: FinalizeStripePayload;
-  try {
-    payload = (await request.json()) as FinalizeStripePayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, finalizeStripeSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const sessionId = String(payload.sessionId ?? "").trim();
   if (!sessionId) {

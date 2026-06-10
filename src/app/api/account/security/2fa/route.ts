@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type UpdateTwoFactorPayload = {
-  enabled?: boolean;
-};
+const updateTwoFactorSchema = z.object({
+  enabled: z.boolean().optional(),
+});
 
 export async function PATCH(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ACCOUNT_UPDATE);
@@ -13,15 +15,9 @@ export async function PATCH(request: Request) {
     return authResult.response;
   }
 
-  let payload: UpdateTwoFactorPayload;
-  try {
-    payload = (await request.json()) as UpdateTwoFactorPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, updateTwoFactorSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const enabled = Boolean(payload.enabled);
 

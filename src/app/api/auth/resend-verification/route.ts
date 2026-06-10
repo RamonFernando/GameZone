@@ -9,9 +9,12 @@ import {
   refreshVerificationTokenForEmail,
 } from "@/lib/auth/store";
 
-type ResendPayload = {
-  email?: string;
-};
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
+
+const resendSchema = z.object({
+  email: z.string().optional(),
+});
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -27,15 +30,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: ResendPayload;
-  try {
-    payload = (await request.json()) as ResendPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, resendSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const email = (payload.email ?? "").trim().toLowerCase();
   if (!EMAIL_REGEX.test(email)) {

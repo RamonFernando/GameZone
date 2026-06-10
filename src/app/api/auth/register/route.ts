@@ -8,11 +8,14 @@ import {
   DuplicateEmailError,
 } from "@/lib/auth/store";
 
-type RegisterPayload = {
-  name?: string;
-  email?: string;
-  password?: string;
-};
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
+
+const registerSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().optional(),
+  password: z.string().optional(),
+});
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -27,16 +30,14 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: RegisterPayload;
-
-  try {
-    payload = (await request.json()) as RegisterPayload;
-  } catch {
+  const parsed = await parseJsonBody(request, registerSchema);
+  if (!parsed.ok) {
     return NextResponse.json(
       { message: "Solicitud inválida. Verifica los datos enviados." },
       { status: 400 }
     );
   }
+  const payload = parsed.data;
 
   const name = (payload.name ?? "").trim();
   const email = (payload.email ?? "").trim().toLowerCase();

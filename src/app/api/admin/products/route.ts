@@ -9,25 +9,27 @@ import {
   computeDiscountedPrice,
   ensureProductsSeeded,
 } from "@/lib/products";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
-type ProductPayload = {
-  name?: string;
-  slug?: string;
-  description?: string;
-  coverImage?: string;
-  platform?: string;
-  region?: string;
-  storeLabel?: string;
-  cardSubtitle?: string;
-  priceOriginal?: number;
-  discountPercent?: number;
-  cashbackPercent?: number;
-  likesCount?: number;
-  stock?: number;
-  isActive?: boolean;
-};
+const productSchema = z.object({
+  name: z.string().optional(),
+  slug: z.string().optional(),
+  description: z.string().optional(),
+  coverImage: z.string().optional(),
+  platform: z.string().optional(),
+  region: z.string().optional(),
+  storeLabel: z.string().optional(),
+  cardSubtitle: z.string().optional(),
+  priceOriginal: z.coerce.number().optional(),
+  discountPercent: z.coerce.number().optional(),
+  cashbackPercent: z.coerce.number().optional(),
+  likesCount: z.coerce.number().optional(),
+  stock: z.coerce.number().optional(),
+  isActive: z.boolean().optional(),
+});
 
 export async function GET(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_PRODUCTS_READ);
@@ -68,15 +70,9 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
-  let payload: ProductPayload;
-  try {
-    payload = (await request.json()) as ProductPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, productSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const name = String(payload.name ?? "").trim();
   const slug = String(payload.slug ?? "").trim().toLowerCase();

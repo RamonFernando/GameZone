@@ -12,11 +12,13 @@ import {
 import { prisma } from "@/lib/prisma";
 import { sendTwoFactorCodeEmail } from "@/lib/auth/email";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type LoginPayload = {
-  identifier?: string;
-  password?: string;
-};
+const loginSchema = z.object({
+  identifier: z.string().optional(),
+  password: z.string().optional(),
+});
 
 export async function POST(request: Request) {
   const rateLimit = await enforceRateLimit(request, "login");
@@ -30,15 +32,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: LoginPayload;
-  try {
-    payload = (await request.json()) as LoginPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, loginSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const identifier = (payload.identifier ?? "").trim();
   const password = payload.password ?? "";

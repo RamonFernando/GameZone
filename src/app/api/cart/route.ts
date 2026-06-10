@@ -4,12 +4,20 @@ import {
   clearUserCartItems,
   getUserCartItems,
   replaceUserCartItems,
-  type PersistedCartInputItem,
 } from "@/lib/cart/persistent-cart";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
 
-type CartPayload = {
-  items?: PersistedCartInputItem[];
-};
+const cartSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        slug: z.string().optional(),
+        quantity: z.number().optional(),
+      })
+    )
+    .optional(),
+});
 
 async function getActiveUserId(request: Request) {
   const sessionToken = getSessionTokenFromRequest(request);
@@ -36,15 +44,14 @@ export async function PUT(request: Request) {
   const userId = await getActiveUserId(request);
   if (!userId) return unauthenticatedResponse();
 
-  let payload: CartPayload;
-  try {
-    payload = (await request.json()) as CartPayload;
-  } catch {
+  const parsed = await parseJsonBody(request, cartSchema);
+  if (!parsed.ok) {
     return NextResponse.json(
       { message: "Solicitud de carrito invalida.", code: "BAD_REQUEST" },
       { status: 400 }
     );
   }
+  const payload = parsed.data;
 
   const items = await replaceUserCartItems(userId, Array.isArray(payload.items) ? payload.items : []);
   return NextResponse.json({ items }, { status: 200 });

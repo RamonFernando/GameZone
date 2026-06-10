@@ -5,21 +5,18 @@ import {
   resetPasswordWithToken,
 } from "@/lib/auth/store";
 
-type ResetPasswordPayload = {
-  token?: string;
-  password?: string;
-};
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/validation";
+
+const resetPasswordSchema = z.object({
+  token: z.string().optional(),
+  password: z.string().optional(),
+});
 
 export async function POST(request: Request) {
-  let payload: ResetPasswordPayload;
-  try {
-    payload = (await request.json()) as ResetPasswordPayload;
-  } catch {
-    return NextResponse.json(
-      { message: "Solicitud inválida.", code: "BAD_REQUEST" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, resetPasswordSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
 
   const token = String(payload.token ?? "").trim();
   const password = String(payload.password ?? "");
