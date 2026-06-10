@@ -11,6 +11,13 @@
   --radius-lg: 1.25rem;
 }
 
+/* Elimina el resaltado azul-grisáceo nativo que los navegadores móviles pintan
+   al tocar CUALQUIER enlace o botón (-webkit-tap-highlight-color). Aplica a todo
+   el sitio; en escritorio no tiene efecto (solo actúa en táctil). */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .market-pulse-source-stack {
   display: grid;
   gap: 1.45rem;
