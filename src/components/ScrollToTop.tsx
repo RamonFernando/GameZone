@@ -19,6 +19,7 @@ export function ScrollToTop() {
 
   return (
     <button
+      type="button"
       className="scroll-to-top"
       onClick={scrollToTop}
       aria-label="Volver al inicio"

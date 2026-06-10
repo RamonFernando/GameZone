@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { GameGrid } from "@/components/GameGrid";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";
 
@@ -50,21 +51,24 @@ export default function GamesPage() {
   const isFiltered = Boolean(query.trim()) || Boolean(platform);
 
   return (
-    <main className="main-wrapper">
-      {loading ? (
-        <p className="section-subtitle">Cargando catálogo...</p>
-      ) : (
-        <GameGrid
-          games={filteredGames}
-          isFiltered={true}
-          title="Catálogo completo"
-          subtitle={
-            isFiltered
-              ? `${filteredGames.length} juego${filteredGames.length !== 1 ? "s" : ""} encontrado${filteredGames.length !== 1 ? "s" : ""}`
-              : `${products.length} juego${products.length !== 1 ? "s" : ""} disponible${products.length !== 1 ? "s" : ""} en GameZone`
-          }
-        />
-      )}
-    </main>
+    <>
+      <main className="main-wrapper">
+        {loading ? (
+          <p className="section-subtitle">Cargando catálogo...</p>
+        ) : (
+          <GameGrid
+            games={filteredGames}
+            isFiltered={true}
+            title="Catálogo completo"
+            subtitle={
+              isFiltered
+                ? `${filteredGames.length} juego${filteredGames.length !== 1 ? "s" : ""} encontrado${filteredGames.length !== 1 ? "s" : ""}`
+                : `${products.length} juego${products.length !== 1 ? "s" : ""} disponible${products.length !== 1 ? "s" : ""} en GameZone`
+            }
+          />
+        )}
+      </main>
+      <ScrollToTop />
+    </>
   );
 }
