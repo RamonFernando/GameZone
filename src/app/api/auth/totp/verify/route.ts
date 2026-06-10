@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verify } from "otplib";
+import { decryptSecret } from "@/lib/crypto/totp-secret";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { enforceRateLimit } from "@/lib/auth/rate-limit";
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
   }
 
   const { valid: isValid } = await verify({
-    secret: user.totpSecret,
+    secret: decryptSecret(user.totpSecret),
     token: code,
     epochTolerance: 1,
   });

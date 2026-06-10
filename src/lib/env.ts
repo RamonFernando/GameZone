@@ -24,6 +24,7 @@ const RECOMMENDED_VARS = [
   "RAWG_API_KEY",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
+  "ENCRYPTION_KEY",
 ] as const;
 
 function isMissing(name: string): boolean {

@@ -3,6 +3,7 @@ import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
 import { verify } from "otplib";
+import { encryptSecret } from "@/lib/crypto/totp-secret";
 
 type EnableTotpPayload = {
   secret?: string;
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     where: { id: authResult.auth.userId },
     data: {
       totpEnabled: true,
-      totpSecret: secret,
+      totpSecret: encryptSecret(secret),
       // opcional: desactivar otros factores automáticos si quieres que solo quede TOTP
       // twoFactorEnabled: false,
       // pushAuthEnabled: false,

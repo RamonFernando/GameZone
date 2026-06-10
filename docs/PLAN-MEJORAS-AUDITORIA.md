@@ -24,7 +24,7 @@ Leyenda: ✅ hecho · ⚠️ hecho parcial / pendiente acción manual · ⬜ pen
 | 1.3 — Cron en Netlify | ✅ hecho (`netlify/functions/sync-catalogs.mts`, schedule `0 5 * * *`) |
 | 1.4 — Runtime Next.js en Netlify | ✅ hecho (`netlify.toml` + `@netlify/plugin-nextjs`). Revisar `instrumentation.ts` en serverless |
 | 1.5 — Geo sin fetch externo | ✅ hecho (usa cabecera `x-nf-geo-country`, sin llamada a ipapi.co) |
-| 2.1 — Cifrar `totpSecret` | ⬜ pendiente (sigue en texto plano) |
+| 2.1 — Cifrar `totpSecret` | ✅ hecho (AES-256-GCM en `src/lib/crypto/totp-secret.ts`, env `ENCRYPTION_KEY`; cifra en enable, descifra en verify; secreto existente re-cifrado; fallback a texto plano legado; con tests) |
 | 2.2 — Reducir tolerancia TOTP | ✅ hecho (`epochTolerance: 1` en enable y verify) |
 | 2.3 — Rate limit en 2FA/TOTP verify | ✅ hecho (scope `2fa-verify`, 5/10min, aplicado en ambos endpoints) |
 | 2.4 — Cabeceras de seguridad HTTP | ✅ hecho (CSP, X-Frame, HSTS, etc. en `next.config.mjs`) |

@@ -41,6 +41,10 @@ Copiar los valores reales del `.env` local o del dashboard de cada proveedor:
 APP_BASE_URL=https://<tu-dominio-netlify>
 SESSION_SECRET=<rotar: secreto largo y aleatorio, distinto al de dev>
 CRON_SECRET=<rotar: secreto largo y aleatorio>
+# Clave para cifrar secretos TOTP (32 bytes base64). Generar con:
+# node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+# ⚠️ NO cambiarla una vez en producción: invalidaría los secretos TOTP ya cifrados.
+ENCRYPTION_KEY=<32 bytes en base64>
 
 # Pagos
 STRIPE_SECRET_KEY=<dashboard Stripe>
