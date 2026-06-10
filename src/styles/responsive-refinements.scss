@@ -763,18 +763,30 @@
     justify-content: space-between;
   }
 
+  /* El wordmark "GameZone" va centrado DENTRO de un círculo de 30px, así que
+     sobresale ~31px por cada lado. En móviles estrechos (sobre todo con DPR alto)
+     ese desborde se salía de pantalla y se cortaba ("neZone").
+     Solución: dejar hueco a la izquierda (padding-left) para el desborde izquierdo
+     y separación suficiente a la derecha (gap) para el derecho, sin recortar. */
   .nav-logo {
     display: flex;
+    align-items: center;
     justify-content: flex-start;
     margin-left: 0;
-    flex: 1 1 0;
+    padding-left: 1.9rem;
+    gap: 2.4rem;
+    flex: 0 1 auto;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
+  }
+
+  .nav-logo-mark {
+    flex-shrink: 0;
   }
 
   .nav-logo-text {
-    margin: 0 0 0 0.5rem;
-    align-items: center;
+    margin: 0;
+    align-items: flex-start;
     min-width: 0;
     overflow: hidden;
   }
