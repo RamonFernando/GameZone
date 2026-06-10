@@ -248,6 +248,28 @@ npm run build
 - **Acción:** añadir vistas para: gestión de pedidos (estado, reembolsos), gestión de usuarios (ban, roles), edición del catálogo de productos, métricas básicas de ventas.
 - **Verificar:** un admin puede gestionar pedidos y productos sin tocar la base de datos directamente.
 
+### 4.6 — Subida de imágenes de producto desde el equipo  🟠 ALTA
+- **Problema:** el formulario de crear/editar producto (`src/components/auth/AdminProductsPanel.tsx`)
+  solo acepta una **ruta escrita a mano** (`/games_data/.../cover.jpg`) o una URL externa de un
+  dominio permitido en `next.config.mjs` (RAWG, Steam, G2A). No hay botón para subir un archivo
+  desde el PC. En Netlify (serverless, FS de solo lectura) NO se puede escribir en `public/`, así
+  que un upload tradicional a disco no funciona.
+- **Acción (reutilizar el patrón de los avatares, tarea 1.2):**
+  1. Guardar los bytes de la imagen en PostgreSQL (tabla nueva `ProductImage` con `Bytes`, o blob
+     storage tipo Cloudinary/R2).
+  2. Servirla por una ruta `GET /api/admin/products/[id]/image` (o pública) y guardar esa URL en
+     `coverImage` / `backgroundImage`.
+  3. En el formulario: `<input type="file" accept="image/*">` + botón "Subir imagen"; al
+     seleccionar, subir vía `POST` y rellenar el campo con la URL resultante.
+  4. Validar en servidor: tamaño máx (~2-3 MB), magic bytes reales, redimensionar/convertir a webp
+     con `sharp` (ya está en el proyecto por los avatares).
+  5. Mantener compatibilidad: seguir aceptando rutas/URL existentes para no romper el catálogo.
+- **Nota de rendimiento:** NO incrustar la imagen como base64 en `coverImage`: el listado del
+  catálogo (`/api/products`) devuelve `coverImage` de todos los productos y dispararía el tamaño de
+  la respuesta. Servir siempre por URL/ruta API.
+- **Verificar:** un admin sube una imagen desde su PC, se guarda y se muestra en la ficha y en el
+  catálogo, en producción (Netlify).
+
 ---
 
 ## FASE 5 — MEJORAS FUTURAS (roadmap a largo plazo)
