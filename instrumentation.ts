@@ -8,5 +8,10 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { validateEnv } = await import("@/lib/env");
     validateEnv();
+
+    // Garantiza que el usuario master admin existe una sola vez al arrancar,
+    // en lugar de recalcular en cada petición de login.
+    const { ensureMasterAdminUser } = await import("@/lib/auth/store");
+    await ensureMasterAdminUser();
   }
 }
