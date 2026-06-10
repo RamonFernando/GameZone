@@ -6,6 +6,12 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 
 ## Novedades recientes (10-06-2026)
 
+### Migración a PostgreSQL (Neon) y avatares en BD
+
+- **Base de datos SQLite → PostgreSQL (Neon):** `schema.prisma` usa `provider = "postgresql"` con `directUrl`. Esquema migrado y datos copiados (67 productos, 5 usuarios, 58 pedidos, etc.) con conteos verificados. El script de copia (`scripts/migrate-data-to-postgres.cjs`) usó dos clientes Prisma para conversión de tipos segura. Backup del SQLite en `prisma/dev.db.backup-pre-postgres-*` y migraciones antiguas en `prisma/_migrations_sqlite_backup/`.
+  - **Producción Netlify:** usar la URL **pooled** (`-pooler`) en `DATABASE_URL`; la directa solo para `prisma migrate` (`DATABASE_URL_UNPOOLED`).
+- **Avatares en la base de datos:** ya no se usa `fs.writeFile` (incompatible con Netlify serverless). El avatar se guarda como `Bytes` en la tabla `UserAvatar` y se sirve desde `GET /api/account/avatar/[userId]`. La subida (`POST /api/account/avatar`) valida tamaño máximo (2 MB) y *magic bytes* reales, y redimensiona a 256×256 WebP con `sharp`.
+
 ### Auditoría de seguridad y preparación Netlify (Fase 1 + Fase 2 parcial)
 
 - **Geo en middleware sin fetch externo:** `middleware.ts` ya no llama a `ipapi.co`. Lee la cabecera `x-nf-geo-country` que Netlify inyecta; fallback `ES/EUR/es-ES` en local.
@@ -652,8 +658,8 @@ como `Vista previa email de compra: https://ethereal.email/message/...`.
 - **Build command:** `npm run build` (incluye `prisma generate`). Configurado en `netlify.toml`.
 - **Plugin:** `@netlify/plugin-nextjs` declarado en `netlify.toml` y en `devDependencies`.
 - **Cron:** `netlify/functions/sync-catalogs.mts` reemplaza `vercel.json`; se dispara a las 05:00 UTC.
-- **Variables de entorno:** definir en el panel de Netlify: `DATABASE_URL`, `SESSION_SECRET`, `CRON_SECRET`, `STRIPE_*`, `PAYPAL_*`, `SMTP_*`, `APP_BASE_URL`.
+- **Variables de entorno:** ver el checklist completo en `docs/NETLIFY-DEPLOY.md`. Incluye `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (directa), `SESSION_SECRET`, `CRON_SECRET`, `STRIPE_*`, `PAYPAL_*`, `SMTP_*`, `APP_BASE_URL`, OAuth y RAWG/G2A.
 
 ### Base de datos en producción
 
-SQLite es incompatible con Netlify (filesystem efímero). **Pendiente de migrar a PostgreSQL** (recomendado: [Neon](https://neon.tech), tier gratuito + driver serverless). Ver tarea 1.1 del plan de auditoría en `docs/PLAN-MEJORAS-AUDITORIA.md`.
+Ya migrada a **PostgreSQL (Neon)**. En Netlify, `DATABASE_URL` debe usar la URL **pooled** (host con `-pooler`) y `DATABASE_URL_UNPOOLED` la **directa** (sin `-pooler`, solo para `prisma migrate`). Detalle y checklist en `docs/NETLIFY-DEPLOY.md`.

@@ -7,8 +7,10 @@ Guia central de comandos de pruebas y verificacion para `GameZoneV4`.
 - Instalar dependencias: `npm install`
 - Generar cliente Prisma: `npm run db:generate`
 - Migrar base de datos local si hace falta: `npm run db:migrate`
-- Tener `.env` configurado con `DATABASE_URL`, `SESSION_SECRET`, credenciales de pagos/OAuth si se van a probar esos flujos.
+- Tener `.env` configurado con `DATABASE_URL` (PostgreSQL/Neon), `SESSION_SECRET`, credenciales de pagos/OAuth si se van a probar esos flujos.
 - Tener servidor activo para E2E/OAuth/webhooks: `npm run dev`
+
+> Nota: el proyecto usa **PostgreSQL (Neon)**, no SQLite. En local, `DATABASE_URL` apunta al endpoint directo de Neon. Para producción (Netlify) se usa la URL pooled; ver `docs/NETLIFY-DEPLOY.md`.
 
 ## Validacion Recomendada
 
@@ -187,7 +189,9 @@ npm run db:migrate
 ```
 
 - `db:generate`: genera Prisma Client.
-- `db:migrate`: aplica/crea migraciones de desarrollo.
+- `db:migrate`: aplica/crea migraciones de desarrollo (PostgreSQL).
+
+Nota: si `db:migrate` o `build` muestran `EPERM` sobre `query_engine-windows.dll.node`, parar el `npm run dev` (bloquea el DLL en Windows), repetir el comando y volver a arrancar el dev.
 
 ## Catalogos Y Datos Externos
 
@@ -258,6 +262,20 @@ Verificacion del carrito entre dispositivos (solo usuarios autenticados):
 1. Inicia sesion en el dispositivo A, añade juegos al carrito.
 2. Abre la misma cuenta en el dispositivo B.
 3. Al cambiar a la pestana o dar foco a la ventana, el carrito debe sincronizarse desde la BD.
+
+## Avatar de usuario (almacenado en BD)
+
+El avatar se guarda como bytes en PostgreSQL (tabla `UserAvatar`) y se sirve desde
+`GET /api/account/avatar/[userId]`. La subida valida tamaño (2 MB), magic bytes
+reales y redimensiona a 256x256 WebP con `sharp`.
+
+Verificacion manual (con sesion iniciada, en `/account`):
+
+1. Sube una imagen JPEG/PNG/WebP: debe aparecer el nuevo avatar al instante.
+2. Recarga la pagina: el avatar persiste (se lee de la BD, no del filesystem).
+3. Sube un archivo que no sea imagen (p. ej. un `.txt` renombrado a `.png`): debe
+   rechazarse con error `INVALID_TYPE` (se validan los magic bytes, no la extension).
+4. Sube una imagen mayor de 2 MB: debe rechazarse con `FILE_TOO_LARGE`.
 
 ## Boton flotante Scroll to Top
 

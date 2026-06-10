@@ -11,9 +11,37 @@
 
 ---
 
+## ESTADO DEL PLAN (actualizado 2026-06-10)
+
+Leyenda: ✅ hecho · ⚠️ hecho parcial / pendiente acción manual · ⬜ pendiente
+
+| Tarea | Estado |
+|---|---|
+| 0.1 — Eliminar `.db` del historial de Git | ✅ hecho (purgado + force-push de `main` y 2 ramas backup; **rotación de secretos/reset de contraseñas pendiente, manual**) |
+| 0.2 — Sin secretos hardcodeados | ✅ verificado (fallbacks dev lanzan error en prod) |
+| 1.1 — SQLite → PostgreSQL | ✅ hecho (Neon, Frankfurt; esquema migrado + 67 productos/5 users/58 pedidos/etc. copiados con conteos verificados). **Pendiente Netlify: usar URL pooled (`-pooler`) en `DATABASE_URL` de producción** |
+| 1.2 — Avatares a blob storage | ✅ hecho (guardados como `Bytes` en Postgres, tabla `UserAvatar`; servidos por `GET /api/account/avatar/[userId]`; límite 2 MB + validación magic bytes + resize 256×256 webp con sharp; 3 avatares existentes migrados) |
+| 1.3 — Cron en Netlify | ✅ hecho (`netlify/functions/sync-catalogs.mts`, schedule `0 5 * * *`) |
+| 1.4 — Runtime Next.js en Netlify | ✅ hecho (`netlify.toml` + `@netlify/plugin-nextjs`). Revisar `instrumentation.ts` en serverless |
+| 1.5 — Geo sin fetch externo | ✅ hecho (usa cabecera `x-nf-geo-country`, sin llamada a ipapi.co) |
+| 2.1 — Cifrar `totpSecret` | ⬜ pendiente (sigue en texto plano) |
+| 2.2 — Reducir tolerancia TOTP | ✅ hecho (`epochTolerance: 1` en enable y verify) |
+| 2.3 — Rate limit en 2FA/TOTP verify | ✅ hecho (scope `2fa-verify`, 5/10min, aplicado en ambos endpoints) |
+| 2.4 — Cabeceras de seguridad HTTP | ✅ hecho (CSP, X-Frame, HSTS, etc. en `next.config.mjs`) |
+| 2.5 — Validar `event.type` en webhooks | ✅ hecho (`HANDLED_TYPES` guard en Stripe y PayPal) |
+| 3.1 — Zod en bodies de API | ⬜ pendiente (no instalado) |
+| 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
+| 3.3 — Logging / Sentry | ⬜ pendiente |
+| 3.4 — CI GitHub Actions | ✅ hecho (`.github/workflows/ci.yml`: tsc + vitest + build) |
+| 3.5 — Tests de integración | ⬜ pendiente |
+
+**Bloqueadores de deploy en Netlify RESUELTOS:** 1.1 (Postgres) ✅ y 1.2 (avatares) ✅. Ya no quedan bloqueadores de runtime. Pendiente operativo antes de producción: usar URL **pooled** (`-pooler`) en `DATABASE_URL` de Netlify (ahora apunta a la directa), y rotación de secretos de la tarea 0.1.
+
+---
+
 ## FASE 0 — CRÍTICO INMEDIATO (hacer antes que nada)
 
-### 0.1 — Eliminar la base de datos real del historial de Git  🔴 CRÍTICO
+### 0.1 — Eliminar la base de datos real del historial de Git  🔴 CRÍTICO  ✅ HECHO (git) / ⚠️ rotación manual pendiente
 - **Problema:** `backups/dev-pre-api-info-2026-06-02.db` está trackeado en el repo público.
   Contiene datos reales (emails, password hashes, pedidos).
 - **Acción:**
@@ -26,7 +54,7 @@
   5. Forzar reset de contraseña a cualquier usuario real que estuviera en ese `.db`.
 - **Verificar:** `git log --all --full-history -- "backups/*.db"` no devuelve nada.
 
-### 0.2 — Confirmar que ningún secreto está hardcodeado  🔴
+### 0.2 — Confirmar que ningún secreto está hardcodeado  🔴  ✅ HECHO
 - Revisar que `SESSION_SECRET` esté en env (los fallbacks dev en `session.ts:25` y
   `oauth.ts:38` ya lanzan error en producción — correcto, mantener).
 - **Verificar:** `validateEnv()` lanza si falta `SESSION_SECRET` o `DATABASE_URL` en prod.
@@ -35,7 +63,7 @@
 
 ## FASE 1 — BLOQUEADORES PARA NETLIFY (sin esto no despliega)
 
-### 1.1 — Migrar SQLite → PostgreSQL  🔴 BLOQUEADOR
+### 1.1 — Migrar SQLite → PostgreSQL  🔴 BLOQUEADOR  ⬜ PENDIENTE
 - **Problema:** `schema.prisma` usa `provider = "sqlite"` con fichero local. Netlify es
   serverless: filesystem efímero, sin estado entre invocaciones.
 - **Acción:**
@@ -48,7 +76,7 @@
   5. Setear `DATABASE_URL` en Netlify con la connection string (usar pooled connection de Neon).
 - **Verificar:** `prisma migrate deploy` corre limpio; la app arranca contra Postgres.
 
-### 1.2 — Mover almacenamiento de avatares a blob storage  🔴 BLOQUEADOR (también es vuln A3)
+### 1.2 — Mover almacenamiento de avatares a blob storage  🔴 BLOQUEADOR (también es vuln A3)  ⬜ PENDIENTE
 - **Problema:** `avatar/route.ts:43-44` hace `fs.writeFile` a `public/avatars/`. El FS de
   Netlify es de solo lectura/efímero → falla en producción.
 - **Acción:**
@@ -61,7 +89,7 @@
   4. Eliminar la variable `updatedUser` sin usar / limpieza.
 - **Verificar:** subida funciona en build de producción; rechaza ficheros >2 MB y no-imágenes.
 
-### 1.3 — Recrear el cron de Vercel en Netlify  🔴 BLOQUEADOR
+### 1.3 — Recrear el cron de Vercel en Netlify  🔴 BLOQUEADOR  ✅ HECHO
 - **Problema:** `vercel.json` define cron `0 5 * * *` → `/api/cron/sync-catalogs`. Netlify NO
   lee `vercel.json`.
 - **Acción:**
@@ -71,7 +99,7 @@
   3. Borrar `vercel.json` (o dejarlo documentado como legacy si se quiere doble target).
 - **Verificar:** la scheduled function dispara y responde 200 con el secreto correcto, 401 sin él.
 
-### 1.4 — Configurar el runtime de Next.js para Netlify  🔴 BLOQUEADOR
+### 1.4 — Configurar el runtime de Next.js para Netlify  🔴 BLOQUEADOR  ✅ HECHO (revisar instrumentation.ts)
 - **Acción:**
   1. Instalar/activar `@netlify/plugin-nextjs` (o el runtime nativo de Next en Netlify).
   2. `netlify.toml`: build command (`npm run build` ya incluye `prisma generate`), publish dir,
@@ -81,7 +109,7 @@
      protegido de inicialización idempotente que se llame una vez tras el deploy.
 - **Verificar:** deploy de prueba en Netlify arranca y sirve páginas + APIs.
 
-### 1.5 — Sustituir la geolocalización síncrona del middleware  🟠 ALTA (vuln A2)
+### 1.5 — Sustituir la geolocalización síncrona del middleware  🟠 ALTA (vuln A2)  ✅ HECHO
 - **Problema:** `middleware.ts:22` hace `fetch("https://ipapi.co/json/")` en cada request a
   página pública. Bloquea el render, depende de un servicio externo, y es caro en Edge.
 - **Acción:**
@@ -94,7 +122,7 @@
 
 ## FASE 2 — SEGURIDAD (severidad alta/media)
 
-### 2.1 — Cifrar `totpSecret` en reposo  🟠 ALTA (vuln A1)
+### 2.1 — Cifrar `totpSecret` en reposo  🟠 ALTA (vuln A1)  ⬜ PENDIENTE
 - **Problema:** `totpSecret` se guarda en texto plano (`schema.prisma:43`,
   `totp/enable/route.ts:66`). Si la DB se filtra, se pueden generar códigos 2FA de cualquiera.
 - **Acción:**
@@ -103,28 +131,28 @@
   3. Migración para re-cifrar secretos existentes (o forzar re-setup de TOTP a usuarios).
 - **Verificar:** el valor en DB es ciphertext; el flujo de verificación TOTP sigue funcionando.
 
-### 2.2 — Reducir la ventana de tolerancia TOTP  🟠 ALTA (vuln A4)
+### 2.2 — Reducir la ventana de tolerancia TOTP  🟠 ALTA (vuln A4)  ✅ HECHO
 - **Problema:** `totp/enable/route.ts:54` usa `epochTolerance: 30`. Verificar la semántica exacta
   en la versión de `otplib` instalada — si son periodos de 30s, eso es ±15 min (excesivo).
 - **Acción:** reducir a la tolerancia mínima razonable (±1 periodo / ±30s). Revisar también el
   endpoint `totp/verify`.
 - **Verificar:** códigos viejos (>1 min) son rechazados; el código actual se acepta.
 
-### 2.3 — Rate limit en endpoints de verificación 2FA/TOTP  🟡 MEDIA (vuln M1)
+### 2.3 — Rate limit en endpoints de verificación 2FA/TOTP  🟡 MEDIA (vuln M1)  ✅ HECHO
 - **Problema:** `rate-limit.ts:12` solo cubre `register/verify/resend/login`. `/api/auth/2fa/verify`
   y `/api/auth/totp/verify` no tienen límite → brute-force del código de 6 dígitos.
 - **Acción:** añadir scope `2fa-verify` (p.ej. 5 intentos / 10 min por IP+usuario) y aplicarlo
   en ambos endpoints.
 - **Verificar:** tras N intentos fallidos se devuelve 429.
 
-### 2.4 — Cabeceras de seguridad HTTP  🟡 MEDIA (vuln M4)
+### 2.4 — Cabeceras de seguridad HTTP  🟡 MEDIA (vuln M4)  ✅ HECHO
 - **Acción:** añadir en `next.config.mjs` (`headers()`) o `netlify.toml`:
   `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
   `Referrer-Policy: strict-origin-when-cross-origin`, `Strict-Transport-Security`.
   Ajustar la CSP a los dominios de imágenes ya listados en `next.config.mjs`.
 - **Verificar:** las cabeceras aparecen en las respuestas; el sitio sigue cargando imágenes/scripts.
 
-### 2.5 — Validación de tipo de evento antes del cast en webhooks  🟡 MEDIA (vuln M2)
+### 2.5 — Validación de tipo de evento antes del cast en webhooks  🟡 MEDIA (vuln M2)  ✅ HECHO
 - **Acción:** en `stripe/webhook/route.ts` y `paypal/webhook/route.ts`, validar `event.type`
   antes de hacer `as Stripe.Checkout.Session`. Confirmar que el `fallbackEmail` dummy de PayPal
   nunca se usa como destinatario real (se recupera por `userId` en `completePaidOrder` — OK,
@@ -149,7 +177,7 @@
 - Sustituir los `.catch(() => false)` silenciosos por logging consistente con `logger`.
 - Integrar **Sentry** para errores de producción.
 
-### 3.4 — CI en GitHub Actions
+### 3.4 — CI en GitHub Actions  ✅ HECHO
 - Workflow que corra `tsc --noEmit` + `eslint` + `vitest run` + `build` en cada PR.
 - Los scripts ya existen en `package.json`; solo falta el `.github/workflows/ci.yml`.
 
