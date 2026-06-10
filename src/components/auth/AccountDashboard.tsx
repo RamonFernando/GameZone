@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import { useScrollMemory } from "@/hooks/useScrollMemory";
 import {
   createPaymentProgressStorageKey,
   getPaymentProgressStepFromStartedAt,
@@ -127,6 +128,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [totpQrDataUrl, setTotpQrDataUrl] = useState("");
   const [totpCodeDraft, setTotpCodeDraft] = useState("");
   const lang = useLocale();
+  useScrollMemory(!isLoading);
   const clearedPaidOrderRef = useRef<string | null>(null);
   const hadActiveCheckoutFlowRef = useRef(false);
 

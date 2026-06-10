@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import { useScrollMemory } from "@/hooks/useScrollMemory";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
@@ -127,6 +128,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<ProductPreview[]>([]);
   const [heroSections, setHeroSections] = useState<HomeHeroSection[]>([]);
   const [loading, setLoading] = useState(true);
+  useScrollMemory(!loading);
   const lang = useLocale();
 
   useEffect(() => {

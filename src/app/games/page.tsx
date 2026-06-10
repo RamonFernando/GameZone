@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { GameGrid } from "@/components/GameGrid";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useScrollMemory } from "@/hooks/useScrollMemory";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";
 
@@ -19,6 +20,7 @@ export default function GamesPage() {
   const [products, setProducts] = useState<ProductPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const { query, platform } = useSearch();
+  useScrollMemory(!loading);
 
   useEffect(() => {
     fetch("/api/products", { cache: "no-store" })

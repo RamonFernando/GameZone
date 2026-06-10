@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import { useScrollMemory } from "@/hooks/useScrollMemory";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
@@ -80,6 +81,7 @@ export default function GameDetailPage() {
   const [suggestions, setSuggestions] = useState<ProductView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const lang = useLocale();
+  useScrollMemory(!isLoading);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
   const slugParam = routeParams?.slug;
