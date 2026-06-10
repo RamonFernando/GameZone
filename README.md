@@ -4,6 +4,29 @@ Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticación con 
 
 Documentación de pruebas centralizada en: `TESTING.md`.
 
+## Novedades recientes (11-06-2026)
+
+### SEO básico (posicionamiento en Google)
+
+- **Metadatos de producción** en `src/app/layout.tsx`: `metadataBase`, `title.template`, descripción, keywords, Open Graph y Twitter Card. Base sobre `APP_BASE_URL`.
+- **`src/app/robots.ts`**: permite crawlers en rutas públicas, bloquea `/api/`, `/admin/`, `/account/`, `/checkout/`, `/auth/`; declara el sitemap.
+- **`src/app/sitemap.ts`** (dinámico, `force-dynamic`): rutas estáticas + todos los productos `isActive` leídos de Prisma (slug + `updatedAt`). Fallback a rutas estáticas si la BD falla.
+- **Favicon** `src/app/icon.svg`.
+- **Google Search Console:** propiedad verificada vía etiqueta meta (`verification.google` en `layout.tsx`). **No borrar esa etiqueta** o se pierde la verificación. Sitemap enviado.
+- **Pendiente (SEO avanzado):** `generateMetadata` por juego + JSON-LD schema Product en `games/[slug]` (requiere pasar la página de client a server component). Plan técnico detallado en `docs/PLAN-MEJORAS-AUDITORIA.md` sección 4.1.
+
+### Subida de imágenes de producto desde el equipo
+
+- Tabla `ProductImage` (`Bytes` en PostgreSQL), mismo patrón que `UserAvatar` (compatible con Netlify serverless, sin filesystem).
+- **Subida:** `POST /api/admin/product-images` (permiso `admin.products.write`): valida *magic bytes* (JPEG/PNG/WebP), límite 5 MB, normaliza a WebP con `sharp` y guarda los bytes en BD. Devuelve `{ url: /api/product-images/<id> }`.
+- **Servir:** `GET /api/product-images/[id]` (público, cache inmutable) devuelve los bytes.
+- Input de archivo en el panel admin (`AdminProductsPanel.tsx`), tanto en **crear** como en **editar** producto: al subir, rellena el campo `coverImage` automáticamente.
+- Nota: la URL del campo imagen debe apuntar a un archivo de imagen real (no a una página); los dominios externos permitidos están en `remotePatterns` de `next.config.mjs`.
+
+### Fix appId de Steam en market pulse
+
+- `src/lib/market/pulse.ts`: el appId de **Marathon** estaba mal (`2453150`, que es otro juego). Corregido a `3065800` (Marathon de Bungie) para que el widget muestre la portada real.
+
 ## Novedades recientes (10-06-2026)
 
 ### Migración a PostgreSQL (Neon) y avatares en BD
