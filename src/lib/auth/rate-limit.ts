@@ -39,10 +39,15 @@ export async function enforceRateLimit(
   const { limit, windowMs } = getConfigForScope(scope);
 
   try {
-    const bucket = await prisma.rateLimitBucket.findUnique({ where: { key } });
+    // Atomic increment: only touches an active bucket (resetAt still in the future).
+    // This eliminates the TOCTOU race between the old findUnique+update pattern.
+    const incremented = await prisma.rateLimitBucket.updateMany({
+      where: { key, resetAt: { gt: new Date(now) } },
+      data: { count: { increment: 1 } },
+    });
 
-    // Sin bucket o ventana expirada: arrancamos una nueva ventana.
-    if (!bucket || bucket.resetAt.getTime() <= now) {
+    if (incremented.count === 0) {
+      // No active bucket or window expired — open a fresh window.
       await prisma.rateLimitBucket.upsert({
         where: { key },
         create: { key, count: 1, resetAt: new Date(now + windowMs) },
@@ -51,20 +56,19 @@ export async function enforceRateLimit(
       return { blocked: false, remaining: limit - 1 };
     }
 
-    if (bucket.count >= limit) {
+    const bucket = await prisma.rateLimitBucket.findUnique({ where: { key } });
+    if (!bucket) {
+      return { blocked: false, remaining: limit - 1 };
+    }
+
+    if (bucket.count > limit) {
       return {
         blocked: true,
         retryAfterSeconds: Math.ceil((bucket.resetAt.getTime() - now) / 1000),
       };
     }
 
-    const updated = await prisma.rateLimitBucket.update({
-      where: { key },
-      data: { count: { increment: 1 } },
-      select: { count: true },
-    });
-
-    return { blocked: false, remaining: Math.max(0, limit - updated.count) };
+    return { blocked: false, remaining: Math.max(0, limit - bucket.count) };
   } catch (error) {
     logger.error("Fallo en rate limit persistente; se permite la petición.", {
       scope,
