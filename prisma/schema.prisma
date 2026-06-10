@@ -51,6 +51,19 @@ model User {
   cartItems                  UserCartItem[]
   pushDevices                PushDevice[]
   loginChallenges            LoginChallenge[]
+  avatar                     UserAvatar?
+}
+
+// Avatar del usuario almacenado como bytes en la BD (compatible con Netlify
+// serverless, que no tiene filesystem persistente). Tabla separada para no
+// arrastrar el blob en cada consulta de User. Se sirve desde
+// GET /api/account/avatar/[userId].
+model UserAvatar {
+  userId      String   @id
+  data        Bytes
+  contentType String   @default("image/webp")
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PushDevice {
