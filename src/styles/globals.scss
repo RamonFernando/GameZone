@@ -914,6 +914,17 @@ img {
   background: radial-gradient(circle at top, rgba(30, 64, 175, 0.3), rgba(15, 23, 42, 0.9));
 }
 
+/* Variante navegación: texto claro sobre fondo oscuro del botón */
+.button-ghost--nav {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.5);
+
+  &:hover {
+    color: #ffffff;
+    border-color: rgba(129, 140, 248, 0.85);
+  }
+}
+
 /* Variante para botones "Cancelar" en modales admin:
    mismo tamaño visual que .button-primary */
 .button-ghost-equal {
@@ -1573,6 +1584,12 @@ img {
   &:hover {
     color: #818cf8;
   }
+}
+
+.section-footer-back {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
 }
 
 .section-subtitle {

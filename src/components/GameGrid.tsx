@@ -17,9 +17,11 @@ type Props = {
   title?: string;
   /** Sobreescribe el subtítulo por defecto */
   subtitle?: string;
+  /** Enlace de vuelta que aparece a la derecha del header de sección */
+  backHref?: string;
 };
 
-export function GameGrid({ games, isFiltered = false, title, subtitle }: Props) {
+export function GameGrid({ games, isFiltered = false, title, subtitle, backHref }: Props) {
   const lang = useLocale();
   const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
@@ -98,8 +100,13 @@ export function GameGrid({ games, isFiltered = false, title, subtitle }: Props) 
           </p>
         </div>
         {hasMore && (
-          <Link href="/games" className="section-view-all">
+          <Link href="/games" className="button-ghost button-ghost--nav btn-padding-site">
             {lang === "en" ? "View all →" : "Ver todos →"}
+          </Link>
+        )}
+        {!hasMore && backHref && (
+          <Link href={backHref} className="button-ghost button-ghost--nav btn-padding-site">
+            {lang === "en" ? "← Back" : "← Inicio"}
           </Link>
         )}
       </div>
@@ -128,6 +135,13 @@ export function GameGrid({ games, isFiltered = false, title, subtitle }: Props) 
           </div>
         )}
       </div>
+      {backHref && (
+        <div className="section-footer-back">
+          <Link href={backHref} className="button-ghost button-ghost--nav btn-padding-site">
+            {lang === "en" ? "← Back" : "← Inicio"}
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

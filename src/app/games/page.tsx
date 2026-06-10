@@ -59,6 +59,7 @@ export default function GamesPage() {
           <GameGrid
             games={filteredGames}
             isFiltered={true}
+            backHref="/"
             title="Catálogo completo"
             subtitle={
               isFiltered
