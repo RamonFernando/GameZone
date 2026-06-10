@@ -7,11 +7,13 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 ## Índice
 
 ### Empezar
+
 - [Requisitos](#requisitos)
 - [Variables de entorno](#variables-de-entorno)
 - [Arranque rapido](#arranque-rapido)
 
 ### Documentación
+
 - [Metadata de juegos con RAWG](#metadata-de-juegos-con-rawg)
 - [Datos externos y market intelligence](#datos-externos-y-market-intelligence)
 - [Comando unico de recuperacion (Windows)](#comando-unico-de-recuperacion-windows)
@@ -24,6 +26,7 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 - [Comandos de tests (ejecucion rapida)](#comandos-de-tests-ejecucion-rapida)
 
 ### Changelog
+
 - [Novedades recientes (11-06-2026)](#novedades-recientes-11-06-2026)
 - [Novedades recientes (10-06-2026)](#novedades-recientes-10-06-2026)
 - [Novedades recientes (09-06-2026)](#novedades-recientes-09-06-2026)
