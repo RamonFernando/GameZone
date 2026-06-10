@@ -7,7 +7,18 @@ const CART_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 const PROTECTED_ROUTES = ["/account", "/checkout", "/admin"];
 
-async function applyGeoCookies(request: NextRequest, response: NextResponse) {
+const CURRENCY_BY_COUNTRY: Record<string, string> = {
+  US: "USD", GB: "GBP", JP: "JPY", CA: "CAD", AU: "AUD",
+  CH: "CHF", MX: "MXN", BR: "BRL", IN: "INR", CN: "CNY",
+};
+
+const LOCALE_BY_COUNTRY: Record<string, string> = {
+  US: "en-US", GB: "en-GB", CA: "en-US", AU: "en-US",
+  FR: "fr-FR", DE: "de-DE", PT: "pt-PT", BR: "pt-PT",
+  MX: "es-ES", AR: "es-ES", CO: "es-ES",
+};
+
+function applyGeoCookies(request: NextRequest, response: NextResponse) {
   const hasGeoCountry = request.cookies.has("geoCountry");
   const hasGeoCurrency = request.cookies.has("geoCurrency");
   const hasGeoLocale = request.cookies.has("geoLocale");
@@ -16,57 +27,17 @@ async function applyGeoCookies(request: NextRequest, response: NextResponse) {
     return response;
   }
 
-  try {
-    // Usamos un servicio público sencillo de geolocalización por IP.
-    // En producción puedes cambiarlo por un proveedor con API key.
-    const geoRes = await fetch("https://ipapi.co/json/", {
-      // No queremos cache muy agresiva; pero dejamos que el edge maneje lo básico.
-      next: { revalidate: 60 * 60 }, // 1 hora
-    });
+  // Netlify inyecta la cabecera x-nf-geo (cero latencia, sin fetch externo).
+  // En desarrollo local no existe, se usa fallback ES/EUR/es-ES.
+  const nfCountry = request.headers.get("x-nf-geo-country") ?? "ES";
+  const country = nfCountry.toUpperCase();
+  const currency = CURRENCY_BY_COUNTRY[country] ?? "EUR";
+  const locale = LOCALE_BY_COUNTRY[country] ?? "es-ES";
 
-    if (!geoRes.ok) {
-      return response;
-    }
-
-    const data = (await geoRes.json()) as {
-      country_code?: string;
-      currency?: string;
-      languages?: string;
-    };
-
-    const country = (data.country_code ?? "ES").toUpperCase();
-    const currency = data.currency ?? "EUR";
-
-    // Tomamos el primer idioma devuelto, por ejemplo "es", "en", "fr"
-    const languageRaw = (data.languages ?? "es").split(",")[0]?.trim() || "es";
-    let locale = "es-ES";
-    if (languageRaw.startsWith("en")) {
-      locale = "en-US";
-    } else if (languageRaw.startsWith("fr")) {
-      locale = "fr-FR";
-    } else if (languageRaw.startsWith("de")) {
-      locale = "de-DE";
-    } else if (languageRaw.startsWith("pt")) {
-      locale = "pt-PT";
-    } else if (languageRaw.startsWith("es")) {
-      locale = "es-ES";
-    }
-
-    response.cookies.set("geoCountry", country, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 días
-    });
-    response.cookies.set("geoCurrency", currency, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-    response.cookies.set("geoLocale", locale, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-  } catch {
-    // Si falla la geolocalización, simplemente no tocamos nada
-  }
+  const cookieOpts = { path: "/", maxAge: 60 * 60 * 24 * 7 } as const;
+  response.cookies.set("geoCountry", country, cookieOpts);
+  response.cookies.set("geoCurrency", currency, cookieOpts);
+  response.cookies.set("geoLocale", locale, cookieOpts);
 
   return response;
 }
