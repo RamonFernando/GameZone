@@ -24,6 +24,7 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 - [Despliegue en Netlify](#despliegue-en-netlify)
 - [Registro y páginas legales](#registro-y-páginas-legales)
 - [Comandos de tests (ejecucion rapida)](#comandos-de-tests-ejecucion-rapida)
+- [Información del proyecto](#información-del-proyecto)
 
 ### Changelog
 
@@ -721,3 +722,72 @@ como `Vista previa email de compra: https://ethereal.email/message/...`.
 ### Base de datos en producción
 
 Ya migrada a **PostgreSQL (Neon)**. En Netlify, `DATABASE_URL` debe usar la URL **pooled** (host con `-pooler`) y `DATABASE_URL_UNPOOLED` la **directa** (sin `-pooler`, solo para `prisma migrate`). Detalle y checklist en `docs/NETLIFY-DEPLOY.md`.
+
+## Información del proyecto
+
+Datos útiles para conocer el tamaño aproximado del proyecto, sus estilos y las tecnologías principales usadas.
+
+```text
+┌──────────────────────────────┬──────────┬──────────┐
+│ Categoría                    │ Archivos │ Líneas   │
+├──────────────────────────────┼──────────┼──────────┤
+│ Código app sin tests         │ 162      │ 23.316   │
+├──────────────────────────────┼──────────┼──────────┤
+│ Tests                        │ 10       │ 1.206    │
+├──────────────────────────────┼──────────┼──────────┤
+│ Estilos SCSS/CSS             │ 3        │ 6.401    │
+├──────────────────────────────┼──────────┼──────────┤
+│ Documentación                │ 8        │ 1.970    │
+├──────────────────────────────┼──────────┼──────────┤
+│ Config JSON/YAML/TOML        │ 9        │ 10.162   │
+├──────────────────────────────┼──────────┼──────────┤
+│ Total contado                │ 192      │ 43.055   │
+└──────────────────────────────┴──────────┴──────────┘
+```
+
+```text
+┌──────────────────────────────┬──────────────────────────────────────────────┐
+│ Resumen útil                 │ Valor                                        │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Código + tests + estilos     │ 30.923 líneas                                │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Solo código app              │ 23.316 líneas                                │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ SCSS actual                  │ 6.401 líneas en 3 archivos                   │
+└──────────────────────────────┴──────────────────────────────────────────────┘
+```
+
+```text
+┌──────────────────────────────┬──────────────────────────────────────────────┐
+│ Categoría                    │ Tecnologías                                  │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Frontend                     │ Next.js 16, React 19, TypeScript             │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Backend                      │ API Routes, Server Components, Route Handlers│
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Base de datos                │ PostgreSQL, Neon                             │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ ORM                          │ Prisma                                       │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Estilos                      │ SCSS, Sass, CSS                              │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Autenticación                │ Sesiones propias, OAuth, RBAC                │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Seguridad                    │ 2FA, TOTP, HMAC, AES-256-GCM                 │
+│                              │ CSP, rate limit                              │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Pagos                        │ Stripe, PayPal                               │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Testing                      │ Vitest, Vite, scripts E2E                    │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Deploy / CI                  │ Netlify, Netlify Functions, GitHub Actions   │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Observabilidad               │ Sentry                                       │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ APIs externas                │ RAWG, CheapShark, G2A, Steam                 │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ SEO                          │ Metadata dinámica, Open Graph, JSON-LD       │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│ Total aproximado             │ 25+ tecnologías principales                  │
+└──────────────────────────────┴──────────────────────────────────────────────┘
+```
