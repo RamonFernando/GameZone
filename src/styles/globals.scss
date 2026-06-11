@@ -727,6 +727,15 @@
 }
 
 @media (max-width: 599px) {
+  .market-pulse-carousel__hero {
+    min-height: 200px;
+  }
+
+  .market-pulse-source-panel--g2a .market-pulse-carousel__hero,
+  .market-pulse-source-panel--steam .market-pulse-carousel__hero {
+    min-height: 188px;
+  }
+
   .market-pulse-catalog-grid {
     grid-template-columns: 1fr;
   }
