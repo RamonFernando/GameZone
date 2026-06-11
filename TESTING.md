@@ -23,7 +23,7 @@ npm run build
 
 - `npm run lint`: ejecuta ESLint sobre el proyecto completo.
 - `npx tsc --noEmit`: comprueba TypeScript sin generar archivos.
-- `npm run test:unit`: ejecuta unit tests con Vitest.
+- `npm run test:unit`: ejecuta unit/integration tests ligeros con Vitest. Estado validado: 10 archivos y 48 tests.
 - `npm run build`: genera Prisma Client y compila Next para produccion.
 
 ## Suite Completa
@@ -54,6 +54,21 @@ npm run test:unit:watch
 - Configuracion: `vitest.config.ts`.
 - Patron actual: `src/**/*.test.ts`.
 - Entorno actual: `node`.
+
+### Tests Criticos Por Archivo
+
+Para validar solo los flujos criticos añadidos en la auditoria:
+
+```bash
+npx vitest run src/app/api/payments/stripe/webhook/route.test.ts
+npx vitest run src/app/api/payments/paypal/webhook/route.test.ts
+npx vitest run src/app/api/auth/login-2fa-flow.test.ts
+```
+
+- `route.test.ts` de Stripe cubre firma ausente/invalida, evento no manejado, `checkout.session.completed`, `checkout.session.expired` y `checkout.session.async_payment_failed`.
+- `route.test.ts` de PayPal cubre JSON invalido, firma invalida, errores logueados, evento no manejado, `CHECKOUT.ORDER.APPROVED` y `PAYMENT.CAPTURE.COMPLETED`.
+- `login-2fa-flow.test.ts` cubre credenciales validas -> segundo factor por email -> verificacion correcta -> sesion creada, y codigo incorrecto sin sesion.
+- Estos tests son mocks route-level: no sustituyen los E2E reales, pero protegen la logica de integracion de pagos/auth sin depender de Stripe, PayPal ni SMTP reales.
 
 ## E2E
 

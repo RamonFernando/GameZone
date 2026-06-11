@@ -1,6 +1,6 @@
 # GameZone / Next Gaming Store
 
-Proyecto e-commerce con Next.js (App Router), Prisma/SQLite, autenticación con sesiones persistentes, RBAC y checkout con pasarelas de pago.
+Proyecto e-commerce con Next.js (App Router), Prisma/PostgreSQL (Neon), autenticación con sesiones persistentes, RBAC y checkout con pasarelas de pago.
 
 Documentación de pruebas centralizada en: `TESTING.md`.
 
@@ -77,7 +77,9 @@ npm run dev
 - **`src/app/sitemap.ts`** (dinámico, `force-dynamic`): rutas estáticas + todos los productos `isActive` leídos de Prisma (slug + `updatedAt`). Fallback a rutas estáticas si la BD falla.
 - **Favicon** `src/app/icon.svg`.
 - **Google Search Console:** propiedad verificada vía etiqueta meta (`verification.google` en `layout.tsx`). **No borrar esa etiqueta** o se pierde la verificación. Sitemap enviado.
-- **Pendiente (SEO avanzado):** `generateMetadata` por juego + JSON-LD schema Product en `games/[slug]` (requiere pasar la página de client a server component). Plan técnico detallado en `docs/PLAN-MEJORAS-AUDITORIA.md` sección 4.1.
+- **SEO avanzado por ficha de juego:** `src/app/games/[slug]/page.tsx` es Server Component, lee el producto con Prisma mediante `getActiveProductBySlug`, usa `notFound()` para slugs inexistentes y delega la UI interactiva en `GameDetailClient`.
+- **Metadata por juego:** `generateMetadata` genera `title`, `description`, Open Graph con `coverImage` y canonical propio para cada ficha.
+- **JSON-LD Product:** cada ficha inyecta schema.org `Product` con nombre, imagen, descripción, oferta en EUR, disponibilidad segun stock y `aggregateRating` cuando hay rating + conteo.
 
 ### Subida de imágenes de producto desde el equipo
 
@@ -153,6 +155,9 @@ npm run lint
 npx tsc --noEmit
 npm run test:unit
 npm run build
+npx vitest run src/app/api/payments/stripe/webhook/route.test.ts
+npx vitest run src/app/api/payments/paypal/webhook/route.test.ts
+npx vitest run src/app/api/auth/login-2fa-flow.test.ts
 npm run e2e:all
 npm run e2e:all:continue
 npm run e2e:checkout
@@ -162,8 +167,11 @@ npm run e2e:paypal
 
 - `lint`: revisa el codigo con ESLint (`eslint .`).
 - `tsc --noEmit`: comprueba TypeScript sin generar archivos.
-- `test:unit`: ejecuta pruebas unitarias con Vitest.
+- `test:unit`: ejecuta pruebas unitarias/integración ligera con Vitest. Actualmente cubre 48 tests en 10 archivos, incluyendo servicios de checkout, webhooks Stripe/PayPal y login + 2FA.
 - `build`: genera la build de produccion; incluye `prisma generate`.
+- `npx vitest run src/app/api/payments/stripe/webhook/route.test.ts`: ejecuta solo los tests route-level del webhook Stripe.
+- `npx vitest run src/app/api/payments/paypal/webhook/route.test.ts`: ejecuta solo los tests route-level del webhook PayPal.
+- `npx vitest run src/app/api/auth/login-2fa-flow.test.ts`: ejecuta solo el flujo login + 2FA email.
 - `e2e:all`: ejecuta los 3 tests en secuencia.
 - `e2e:all:continue`: ejecuta los 3 tests aunque uno falle y muestra resumen final.
 - `e2e:checkout`: login + compra manual + verificacion en panel admin.
