@@ -1,345 +1,365 @@
 # Plan de mejoras y auditoría — GameZone (GameStopV4)
 
-> Documento de trabajo para implementación. Auditoría realizada sobre el estado del repo
-> a fecha 2026-06-10. Pensado para ejecutarse por fases. Cada tarea indica severidad,
-> archivos afectados y criterio de "hecho".
+> **v2 — Auditoría revisada y ampliada el 2026-06-11** (revisión senior fullstack + seguridad + UX
+> sobre el código real del repo). Sustituye a la v1 del 2026-06-10, conservando su historial de estado.
 >
-> **Contexto para quien implemente (Sonnet 4.6):** Proyecto Next.js 16 (App Router) + Prisma +
-> SQLite, auth propio con HMAC, 2FA (email/TOTP/push), pagos Stripe + PayPal. Objetivo final:
-> desplegar en **Netlify**. NO romper los flujos de auth ni de pago existentes. Ejecutar
-> `npx tsc --noEmit` + `npx vitest run` + `npm run build` tras cada fase.
+> **Contexto para quien implemente (Opus / Sonnet):** Proyecto Next.js 16 (App Router) + React 19 +
+> Prisma + PostgreSQL (Neon), auth propio con HMAC, 2FA (email/TOTP/push), pagos Stripe + PayPal,
+> deploy en **Netlify**. SCSS global (sin Tailwind). Sentry integrado.
+>
+> **Reglas para implementar (obligatorias):**
+> 1. NO romper los flujos de auth, carrito ni pago existentes.
+> 2. Mínimo cambio viable: no refactorizar lo que no pide la tarea.
+> 3. Tras cada tarea: `npx tsc --noEmit` + `npx vitest run` + `npm run build` limpios.
+> 4. Una rama backup antes de cada fase: `git checkout -b backup-pre-<fase>-DDMMYYYY`.
+> 5. Commits pequeños, uno por tarea, con mensaje descriptivo.
 
 ---
 
-## ESTADO DEL PLAN (actualizado 2026-06-10)
+## ESTADO GLOBAL (verificado contra el código el 2026-06-11)
 
-Leyenda: ✅ hecho · ⚠️ hecho parcial / pendiente acción manual · ⬜ pendiente
+Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 | Tarea | Estado |
 |---|---|
-| 0.1 — Eliminar `.db` del historial de Git | ✅ hecho (purgado + force-push de `main` y 2 ramas backup; **rotación de secretos/reset de contraseñas pendiente, manual**) |
-| 0.2 — Sin secretos hardcodeados | ✅ verificado (fallbacks dev lanzan error en prod) |
-| 1.1 — SQLite → PostgreSQL | ✅ hecho (Neon, Frankfurt; esquema migrado + 67 productos/5 users/58 pedidos/etc. copiados con conteos verificados). **Pendiente Netlify: usar URL pooled (`-pooler`) en `DATABASE_URL` de producción** |
-| 1.2 — Avatares a blob storage | ✅ hecho (guardados como `Bytes` en Postgres, tabla `UserAvatar`; servidos por `GET /api/account/avatar/[userId]`; límite 2 MB + validación magic bytes + resize 256×256 webp con sharp; 3 avatares existentes migrados) |
-| 1.3 — Cron en Netlify | ✅ hecho (`netlify/functions/sync-catalogs.mts`, schedule `0 5 * * *`) |
-| 1.4 — Runtime Next.js en Netlify | ✅ hecho (`netlify.toml` + `@netlify/plugin-nextjs`). Revisar `instrumentation.ts` en serverless |
-| 1.5 — Geo sin fetch externo | ✅ hecho (usa cabecera `x-nf-geo-country`, sin llamada a ipapi.co) |
-| 2.1 — Cifrar `totpSecret` | ✅ hecho (AES-256-GCM en `src/lib/crypto/totp-secret.ts`, env `ENCRYPTION_KEY`; cifra en enable, descifra en verify; secreto existente re-cifrado; fallback a texto plano legado; con tests) |
-| 2.2 — Reducir tolerancia TOTP | ✅ hecho (`epochTolerance: 1` en enable y verify) |
-| 2.3 — Rate limit en 2FA/TOTP verify | ✅ hecho (scope `2fa-verify`, 5/10min, aplicado en ambos endpoints) |
-| 2.4 — Cabeceras de seguridad HTTP | ✅ hecho (CSP, X-Frame, HSTS, etc. en `next.config.mjs`) |
-| 2.5 — Validar `event.type` en webhooks | ✅ hecho (`HANDLED_TYPES` guard en Stripe y PayPal) |
-| 3.1 — Zod en bodies de API | ✅ hecho (zod instalado; helper `src/lib/validation.ts`; aplicado a las 24 rutas con body JSON: auth, account, cart, checkout, payments, admin; webhooks usan body crudo, no aplica; con tests) |
+| 0.1 — `.db` fuera del historial Git | ✅ git purgado · ⚠️ **rotación de secretos manual SIGUE PENDIENTE** |
+| 0.2 — Sin secretos hardcodeados | ✅ verificado |
+| 1.1 — SQLite → PostgreSQL (Neon) | ✅ hecho · ⚠️ usar URL **pooled** en `DATABASE_URL` de Netlify |
+| 1.2 — Avatares en Postgres (`UserAvatar`) | ✅ hecho |
+| 1.3 — Cron en Netlify | ✅ hecho |
+| 1.4 — Runtime Next.js en Netlify | ✅ hecho |
+| 1.5 — Geo sin fetch externo | ✅ hecho (verificado en `middleware.ts`) |
+| 2.1 — Cifrar `totpSecret` (AES-256-GCM) | ✅ hecho |
+| 2.2 — Tolerancia TOTP reducida | ✅ hecho |
+| 2.3 — Rate limit en 2FA/TOTP | ✅ hecho |
+| 2.4 — Cabeceras de seguridad | ✅ hecho · ⚠️ CSP débil, ver tarea 7.1 |
+| 2.5 — Validación `event.type` webhooks | ✅ hecho |
+| 3.1 — Zod en bodies de API | ✅ hecho |
 | 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
-| 3.3 — Logging / Sentry | ⬜ pendiente |
-| 3.4 — CI GitHub Actions | ✅ hecho (`.github/workflows/ci.yml`: tsc + vitest + build) |
-| 3.5 — Tests de integración | ⬜ pendiente |
+| 3.3 — Sentry | ✅ **HECHO** (verificado: `withSentryConfig` en `next.config.mjs`, configs server/edge/client) — la v1 lo marcaba pendiente por error |
+| 3.4 — CI GitHub Actions | ✅ hecho |
+| 3.5 — Tests de integración | ⬜ pendiente (7 archivos de test unitario actuales) |
+| 4.1 — SEO básico (sitemap/robots/OG/Search Console) | ✅ hecho |
+| 4.1b — SEO avanzado (metadata por juego + JSON-LD) | ⬜ **pendiente** (verificado: `games/[slug]/page.tsx` sigue siendo client component) → ver FASE 8 |
+| 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
+| 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
+| **FASE 6 — Rendimiento** | ⬜ **NUEVA — prioridad máxima** (la home tarda en cargar; causa identificada) |
+| **FASE 7 — Seguridad avanzada** | ⬜ NUEVA |
+| **FASE 8 — SEO avanzado** | ⬜ NUEVA (absorbe 4.1b) |
+| **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
+| **FASE 10 — Testing y robustez** | ⬜ NUEVA (absorbe 3.5) |
 
-**Bloqueadores de deploy en Netlify RESUELTOS:** 1.1 (Postgres) ✅ y 1.2 (avatares) ✅. Ya no quedan bloqueadores de runtime. Pendiente operativo antes de producción: usar URL **pooled** (`-pooler`) en `DATABASE_URL` de Netlify (ahora apunta a la directa), y rotación de secretos de la tarea 0.1.
-
----
-
-## FASE 0 — CRÍTICO INMEDIATO (hacer antes que nada)
-
-### 0.1 — Eliminar la base de datos real del historial de Git  🔴 CRÍTICO  ✅ HECHO (git) / ⚠️ rotación manual pendiente
-- **Problema:** `backups/dev-pre-api-info-2026-06-02.db` está trackeado en el repo público.
-  Contiene datos reales (emails, password hashes, pedidos).
-- **Acción:**
-  1. `git rm --cached backups/dev-pre-api-info-2026-06-02.db`
-  2. Purgar del historial completo con `git filter-repo --path backups/dev-pre-api-info-2026-06-02.db --invert-paths`
-     (o BFG Repo-Cleaner). Un `git rm` simple NO basta.
-  3. Force push (`git push --force`) tras coordinar.
-  4. **Rotar TODOS los secretos** como si estuvieran comprometidos: `SESSION_SECRET`,
-     `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, claves PayPal, SMTP, OAuth, `CRON_SECRET`.
-  5. Forzar reset de contraseña a cualquier usuario real que estuviera en ese `.db`.
-- **Verificar:** `git log --all --full-history -- "backups/*.db"` no devuelve nada.
-
-### 0.2 — Confirmar que ningún secreto está hardcodeado  🔴  ✅ HECHO
-- Revisar que `SESSION_SECRET` esté en env (los fallbacks dev en `session.ts:25` y
-  `oauth.ts:38` ya lanzan error en producción — correcto, mantener).
-- **Verificar:** `validateEnv()` lanza si falta `SESSION_SECRET` o `DATABASE_URL` en prod.
+**Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
 
 ---
 
-## FASE 1 — BLOQUEADORES PARA NETLIFY (sin esto no despliega)
+## FASES 0–5 (v1) — resumen
 
-### 1.1 — Migrar SQLite → PostgreSQL  🔴 BLOQUEADOR  ⬜ PENDIENTE
-- **Problema:** `schema.prisma` usa `provider = "sqlite"` con fichero local. Netlify es
-  serverless: filesystem efímero, sin estado entre invocaciones.
-- **Acción:**
-  1. Provisionar Postgres gestionado (recomendado: **Neon**, tier gratis + driver serverless).
-  2. `schema.prisma`: cambiar `provider = "postgresql"`.
-  3. Revisar tipos: SQLite es laxo; Postgres es estricto. Los campos `*Json String` siguen
-     siendo `String` (OK), pero verificar defaults y `@db.Text` donde haga falta para
-     descripciones largas (`longDescription`, `requirements`).
-  4. Generar migración inicial limpia para Postgres (`prisma migrate dev`).
-  5. Setear `DATABASE_URL` en Netlify con la connection string (usar pooled connection de Neon).
-- **Verificar:** `prisma migrate deploy` corre limpio; la app arranca contra Postgres.
-
-### 1.2 — Mover almacenamiento de avatares a blob storage  🔴 BLOQUEADOR (también es vuln A3)  ⬜ PENDIENTE
-- **Problema:** `avatar/route.ts:43-44` hace `fs.writeFile` a `public/avatars/`. El FS de
-  Netlify es de solo lectura/efímero → falla en producción.
-- **Acción:**
-  1. Elegir backend: **Netlify Blobs** (nativo) o Cloudinary / Cloudflare R2 / S3.
-  2. Reescribir el handler para subir al blob store y guardar la URL pública en `avatarUrl`.
-  3. **Aprovechar para arreglar las sub-vulnerabilidades:**
-     - Límite de tamaño máximo (~2 MB) antes de procesar.
-     - Validar *magic bytes* reales (no confiar en `file.type`, que lo controla el cliente).
-     - Acotar extensiones a jpg/png/webp por contenido real.
-  4. Eliminar la variable `updatedUser` sin usar / limpieza.
-- **Verificar:** subida funciona en build de producción; rechaza ficheros >2 MB y no-imágenes.
-
-### 1.3 — Recrear el cron de Vercel en Netlify  🔴 BLOQUEADOR  ✅ HECHO
-- **Problema:** `vercel.json` define cron `0 5 * * *` → `/api/cron/sync-catalogs`. Netlify NO
-  lee `vercel.json`.
-- **Acción:**
-  1. Crear `netlify.toml` con una **Scheduled Function** que invoque `/api/cron/sync-catalogs`.
-  2. El endpoint ya valida `Bearer CRON_SECRET` (`cron/sync-catalogs/route.ts:12`) — mantener,
-     setear `CRON_SECRET` en Netlify.
-  3. Borrar `vercel.json` (o dejarlo documentado como legacy si se quiere doble target).
-- **Verificar:** la scheduled function dispara y responde 200 con el secreto correcto, 401 sin él.
-
-### 1.4 — Configurar el runtime de Next.js para Netlify  🔴 BLOQUEADOR  ✅ HECHO (revisar instrumentation.ts)
-- **Acción:**
-  1. Instalar/activar `@netlify/plugin-nextjs` (o el runtime nativo de Next en Netlify).
-  2. `netlify.toml`: build command (`npm run build` ya incluye `prisma generate`), publish dir,
-     y declarar todas las env vars necesarias.
-  3. Revisar `instrumentation.ts`: `ensureMasterAdminUser()` en startup puede NO ejecutarse de
-     forma fiable en serverless. Alternativas: moverlo a seed de migración, o a un endpoint
-     protegido de inicialización idempotente que se llame una vez tras el deploy.
-- **Verificar:** deploy de prueba en Netlify arranca y sirve páginas + APIs.
-
-### 1.5 — Sustituir la geolocalización síncrona del middleware  🟠 ALTA (vuln A2)  ✅ HECHO
-- **Problema:** `middleware.ts:22` hace `fetch("https://ipapi.co/json/")` en cada request a
-  página pública. Bloquea el render, depende de un servicio externo, y es caro en Edge.
-- **Acción:**
-  1. Usar la geo que Netlify ya inyecta (`context.geo` / cabecera `x-nf-geo`) — cero latencia.
-  2. Si se quiere fallback, hacerlo client-side y cacheado, NUNCA bloqueando el middleware.
-  3. Mantener las cookies `geoCountry/geoCurrency/geoLocale` pero pobladas desde la geo nativa.
-- **Verificar:** middleware no hace fetch externo; las cookies se siguen poblando.
+Las fases 0–3 están completas salvo 3.2 (Upstash, opcional) y 3.5 (absorbida por FASE 10).
+La fase 4 está completa salvo 4.1b (absorbida por FASE 8) y 4.2 (dominio, manual).
+La fase 5 (roadmap: Xbox API, GA4, reseñas, wishlist, PWA, cupones) sigue vigente como futuro.
+El detalle histórico completo está en el commit anterior de este archivo (`git log -- docs/PLAN-MEJORAS-AUDITORIA.md`).
 
 ---
 
-## FASE 2 — SEGURIDAD (severidad alta/media)
+## FASE 6 — RENDIMIENTO  🔴 PRIORIDAD MÁXIMA
 
-### 2.1 — Cifrar `totpSecret` en reposo  🟠 ALTA (vuln A1)  ⬜ PENDIENTE
-- **Problema:** `totpSecret` se guarda en texto plano (`schema.prisma:43`,
-  `totp/enable/route.ts:66`). Si la DB se filtra, se pueden generar códigos 2FA de cualquiera.
+> **Síntoma reportado por el usuario:** la página tarda mucho en cargar.
+> **Causa raíz identificada en la auditoría (verificada en código):** la home es 100% client-side.
+> La cadena actual es: HTML vacío → descarga JS → hidratación → `fetch /api/products` +
+> `fetch /api/home/hero` (ambos con `cache: "no-store"`) → consulta a Neon (Frankfurt) en frío →
+> render. Cada visita paga TODA la cadena; nada se cachea en ningún nivel.
+
+### 6.1 — Convertir la home a Server Component con datos precargados  🔴 CRÍTICO
+- **Problema:** `src/app/page.tsx` es `"use client"` y carga productos y hero por fetch en
+  `useEffect` con `cache: "no-store"` (líneas 156-188). `src/app/api/products/route.ts` es
+  `force-dynamic` y consulta la DB en cada request.
+- **Acción (patrón igual al planificado para la ficha de juego en FASE 8 — hacer ambos con el mismo criterio):**
+  1. Crear `src/app/HomeClient.tsx` con `"use client"`: mover ahí TODO el contenido actual de
+     `page.tsx` (búsqueda, scoring, filtros, Hero, GameGrid), recibiendo `initialProducts` y
+     `initialHeroSections` por props.
+  2. Convertir `src/app/page.tsx` en server component (sin `"use client"`): llamar directamente a
+     `listActiveProducts()` y a la lógica de hero (extraerla de `api/home/hero/route.ts` a
+     `src/lib/home-hero.ts` para reutilizarla) y pasar los datos a `<HomeClient>`.
+  3. Envolver la carga de productos con `unstable_cache` (tag `products`, `revalidate: 300`).
+  4. Llamar a `revalidateTag("products")` en las mutaciones de admin que crean/editan/borran
+     productos, para que el catálogo se refresque al instante tras un cambio.
+  5. Los likes del usuario NO van en el payload cacheado: hidratarlos client-side tras el load
+     con un endpoint ligero `GET /api/products/likes` (solo ids), únicamente si hay cookie de sesión.
+  6. Mantener `/api/products` como está para compatibilidad (lo usan otras vistas), pero la home
+     ya no dependerá de él.
+- **Resultado esperado:** el HTML llega con el catálogo ya renderizado (LCP inmediato), la DB se
+  consulta como máximo una vez cada 5 min, y la interactividad (búsqueda/filtros) no cambia.
+- **Verificar:** la home renderiza productos sin JS (ver código fuente de la página); búsqueda,
+  filtros, likes y carrito siguen funcionando; `npm run build` muestra la ruta `/` como dinámica
+  con caché o estática.
+
+### 6.2 — Recortar el payload del catálogo  🟠 ALTA
+- **Problema:** `/api/products` y ahora el server fetch devuelven TODOS los campos de TODOS los
+  productos (incl. `description` completa) para pintar tarjetas que solo usan nombre, imagen,
+  precio y plataforma. Con el catálogo creciendo, el payload crece linealmente.
 - **Acción:**
-  1. Nueva env var `ENCRYPTION_KEY` (32 bytes, base64).
-  2. Cifrar con AES-256-GCM al guardar; descifrar solo al verificar.
-  3. Migración para re-cifrar secretos existentes (o forzar re-setup de TOTP a usuarios).
-- **Verificar:** el valor en DB es ciphertext; el flujo de verificación TOTP sigue funcionando.
+  1. Crear un selector "preview" en `src/lib/products.ts` con solo los campos que usa `GameCard`
+     (revisar el componente para la lista exacta; `description` solo si la búsqueda la usa —
+     la usa el scoring: en ese caso truncarla a ~200 chars para el índice de búsqueda).
+  2. Aplicarlo en la home (6.1) y en `/api/products`.
+- **Verificar:** la respuesta del catálogo baja de tamaño (medir antes/después con DevTools);
+  las tarjetas y la búsqueda se ven/funcionan igual.
 
-### 2.2 — Reducir la ventana de tolerancia TOTP  🟠 ALTA (vuln A4)  ✅ HECHO
-- **Problema:** `totp/enable/route.ts:54` usa `epochTolerance: 30`. Verificar la semántica exacta
-  en la versión de `otplib` instalada — si son periodos de 30s, eso es ±15 min (excesivo).
-- **Acción:** reducir a la tolerancia mínima razonable (±1 periodo / ±30s). Revisar también el
-  endpoint `totp/verify`.
-- **Verificar:** códigos viejos (>1 min) son rechazados; el código actual se acepta.
+### 6.3 — Skeletons en lugar de texto "Cargando..."  🟡 MEDIA (percepción de velocidad)
+- **Problema:** mientras carga, la home muestra un párrafo "Cargando productos...". La percepción
+  de lentitud empeora.
+- **Acción:**
+  1. Crear `src/app/loading.tsx` (convención App Router) con un skeleton del grid: 8-12
+     tarjetas grises con `animation: pulse`. Reutilizar las clases/dimensiones reales de
+     `GameCard` para que no haya salto de layout (CLS).
+  2. Tras 6.1 apenas se verá, pero cubre navegaciones lentas y rutas aún client-side.
+- **Verificar:** al navegar con red lenta (DevTools → Slow 3G) se ven skeletons, no texto plano.
 
-### 2.3 — Rate limit en endpoints de verificación 2FA/TOTP  🟡 MEDIA (vuln M1)  ✅ HECHO
-- **Problema:** `rate-limit.ts:12` solo cubre `register/verify/resend/login`. `/api/auth/2fa/verify`
-  y `/api/auth/totp/verify` no tienen límite → brute-force del código de 6 dígitos.
-- **Acción:** añadir scope `2fa-verify` (p.ej. 5 intentos / 10 min por IP+usuario) y aplicarlo
-  en ambos endpoints.
-- **Verificar:** tras N intentos fallidos se devuelve 429.
+### 6.4 — Imágenes: placeholders blur y `sizes` correctos  🟡 MEDIA
+- **Estado actual:** `GameCard` y `Hero` ya usan `next/image` y el Hero ya tiene `priority` ✓.
+- **Acción:**
+  1. Revisar que las `<Image>` del grid tengan `sizes` acorde al layout real (p. ej.
+     `(max-width: 768px) 50vw, 25vw`) para que Next sirva resoluciones pequeñas en móvil.
+  2. Añadir `placeholder="blur"` con `blurDataURL` (un SVG/base64 genérico oscuro #22242A vale;
+     no hace falta generar blur por imagen).
+- **Verificar:** en DevTools → Network, las imágenes del grid en móvil pesan menos; no hay CLS.
 
-### 2.4 — Cabeceras de seguridad HTTP  🟡 MEDIA (vuln M4)  ✅ HECHO
-- **Acción:** añadir en `next.config.mjs` (`headers()`) o `netlify.toml`:
-  `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
-  `Referrer-Policy: strict-origin-when-cross-origin`, `Strict-Transport-Security`.
-  Ajustar la CSP a los dominios de imágenes ya listados en `next.config.mjs`.
-- **Verificar:** las cabeceras aparecen en las respuestas; el sitio sigue cargando imágenes/scripts.
-
-### 2.5 — Validación de tipo de evento antes del cast en webhooks  🟡 MEDIA (vuln M2)  ✅ HECHO
-- **Acción:** en `stripe/webhook/route.ts` y `paypal/webhook/route.ts`, validar `event.type`
-  antes de hacer `as Stripe.Checkout.Session`. Confirmar que el `fallbackEmail` dummy de PayPal
-  nunca se usa como destinatario real (se recupera por `userId` en `completePaidOrder` — OK,
-  pero blindar).
-- **Verificar:** eventos de tipo inesperado no provocan acceso a campos inexistentes.
-
----
-
-## FASE 3 — CALIDAD DE CÓDIGO Y ROBUSTEZ
-
-### 3.1 — Introducir Zod para validación de bodies de API  🟡 (vuln M3)
-- **Problema:** los bodies se castean con `as Type` sin validación runtime (todas las rutas).
-- **Acción:** añadir `zod`, definir esquemas por endpoint, parsear y devolver 400 con detalle.
-  Empezar por las rutas sensibles: login, register, checkout, reset-password.
-- **Verificar:** inputs malformados devuelven 400 estructurado; tipos garantizados en runtime.
-
-### 3.2 — Rate limiting distribuido (opcional pero recomendado)
-- El rate limit actual (`RateLimitBucket` en DB) ya es atómico tras el último fix, pero carga la
-  DB principal. Para escala, migrar a **Upstash Redis**. No es bloqueador.
-
-### 3.3 — Logging y observabilidad
-- Sustituir los `.catch(() => false)` silenciosos por logging consistente con `logger`.
-- Integrar **Sentry** para errores de producción.
-
-### 3.4 — CI en GitHub Actions  ✅ HECHO
-- Workflow que corra `tsc --noEmit` + `eslint` + `vitest run` + `build` en cada PR.
-- Los scripts ya existen en `package.json`; solo falta el `.github/workflows/ci.yml`.
-
-### 3.5 — Tests de integración
-- Solo hay 9 tests unitarios (auth/games/oauth). Añadir cobertura para: flujo de checkout
-  completo, idempotencia de webhooks (Stripe manda evento doble, PayPal manda 2), y rotación
-  de sesión.
+### 6.5 — Medición objetiva (antes y después)  🟡 MEDIA
+- **Acción:** correr Lighthouse (Chrome DevTools, modo incógnito, Performance) sobre la home en
+  producción ANTES de empezar la fase y DESPUÉS de 6.1-6.4. Guardar ambos reports en
+  `docs/lighthouse/` (JSON o captura).
+- **Objetivo:** Performance ≥ 90 móvil, LCP < 2.5s, CLS < 0.1.
+- **Nota:** sin medición no se puede afirmar mejora. Este paso no es opcional.
 
 ---
 
-## Orden de ejecución recomendado
+## FASE 7 — SEGURIDAD AVANZADA  🟠
 
-1. **FASE 0** — antes de cualquier otra cosa (fuga de datos activa).
-2. **FASE 1** — para que el deploy en Netlify sea posible.
-3. **FASE 2** — endurecer seguridad antes de exponer en producción.
-4. **FASE 3** — calidad continua, se puede iterar tras el primer deploy.
+> Lo crítico ya está hecho (fases 0-2). Esto es endurecimiento de nivel producción real.
 
-## Comandos de verificación (tras cada fase)
+### 7.1 — Endurecer la CSP: eliminar `unsafe-eval`, plan para `unsafe-inline`  🟠 ALTA
+- **Problema:** `next.config.mjs:12` → `script-src 'self' 'unsafe-inline' 'unsafe-eval' ...`.
+  `unsafe-eval` + `unsafe-inline` anulan gran parte de la protección XSS de la CSP: un atacante
+  que logre inyectar HTML puede ejecutar scripts.
+- **Acción (incremental, con cuidado):**
+  1. Quitar `'unsafe-eval'` y probar el build de producción completo (Next en prod no necesita
+     eval; el dev server sí — si rompe dev, condicionar la cabecera por `NODE_ENV`).
+  2. Probar exhaustivamente Stripe y PayPal tras el cambio (son los terceros del `script-src`).
+  3. `'unsafe-inline'` en `script-src`: dejarlo de momento (Next inyecta inline scripts);
+     anotar como deuda la migración a CSP con nonce vía middleware cuando Next/Netlify lo
+     soporten bien. NO intentar nonces ahora: alto riesgo de romper hidratación.
+- **Verificar:** sin errores CSP en consola en: home, ficha, auth, checkout Stripe y PayPal
+  completos en producción.
+
+### 7.2 — Rotación de secretos (recordatorio de 0.1)  🔴 MANUAL PENDIENTE
+- Sigue pendiente desde la v1. Mientras no se haga, los secretos que convivieron con el `.db`
+  filtrado deben considerarse comprometidos: `SESSION_SECRET`, claves Stripe/PayPal, SMTP,
+  OAuth, `CRON_SECRET`, `ENCRYPTION_KEY`.
+- **Acción (usuario, ~30 min):** regenerar cada secreto en su panel (Stripe, PayPal, Google,
+  etc.), actualizar env vars en Netlify, redeploy, forzar reset de contraseña a usuarios reales
+  del `.db` antiguo.
+
+### 7.3 — Cookie del carrito anónimo legible por JS  🟡 MEDIA
+- **Problema:** `middleware.ts:65` crea `gamezone_cart_session` con `httpOnly: false`.
+- **Acción:** comprobar si el código cliente lee esa cookie (`grep -rn "gamezone_cart_session" src/`).
+  - Si NO la lee nadie en cliente → cambiar a `httpOnly: true`.
+  - Si SÍ la lee → dejarla, pero documentar el porqué en un comentario en el middleware
+    (decisión consciente, impacto bajo: solo identifica un carrito anónimo).
+- **Verificar:** carrito anónimo sigue funcionando en pestañas nuevas/incógnito.
+
+### 7.4 — Auditoría de dependencias automatizada  🟡 MEDIA
+- **Acción:**
+  1. Correr `npm audit --omit=dev` y resolver lo que salga high/critical.
+  2. Añadir `npm audit --omit=dev --audit-level=high` como step del CI (que falle el build).
+  3. Activar **Dependabot** en GitHub (`.github/dependabot.yml`, ecosistema npm, weekly).
+- **Verificar:** CI falla si entra una dependencia con CVE high; PRs de Dependabot llegan.
+
+### 7.5 — Protección anti-bot en registro  🔵 OPCIONAL
+- Si empieza a haber registros basura: **Cloudflare Turnstile** (gratis, sin fricción de
+  usuario) en register y reset-password. No implementar hasta que haya señal del problema.
+
+---
+
+## FASE 8 — SEO AVANZADO  🟠
+
+> El SEO básico (sitemap, robots, OG global, Search Console) está hecho. Esto es lo que hace
+> que cada juego aparezca en Google con su propio título, precio y estrellas.
+
+### 8.1 — `generateMetadata` por juego (split server/client)  🟠 ALTA
+- **Problema (verificado):** `src/app/games/[slug]/page.tsx` es `"use client"` → todas las
+  fichas comparten el metadato genérico del layout. Google las ve idénticas.
+- **Acción (el mismo patrón que la home en 6.1 — hacer después de 6.1 para reaprovechar el criterio):**
+  1. Mover toda la UI actual a `src/app/games/[slug]/GameDetailClient.tsx` (`"use client"`),
+     recibiendo el producto por props.
+  2. `page.tsx` pasa a server component: lee el producto por slug desde Prisma
+     (reutilizar/crear helper en `src/lib/products.ts`), maneja inexistente con `notFound()`,
+     y renderiza `<GameDetailClient product={...}>`.
+  3. Exportar `generateMetadata({ params })`: title = nombre del juego, description = corta del
+     producto, `openGraph.images` = `coverImage` del producto (cada juego con su preview real al
+     compartirlo, no el logo), canonical = `/games/[slug]`.
+  4. El producto viaja por props — eliminar el fetch client-side duplicado.
+- **Precaución:** probar añadir al carrito, likes y galería tras el split. Commit separado.
+- **Verificar:** `view-source:` de una ficha muestra title/OG propios; carrito y likes funcionan.
+
+### 8.2 — JSON-LD `Product` por ficha  🟠 ALTA
+- **Acción:** en el `page.tsx` server de 8.1, inyectar
+  `<script type="application/ld+json">` con schema.org `Product`: `name`, `image`,
+  `description`, `offers` (`price` final calculado, `priceCurrency: "EUR"`, `availability`
+  según stock) y `aggregateRating` solo si hay rating con count > 0.
+- **Verificar:** [Rich Results Test](https://search.google.com/test/rich-results) valida la
+  ficha sin errores.
+
+### 8.3 — JSON-LD `WebSite` + `Organization` en la home  🟡 MEDIA
+- **Acción:** en el `page.tsx` server de la home (tras 6.1), añadir schema `WebSite` con
+  `potentialAction: SearchAction` (target `/?q={search_term_string}` — la home ya soporta `?q=`)
+  y `Organization` con logo. Esto habilita la caja de búsqueda en resultados de Google.
+- **Verificar:** Rich Results Test reconoce el SearchAction.
+
+### 8.4 — Idioma declarado vs idioma real  🟡 MEDIA
+- **Problema:** `layout.tsx` fija `<html lang="es">` pero la UI tiene textos en/es vía
+  `useLocale`. Para buscadores y lectores de pantalla el sitio declara solo español.
+- **Acción (mínima, sin i18n de rutas):** decidir el idioma canónico (es) y mantenerlo, PERO
+  unificar los textos visibles: hoy hay strings hardcodeados mezclados. Crear
+  `src/lib/i18n.ts` con un diccionario simple `{ es: {...}, en: {...} }` y migrar los textos de
+  los componentes principales (Header, Hero, GameGrid, CartDrawer, Footer). NO montar rutas
+  `/en/*` todavía (eso es FASE 5 / futuro).
+- **Verificar:** cambiar de idioma no deja textos mezclados en la home ni en la ficha.
+
+### 8.5 — Dominio propio (recordatorio de 4.2)  🟠 MANUAL
+- Sin dominio propio el SEO competirá siempre con handicap. ~10-15 €/año. Tras configurarlo:
+  actualizar `APP_BASE_URL`, OAuth redirects, webhooks Stripe/PayPal, y `metadataBase`.
+
+---
+
+## FASE 9 — UI/UX
+
+> Parte A = calidad base que toda tienda real necesita (hacer). Parte B = modernización
+> estética OPCIONAL — el usuario está satisfecho con su diseño actual; son propuestas
+> inspiradas en tiendas reales (Instant Gaming, Eneba, G2A, Epic) para valorar una a una.
+> **NO implementar la Parte B sin que el usuario elija qué puntos quiere.**
+
+### Parte A — Calidad base (hacer)
+
+### 9.1 — Estados de error y carga por ruta  🟠 ALTA
+- **Problema (verificado):** no existe ningún `loading.tsx` ni `error.tsx` por ruta (solo
+  `global-error.tsx`). Un error en la ficha de un juego tumba la página entera sin recuperación.
+- **Acción:** añadir `src/app/error.tsx` (client, con botón "Reintentar" que llame a `reset()`)
+  y los `loading.tsx` de 6.3. Estilo coherente con el tema oscuro actual.
+- **Verificar:** forzar un throw en una página → se ve la pantalla de error con retry, no un
+  crash en blanco.
+
+### 9.2 — Estado vacío de búsqueda con sugerencias  🟡 MEDIA
+- **Problema:** buscar algo sin resultados deja el grid vacío sin guía.
+- **Acción:** en `GameGrid`, cuando `isFiltered && games.length === 0`: mensaje claro
+  ("Sin resultados para «X»"), botón "Limpiar búsqueda", y 4 productos populares como
+  sugerencia (los de mayor `discountPercent` o rating ya disponibles en el listado completo).
+- **Verificar:** buscar "asdfgh" muestra el estado vacío con sugerencias clicables.
+
+### 9.3 — Accesibilidad base  🟡 MEDIA
+- **Acción (auditar y corregir, no rediseñar):**
+  1. Foco visible: comprobar que todos los elementos interactivos tienen `:focus-visible` con
+     outline perceptible sobre fondo oscuro (globals.scss).
+  2. Botones de icono (carrito, like, cerrar drawer) con `aria-label`.
+  3. `prefers-reduced-motion`: envolver animaciones/transiciones grandes en
+     `@media (prefers-reduced-motion: no-preference)`.
+  4. Contraste: verificar textos secundarios grises sobre #22242A con un checker (ratio ≥ 4.5:1).
+  5. El CartDrawer debe poder cerrarse con `Escape` y atrapar el foco mientras está abierto.
+- **Verificar:** navegación completa home → ficha → carrito → checkout solo con teclado.
+
+### 9.4 — Consistencia de textos (ver 8.4)  🟡 MEDIA
+- La unificación i18n de 8.4 es también una tarea UX. Misma tarea, no duplicar.
+
+### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
+
+> Inspirado en patrones estándar de las tiendas de videojuegos actuales. Cada punto es
+> independiente. El diseño actual (tema oscuro #22242A, grid de tarjetas, hero) se mantiene
+> como base — esto son capas encima, no un rediseño.
+
+- **B1 — Fila de confianza** bajo el hero: iconos de "Entrega inmediata", "Pago seguro"
+  (logos Visa/Mastercard/PayPal), "Soporte 24h". Patrón universal en Eneba/Instant Gaming/G2A;
+  es lo que más "tienda real" transmite de toda la lista. Coste: bajo (HTML+SCSS).
+- **B2 — Chips de filtro** sobre el grid: género/plataforma/oferta como botones-píldora
+  clicables, en lugar de solo búsqueda por texto. Coste: medio (los datos de género ya existen
+  vía RAWG).
+- **B3 — Micro-interacciones en tarjetas:** hover con `transform: translateY(-4px)` + sombra +
+  zoom sutil de la imagen (`scale(1.05)` con `overflow: hidden`). Respetar
+  `prefers-reduced-motion`. Coste: bajo.
+- **B4 — CTA pegajoso en ficha móvil:** barra inferior fija con precio + "Añadir al carrito"
+  al hacer scroll en la ficha (patrón Epic/Steam móvil). Coste: bajo-medio.
+- **B5 — "Vistos recientemente":** carrusel al final de la home/ficha con los últimos 6 juegos
+  visitados (localStorage, sin backend). Coste: bajo.
+- **B6 — Wishlist visible:** ya existe `ProductLike` en el modelo — exponer los likes como
+  "Mi lista" en el menú de cuenta y un corazón en las tarjetas. Coste: medio (la base ya está).
+- **B7 — Cuenta atrás en ofertas:** si un producto tiene oferta con fecha fin, mostrar countdown
+  en la tarjeta (urgencia, patrón Instant Gaming). Requiere campo `saleEndsAt` en Product.
+  Coste: medio.
+- **B8 — Tipografía display propia:** una fuente de título gaming (p. ej. una grotesk condensada)
+  vía `next/font/local` solo para h1/h2/hero, manteniendo system-ui en el cuerpo (que es óptimo
+  para rendimiento). Cambia mucho la personalidad con poco coste. Coste: bajo.
+
+---
+
+## FASE 10 — TESTING Y ROBUSTEZ  🟡
+
+### 10.1 — Tests de integración de los flujos críticos (absorbe 3.5)  🟠 ALTA
+- **Estado:** 7 archivos de test unitario (session ×2, oauth, order-service, totp-secret,
+  games, validation). Los flujos de dinero no tienen test de integración.
+- **Acción (en Vitest, mockeando Stripe/PayPal con sus payloads reales):**
+  1. **Idempotencia de webhooks:** el mismo `checkout.session.completed` dos veces NO crea dos
+     pedidos ni manda dos emails. Ídem PayPal.
+  2. **Checkout completo:** carrito → orden creada → webhook → orden pagada → stock/estado correcto.
+  3. **Rotación de sesión:** login → token válido → logout → token inválido. Login con 2FA activo
+     exige el segundo factor.
+- **Verificar:** `npx vitest run` verde; los tests fallan si se rompe la idempotencia (probar
+  rompiéndola a propósito una vez).
+
+### 10.2 — E2E reales con Playwright  🟡 MEDIA
+- **Estado:** existen scripts e2e a medida (`scripts/e2e-*.mjs`) — útiles pero frágiles y fuera
+  del runner estándar.
+- **Acción:** montar Playwright con 3 specs: (1) compra completa con tarjeta test de Stripe,
+  (2) registro + verificación + login, (3) búsqueda + añadir al carrito + persistencia tras
+  recargar. Integrarlo como job manual/nightly en CI (no en cada PR, es lento).
+- **Verificar:** `npx playwright test` verde en local contra build de producción.
+
+### 10.3 — CI ampliado  🟡 MEDIA
+- **Acción:** al workflow actual (tsc + vitest + build) añadir: `eslint`, `npm audit
+  --audit-level=high` (de 7.4), y opcionalmente **Lighthouse CI** contra el deploy preview de
+  Netlify con presupuesto (Performance ≥ 85) para que una regresión de rendimiento falle el PR.
+- **Verificar:** un PR con un error de lint o una dependencia vulnerable no pasa el CI.
+
+### 10.4 — Operacional  🟡 MEDIA (manual, usuario)
+- **Backups:** confirmar el plan de Neon (el tier gratis tiene restore limitado — revisar
+  retención y hacer un dump mensual `pg_dump` a local como red de seguridad).
+- **Uptime:** monitor gratuito (UptimeRobot/BetterStack) sobre la home y `/api/products` con
+  alerta a email.
+- **Sentry:** revisar que las alertas por email estén activadas para errores nuevos en
+  producción (ya está integrado; es solo configuración del panel).
+
+---
+
+## ORDEN DE EJECUCIÓN RECOMENDADO
+
+1. **FASE 6** (rendimiento) — es el dolor actual del usuario y además mejora SEO (Core Web Vitals).
+   Orden interno: 6.1 → 6.2 → 6.3 → 6.4 → 6.5.
+2. **FASE 8.1 + 8.2** (SEO por ficha) — reutiliza el patrón server/client de 6.1 recién aprendido.
+3. **FASE 9 Parte A** (calidad UX base).
+4. **FASE 7** (seguridad avanzada) — 7.2 (rotación) puede y debe hacerla el usuario en paralelo desde ya.
+5. **FASE 10** (testing).
+6. **FASE 9 Parte B** — solo los puntos que el usuario elija.
+7. FASE 5 (roadmap futuro) según interés.
+
+## Comandos de verificación (tras cada tarea)
 ```
 npx tsc --noEmit
 npx vitest run
 npm run build
 ```
 
-## Tecnologías a incorporar (resumen)
-- **Zod** — validación runtime (mayor impacto/coste).
-- **PostgreSQL (Neon)** — reemplazo obligatorio de SQLite.
-- **Netlify Blobs / Cloudinary / R2** — avatares.
-- **Upstash Redis** — rate limit distribuido (opcional).
-- **Sentry** — observabilidad.
-- **@netlify/plugin-nextjs** — runtime de despliegue.
-- **GitHub Actions** — CI.
-
----
-
-## FASE 4 — MEJORAS IMPORTANTES (próximas iteraciones)
-
-> Estas mejoras no son bloqueadoras pero son necesarias para que GameZone sea una aplicación real y profesional.
-
-### 4.1 — SEO básico  🟠 ALTA
-- **Problema:** el sitio no aparece en Google ni en buscadores. No hay `sitemap.xml`, `robots.txt` ni metadatos Open Graph.
-- **Acción:**
-  1. Generar `sitemap.xml` dinámico con todas las rutas públicas y productos (Next.js `app/sitemap.ts`).
-  2. Añadir `robots.txt` permitiendo crawlers en rutas públicas y bloqueando `/api/`, `/admin/`, `/account/`.
-  3. Añadir metadatos Open Graph en cada página (título, descripción, imagen) para previews en redes sociales.
-  4. Registrar el sitio en **Google Search Console** y enviar el sitemap.
-  5. Usar un **dominio propio** (ej. `gamezoneshop.es`) en lugar de `gamezone-digital-store.netlify.app` — mejora el SEO y la credibilidad.
-- **Verificar:** `https://gamezone-digital-store.netlify.app/sitemap.xml` devuelve XML válido; Google Search Console muestra el sitio indexado.
-
-#### Estado a 11/06/2026 — qué está HECHO y qué FALTA
-
-**✅ HECHO (commit `bd2e9e9` + verificación Search Console):**
-- `src/app/sitemap.ts` (dinámico, lee productos activos de Prisma) y `src/app/robots.ts`.
-- Metadatos base + Open Graph + Twitter Card en `src/app/layout.tsx` (`metadataBase`, `title.template`, etc.).
-- Favicon `src/app/icon.svg`.
-- Verificación de propiedad en Google Search Console (etiqueta meta `verification.google` en `layout.tsx`, commit `6d37fa8`). **NO borrar esa etiqueta o se pierde la verificación.**
-- Sitemap enviado en Search Console (a la espera de primer rastreo de Google).
-
-**🔜 FALTA — SEO avanzado (hacer en sesión nueva con Opus, contexto fresco):**
-
-Objetivo: que cada ficha de juego tenga su propio título/descripción en Google y genere *rich snippets* (estrellas + precio). Hoy todas las fichas comparten el metadato genérico del layout porque `games/[slug]` es client component y no puede exportar `generateMetadata`.
-
-1. **`generateMetadata` por juego** en `src/app/games/[slug]`:
-   - Problema arquitectónico: la página es `"use client"`, y `generateMetadata` solo funciona en server components.
-   - Plan: separar en dos. Convertir `page.tsx` en **server component** que (a) lee el producto por slug desde Prisma, (b) exporta `generateMetadata({ params })` con title/description/openGraph propios (nombre del juego, precio, plataforma), y (c) renderiza un componente cliente hijo (mover la UI interactiva actual a `GameDetailClient.tsx` con `"use client"`).
-   - Pasar los datos del producto del server al cliente vía props (ya cargados en el server, evita doble fetch).
-   - `generateMetadata` debe manejar producto inexistente → `notFound()`.
-
-2. **JSON-LD (schema Product)** en esa misma página server:
-   - Inyectar un `<script type="application/ld+json">` con schema.org `Product`: `name`, `image`, `description`, `offers` (`price`, `priceCurrency: "EUR"`, `availability` según stock), y `aggregateRating` si hay `rating`/`ratingsCount`.
-   - Construir el objeto en el server y serializarlo con `JSON.stringify`.
-   - Validar luego en [Rich Results Test](https://search.google.com/test/rich-results).
-
-3. **Precauciones (importante):**
-   - Crear backup branch antes (`git checkout -b backup-pre-seo-avanzado-DDMMYYYY`).
-   - Commits pequeños y separados (uno para el split client/server, otro para JSON-LD).
-   - Verificar que NO se rompe la interactividad actual de la ficha (añadir al carrito, likes, galería) tras mover a `GameDetailClient.tsx`.
-   - `npx tsc --noEmit` limpio en cada paso.
-
-4. **Dominio propio** (ver 4.2) — coste ~10-15 €/año, lo configura el usuario. Mejora posicionamiento y confianza frente a `.netlify.app`.
-
-### 4.2 — Dominio propio  🟠 ALTA
-- **Problema:** `gamezone-digital-store.netlify.app` no transmite confianza ni es memorable. Los subdominios `.netlify.app` tienen menos peso en SEO.
-- **Acción:**
-  1. Registrar dominio (recomendado: `gamezoneshop.es`, `gamezone.store` o similar).
-  2. Configurarlo en Netlify (DNS + certificado SSL automático).
-  3. Actualizar `APP_BASE_URL`, OAuth redirect URIs (Google, Facebook), webhooks de Stripe y PayPal con el nuevo dominio.
-- **Verificar:** el sitio carga en el dominio propio con HTTPS; los redirects de OAuth funcionan.
-
-### 4.3 — Rate limiting distribuido (Upstash)  🟡 MEDIA
-- Ver tarea 3.2 — ya documentado. Prioritario si el sitio recibe tráfico real.
-
-### 4.4 — Emails transaccionales con plantillas HTML  🟡 MEDIA
-- **Problema:** los emails de confirmación de compra son texto plano. No representan bien la marca.
-- **Acción:** diseñar plantillas HTML responsive para: confirmación de pedido, reset de contraseña, verificación de cuenta, bienvenida.
-- **Verificar:** los emails se renderizan correctamente en Gmail, Outlook y móvil.
-
-### 4.5 — Panel de administración completo  🟡 MEDIA
-- **Problema:** el panel admin actual es básico. Falta gestión de pedidos, usuarios, y catálogo desde la UI.
-- **Acción:** añadir vistas para: gestión de pedidos (estado, reembolsos), gestión de usuarios (ban, roles), edición del catálogo de productos, métricas básicas de ventas.
-- **Verificar:** un admin puede gestionar pedidos y productos sin tocar la base de datos directamente.
-
-### 4.6 — Subida de imágenes de producto desde el equipo  🟠 ALTA
-- **Problema:** el formulario de crear/editar producto (`src/components/auth/AdminProductsPanel.tsx`)
-  solo acepta una **ruta escrita a mano** (`/games_data/.../cover.jpg`) o una URL externa de un
-  dominio permitido en `next.config.mjs` (RAWG, Steam, G2A). No hay botón para subir un archivo
-  desde el PC. En Netlify (serverless, FS de solo lectura) NO se puede escribir en `public/`, así
-  que un upload tradicional a disco no funciona.
-- **Acción (reutilizar el patrón de los avatares, tarea 1.2):**
-  1. Guardar los bytes de la imagen en PostgreSQL (tabla nueva `ProductImage` con `Bytes`, o blob
-     storage tipo Cloudinary/R2).
-  2. Servirla por una ruta `GET /api/admin/products/[id]/image` (o pública) y guardar esa URL en
-     `coverImage` / `backgroundImage`.
-  3. En el formulario: `<input type="file" accept="image/*">` + botón "Subir imagen"; al
-     seleccionar, subir vía `POST` y rellenar el campo con la URL resultante.
-  4. Validar en servidor: tamaño máx (~2-3 MB), magic bytes reales, redimensionar/convertir a webp
-     con `sharp` (ya está en el proyecto por los avatares).
-  5. Mantener compatibilidad: seguir aceptando rutas/URL existentes para no romper el catálogo.
-- **Nota de rendimiento:** NO incrustar la imagen como base64 en `coverImage`: el listado del
-  catálogo (`/api/products`) devuelve `coverImage` de todos los productos y dispararía el tamaño de
-  la respuesta. Servir siempre por URL/ruta API.
-- **Verificar:** un admin sube una imagen desde su PC, se guarda y se muestra en la ficha y en el
-  catálogo, en producción (Netlify).
-
----
-
-## FASE 5 — MEJORAS FUTURAS (roadmap a largo plazo)
-
-> Mejoras que añadirían valor significativo pero que requieren más tiempo de desarrollo o dependen de acuerdos con terceros.
-
-### 5.1 — Integración con la API de Xbox (Microsoft Store)  🔵 FUTURO
-- **Descripción:** conectar con la API de Xbox/Microsoft Store para importar catálogo de juegos Xbox, precios actualizados y disponibilidad en tiempo real.
-- **Requisito:** acceso a la [Microsoft Partner Center API](https://docs.microsoft.com/en-us/azure/marketplace/) o acuerdo con Microsoft.
-- **Acción:**
-  1. Crear sección dedicada `/xbox` en la app con catálogo y filtros específicos de Xbox.
-  2. Sincronizar precios y disponibilidad vía cron diario (igual que `sync-catalogs`).
-  3. Mostrar distintivo de plataforma (Xbox Series X/S, Xbox One, Game Pass).
-- **Nota:** evaluar también APIs de PlayStation Store y Nintendo eShop para unificar en una sección "Todas las plataformas".
-
-### 5.2 — Google Analytics / GA4  🔵 FUTURO
-- **Descripción:** integrar Google Analytics 4 para medir tráfico, conversiones y comportamiento de usuarios.
-- **Acción:**
-  1. Crear propiedad GA4 en [analytics.google.com](https://analytics.google.com).
-  2. Añadir el script de GA4 en `layout.tsx` usando `next/script` con `strategy="afterInteractive"`.
-  3. Configurar eventos personalizados: `view_item`, `add_to_cart`, `begin_checkout`, `purchase`.
-  4. Actualizar la CSP en `next.config.mjs` para permitir los dominios de Google Analytics.
-- **Nota:** asegurarse de cumplir con RGPD — mostrar banner de cookies y no activar GA hasta consentimiento.
-
-### 5.3 — Sistema de valoraciones y reseñas  🔵 FUTURO
-- **Descripción:** permitir a usuarios que han comprado un juego dejar una valoración (1-5 estrellas) y reseña de texto.
-- **Acción:** nuevo modelo `Review` en Prisma, endpoints CRUD, componente UI en la página del producto.
-- **Verificar:** solo usuarios con compra confirmada pueden dejar reseña; las reseñas aparecen paginadas en el producto.
-
-### 5.4 — Lista de deseos (Wishlist)  🔵 FUTURO
-- **Descripción:** los usuarios pueden guardar juegos en una lista de deseos y recibir notificación por email cuando bajen de precio.
-- **Acción:** modelo `Wishlist` en Prisma, endpoints, UI en la página del producto y sección `/account/wishlist`.
-
-### 5.5 — PWA (Progressive Web App)  🔵 FUTURO
-- **Descripción:** convertir GameZone en una PWA para que los usuarios puedan instalarla en móvil como app nativa.
-- **Acción:** añadir `manifest.json`, Service Worker con caché offline para el catálogo, iconos de app.
-- **Verificar:** Chrome muestra el prompt "Añadir a pantalla de inicio"; la home carga offline.
-
-### 5.6 — Sistema de afiliados / códigos de descuento  🔵 FUTURO
-- **Descripción:** gestión de cupones y códigos de descuento (porcentaje o cantidad fija) para campañas de marketing.
-- **Acción:** modelo `Coupon` en Prisma, validación en checkout, panel admin para gestión de cupones.
+## Tecnologías a incorporar en esta v2 (resumen)
+- **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
+- **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
+- **Dependabot** — actualizaciones de seguridad automáticas. Sin código.
+- **Lighthouse CI** (opcional) — presupuesto de rendimiento en CI.
+- **Cloudflare Turnstile** (opcional, solo si hay bots) — anti-bot sin fricción.
+- **Upstash Redis** (opcional, hereda de 3.2) — rate limit distribuido si crece el tráfico.
