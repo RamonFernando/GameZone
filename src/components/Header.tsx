@@ -94,10 +94,14 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     let cancelled = false;
     const loadProfile = async () => {
       try {
-        const hasSession = document.cookie.split(";").some(
+        const hasSessionIndicator = document.cookie.split(";").some(
           (c) => c.trim().startsWith("gz_auth=1")
         );
-        if (!hasSession) {
+        const isAuthenticatedArea =
+          pathname?.startsWith("/account") ||
+          pathname?.startsWith("/checkout") ||
+          pathname?.startsWith("/admin");
+        if (!hasSessionIndicator && !isAuthenticatedArea) {
           if (!cancelled) setMiniProfile(null);
           return;
         }
@@ -129,7 +133,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
       cancelled = true;
       window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (!topTransparentOnTop) {
