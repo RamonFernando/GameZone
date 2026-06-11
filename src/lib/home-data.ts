@@ -12,6 +12,17 @@ export const PRODUCTS_CACHE_TAG = "products";
 const CACHE_REVALIDATE_SECONDS = 300;
 const HERO_SECTION_SIZE = 5;
 
+// La home solo usa `description` para el índice de búsqueda (puntuación por
+// tokens), no la pinta. Truncarla evita que un enriquecimiento RAWG con
+// descripciones largas infle el HTML de la home (descripción completa × catálogo).
+// La ficha de detalle lee la descripción íntegra de su propia query, no de aquí.
+const SEARCH_DESCRIPTION_MAX = 200;
+
+function truncateForSearch(description: string) {
+  if (description.length <= SEARCH_DESCRIPTION_MAX) return description;
+  return description.slice(0, SEARCH_DESCRIPTION_MAX);
+}
+
 export function toProductPreview(product: Product): ProductPreview {
   return {
     id: product.id,
@@ -35,7 +46,10 @@ export function toProductPreview(product: Product): ProductPreview {
 
 async function loadCatalogPreviews(): Promise<ProductPreview[]> {
   const products = await listActiveProducts();
-  return products.map(toProductPreview);
+  return products.map((product) => {
+    const preview = toProductPreview(product);
+    return { ...preview, description: truncateForSearch(preview.description) };
+  });
 }
 
 export const getCachedCatalog = unstable_cache(loadCatalogPreviews, ["home-catalog"], {

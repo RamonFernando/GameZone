@@ -94,7 +94,14 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   filtros, likes y carrito siguen funcionando; `npm run build` muestra la ruta `/` como dinámica
   con caché o estática.
 
-### 6.2 — Recortar el payload del catálogo  🟠 ALTA
+### 6.2 — Recortar el payload del catálogo  🟠 ALTA  ✅ HECHA (11/06/2026, commit pendiente)
+> Hecho como blindaje defensivo: se trunca `description` a 200 chars en la preview
+> del catálogo de la home (`src/lib/home-data.ts`, `truncateForSearch`). Con los
+> datos actuales (descripciones de ~64 chars) ahorra 0 bytes, pero evita que un
+> futuro enriquecimiento RAWG con descripciones largas infle el HTML de la home.
+> La ficha de detalle sigue leyendo la descripción íntegra de su propia query.
+> `backgroundImage` se dejó intacto a propósito (lo usa el fallback del Hero;
+> riesgo > beneficio).
 - **Problema:** `/api/products` y ahora el server fetch devuelven TODOS los campos de TODOS los
   productos (incl. `description` completa) para pintar tarjetas que solo usan nombre, imagen,
   precio y plataforma. Con el catálogo creciendo, el payload crece linealmente.
