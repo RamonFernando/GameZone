@@ -94,6 +94,13 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     let cancelled = false;
     const loadProfile = async () => {
       try {
+        const hasSession = document.cookie.split(";").some(
+          (c) => c.trim().startsWith("gz_auth=1")
+        );
+        if (!hasSession) {
+          if (!cancelled) setMiniProfile(null);
+          return;
+        }
         const res = await fetch("/api/account/me", { cache: "no-store" });
         if (!res.ok) {
           if (!cancelled) {

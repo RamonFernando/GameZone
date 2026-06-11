@@ -939,7 +939,7 @@ export function MarketIntelligenceSections() {
                   key={section.id}
                 >
                   <div className="market-pulse-subsection__head">
-                    <h4>{section.title}</h4>
+                    <h3>{section.title}</h3>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
                   <MarketPulseCarousel
@@ -965,7 +965,7 @@ export function MarketIntelligenceSections() {
               {steamSections.map((section) => (
                 <article className="market-pulse-subsection" key={section.id}>
                   <div className="market-pulse-subsection__head">
-                    <h4>{section.title}</h4>
+                    <h3>{section.title}</h3>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
                   <MarketPulseCarousel
@@ -990,7 +990,7 @@ export function MarketIntelligenceSections() {
               {rawgSections.map((section) => (
                 <article className="market-pulse-subsection" key={section.id}>
                   <div className="market-pulse-subsection__head">
-                    <h4>{section.title}</h4>
+                    <h3>{section.title}</h3>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
                   <MarketPulseCarousel section={section} />

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
+import { SESSION_COOKIE_NAME, SESSION_TTL_SECONDS, verifySessionToken } from "@/lib/auth/session";
 
 const CART_COOKIE_NAME = "gamezone_cart_session";
 const CART_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -52,10 +52,28 @@ export async function middleware(request: NextRequest) {
   if (isProtectedPath && !isAuthenticated) {
     const redirectUrl = new URL("/auth", request.url);
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
-    return NextResponse.redirect(redirectUrl);
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    redirectResponse.cookies.set({ name: "gz_auth", value: "", maxAge: 0, path: "/" });
+    return redirectResponse;
   }
 
   const response = NextResponse.next();
+
+  // Cookie indicadora de sesión (no httpOnly) para que el JS del cliente evite
+  // llamar a /api/account/me cuando no hay sesión activa.
+  if (isAuthenticated) {
+    response.cookies.set({
+      name: "gz_auth",
+      value: "1",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_TTL_SECONDS,
+    });
+  } else {
+    response.cookies.set({ name: "gz_auth", value: "", maxAge: 0, path: "/" });
+  }
 
   // Pre-seed anonymous cart cookie so all tabs share the same key from the first page load.
   if (!request.cookies.has(CART_COOKIE_NAME)) {
