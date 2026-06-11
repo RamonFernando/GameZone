@@ -19,6 +19,8 @@ jobs:
 
       - run: npm ci
 
+      - run: npm audit --omit=dev --audit-level=high
+
       - run: npx tsc --noEmit
 
       - run: npx eslint . --max-warnings 0

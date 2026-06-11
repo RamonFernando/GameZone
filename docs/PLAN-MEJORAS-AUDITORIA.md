@@ -44,7 +44,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
 | 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
-| **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅** hecha; 7.2 🔴 manual pendiente (usuario); 7.3-7.4 pendientes |
+| **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3 ✅ hechas**; 8.4 y 8.5 pendientes |
 | **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
 | **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); 10.2-10.4 pendientes |
@@ -187,20 +187,17 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   etc.), actualizar env vars en Netlify, redeploy, forzar reset de contraseña a usuarios reales
   del `.db` antiguo.
 
-### 7.3 — Cookie del carrito anónimo legible por JS  🟡 MEDIA
-- **Problema:** `middleware.ts:65` crea `gamezone_cart_session` con `httpOnly: false`.
-- **Acción:** comprobar si el código cliente lee esa cookie (`grep -rn "gamezone_cart_session" src/`).
-  - Si NO la lee nadie en cliente → cambiar a `httpOnly: true`.
-  - Si SÍ la lee → dejarla, pero documentar el porqué en un comentario en el middleware
-    (decisión consciente, impacto bajo: solo identifica un carrito anónimo).
-- **Verificar:** carrito anónimo sigue funcionando en pestañas nuevas/incógnito.
+### 7.3 — Cookie del carrito anónimo legible por JS  🟡 MEDIA  ✅ HECHA (11/06/2026)
+> `gamezone_cart_session` solo se lee en `src/app/api/cart/scope/route.ts` (servidor).
+> Ningún cliente JS la lee. Cambiado `httpOnly: false` → `httpOnly: true`.
 
-### 7.4 — Auditoría de dependencias automatizada  🟡 MEDIA
-- **Acción:**
-  1. Correr `npm audit --omit=dev` y resolver lo que salga high/critical.
-  2. Añadir `npm audit --omit=dev --audit-level=high` como step del CI (que falle el build).
-  3. Activar **Dependabot** en GitHub (`.github/dependabot.yml`, ecosistema npm, weekly).
-- **Verificar:** CI falla si entra una dependencia con CVE high; PRs de Dependabot llegan.
+### 7.4 — Auditoría de dependencias automatizada  🟡 MEDIA  ✅ HECHA (11/06/2026)
+> - `npm audit fix` aplicado: vulnerabilidad de nodemailer resuelta.
+> - 2 vulnerabilidades moderadas restantes en `postcss` (dependencia transitiva de Next.js
+>   16.2.7) — no reparables sin downgrade de Next.js. Documentadas como known issue.
+> - `npm audit --omit=dev --audit-level=high` añadido al CI (`ci.yml`) — falla solo en high/critical.
+> - `.github/dependabot.yml` creado: updates npm weekly (lunes), límite 5 PRs,
+>   major updates de Next.js ignorados (evitar upgrades automáticos rotos).
 
 ### 7.5 — Protección anti-bot en registro  🔵 OPCIONAL
 - Si empieza a haber registros basura: **Cloudflare Turnstile** (gratis, sin fricción de
