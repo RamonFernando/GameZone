@@ -4229,8 +4229,8 @@ textarea:focus-visible,
 
 .recently-viewed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1.1rem;
 }
 
 @media (max-width: 480px) {
@@ -4336,9 +4336,9 @@ h1,
   gap: 0.3rem;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
-  border: 1px solid rgba(255 255 255 / 0.15);
-  background: rgba(255 255 255 / 0.05);
-  color: #94a3b8;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  background: transparent;
+  color: #475569;
   font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
@@ -4346,21 +4346,21 @@ h1,
   white-space: nowrap;
 
   &:hover {
-    border-color: rgba(255 255 255 / 0.35);
-    color: #e2e8f0;
-    background: rgba(255 255 255 / 0.1);
+    border-color: rgba(15, 23, 42, 0.38);
+    color: #1e293b;
+    background: rgba(15, 23, 42, 0.05);
   }
 
   &--active {
     border-color: #6366f1;
-    background: rgba(99 102 241 / 0.2);
-    color: #c7d2fe;
+    background: rgba(99, 102, 241, 0.1);
+    color: #4338ca;
   }
 
   &--offer#{&}--active {
-    border-color: #f97316;
-    background: rgba(249 115 22 / 0.2);
-    color: #fed7aa;
+    border-color: #ea580c;
+    background: rgba(234, 88, 12, 0.08);
+    color: #c2410c;
   }
 }
 
