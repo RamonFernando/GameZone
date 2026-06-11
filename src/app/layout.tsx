@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Exo_2 } from "next/font/google";
 import "@/styles/globals.scss";
 import "@/styles/responsive-refinements.scss";
 import { ReactNode } from "react";
@@ -6,6 +7,13 @@ import { cookies } from "next/headers";
 import { CartProvider } from "@/contexts/CartContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import { SiteShell } from "@/components/SiteShell";
+
+const exoDisplay = Exo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 const baseUrl = process.env.APP_BASE_URL ?? "https://gamezone-digital-store.netlify.app";
 
@@ -62,7 +70,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const uiLocale = cookieStore.get("uiLocale")?.value ?? cookieStore.get("geoLocale")?.value ?? "es-ES";
   const lang = uiLocale.slice(0, 2);
   return (
-    <html lang={lang}>
+    <html lang={lang} className={exoDisplay.variable}>
       <body>
         <CartProvider>
           <SearchProvider>

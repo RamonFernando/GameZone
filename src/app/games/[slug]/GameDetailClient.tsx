@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
@@ -83,12 +84,32 @@ export default function GameDetailClient({
   const router = useRouter();
   const { addToCart } = useCart();
   const lang = useLocale();
+  const { push: pushRecent } = useRecentlyViewed();
   useScrollMemory(true);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [showStickyCta, setShowStickyCta] = useState(false);
 
   useEffect(() => {
     setSelectedMediaIndex(0);
   }, [game.slug]);
+
+  useEffect(() => {
+    pushRecent({
+      slug: game.slug,
+      name: game.name,
+      coverImage: game.coverImage,
+      priceFinal: game.priceFinal,
+      discountPercent: game.discountPercent,
+    });
+  // pushRecent es estable; solo ejecutar al cambiar de juego
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.slug]);
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyCta(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const mediaCount = [game.backgroundImage || game.coverImage, ...game.screenshots].filter(Boolean).length;
@@ -154,6 +175,7 @@ export default function GameDetailClient({
   };
 
   return (
+    <>
     <main className="main-wrapper">
     <div className="game-detail-shell">
       <div className="card game-detail-card">
@@ -448,5 +470,29 @@ export default function GameDetailClient({
       )}
     </div>
     </main>
+
+    {/* B4 — CTA pegajoso en móvil (solo visible en scroll > 300px) */}
+    {showStickyCta && (
+      <div
+        className="game-detail-sticky-cta"
+        aria-label={lang === "en" ? "Quick buy" : "Compra rápida"}
+      >
+        <span className="game-detail-sticky-title">{localizedName}</span>
+        <span className="game-detail-sticky-price">
+          {formatPublicPrice(game.priceFinal, lang)}
+          {game.discountPercent > 0 && (
+            <span className="game-detail-sticky-discount">-{game.discountPercent}%</span>
+          )}
+        </span>
+        <button
+          type="button"
+          className="button-primary btn-padding-site game-detail-sticky-btn"
+          onClick={() => addToCart(mainPreview)}
+        >
+          {lang === "en" ? "Add to cart" : "Añadir al carrito"}
+        </button>
+      </div>
+    )}
+    </>
   );
 }

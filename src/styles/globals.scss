@@ -4167,6 +4167,91 @@ textarea:focus-visible,
 }
 
 // Desactiva animaciones continuas grandes para usuarios que lo prefieren
+/* ─── B4 — CTA pegajoso móvil en ficha de juego ─── */
+.game-detail-sticky-cta {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .game-detail-sticky-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    padding: 0.65rem 1rem;
+    background: rgba(15, 23, 42, 0.97);
+    border-top: 1px solid rgba(148, 163, 184, 0.15);
+    backdrop-filter: blur(8px);
+  }
+
+  .game-detail-sticky-title {
+    flex: 1;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .game-detail-sticky-price {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+  }
+
+  .game-detail-sticky-discount {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.12);
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+  }
+
+  .game-detail-sticky-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.78rem !important;
+    padding: 0.35rem 0.8rem !important;
+  }
+}
+
+/* ─── B5 — Vistos recientemente ─────────────────── */
+.recently-viewed {
+  margin-bottom: 2rem;
+}
+
+.recently-viewed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .recently-viewed-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ─── B8 — Tipografía display ───────────────────── */
+h1,
+.hero-title,
+.section-title,
+.game-detail-title,
+.market-intel-title {
+  font-family: var(--font-display, system-ui, sans-serif);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-bg-blur,
   .hero-bg-art {

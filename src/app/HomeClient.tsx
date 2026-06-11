@@ -10,6 +10,8 @@ import { GameGrid } from "@/components/GameGrid";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useSearch } from "@/contexts/SearchContext";
 import { useLocale } from "@/hooks/useLocale";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { GameCard } from "@/components/GameCard";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
 const MarketIntelligenceSections = dynamic(
@@ -133,6 +135,8 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
   const { query, setQuery, platform } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>(initialProducts);
   const lang = useLocale();
+  const { getAll: getRecent } = useRecentlyViewed();
+  const [recentSlugs, setRecentSlugs] = useState<string[]>([]);
   useScrollMemory(true);
 
   useEffect(() => {
@@ -188,6 +192,21 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    setRecentSlugs(getRecent().map((item) => item.slug));
+  // getRecent es estable; solo leer al montar
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const recentlyViewed = useMemo(() => {
+    if (recentSlugs.length === 0) return [];
+    const bySlug = new Map(products.map((p) => [p.slug, p]));
+    return recentSlugs.flatMap((slug) => {
+      const match = bySlug.get(slug);
+      return match ? [match] : [];
+    });
+  }, [recentSlugs, products]);
 
   const popularSuggestions = useMemo(
     () => [...products].sort((a, b) => b.discountPercent - a.discountPercent).slice(0, 4),
@@ -262,6 +281,22 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
       </section>
       <main className="main-wrapper">
         <MarketIntelligenceSections />
+        {recentlyViewed.length > 0 && (
+          <section className="recently-viewed">
+            <div className="section-header">
+              <div>
+                <h2 className="section-title">
+                  {lang === "en" ? "Recently viewed" : "Vistos recientemente"}
+                </h2>
+              </div>
+            </div>
+            <div className="recently-viewed-grid">
+              {recentlyViewed.map((game) => (
+                <GameCard key={game.slug} game={game} />
+              ))}
+            </div>
+          </section>
+        )}
         <GameGrid
           games={filteredGames}
           isFiltered={Boolean(query.trim()) || Boolean(platform)}
