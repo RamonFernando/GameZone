@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@/styles/globals.scss";
 import "@/styles/responsive-refinements.scss";
 import { ReactNode } from "react";
+import { cookies } from "next/headers";
 import { CartProvider } from "@/contexts/CartContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import { SiteShell } from "@/components/SiteShell";
@@ -56,9 +57,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const uiLocale = cookieStore.get("uiLocale")?.value ?? cookieStore.get("geoLocale")?.value ?? "es-ES";
+  const lang = uiLocale.slice(0, 2);
   return (
-    <html lang="es">
+    <html lang={lang}>
       <body>
         <CartProvider>
           <SearchProvider>

@@ -45,8 +45,8 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
 | **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
-| **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3 ✅ hechas**; 8.4 y 8.5 pendientes |
-| **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
+| **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
+| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; B1-B8 opcionales pendientes |
 | **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); 10.2-10.4 pendientes |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
@@ -240,15 +240,14 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   y `Organization` con logo. Esto habilita la caja de búsqueda en resultados de Google.
 - **Verificar:** Rich Results Test reconoce el SearchAction.
 
-### 8.4 — Idioma declarado vs idioma real  🟡 MEDIA
-- **Problema:** `layout.tsx` fija `<html lang="es">` pero la UI tiene textos en/es vía
-  `useLocale`. Para buscadores y lectores de pantalla el sitio declara solo español.
-- **Acción (mínima, sin i18n de rutas):** decidir el idioma canónico (es) y mantenerlo, PERO
-  unificar los textos visibles: hoy hay strings hardcodeados mezclados. Crear
-  `src/lib/i18n.ts` con un diccionario simple `{ es: {...}, en: {...} }` y migrar los textos de
-  los componentes principales (Header, Hero, GameGrid, CartDrawer, Footer). NO montar rutas
-  `/en/*` todavía (eso es FASE 5 / futuro).
-- **Verificar:** cambiar de idioma no deja textos mezclados en la home ni en la ficha.
+### 8.4 — Idioma declarado vs idioma real  ✅ HECHO (11/06/2026)
+- **Problema:** `layout.tsx` fijaba `<html lang="es">` pero la UI tiene textos en/es vía `uiLocale`.
+- **Implementado:** `layout.tsx` ahora es `async`, lee la cookie `uiLocale` (fallback `geoLocale` → `"es-ES"`)
+  con `await cookies()` de `next/headers`, extrae los 2 primeros chars y pasa `lang={lang}` al `<html>`.
+  Los cambios de idioma en Header/Footer actualizan la cookie → el server re-renderiza con `lang` correcto.
+- **Textos i18n:** migrados en FASE 9.4 (CartDrawer, Header). Los componentes restantes están en la hoja
+  de ruta de FASE 9 Parte B (opcional).
+- **Verificar:** en DevTools, `<html lang="en">` al seleccionar inglés y `<html lang="es">` al volver.
 
 ### 8.5 — Dominio propio (recordatorio de 4.2)  🟠 MANUAL
 - Sin dominio propio el SEO competirá siempre con handicap. ~10-15 €/año. Tras configurarlo:
