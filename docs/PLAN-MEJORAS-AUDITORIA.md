@@ -125,7 +125,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
      no hace falta generar blur por imagen).
 - **Verificar:** en DevTools → Network, las imágenes del grid en móvil pesan menos; no hay CLS.
 
-### 6.5 — Medición objetiva (antes y después)  🟡 MEDIA
+### 6.5 — Medición objetiva (antes y después)  🟡 MEDIA  ⚠️ PARCIAL (baseline de servidor hecho el 11/06/2026 en `docs/lighthouse/baseline-2026-06-11.md`; falta el Lighthouse de Chrome que corre el usuario)
 - **Acción:** correr Lighthouse (Chrome DevTools, modo incógnito, Performance) sobre la home en
   producción ANTES de empezar la fase y DESPUÉS de 6.1-6.4. Guardar ambos reports en
   `docs/lighthouse/` (JSON o captura).
