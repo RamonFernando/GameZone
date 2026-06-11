@@ -102,7 +102,6 @@ export default function GameDetailClient({
       discountPercent: game.discountPercent,
     });
   // pushRecent es estable; solo ejecutar al cambiar de juego
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.slug]);
 
   useEffect(() => {

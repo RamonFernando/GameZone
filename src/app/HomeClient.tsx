@@ -198,7 +198,6 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
   useEffect(() => {
     setRecentSlugs(getRecent().map((item) => item.slug));
   // getRecent es estable; solo leer al montar
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const recentlyViewed = useMemo(() => {

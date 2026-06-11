@@ -8,13 +8,6 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
 
-type DataSourcePreview = {
-  name: string;
-  source: string;
-  route: string;
-  fields: string[];
-};
-
 type TrendingGamePreview = {
   rank: number;
   title: string;
@@ -108,33 +101,6 @@ type MarketRecommendationsResponse = {
   source?: string;
   recommendations?: RecommendationPreview[];
 };
-
-const dataSources: DataSourcePreview[] = [
-  {
-    name: "Precios externos",
-    source: "CheapShark",
-    route: "/api/market/deals",
-    fields: ["title", "store", "salePrice", "normalPrice"],
-  },
-  {
-    name: "Tendencias",
-    source: "Steam + RAWG",
-    route: "/api/market/trending",
-    fields: ["rank", "steamAppId", "players", "rating"],
-  },
-  {
-    name: "Metadata",
-    source: "RAWG / IGDB",
-    route: "/api/market/games/:slug",
-    fields: ["cover", "genres", "platforms", "released"],
-  },
-  {
-    name: "Recomendaciones",
-    source: "GameZone IA",
-    route: "/api/recommendations",
-    fields: ["catalogMatch", "priceSignal", "trendScore"],
-  },
-];
 
 const fallbackTrendingGames: TrendingGamePreview[] = [
   {
