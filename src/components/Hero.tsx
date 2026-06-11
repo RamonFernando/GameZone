@@ -276,7 +276,6 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
           priority
           sizes="100vw"
           quality={50}
-          unoptimized
           className="hero-bg-blur"
         />
         {/* Arte nitido y completo, sin recorte */}
@@ -286,8 +285,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
           fill
           priority
           sizes="100vw"
-          quality={100}
-          unoptimized
+          quality={90}
           onError={() => {
             setHeroBgSrc((current) => (current === active.image ? current : active.image));
           }}
@@ -401,8 +399,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
                         alt={slide.title}
                         fill
                         sizes="160px"
-                        quality={100}
-                        unoptimized
+                        quality={75}
                         style={{ objectFit: "contain", objectPosition: "center center" }}
                       />
                     </button>

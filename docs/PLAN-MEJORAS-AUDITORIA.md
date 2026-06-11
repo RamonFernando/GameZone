@@ -136,7 +136,10 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 > - `placeholder="blur"` + `blurDataURL` SVG #0f172a añadido.
 > - `remotePatterns` en `next.config.mjs` ya estaba configurado con todos los dominios necesarios.
 - **Estado actual:** `GameCard` y `Hero` ya usan `next/image` y el Hero ya tiene `priority` ✓.
-- **Pendiente:** `<link rel="preload">` para imagen LCP del hero (ver 6.5 punto 2).
+- **Hero también corregido (11/06/2026):** `unoptimized` eliminado de las 3 imágenes del Hero
+  (`hero-bg-blur` quality 50, `hero-bg-art` quality 100→90, thumbnails quality 100→75).
+  Con optimization activa + `priority`, Next.js inyecta automáticamente `<link rel="preload">`
+  en el SSR del Hero, resolviendo el "Descubrimiento de solicitudes de LCP" de Lighthouse.
 - **Verificar:** en DevTools → Network, las imágenes del grid en móvil pesan menos; no hay CLS.
 
 ### 6.5 — Medición objetiva (antes y después)  🟡 MEDIA  ⚠️ PARCIAL
