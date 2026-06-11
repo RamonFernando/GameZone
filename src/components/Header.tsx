@@ -158,22 +158,20 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   }, []);
 
   // Cierra el menú móvil al tocar/hacer click fuera del header.
-  // Se escucha tanto mousedown (ratón en PC) como touchstart (dedos en móvil).
+  // pointerdown unifica mouse y touch en un solo evento — funciona en iOS/Android/PC.
   useEffect(() => {
     if (!mobileMenuOpen) return;
 
-    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+    const handleOutside = (event: PointerEvent) => {
       if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleOutsideClick as EventListener);
-    document.addEventListener("touchstart", handleOutsideClick as EventListener, { passive: true });
+    document.addEventListener("pointerdown", handleOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick as EventListener);
-      document.removeEventListener("touchstart", handleOutsideClick as EventListener);
+      document.removeEventListener("pointerdown", handleOutside);
     };
   }, [mobileMenuOpen]);
 
