@@ -117,14 +117,24 @@ export function Footer() {
       <div className="footer-wrapper">
         {/* IZQUIERDA – INFO */}
         <div className="footer-info">
-          <h3 className="footer-title">Next Gaming Store</h3>
+          <h3 className="footer-title footer-brand-title" aria-label="Game Zone">
+            <span className="footer-brand-logo-lockup" aria-hidden="true">
+              <span className="footer-brand-disc" />
+              <span className="footer-brand-word">
+                <span>Game</span>
+                <span className="footer-brand-word-z">Z</span>
+                <span>one</span>
+              </span>
+            </span>
+            <span>Game Zone</span>
+          </h3>
           <p className="footer-text">
             {lang === "en"
               ? "Your digital store for videogames and gaming content. UI designed to offer the best experience on PlayStation, Xbox, Nintendo and PC."
               : "Tu tienda digital de videojuegos y contenido gaming. UI creada para ofrecer la mejor experiencia en plataformas PlayStation, Xbox, Nintendo y PC."}
           </p>
           <span className="footer-copy">
-            © {year} Next Gaming Store.{" "}
+            © {year} Game Zone.{" "}
             {lang === "en" ? "All rights reserved." : "Todos los derechos reservados."}
           </span>
         </div>
@@ -198,7 +208,7 @@ export function Footer() {
               <Link href="/privacy" className="footer-legal-link">
                 Privacy Policy
               </Link>
-              . Copyright © {year} Next Gaming Store. All rights reserved.
+              . Copyright © {year} Game Zone. All rights reserved.
             </>
           ) : (
             <>
@@ -210,7 +220,7 @@ export function Footer() {
               <Link href="/privacy" className="footer-legal-link">
                 Política de privacidad
               </Link>
-              . Copyright © {year} Next Gaming Store. Todos los derechos reservados.
+              . Copyright © {year} Game Zone. Todos los derechos reservados.
             </>
           )}
         </p>

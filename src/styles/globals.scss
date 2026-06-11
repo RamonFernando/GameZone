@@ -3134,6 +3134,67 @@ html[data-hero-zoom="normal"] .hero--carousel {
   color: #f1f5f9;
 }
 
+.footer-brand-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.footer-brand-logo-lockup {
+  width: 124px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.footer-brand-disc {
+  position: absolute;
+  left: 42px;
+  top: 3px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.footer-brand-disc::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: url("/iconos_platforms/icon-play.svg") center/90% no-repeat;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+.footer-brand-word {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+  color: #ffffff;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  -webkit-text-stroke: 0.35px rgba(8, 11, 23, 0.95);
+  text-stroke: 0.35px rgba(8, 11, 23, 0.95);
+  text-shadow:
+    0 0 4px rgba(59, 130, 246, 0.55),
+    0 0 8px rgba(37, 99, 235, 0.42);
+}
+
+.footer-brand-word-z {
+  color: #fb923c;
+  font-size: 1.34rem;
+  line-height: 0.9;
+}
+
 .footer-text {
   font-size: 0.82rem;
   line-height: 1.45;
