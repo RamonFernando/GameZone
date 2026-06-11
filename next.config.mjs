@@ -9,7 +9,7 @@ const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com",
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : ""} https://js.stripe.com https://www.paypal.com`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://*.g2a.com https://media.rawg.io https://ddragon.leagueoflegends.com https://cdn1.epicgames.com https://www.minecraft.net https://images.igdb.com https://static.wikia.nocookie.net",
       "font-src 'self'",

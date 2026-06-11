@@ -44,7 +44,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
 | 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
-| **FASE 7 — Seguridad avanzada** | ⬜ NUEVA |
+| **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅** hecha; 7.2 🔴 manual pendiente (usuario); 7.3-7.4 pendientes |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3 ✅ hechas**; 8.4 y 8.5 pendientes |
 | **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
 | **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); 10.2-10.4 pendientes |
@@ -168,19 +168,16 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 
 > Lo crítico ya está hecho (fases 0-2). Esto es endurecimiento de nivel producción real.
 
-### 7.1 — Endurecer la CSP: eliminar `unsafe-eval`, plan para `unsafe-inline`  🟠 ALTA
-- **Problema:** `next.config.mjs:12` → `script-src 'self' 'unsafe-inline' 'unsafe-eval' ...`.
-  `unsafe-eval` + `unsafe-inline` anulan gran parte de la protección XSS de la CSP: un atacante
-  que logre inyectar HTML puede ejecutar scripts.
-- **Acción (incremental, con cuidado):**
-  1. Quitar `'unsafe-eval'` y probar el build de producción completo (Next en prod no necesita
-     eval; el dev server sí — si rompe dev, condicionar la cabecera por `NODE_ENV`).
-  2. Probar exhaustivamente Stripe y PayPal tras el cambio (son los terceros del `script-src`).
-  3. `'unsafe-inline'` en `script-src`: dejarlo de momento (Next inyecta inline scripts);
-     anotar como deuda la migración a CSP con nonce vía middleware cuando Next/Netlify lo
-     soporten bien. NO intentar nonces ahora: alto riesgo de romper hidratación.
-- **Verificar:** sin errores CSP en consola en: home, ficha, auth, checkout Stripe y PayPal
-  completos en producción.
+### 7.1 — Endurecer la CSP: eliminar `unsafe-eval`, plan para `unsafe-inline`  🟠 ALTA  ✅ HECHA (11/06/2026)
+> `unsafe-eval` eliminado de `script-src` en producción. Solución aplicada en `next.config.mjs`:
+> ```js
+> `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : ""} https://js.stripe.com https://www.paypal.com`
+> ```
+> Dev mantiene `unsafe-eval` (webpack HMR lo necesita). Producción queda sin él.
+> `unsafe-inline` se mantiene de momento — Next.js inyecta inline scripts en hidratación;
+> migrar a nonces requiere soporte estable en Netlify (deuda técnica anotada).
+- **Verificar pendiente (manual):** abrir producción tras deploy y confirmar sin errores CSP
+  en consola en: home, ficha, auth, checkout con Stripe y PayPal completos.
 
 ### 7.2 — Rotación de secretos (recordatorio de 0.1)  🔴 MANUAL PENDIENTE
 - Sigue pendiente desde la v1. Mientras no se haga, los secretos que convivieron con el `.db`
