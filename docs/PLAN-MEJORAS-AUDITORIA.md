@@ -248,7 +248,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 
 ### Parte A — Calidad base (hacer)
 
-### 9.1 — Estados de error y carga por ruta  🟠 ALTA
+### 9.1 — Estados de error y carga por ruta  ✅ HECHA (11/06/2026)
 - **Problema (verificado):** no existe ningún `loading.tsx` ni `error.tsx` por ruta (solo
   `global-error.tsx`). Un error en la ficha de un juego tumba la página entera sin recuperación.
 - **Acción:** añadir `src/app/error.tsx` (client, con botón "Reintentar" que llame a `reset()`)

@@ -4071,3 +4071,77 @@ html[data-hero-zoom="normal"] .hero--carousel {
     font-size: 1.1rem;
   }
 }
+
+/* ─── 9.1 Error boundary ─────────────────────────────────── */
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+  color: #e2e8f0;
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  p {
+    color: #94a3b8;
+    max-width: 36rem;
+  }
+}
+
+/* ─── 9.1 Loading skeleton ───────────────────────────────── */
+.game-grid-skeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.5rem;
+  justify-content: center;
+}
+
+.game-card-skeleton {
+  width: clamp(160px, 22vw, 220px);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.game-card-skeleton__media {
+  height: 240px;
+  background: rgba(51, 65, 85, 0.6);
+}
+
+.game-card-skeleton__body {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.game-card-skeleton__line {
+  border-radius: 0.3rem;
+  background: rgba(71, 85, 105, 0.5);
+
+  &--title  { height: 1rem;    width: 80%; }
+  &--subtitle { height: 0.75rem; width: 55%; }
+  &--price  { height: 1.1rem;  width: 40%; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.45; }
+  }
+
+  .game-card-skeleton__media,
+  .game-card-skeleton__line {
+    animation: skeleton-pulse 1.6s ease-in-out infinite;
+  }
+}
