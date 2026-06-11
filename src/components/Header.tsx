@@ -1,7 +1,7 @@
 // Header principal del sitio: logo, filtros de plataforma, buscador, carrito y avatar.
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { t } from "@/lib/i18n";
 import Image from "next/image";
@@ -56,6 +56,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const [uiLocale, setUiLocale] = useState<string>("es-ES");
   const lang = useLocale();
   const [isScrolled, setIsScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   // Lee el idioma/moneda preferidos (si existen) al montar.
   useEffect(() => {
@@ -156,6 +157,26 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     };
   }, []);
 
+  // Cierra el menú móvil al tocar/hacer click fuera del header.
+  // Se escucha tanto mousedown (ratón en PC) como touchstart (dedos en móvil).
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick as EventListener);
+    document.addEventListener("touchstart", handleOutsideClick as EventListener, { passive: true });
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick as EventListener);
+      document.removeEventListener("touchstart", handleOutsideClick as EventListener);
+    };
+  }, [mobileMenuOpen]);
+
   const headerClassName =
     "header-shell" +
     (topTransparentOnTop ? " header-shell--fixed" : "") +
@@ -204,7 +225,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   };
 
   return (
-    <header className={headerClassName}>
+    <header ref={headerRef} className={headerClassName}>
       <div className="navbar">
 
         {/* LOGO: reset de filtros */}
