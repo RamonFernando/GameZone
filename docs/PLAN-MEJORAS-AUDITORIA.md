@@ -277,6 +277,26 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 ### 9.4 — Consistencia de textos (ver 8.4)  🟡 MEDIA
 - La unificación i18n de 8.4 es también una tarea UX. Misma tarea, no duplicar.
 
+### 9.5 — Modularizar SCSS por componente  🟡 MEDIA
+- **Problema:** el proyecto tiene muchos componentes (`Header`, `Hero`, `Footer`, `GameCard`,
+  `GameGrid`, `CartDrawer`, paneles de cuenta/admin, etc.) pero solo unos pocos archivos SCSS
+  globales (`globals.scss`, `auth.scss`, `responsive-refinements.scss`). Esto concentra estilos
+  de secciones distintas en un mismo archivo, dificulta localizar cambios y aumenta el riesgo de
+  colisiones entre clases.
+- **Acción (progresiva, no masiva):**
+  1. Mantener `globals.scss` solo para estilos verdaderamente globales: reset, variables base,
+     `html/body`, tipografía, tokens, utilidades generales y reglas globales justificadas.
+  2. Migrar un componente cada vez a CSS Modules con el patrón:
+     `ComponentName.tsx` + `ComponentName.module.scss`.
+  3. Empezar por componentes de menor riesgo: `Footer` → `Hero` → `GameCard` → `GameGrid` →
+     `Header`.
+  4. En cada migración: localizar clases usadas, mover solo esos estilos al módulo, cambiar
+     `className="..."` por `className={styles...}`, probar desktop/móvil y eliminar del global
+     solo cuando esté verificado.
+  5. No mezclar esta tarea con rediseños visuales ni cambios de lógica.
+- **Verificar:** el componente migrado se ve igual en desktop y móvil; no hay clases huérfanas
+  evidentes en `globals.scss`; `npx tsc --noEmit`, `npx vitest run` y `npm run build` pasan.
+
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
 
 > Inspirado en patrones estándar de las tiendas de videojuegos actuales. Cada punto es
@@ -352,7 +372,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 1. **FASE 6** (rendimiento) — es el dolor actual del usuario y además mejora SEO (Core Web Vitals).
    Orden interno: 6.1 → 6.2 → 6.3 → 6.4 → 6.5.
 2. **FASE 8.1 + 8.2** (SEO por ficha) — reutiliza el patrón server/client de 6.1 recién aprendido.
-3. **FASE 9 Parte A** (calidad UX base).
+3. **FASE 9 Parte A** (calidad UX base), incluyendo 9.5 de forma progresiva cuando se toque cada componente.
 4. **FASE 7** (seguridad avanzada) — 7.2 (rotación) puede y debe hacerla el usuario en paralelo desde ya.
 5. **FASE 10** (testing).
 6. **FASE 9 Parte B** — solo los puntos que el usuario elija.
