@@ -16,6 +16,7 @@ export type ProductPreview = {
   likedByCurrentUser?: boolean;
   priceFinal: number;
   stock: number;
+  genres: string[];
 };
 
 export type HomeHeroSection = {

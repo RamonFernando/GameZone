@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="wood" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#c8883a"/>
+      <stop offset="40%"  stop-color="#8B4513"/>
+      <stop offset="100%" stop-color="#4a2008"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%"   stop-color="#f5c97a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#c8883a" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="topshine" cx="38%" cy="35%">
+      <stop offset="0%"  stop-color="#f5c97a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#8B4513" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- BASE PLATFORM -->
+  <ellipse cx="50" cy="90" rx="30" ry="5.5" fill="#4a2008"/>
+  <path d="M20 86 Q20 90 50 90 Q80 90 80 86 L76 80 Q76 83 50 83 Q24 83 24 80 Z" fill="url(#wood)"/>
+
+  <!-- PEDESTAL RING -->
+  <ellipse cx="50" cy="80" rx="26" ry="5" fill="#6a3010"/>
+  <path d="M24 76 Q24 80 50 80 Q76 80 76 76 L72 70 Q72 74 50 74 Q28 74 28 70 Z" fill="url(#wood)"/>
+
+  <!-- WAIST (narrow stem) -->
+  <path d="M38 70 Q36 60 37 52 L63 52 Q64 60 62 70 Z" fill="url(#wood)"/>
+  <ellipse cx="50" cy="70" rx="12" ry="4" fill="#6a3010"/>
+
+  <!-- BODY BELLY -->
+  <ellipse cx="50" cy="52" rx="16" ry="6" fill="#6a3010"/>
+  <path d="M34 48 Q32 38 34 30 Q38 24 50 24 Q62 24 66 30 Q68 38 66 48 Z" fill="url(#wood)"/>
+  <ellipse cx="50" cy="48" rx="16" ry="5" fill="#7a3a18"/>
+
+  <!-- NECK -->
+  <path d="M42 28 Q40 22 50 20 Q60 22 58 28 Z" fill="url(#wood)"/>
+
+  <!-- HEAD (sphere) -->
+  <circle cx="50" cy="18" r="14" fill="url(#wood)"/>
+  <circle cx="50" cy="18" r="14" fill="url(#topshine)"/>
+
+  <!-- Shine overlay on body -->
+  <path d="M38 36 Q40 28 50 26 Q58 28 60 36 Q56 32 50 31 Q44 32 38 36 Z" fill="url(#shine)"/>
+</svg>

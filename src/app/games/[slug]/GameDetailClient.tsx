@@ -171,6 +171,7 @@ export default function GameDetailClient({
     likesCount: 0,
     priceFinal: game.priceFinal,
     stock: 99,
+    genres: [],
   };
 
   return (
@@ -389,6 +390,7 @@ export default function GameDetailClient({
                 likesCount: 0,
                 priceFinal: g.priceFinal,
                 stock: 99,
+                genres: [],
               };
 
               return (

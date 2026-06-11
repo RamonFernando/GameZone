@@ -23,6 +23,15 @@ function truncateForSearch(description: string) {
   return description.slice(0, SEARCH_DESCRIPTION_MAX);
 }
 
+function parseGenres(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 export function toProductPreview(product: Product): ProductPreview {
   return {
     id: product.id,
@@ -41,6 +50,7 @@ export function toProductPreview(product: Product): ProductPreview {
     likesCount: product.likesCount,
     priceFinal: computeDiscountedPrice(product.priceOriginal, product.discountPercent),
     stock: product.stock,
+    genres: parseGenres(product.genresJson),
   };
 }
 

@@ -56,6 +56,7 @@ function productPreviewFromRow(row: UserCartRow): ProductPreview {
     likesCount: row.likesCount,
     priceFinal: computeDiscountedPrice(row.priceOriginal, row.discountPercent),
     stock: row.stock,
+    genres: [],
   };
 }
 

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <!-- Sword blade -->
+  <rect x="30" y="8" width="4" height="34" rx="2" fill="url(#rg)"/>
+  <!-- Tip -->
+  <polygon points="32,4 28,14 36,14" fill="url(#rg)"/>
+  <!-- Guard -->
+  <rect x="22" y="38" width="20" height="5" rx="2.5" fill="url(#rg2)"/>
+  <!-- Grip -->
+  <rect x="29" y="43" width="6" height="12" rx="3" fill="#a78bfa"/>
+  <!-- Pommel gem -->
+  <circle cx="32" cy="57" r="3" fill="url(#rg2)"/>
+</svg>

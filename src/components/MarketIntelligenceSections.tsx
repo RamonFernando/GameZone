@@ -306,6 +306,7 @@ function buildCartPreview(game: MarketPulseItem): ProductPreview | null {
     likesCount: 0,
     priceFinal,
     stock: 99,
+    genres: [],
   };
 }
 

@@ -4583,3 +4583,469 @@ h1,
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
+
+// Featured section — géneros + cards laterales + (Fase 3: oferta del día)
+.featured-section {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-bottom: 1.5rem;
+  padding: 0 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 0 1.75rem;
+  }
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  gap: 0.75rem;
+  align-items: stretch;
+  min-height: 300px;
+}
+
+// Cards laterales grandes
+.featured-side-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  position: relative;
+  min-height: 300px;
+  transition: transform 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 12px rgba(2, 6, 23, 0.10);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(2, 6, 23, 0.18);
+  }
+}
+
+.featured-side-card__media {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  background: #1e293b;
+}
+
+.featured-side-card__img {
+  object-fit: cover;
+}
+
+.featured-side-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(2, 6, 23, 0.88) 0%, rgba(2, 6, 23, 0.2) 55%, transparent 100%);
+  z-index: 1;
+}
+
+.featured-side-card__info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.featured-side-card__badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.featured-side-card__badge--purple {
+  background: rgba(124, 58, 237, 0.85);
+  color: #ede9fe;
+}
+
+.featured-side-card__badge--orange {
+  background: rgba(234, 88, 12, 0.85);
+  color: #fff7ed;
+}
+
+.featured-side-card__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f8fafc;
+  line-height: 1.3;
+  margin: 0;
+  text-shadow: 0 1px 6px rgba(2, 6, 23, 0.6);
+}
+
+.featured-side-card__price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.featured-side-card__discount {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #16a34a;
+  color: #fff;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.featured-side-card__price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+// Columna central
+.featured-center {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.featured-genres {
+  background: #ffffff;
+  border: 1px solid rgba(71, 85, 105, 0.18);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+
+.featured-genres-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin: 0 0 0.75rem;
+}
+
+.featured-genres-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.featured-genre-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 0.6rem 0.7rem;
+  background: #f8f9fa;
+  border: 1px solid rgba(71, 85, 105, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 72px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+
+  &:hover {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.35);
+    box-shadow: 0 2px 10px rgba(124, 58, 237, 0.1);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.featured-genre-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 1.6rem;
+  line-height: 1;
+
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+}
+
+.featured-genre-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #475569;
+  white-space: nowrap;
+}
+
+// Placeholder para Fase 3
+.featured-deal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: #ffffff;
+  border: 1px solid rgba(71, 85, 105, 0.15);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+
+.featured-deal__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.featured-deal__fire { font-size: 1rem; }
+
+.featured-deal__title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #c2410c;
+  flex: 1;
+}
+
+.featured-deal__countdown {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.featured-deal__cd-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid rgba(71, 85, 105, 0.15);
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  min-width: 34px;
+}
+
+.featured-deal__cd-num {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.featured-deal__cd-unit {
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.featured-deal__cd-sep {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 0.4rem;
+}
+
+.featured-deal__list {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.featured-deal__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  text-decoration: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(71, 85, 105, 0.12);
+  transition: background 0.12s, border-color 0.12s;
+
+  &:hover {
+    background: #f8f9fa;
+    border-color: rgba(124, 58, 237, 0.2);
+  }
+}
+
+.featured-deal__cover {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border-radius: 7px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #e2e8f0;
+}
+
+.featured-deal__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.featured-deal__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.featured-deal__price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.featured-deal__badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #ea580c;
+  color: #fff;
+  padding: 0.12rem 0.4rem;
+  border-radius: 5px;
+}
+
+.featured-deal__price {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.featured-deal__original {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+@media (max-width: 1100px) {
+  .featured-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .featured-center {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+
+  .featured-side-card,
+  .featured-side-card__media {
+    min-height: 240px;
+  }
+
+  .featured-deal__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .featured-section {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+  }
+
+  .featured-grid {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .featured-side-card,
+  .featured-side-card__media {
+    min-height: 210px;
+  }
+
+  .featured-genres,
+  .featured-deal {
+    padding: 0.9rem;
+  }
+
+  .featured-genres-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .featured-genre-chip {
+    min-width: 0;
+  }
+
+  .featured-deal__header {
+    align-items: flex-start;
+  }
+
+  .featured-deal__countdown {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .featured-deal__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .featured-deal__row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .featured-deal__cover {
+    height: 72px;
+  }
+}
+
+@media (max-width: 420px) {
+  .footer-brand-title {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-brand-logo-lockup {
+    width: 108px;
+    height: 40px;
+  }
+
+  .footer-brand-disc {
+    left: 36px;
+    top: 3px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .footer-brand-word {
+    font-size: 0.92rem;
+  }
+
+  .footer-brand-word-z {
+    font-size: 1.18rem;
+  }
+
+  .featured-side-card,
+  .featured-side-card__media {
+    min-height: 190px;
+  }
+
+  .featured-side-card__info {
+    padding: 0.8rem;
+  }
+
+  .featured-deal__price-row {
+    flex-wrap: wrap;
+  }
+}

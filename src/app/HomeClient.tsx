@@ -13,6 +13,7 @@ import { useLocale } from "@/hooks/useLocale";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { GameCard } from "@/components/GameCard";
 import { PlatformBar } from "@/components/PlatformBar";
+import { FeaturedSection } from "@/components/FeaturedSection";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
 const MarketIntelligenceSections = dynamic(
@@ -282,6 +283,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
         </div>
       </section>
       <main className="main-wrapper">
+        <FeaturedSection products={products} />
         <MarketIntelligenceSections />
         {recentlyViewed.length > 0 && (
           <section className="recently-viewed">
