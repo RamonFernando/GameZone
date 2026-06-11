@@ -217,7 +217,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** [Rich Results Test](https://search.google.com/test/rich-results) valida la
   ficha sin errores.
 
-### 8.3 — JSON-LD `WebSite` + `Organization` en la home  🟡 MEDIA
+### 8.3 — JSON-LD `WebSite` + `Organization` en la home  ✅ HECHA (11/06/2026)
 - **Acción:** en el `page.tsx` server de la home (tras 6.1), añadir schema `WebSite` con
   `potentialAction: SearchAction` (target `/?q={search_term_string}` — la home ya soporta `?q=`)
   y `Organization` con logo. Esto habilita la caja de búsqueda en resultados de Google.

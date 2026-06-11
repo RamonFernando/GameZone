@@ -12,5 +12,43 @@ export default async function HomePage() {
     getCachedHeroSections(),
   ]);
 
-  return <HomeClient initialProducts={products} initialHeroSections={heroSections} />;
+  const baseUrl =
+    process.env.APP_BASE_URL ?? "https://gamezone-digital-store.netlify.app";
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "GameZone",
+    url: baseUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${baseUrl}/?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "GameZone",
+    url: baseUrl,
+    logo: `${baseUrl}/Recursos/logo.png`,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <HomeClient initialProducts={products} initialHeroSections={heroSections} />
+    </>
+  );
 }
