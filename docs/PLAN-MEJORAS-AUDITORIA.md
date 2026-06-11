@@ -43,7 +43,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 4.1b — SEO avanzado (metadata por juego + JSON-LD) | ⬜ **pendiente** (verificado: `games/[slug]/page.tsx` sigue siendo client component) → ver FASE 8 |
 | 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
 | 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
-| **FASE 6 — Rendimiento** | ⬜ **NUEVA — prioridad máxima** (la home tarda en cargar; causa identificada) |
+| **FASE 6 — Rendimiento** | ⚠️ en curso — **6.1 ✅ hecha el 11/06/2026** (commit `9533064`); 6.2-6.5 pendientes |
 | **FASE 7 — Seguridad avanzada** | ⬜ NUEVA |
 | **FASE 8 — SEO avanzado** | ⬜ NUEVA (absorbe 4.1b) |
 | **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
@@ -70,7 +70,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 > `fetch /api/home/hero` (ambos con `cache: "no-store"`) → consulta a Neon (Frankfurt) en frío →
 > render. Cada visita paga TODA la cadena; nada se cachea en ningún nivel.
 
-### 6.1 — Convertir la home a Server Component con datos precargados  🔴 CRÍTICO
+### 6.1 — Convertir la home a Server Component con datos precargados  🔴 CRÍTICO  ✅ HECHA (commit `9533064`, 11/06/2026; tsc + 25 tests + build verdes; la ruta `/` aparece como ƒ dynamic en el build con datos vía unstable_cache)
 - **Problema:** `src/app/page.tsx` es `"use client"` y carga productos y hero por fetch en
   `useEffect` con `cache: "no-store"` (líneas 156-188). `src/app/api/products/route.ts` es
   `force-dynamic` y consulta la DB en cada request.
