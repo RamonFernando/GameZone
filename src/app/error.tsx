@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function Error({
   error,
   reset,
@@ -7,6 +9,15 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("Error boundary capturó un fallo de ruta.", {
+      name: error.name,
+      message: error.message,
+      digest: error.digest,
+      stack: process.env.NODE_ENV === "production" ? undefined : error.stack,
+    });
+  }, [error]);
+
   return (
     <main className="error-boundary">
       <h1>Algo ha fallado</h1>
