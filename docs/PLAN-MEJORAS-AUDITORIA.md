@@ -363,6 +363,33 @@ npx vitest run
 npm run build
 ```
 
+---
+
+## Hallazgos Lighthouse — informe 11/06/2026 (Móvil, 8:36)
+
+> Scores al medir: **Rendimiento 98 · Accesibilidad 98 · Prácticas recomendadas 96 · SEO 100**
+> Fuente: PageSpeed Insights móvil. Medido antes de los commits 8.3/9.1 (no afectan estos fallos).
+
+### Fallos detectados (6 únicos)
+
+| # | Categoría | Problema | Accionable |
+|---|---|---|---|
+| 1 | Rendimiento | **Solicitudes que bloquean el renderizado** — chunk CSS `0k1w7_h05lnt_.css` en ruta crítica | ❌ Lo genera Next.js internamente |
+| 2 | Rendimiento | **Descubrimiento de solicitudes de LCP** — imagen hero no descubierta en HTML inicial | ✅ Añadir `<link rel="preload">` en `page.tsx` |
+| 3 | Rendimiento | **Redistribución forzada** — JS lee layout y escribe DOM en el mismo frame | ⚠️ Requiere profiling en DevTools |
+| 4 | Accesibilidad | **Encabezados fuera de orden secuencial** — salto de nivel `<h>` (ej. h1→h3) en Hero/GameGrid | ✅ Fácil — revisar jerarquía `<h>` |
+| 5 | Prácticas | **Errores en consola** — `/api/account/me` falla en carga (usuario no autenticado); error externo de `wikia.nocookie.net` | ✅ Suprimir fetch si no hay sesión |
+| 6 | Prácticas | **Sin source maps** para JS propio de gran tamaño | ❌ No afecta al usuario |
+
+### Prioridad de acción
+
+1. 🟢 **Fácil + Accesibilidad:** corregir orden de `<h>` en componentes Hero/GameGrid (tarea 9.3).
+2. 🟢 **Fácil + Prácticas:** no llamar a `/api/account/me` si no hay cookie de sesión — evita el error de consola.
+3. 🟡 **Media:** añadir `<link rel="preload">` para la imagen LCP del hero en `page.tsx`.
+4. 🔴 **Alta complejidad:** redistribución forzada — solo abordar si el Rendimiento baja de 95.
+
+---
+
 ## Tecnologías a incorporar en esta v2 (resumen)
 - **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
 - **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
