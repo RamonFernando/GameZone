@@ -441,6 +441,17 @@
     0 0 0 1px rgba(99, 102, 241, 0.32);
 }
 
+/* B3 — Zoom sutil de portada en hover (respeta prefers-reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .game-card-media img {
+    transition: transform 220ms ease-out;
+  }
+
+  .card.game-card-plus.card-hover:hover .game-card-media img {
+    transform: scale(1.05);
+  }
+}
+
 .game-card-cashback-badge {
   position: absolute;
   left: 0.55rem;

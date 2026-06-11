@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
 import { Hero } from "@/components/Hero";
@@ -8,6 +9,7 @@ import { Header } from "@/components/Header";
 import { GameGrid } from "@/components/GameGrid";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useSearch } from "@/contexts/SearchContext";
+import { useLocale } from "@/hooks/useLocale";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
 const MarketIntelligenceSections = dynamic(
@@ -130,6 +132,7 @@ type HomeClientProps = {
 export function HomeClient({ initialProducts, initialHeroSections }: HomeClientProps) {
   const { query, setQuery, platform } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>(initialProducts);
+  const lang = useLocale();
   useScrollMemory(true);
 
   useEffect(() => {
@@ -227,6 +230,36 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
         heroSections={initialHeroSections}
         headerSlot={<Header topTransparentOnTop />}
       />
+      <section
+        className="trust-bar"
+        aria-label={lang === "en" ? "Why shop with us" : "Por qué comprar con nosotros"}
+      >
+        <div className="trust-bar-inner">
+          <div className="trust-item">
+            <span className="trust-item-icon" aria-hidden="true">⚡</span>
+            <span className="trust-item-label">
+              {lang === "en" ? "Instant delivery" : "Entrega inmediata"}
+            </span>
+          </div>
+          <div className="trust-item">
+            <span className="trust-item-icon" aria-hidden="true">🔒</span>
+            <span className="trust-item-label">
+              {lang === "en" ? "Secure payment" : "Pago seguro"}
+            </span>
+            <div className="trust-payment-logos">
+              <Image src="/payment/visa.svg" alt="VISA" width={36} height={16} unoptimized />
+              <Image src="/payment/mastercard.svg" alt="Mastercard" width={28} height={16} unoptimized />
+              <Image src="/payment/paypal.svg" alt="PayPal" width={36} height={16} unoptimized />
+            </div>
+          </div>
+          <div className="trust-item">
+            <span className="trust-item-icon" aria-hidden="true">🎧</span>
+            <span className="trust-item-label">
+              {lang === "en" ? "24h support" : "Soporte 24h"}
+            </span>
+          </div>
+        </div>
+      </section>
       <main className="main-wrapper">
         <MarketIntelligenceSections />
         <GameGrid
