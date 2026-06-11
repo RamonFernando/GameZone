@@ -32,7 +32,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 2.1 — Cifrar `totpSecret` (AES-256-GCM) | ✅ hecho |
 | 2.2 — Tolerancia TOTP reducida | ✅ hecho |
 | 2.3 — Rate limit en 2FA/TOTP | ✅ hecho |
-| 2.4 — Cabeceras de seguridad | ✅ hecho · ⚠️ CSP débil, ver tarea 7.1 |
+| 2.4 — Cabeceras de seguridad | ✅ hecho · 7.1 ✅ hecho · ⚠️ pendiente validación manual en producción (home, ficha, auth, checkout) |
 | 2.5 — Validación `event.type` webhooks | ✅ hecho |
 | 3.1 — Zod en bodies de API | ✅ hecho |
 | 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
@@ -413,7 +413,7 @@ npm run build
 | # | Categoría | Problema | Accionable |
 |---|---|---|---|
 | 1 | Rendimiento | **Solicitudes que bloquean el renderizado** — chunk CSS `0k1w7_h05lnt_.css` en ruta crítica | ❌ Lo genera Next.js internamente |
-| 2 | Rendimiento | **Descubrimiento de solicitudes de LCP** — imagen hero no descubierta en HTML inicial | ✅ Añadir `<link rel="preload">` en `page.tsx` |
+| 2 | Rendimiento | **Descubrimiento de solicitudes de LCP** — imagen hero no descubierta en HTML inicial | ✅ **Resuelto en 6.4** — `priority` en Hero activa el preload automático de Next.js |
 | 3 | Rendimiento | **Redistribución forzada** — JS lee layout y escribe DOM en el mismo frame | ⚠️ Requiere profiling en DevTools |
 | 4 | Accesibilidad | **Encabezados fuera de orden secuencial** — salto de nivel `<h>` (ej. h1→h3) en Hero/GameGrid | ✅ Fácil — revisar jerarquía `<h>` |
 | 5 | Prácticas | **Errores en consola** — `/api/account/me` falla en carga (usuario no autenticado); error externo de `wikia.nocookie.net` | ✅ Suprimir fetch si no hay sesión |
@@ -423,7 +423,7 @@ npm run build
 
 1. 🟢 **Fácil + Accesibilidad:** corregir orden de `<h>` en componentes Hero/GameGrid (tarea 9.3).
 2. 🟢 **Fácil + Prácticas:** no llamar a `/api/account/me` si no hay cookie de sesión — evita el error de consola.
-3. 🟡 **Media:** añadir `<link rel="preload">` para la imagen LCP del hero en `page.tsx`.
+3. ~~🟡 **Media:** añadir `<link rel="preload">` para la imagen LCP del hero~~ — **resuelto en 6.4**.
 4. 🔴 **Alta complejidad:** redistribución forzada — solo abordar si el Rendimiento baja de 95.
 
 ---
