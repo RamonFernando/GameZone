@@ -12,6 +12,7 @@ import { useSearch } from "@/contexts/SearchContext";
 import { useLocale } from "@/hooks/useLocale";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { GameCard } from "@/components/GameCard";
+import { PlatformBar } from "@/components/PlatformBar";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
 const MarketIntelligenceSections = dynamic(
@@ -299,36 +300,12 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
             </div>
           </section>
         )}
-        <div
-          className="filter-chips"
-          role="group"
-          aria-label={lang === "en" ? "Filter by platform" : "Filtrar por plataforma"}
-        >
-          <button
-            type="button"
-            className={`filter-chip${!platform && !filterOffer ? " filter-chip--active" : ""}`}
-            onClick={() => { setPlatform(null); setFilterOffer(false); }}
-          >
-            {lang === "en" ? "All" : "Todos"}
-          </button>
-          {(["PlayStation", "Xbox", "Nintendo", "PC"] as const).map((p) => (
-            <button
-              key={p}
-              type="button"
-              className={`filter-chip${platform === p ? " filter-chip--active" : ""}`}
-              onClick={() => { setPlatform(platform === p ? null : p); setFilterOffer(false); }}
-            >
-              {p}
-            </button>
-          ))}
-          <button
-            type="button"
-            className={`filter-chip filter-chip--offer${filterOffer ? " filter-chip--active" : ""}`}
-            onClick={() => { setFilterOffer(!filterOffer); setPlatform(null); }}
-          >
-            {lang === "en" ? "🔥 Deals" : "🔥 Ofertas"}
-          </button>
-        </div>
+        <PlatformBar
+          activePlatform={platform}
+          filterOffer={filterOffer}
+          onSelectPlatform={(p) => { setPlatform(p); setFilterOffer(false); }}
+          onToggleOffer={() => { setFilterOffer(!filterOffer); setPlatform(null); }}
+        />
         <GameGrid
           games={filteredGames}
           isFiltered={Boolean(query.trim()) || Boolean(platform) || filterOffer}
