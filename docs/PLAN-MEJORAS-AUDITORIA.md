@@ -46,7 +46,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
 | **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
-| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1 ✅ B3 ✅**, B2/B4/B5/B6/B7/B8 pendientes |
+| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1/B2/B3/B4/B5/B6/B8 ✅**, B7 pendiente |
 | **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); **10.3 parcial ✅** (ESLint + audit en CI), 10.2/10.4 y Lighthouse CI pendientes |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
@@ -323,25 +323,28 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   Iconos de "Entrega inmediata", "Pago seguro"
   (logos Visa/Mastercard/PayPal), "Soporte 24h". Patrón universal en Eneba/Instant Gaming/G2A;
   es lo que más "tienda real" transmite de toda la lista.
-- **B2 — Chips de filtro** sobre el grid: género/plataforma/oferta como botones-píldora
-  clicables, en lugar de solo búsqueda por texto. Coste: medio (los datos de género ya existen
-  vía RAWG).
+- **B2 — Chips de filtro** sobre el grid: ✅ **HECHA** (11/06/2026, commit `e6a3525`).
+  Chips Todos/PlayStation/Xbox/Nintendo/PC/Ofertas sobre el grid, conectados a `useSearch`
+  y filtro local por descuento.
 - **B3 — Micro-interacciones en tarjetas:** ✅ **HECHA** (11/06/2026, commit `5e57af5`).
   Hover con `transform: translateY(-4px)` + sombra +
   zoom sutil de la imagen (`scale(1.05)` con `overflow: hidden`). Respetar
   `prefers-reduced-motion`.
-- **B4 — CTA pegajoso en ficha móvil:** barra inferior fija con precio + "Añadir al carrito"
-  al hacer scroll en la ficha (patrón Epic/Steam móvil). Coste: bajo-medio.
-- **B5 — "Vistos recientemente":** carrusel al final de la home/ficha con los últimos 6 juegos
-  visitados (localStorage, sin backend). Coste: bajo.
-- **B6 — Wishlist visible:** ya existe `ProductLike` en el modelo — exponer los likes como
-  "Mi lista" en el menú de cuenta y un corazón en las tarjetas. Coste: medio (la base ya está).
+- **B4 — CTA pegajoso en ficha móvil:** ✅ **HECHA** (11/06/2026, commit `ae61b54`).
+  Barra inferior fija con precio + "Añadir al carrito" al hacer scroll en la ficha.
+- **B5 — "Vistos recientemente":** ✅ **HECHA** (11/06/2026, commit `ae61b54`).
+  Carrusel en home con los últimos juegos visitados mediante `localStorage` (`useRecentlyViewed`).
+- **B6 — Wishlist visible:** ✅ **HECHA** (11/06/2026, commit `e6a3525`).
+  `GET /api/account/wishlist` y pestaña "Mi lista" en cuenta, alimentada desde `ProductLike`.
 - **B7 — Cuenta atrás en ofertas:** si un producto tiene oferta con fecha fin, mostrar countdown
   en la tarjeta (urgencia, patrón Instant Gaming). Requiere campo `saleEndsAt` en Product.
   Coste: medio.
-- **B8 — Tipografía display propia:** una fuente de título gaming (p. ej. una grotesk condensada)
-  vía `next/font/local` solo para h1/h2/hero, manteniendo system-ui en el cuerpo (que es óptimo
-  para rendimiento). Cambia mucho la personalidad con poco coste. Coste: bajo.
+- **B8 — Tipografía display propia:** ✅ **HECHA** (11/06/2026, commit `ae61b54`).
+  Exo 2 vía `next/font/google` como variable `--font-display` para títulos principales.
+
+> **Validación local 11/06/2026:** `npx tsc --noEmit` ✅ y `npm run test:unit` ✅ (48/48).
+> `npm run lint` ❌ pendiente por resolver en código: dos `eslint-disable-next-line react-hooks/exhaustive-deps`
+> apuntan a una regla no configurada y `dataSources` queda sin uso en `MarketIntelligenceSections.tsx`.
 
 ---
 
