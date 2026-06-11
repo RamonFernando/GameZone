@@ -883,39 +883,6 @@ export function MarketIntelligenceSections() {
 
   return (
     <div className="market-intel-stack">
-      <section className="market-intel market-intel--intro" aria-labelledby="market-intel-title">
-        <div className="market-intel-head market-intel-head--split">
-          <div>
-            <span className="market-intel-kicker">Datos externos</span>
-            <h2 id="market-intel-title" className="section-title market-intel-title">
-              Fuentes preparadas para conectar APIs
-            </h2>
-          </div>
-          <p className="section-subtitle market-intel-copy">
-            Esta seccion define que datos necesita GameZone antes de conectarlos: fuente,
-            ruta interna y campos esperados. Asi la interfaz ya nace lista para cambiar los
-            mocks por respuestas reales.
-          </p>
-        </div>
-
-        <div className="data-source-grid">
-          {dataSources.map((item) => (
-            <article className="data-source-card" key={item.name}>
-              <div className="data-source-top">
-                <span>{item.source}</span>
-                <strong>{item.name}</strong>
-              </div>
-              <code>{item.route}</code>
-              <div className="data-field-list">
-                {item.fields.map((field) => (
-                  <span key={field}>{field}</span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="market-intel market-intel--popular" aria-label="Fuentes de tendencias de mercado">
         <div className="market-pulse-source-stack">
           <section className="market-pulse-source-panel market-pulse-source-panel--g2a" aria-labelledby="g2a-panel-title">
