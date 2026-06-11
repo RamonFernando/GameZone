@@ -2,9 +2,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
+import type { WishlistItem } from "@/app/api/account/wishlist/route";
 import {
   createPaymentProgressStorageKey,
   getPaymentProgressStepFromStartedAt,
@@ -65,7 +67,7 @@ type PaymentStatusPayload = {
   paymentResult?: PendingPayment | null;
 };
 
-type AccountTab = "account" | "details" | "security" | "payment";
+type AccountTab = "account" | "details" | "security" | "payment" | "wishlist";
 
 const MAX_PENDING_PAYMENT_POLLS = 30;
 
@@ -117,6 +119,9 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<AccountTab>(initialTab);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
+  const wishlistLoadedRef = useRef(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [isUpdatingTwoFactor, setIsUpdatingTwoFactor] = useState(false);
@@ -317,6 +322,19 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       setActiveTab("account");
     }
   }, [activeTab, isLoading, pendingPayment, paymentResult]);
+
+  useEffect(() => {
+    if (activeTab !== "wishlist" || wishlistLoadedRef.current) return;
+    wishlistLoadedRef.current = true;
+    setIsLoadingWishlist(true);
+    fetch("/api/account/wishlist")
+      .then((res) => res.json())
+      .then((payload: { items?: WishlistItem[] }) => {
+        setWishlistItems(payload.items ?? []);
+      })
+      .catch(() => { /* keep empty list */ })
+      .finally(() => { setIsLoadingWishlist(false); });
+  }, [activeTab]);
 
   const handleRefreshPendingPayment = async () => {
     setIsRefreshingPendingPayment(true);
@@ -752,6 +770,15 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
           onClick={() => setActiveTab("security")}
         >
           {lang === "en" ? "Security" : "Seguridad"}
+        </button>
+        <button
+          type="button"
+          className={
+            "account-tab" + (activeTab === "wishlist" ? " account-tab--active" : "")
+          }
+          onClick={() => setActiveTab("wishlist")}
+        >
+          {lang === "en" ? "My list" : "Mi lista"}
         </button>
         {pendingPayment || paymentResult ? (
           <button
@@ -1532,6 +1559,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
 
           <div className="auth-field">
             <span className="auth-label">Verificación de acceso desde el móvil (Push MFA)</span>
+
             <p className="auth-alt">
               {lang === "en"
                 ? "This is the system where you receive a notification on your phone and approve or deny the sign‑in (for example: “Is this you?” with Yes / No buttons)."
@@ -1554,6 +1582,68 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               ? "Coming soon: enable verification by mobile notification"
               : "Próximamente: activar verificación por notificación en el móvil"}
           </button>
+        </>
+      ) : null}
+
+      {activeTab === "wishlist" ? (
+        <>
+          <div className="auth-field">
+            <span className="auth-label">
+              {lang === "en" ? "My wish list" : "Mi lista de deseos"}
+            </span>
+            <p className="auth-alt">
+              {lang === "en"
+                ? "Games you have marked with ♥ while browsing the store."
+                : "Juegos que has marcado con ♥ al navegar por la tienda."}
+            </p>
+          </div>
+
+          {isLoadingWishlist ? (
+            <p className="auth-alt">
+              {lang === "en" ? "Loading your list..." : "Cargando tu lista..."}
+            </p>
+          ) : wishlistItems.length === 0 ? (
+            <p className="auth-alt">
+              {lang === "en"
+                ? "Your list is empty. Click the ♥ on any game to save it here."
+                : "Tu lista está vacía. Haz clic en el ♥ de cualquier juego para guardarlo aquí."}
+            </p>
+          ) : (
+            <ul className="wishlist-items">
+              {wishlistItems.map((item) => (
+                <li key={item.id} className="wishlist-item">
+                  <Link href={`/games/${item.slug}`} className="wishlist-item-link">
+                    <Image
+                      src={item.coverImage}
+                      alt={item.name}
+                      width={48}
+                      height={48}
+                      className="wishlist-item-cover"
+                      unoptimized
+                    />
+                    <div className="wishlist-item-info">
+                      <span className="wishlist-item-name">{item.name}</span>
+                      <span className="wishlist-item-meta">
+                        {item.platform}
+                        {item.discountPercent > 0 && (
+                          <span className="wishlist-item-discount">
+                            {" "}−{item.discountPercent}%
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <span className="wishlist-item-price">
+                      {item.priceFinal.toLocaleString("es-ES", {
+                        style: "currency",
+                        currency: "EUR",
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       ) : null}
     </div>

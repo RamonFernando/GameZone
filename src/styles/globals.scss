@@ -4324,3 +4324,115 @@ h1,
     display: none;
   }
 }
+
+// B2 — Chips de filtro plataforma + oferta
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255 255 255 / 0.15);
+  background: rgba(255 255 255 / 0.05);
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms, color 150ms;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: rgba(255 255 255 / 0.35);
+    color: #e2e8f0;
+    background: rgba(255 255 255 / 0.1);
+  }
+
+  &--active {
+    border-color: #6366f1;
+    background: rgba(99 102 241 / 0.2);
+    color: #c7d2fe;
+  }
+
+  &--offer#{&}--active {
+    border-color: #f97316;
+    background: rgba(249 115 22 / 0.2);
+    color: #fed7aa;
+  }
+}
+
+// B6 — Wishlist Mi lista
+.wishlist-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wishlist-item-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255 255 255 / 0.04);
+  border: 1px solid rgba(255 255 255 / 0.08);
+  transition: background 150ms;
+
+  &:hover {
+    background: rgba(255 255 255 / 0.09);
+  }
+}
+
+.wishlist-item-cover {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.wishlist-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.wishlist-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wishlist-item-meta {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.wishlist-item-discount {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.wishlist-item-price {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  flex-shrink: 0;
+}

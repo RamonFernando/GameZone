@@ -132,11 +132,12 @@ type HomeClientProps = {
 };
 
 export function HomeClient({ initialProducts, initialHeroSections }: HomeClientProps) {
-  const { query, setQuery, platform } = useSearch();
+  const { query, setQuery, platform, setPlatform } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>(initialProducts);
   const lang = useLocale();
   const { getAll: getRecent } = useRecentlyViewed();
   const [recentSlugs, setRecentSlugs] = useState<string[]>([]);
+  const [filterOffer, setFilterOffer] = useState(false);
   useScrollMemory(true);
 
   useEffect(() => {
@@ -223,8 +224,9 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
           !normalizedPlatform ||
           gamePlatform === normalizedPlatform ||
           gamePlatform.includes(normalizedPlatform);
+        const matchesOffer = !filterOffer || game.discountPercent > 0;
 
-        return score > 0 && matchesPlatform;
+        return score > 0 && matchesPlatform && matchesOffer;
       });
 
     if (!query.trim()) {
@@ -240,7 +242,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
         return a.game.name.localeCompare(b.game.name);
       })
       .map(({ game }) => game);
-  }, [query, platform, products]);
+  }, [query, platform, products, filterOffer]);
 
   return (
     <>
@@ -297,12 +299,42 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
             </div>
           </section>
         )}
+        <div
+          className="filter-chips"
+          role="group"
+          aria-label={lang === "en" ? "Filter by platform" : "Filtrar por plataforma"}
+        >
+          <button
+            type="button"
+            className={`filter-chip${!platform && !filterOffer ? " filter-chip--active" : ""}`}
+            onClick={() => { setPlatform(null); setFilterOffer(false); }}
+          >
+            {lang === "en" ? "All" : "Todos"}
+          </button>
+          {(["PlayStation", "Xbox", "Nintendo", "PC"] as const).map((p) => (
+            <button
+              key={p}
+              type="button"
+              className={`filter-chip${platform === p ? " filter-chip--active" : ""}`}
+              onClick={() => { setPlatform(platform === p ? null : p); setFilterOffer(false); }}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`filter-chip filter-chip--offer${filterOffer ? " filter-chip--active" : ""}`}
+            onClick={() => { setFilterOffer(!filterOffer); setPlatform(null); }}
+          >
+            {lang === "en" ? "🔥 Deals" : "🔥 Ofertas"}
+          </button>
+        </div>
         <GameGrid
           games={filteredGames}
-          isFiltered={Boolean(query.trim()) || Boolean(platform)}
+          isFiltered={Boolean(query.trim()) || Boolean(platform) || filterOffer}
           emptyQuery={query}
           popularSuggestions={popularSuggestions}
-          onClearSearch={() => setQuery("")}
+          onClearSearch={() => { setQuery(""); setPlatform(null); setFilterOffer(false); }}
         />
       </main>
       <ScrollToTop />
