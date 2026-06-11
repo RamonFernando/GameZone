@@ -38,7 +38,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
 | 3.3 — Sentry | ✅ **HECHO** (verificado: `withSentryConfig` en `next.config.mjs`, configs server/edge/client) — la v1 lo marcaba pendiente por error |
 | 3.4 — CI GitHub Actions | ✅ hecho |
-| 3.5 — Tests de integración | ⬜ pendiente (7 archivos de test unitario actuales) |
+| 3.5 — Tests de integración | ✅ **HECHO** (commit `c972114`, 11/06/2026; 32 tests: createPendingOrder, flujo completo checkout, idempotencia, rotación sesión) |
 | 4.1 — SEO básico (sitemap/robots/OG/Search Console) | ✅ hecho |
 | 4.1b — SEO avanzado (metadata por juego + JSON-LD) | ⬜ **pendiente** (verificado: `games/[slug]/page.tsx` sigue siendo client component) → ver FASE 8 |
 | 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
@@ -47,7 +47,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 7 — Seguridad avanzada** | ⬜ NUEVA |
 | **FASE 8 — SEO avanzado** | ⬜ NUEVA (absorbe 4.1b) |
 | **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
-| **FASE 10 — Testing y robustez** | ⬜ NUEVA (absorbe 3.5) |
+| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (commit `c972114`); 10.2-10.4 pendientes |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
 

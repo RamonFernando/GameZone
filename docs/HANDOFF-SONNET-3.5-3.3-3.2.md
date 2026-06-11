@@ -1,4 +1,4 @@
-# Traspaso para Sonnet — tareas 3.5, 3.3 y 3.2
+# Traspaso para Sonnet — tareas 3.5, 3.3 y 3.2  ✅ CERRADO 11/06/2026
 
 > Contexto: GameZone (Next.js App Router + Prisma + PostgreSQL/Neon). El plan de
 > auditoría está en `docs/PLAN-MEJORAS-AUDITORIA.md`. Tareas 1.1, 1.2, 2.1 y 3.1 ya
@@ -13,7 +13,7 @@
 
 ---
 
-## 3.5 — Tests de integración
+## 3.5 — Tests de integración  ✅ HECHO (commit `c972114`, 11/06/2026; 32 tests verdes)
 
 **Objetivo:** cubrir flujos que cruzan varias piezas, no solo funciones sueltas.
 
@@ -37,7 +37,7 @@
 
 ---
 
-## 3.3 — Logging / Sentry
+## 3.3 — Logging / Sentry  ✅ HECHO (Parte A ya estaba; Parte B verificada en plan v2)
 
 **Parte A — logging consistente (rápido, sin cuentas):**
 - Solo hay **2 catches silenciosos**, ambos en `src/app/api/payments/paypal/webhook/route.ts` (líneas ~32 y ~61: `.catch(() => false)` y `.catch(() => null)`).
@@ -54,7 +54,7 @@
 
 ---
 
-## 3.2 — Rate limit distribuido con Upstash (OPCIONAL)
+## 3.2 — Rate limit distribuido con Upstash (OPCIONAL)  ⬜ PENDIENTE — requiere credenciales Upstash del usuario
 
 > El rate limit actual (`src/lib/auth/rate-limit.ts`) ya es atómico y persistente en BD (`RateLimitBucket`), con fail-open. Funciona. Esta tarea es solo para escala; **no es bloqueante**. Confirmar con el usuario si merece la pena ahora.
 
