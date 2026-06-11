@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { computeTotalAmount, completePaidOrder, CheckoutValidationError } from "./order-service";
+import {
+  computeTotalAmount,
+  completePaidOrder,
+  createPendingOrder,
+  CheckoutValidationError,
+} from "./order-service";
 
 // Hoisted so the reference is available inside the vi.mock factory below
 const mockTx = vi.hoisted(() => ({
@@ -19,6 +24,10 @@ vi.mock("@/lib/prisma", () => ({
       findFirst: vi.fn(),
       updateMany: vi.fn(),
       update: vi.fn(),
+      create: vi.fn(),
+    },
+    product: {
+      findMany: vi.fn(),
     },
     user: {
       findUnique: vi.fn(),
@@ -32,6 +41,13 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
+vi.mock("@/lib/products", () => ({
+  ensureProductsSeeded: vi.fn().mockResolvedValue(undefined),
+  computeDiscountedPrice: vi.fn((price: number, discount: number) =>
+    Number((price * (1 - discount / 100)).toFixed(2))
+  ),
+}));
+
 vi.mock("@/lib/auth/email", () => ({
   sendPurchaseConfirmationEmail: vi.fn().mockResolvedValue(undefined),
 }));
@@ -42,6 +58,28 @@ vi.mock("@/lib/cart/persistent-cart", () => ({
 
 import { prisma } from "@/lib/prisma";
 import { sendPurchaseConfirmationEmail } from "@/lib/auth/email";
+import { computeDiscountedPrice } from "@/lib/products";
+
+const MOCK_CATALOG = [
+  {
+    id: "prod-1",
+    slug: "cyberpunk-2077",
+    name: "Cyberpunk 2077",
+    priceOriginal: 29.99,
+    discountPercent: 0,
+    stock: 5,
+    isActive: true,
+  },
+  {
+    id: "prod-2",
+    slug: "elden-ring",
+    name: "Elden Ring",
+    priceOriginal: 39.99,
+    discountPercent: 20,
+    stock: 3,
+    isActive: true,
+  },
+];
 
 const MOCK_ORDER_ITEMS = [
   {
@@ -174,5 +212,180 @@ describe("completePaidOrder", () => {
     // La segunda llamada también devuelve emailSent: true porque el email
     // ya estaba enviado (count === 0 significa que otro lo hizo antes)
     expect(result2.emailSent).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createPendingOrder — validaciones y creación
+// ---------------------------------------------------------------------------
+describe("createPendingOrder", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("crea un pedido pending con el total y los ítems correctos", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(MOCK_CATALOG as never);
+    vi.mocked(prisma.order.create).mockResolvedValueOnce({
+      ...MOCK_ORDER,
+      id: "order-new",
+      totalAmount: 29.99,
+      items: [
+        {
+          id: "item-new",
+          orderId: "order-new",
+          gameSlug: "cyberpunk-2077",
+          title: "Cyberpunk 2077",
+          unitPrice: 29.99,
+          quantity: 1,
+          subtotal: 29.99,
+        },
+      ],
+    } as never);
+
+    const order = await createPendingOrder({
+      userId: "user-xyz",
+      items: [{ slug: "cyberpunk-2077", quantity: 1 }],
+      paymentProvider: "stripe",
+    });
+
+    expect(order.status).toBe("pending");
+    expect(order.totalAmount).toBe(29.99);
+    expect(order.items).toHaveLength(1);
+    expect(prisma.order.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "pending",
+          userId: "user-xyz",
+          currency: "EUR",
+        }),
+      })
+    );
+  });
+
+  it("aplica el descuento al precio unitario", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(MOCK_CATALOG as never);
+    vi.mocked(prisma.order.create).mockResolvedValueOnce({
+      ...MOCK_ORDER,
+      totalAmount: 31.99,
+      items: [],
+    } as never);
+
+    await createPendingOrder({
+      userId: "user-xyz",
+      items: [{ slug: "elden-ring", quantity: 1 }],
+      paymentProvider: "stripe",
+    });
+
+    // computeDiscountedPrice llamado con los valores del producto Elden Ring
+    expect(computeDiscountedPrice).toHaveBeenCalledWith(39.99, 20);
+  });
+
+  it("lanza EMPTY_CART si el array de ítems está vacío", async () => {
+    await expect(
+      createPendingOrder({ userId: "user-xyz", items: [], paymentProvider: "stripe" })
+    ).rejects.toMatchObject({ code: "EMPTY_CART" });
+  });
+
+  it("lanza INVALID_ITEM si el slug no está en el catálogo", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(MOCK_CATALOG as never);
+
+    await expect(
+      createPendingOrder({
+        userId: "user-xyz",
+        items: [{ slug: "juego-inexistente", quantity: 1 }],
+        paymentProvider: "stripe",
+      })
+    ).rejects.toMatchObject({ code: "INVALID_ITEM" });
+  });
+
+  it("lanza OUT_OF_STOCK si el producto no tiene stock", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce([
+      { ...MOCK_CATALOG[0], stock: 0 },
+    ] as never);
+
+    await expect(
+      createPendingOrder({
+        userId: "user-xyz",
+        items: [{ slug: "cyberpunk-2077", quantity: 1 }],
+        paymentProvider: "stripe",
+      })
+    ).rejects.toMatchObject({ code: "OUT_OF_STOCK" });
+  });
+
+  it("lanza INVALID_QUANTITY si la cantidad supera el máximo por ítem", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(MOCK_CATALOG as never);
+
+    await expect(
+      createPendingOrder({
+        userId: "user-xyz",
+        items: [{ slug: "cyberpunk-2077", quantity: 10 }],
+        paymentProvider: "stripe",
+      })
+    ).rejects.toMatchObject({ code: "INVALID_QUANTITY" });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Flujo completo: createPendingOrder → completePaidOrder
+// ---------------------------------------------------------------------------
+describe("flujo completo: createPendingOrder → completePaidOrder", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("crea el pedido como pending y lo completa a paid enviando el email exactamente una vez", async () => {
+    const pendingOrderResult = {
+      ...MOCK_ORDER,
+      id: "order-flow",
+      totalAmount: 29.99,
+      items: [
+        {
+          id: "item-flow",
+          orderId: "order-flow",
+          gameSlug: "cyberpunk-2077",
+          title: "Cyberpunk 2077",
+          unitPrice: 29.99,
+          quantity: 1,
+          subtotal: 29.99,
+        },
+      ],
+    };
+
+    // Setup createPendingOrder
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(MOCK_CATALOG as never);
+    vi.mocked(prisma.order.create).mockResolvedValueOnce(pendingOrderResult as never);
+
+    // Setup completePaidOrder
+    vi.mocked(prisma.order.findFirst).mockResolvedValueOnce(pendingOrderResult as never);
+    mockTx.order.updateMany.mockResolvedValueOnce({ count: 1 });
+    mockTx.order.findFirstOrThrow.mockResolvedValueOnce(MOCK_PAID_ORDER as never);
+    mockTx.product.findUnique.mockResolvedValueOnce(MOCK_PRODUCT as never);
+    mockTx.product.update.mockResolvedValueOnce({} as never);
+    vi.mocked(prisma.order.updateMany).mockResolvedValueOnce({ count: 1 } as never);
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(MOCK_USER as never);
+
+    // Ejecutar flujo
+    const pending = await createPendingOrder({
+      userId: "user-xyz",
+      items: [{ slug: "cyberpunk-2077", quantity: 1 }],
+      paymentProvider: "stripe",
+    });
+
+    expect(pending.status).toBe("pending");
+    expect(pending.totalAmount).toBe(29.99);
+
+    const { order: paid, emailSent } = await completePaidOrder({
+      orderId: pending.id,
+      userId: "user-xyz",
+      paymentProvider: "stripe",
+      paymentReference: "pi_test_flow",
+      requestUrl: "https://gamezone.app/api/payments/stripe/webhook",
+      fallbackEmail: "no-reply@gamezone.local",
+      fallbackUsername: "gamer",
+    });
+
+    expect(paid.status).toBe("paid");
+    expect(emailSent).toBe(true);
+    expect(sendPurchaseConfirmationEmail).toHaveBeenCalledTimes(1);
   });
 });
