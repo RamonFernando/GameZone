@@ -2113,7 +2113,7 @@ img {
   position: relative;
   overflow: hidden;
   border-radius: 0;
-  margin: 0 0 2rem;
+  margin: 0;
   width: 100%;
   /* El contenedor mantiene el mismo aspect ratio que las imagenes de fondo
      (16:9), de modo que object-fit: cover no recorte ni amplie el arte.
@@ -2326,11 +2326,7 @@ html[data-hero-zoom="normal"] .hero--carousel {
   max-width: 100%;
   overflow-wrap: anywhere;
   text-wrap: balance;
-  -webkit-text-stroke: 0.8px rgba(2, 6, 23, 0.95);
-  text-stroke: 0.8px rgba(2, 6, 23, 0.95);
-  text-shadow:
-    0 1px 0 rgba(2, 6, 23, 0.9),
-    0 10px 22px rgba(2, 6, 23, 0.55);
+  text-shadow: 0 2px 12px rgba(2, 6, 23, 0.7);
 }
 
 .hero--carousel .hero-price {
