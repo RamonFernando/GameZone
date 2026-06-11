@@ -84,7 +84,9 @@ async function rawgFetchTrending(options: MarketTrendingOptions = {}) {
 
   const url = new URL(`${RAWG_BASE_URL}/games`);
   url.searchParams.set("key", apiKey);
-  url.searchParams.set("ordering", "-added");
+  url.searchParams.set("ordering", "-metacritic");
+  url.searchParams.set("dates", "2021-01-01,2026-12-31");
+  url.searchParams.set("metacritic", "70,100");
   url.searchParams.set("page_size", "12");
 
   const response = await fetch(url, {
