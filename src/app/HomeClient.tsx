@@ -186,6 +186,11 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
     };
   }, []);
 
+  const popularSuggestions = useMemo(
+    () => [...products].sort((a, b) => b.discountPercent - a.discountPercent).slice(0, 4),
+    [products]
+  );
+
   const filteredGames = useMemo(() => {
     const normalizedPlatform = platform ? normalizeSearchText(platform) : "";
     const rankedGames = products
@@ -224,7 +229,13 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
       />
       <main className="main-wrapper">
         <MarketIntelligenceSections />
-        <GameGrid games={filteredGames} isFiltered={Boolean(query.trim()) || Boolean(platform)} />
+        <GameGrid
+          games={filteredGames}
+          isFiltered={Boolean(query.trim()) || Boolean(platform)}
+          emptyQuery={query}
+          popularSuggestions={popularSuggestions}
+          onClearSearch={() => setQuery("")}
+        />
       </main>
       <ScrollToTop />
     </>

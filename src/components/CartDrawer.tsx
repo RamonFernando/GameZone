@@ -2,10 +2,12 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import { useLocale } from "@/hooks/useLocale";
+import { t } from "@/lib/i18n";
 
 // Props mínimos del CartDrawer: callback para cerrarlo.
 type Props = {
@@ -24,6 +26,40 @@ export function CartDrawer({ onClose }: Props) {
     clearCart,
   } = useCart();
   const lang = useLocale();
+
+  const drawerRef = useRef<HTMLElement>(null);
+
+  // Cerrar con Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Focus trap: mantener foco dentro del drawer mientras está abierto
+  useEffect(() => {
+    const el = drawerRef.current;
+    if (!el) return;
+    const focusable = el.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    first?.focus();
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
+    el.addEventListener("keydown", handleTab);
+    return () => el.removeEventListener("keydown", handleTab);
+  }, []);
 
   // Indica si hay productos en el carrito o está vacío.
   const hasItems = items.length > 0;
@@ -49,6 +85,10 @@ export function CartDrawer({ onClose }: Props) {
     <div className="cart-drawer-backdrop" onClick={onClose}>
       <aside
         className="cart-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t(lang, "cart.aria-label")}
+        ref={drawerRef}
         onClick={(event) => event.stopPropagation()}
       >
         {/* NUEVO CONTENEDOR INTERNO */}
@@ -60,17 +100,18 @@ export function CartDrawer({ onClose }: Props) {
               <span className="cart-icon-button cart-drawer-cart-icon-button">
                 <Image
                   src="/iconos_platforms/carritoCompra2.svg"
-                  alt={lang === "en" ? "Cart" : "Carrito"}
+                  alt=""
+                  aria-hidden="true"
                   width={20}
                   height={20}
                   className="cart-drawer-cart-icon"
                 />
               </span>
-              {lang === "en" ? "Your cart" : "Tu carrito"}
+              {t(lang, "cart.title")}
             </h2>
 
             <button type="button" className="button-ghost btn-padding-site" onClick={onClose}>
-              {lang === "en" ? "Close" : "Cerrar"}
+              {t(lang, "cart.close")}
             </button>
           </header>
 
@@ -78,9 +119,7 @@ export function CartDrawer({ onClose }: Props) {
           <div className="cart-drawer-body">
             {!hasItems && (
               <p className="cart-empty-text">
-                {lang === "en"
-                  ? "You haven't added any games yet. Find your favorite title and click “Add” to put it in the cart."
-                  : "Todavía no has añadido ningún juego. Busca tu título favorito y pulsa “Añadir” para agregarlo al carrito."}
+                {t(lang, "cart.empty")}
               </p>
             )}
 
@@ -98,10 +137,7 @@ export function CartDrawer({ onClose }: Props) {
                       openGameDetail(item.slug);
                     }
                   }}
-                  aria-label={
-                    (lang === "en" ? "Open details for " : "Abrir detalles de ") +
-                    item.game.name
-                  }
+                  aria-label={t(lang, "cart.open-details")(item.game.name)}
                 >
                   <div
                     style={{
@@ -136,11 +172,12 @@ export function CartDrawer({ onClose }: Props) {
                             event.stopPropagation();
                             decreaseFromCart(item.slug);
                           }}
+                          aria-label={t(lang, "cart.decrease")(item.game.name)}
                         >
                           −
                         </button>
 
-                        <span className="qty-value">
+                        <span className="qty-value" aria-live="polite">
                           {item.quantity}
                         </span>
 
@@ -151,6 +188,7 @@ export function CartDrawer({ onClose }: Props) {
                             event.stopPropagation();
                             addToCart(item.game);
                           }}
+                          aria-label={t(lang, "cart.increase")(item.game.name)}
                         >
                           +
                         </button>
@@ -164,7 +202,7 @@ export function CartDrawer({ onClose }: Props) {
                           removeFromCart(item.slug);
                         }}
                       >
-                        {lang === "en" ? "Remove" : "Quitar"}
+                        {t(lang, "cart.remove")}
                       </button>
                     </div>
                   </div>
@@ -176,13 +214,13 @@ export function CartDrawer({ onClose }: Props) {
           {/* cart-drawer-footer */}
           <div className="cart-drawer-footer">
             <div className="cart-drawer-summary">
-              <strong>{lang === "en" ? "Summary" : "Resumen"}</strong>
+              <strong>{t(lang, "cart.summary")}</strong>
               <div>
-                {lang === "en" ? "Total games:" : "Total de juegos:"} {totalItems}
+                {t(lang, "cart.total-items")} {totalItems}
               </div>
 
               <div>
-                {lang === "en" ? "Total:" : "Total:"}{" "}
+                {t(lang, "cart.total")}{" "}
                 {formatPublicPrice(totalAmount, lang)}
               </div>
             </div>
@@ -195,7 +233,7 @@ export function CartDrawer({ onClose }: Props) {
               disabled={!hasItems}
               onClick={goToCheckout}
             >
-              {lang === "en" ? "Checkout now" : "Pagar ahora"}
+              {t(lang, "cart.checkout")}
             </button>
 
             {/* Botón secundario: VACIAR */}
@@ -204,7 +242,7 @@ export function CartDrawer({ onClose }: Props) {
               className="button-ghost cart-full-width btn-padding-site"
               onClick={clearCart}
             >
-              {lang === "en" ? "Empty cart" : "Vaciar carrito"}
+              {t(lang, "cart.clear")}
             </button>
             </div>
           </div>

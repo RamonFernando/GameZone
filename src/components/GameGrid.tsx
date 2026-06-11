@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { ProductPreview } from "@/types/product";
 import { GameCard } from "@/components/GameCard";
 import { useLocale } from "@/hooks/useLocale";
+import { t } from "@/lib/i18n";
 
 const DESKTOP_LIMIT = 40;
 const MOBILE_LIMIT = 20;
@@ -19,9 +20,15 @@ type Props = {
   subtitle?: string;
   /** Enlace de vuelta que aparece a la derecha del header de sección */
   backHref?: string;
+  /** Texto de búsqueda activo, para mostrarlo en el mensaje de sin resultados */
+  emptyQuery?: string;
+  /** Juegos populares a sugerir cuando la búsqueda no da resultados */
+  popularSuggestions?: ProductPreview[];
+  /** Callback para limpiar la búsqueda activa */
+  onClearSearch?: () => void;
 };
 
-export function GameGrid({ games, isFiltered = false, title, subtitle, backHref }: Props) {
+export function GameGrid({ games, isFiltered = false, title, subtitle, backHref, emptyQuery, popularSuggestions, onClearSearch }: Props) {
   const lang = useLocale();
   const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
@@ -91,32 +98,60 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref 
       <div className="section-header">
         <div>
           <h2 className="section-title">
-            {title ?? (lang === "en" ? "Latest releases" : "Últimos lanzamientos")}
+            {title ?? t(lang, "grid.title")}
           </h2>
           <p className="section-subtitle">
-            {subtitle ?? (lang === "en"
-              ? "Recently released games. Discover the latest in the gaming world!"
-              : "Juegos lanzados recientemente. ¡Descubre lo último en el mundo gaming!")}
+            {subtitle ?? t(lang, "grid.subtitle")}
           </p>
         </div>
         {hasMore && (
           <Link href="/games" className="button-ghost button-ghost--nav btn-padding-site">
-            {lang === "en" ? "View all →" : "Ver todos →"}
+            {t(lang, "grid.view-all")}
           </Link>
         )}
         {!hasMore && backHref && (
           <Link href={backHref} className="button-ghost button-ghost--nav btn-padding-site">
-            {lang === "en" ? "← Back" : "← Inicio"}
+            {t(lang, "grid.back")}
           </Link>
         )}
       </div>
       <div className="grid-games">
         {displayedGames.length === 0 ? (
-          <p className="section-subtitle">
-            {lang === "en"
-              ? "We couldn't find games with that title. Try another one."
-              : "No hemos encontrado juegos con el título buscado. Prueba con otro título."}
-          </p>
+          isFiltered ? (
+            <div className="game-grid-empty">
+              <p className="section-subtitle">
+                {emptyQuery
+                  ? t(lang, "grid.empty-query")(emptyQuery)
+                  : t(lang, "grid.empty-no-query")}
+              </p>
+              {onClearSearch && (
+                <button
+                  type="button"
+                  className="button-ghost btn-padding-site"
+                  onClick={onClearSearch}
+                  style={{ marginTop: "0.75rem" }}
+                >
+                  {t(lang, "grid.clear-search")}
+                </button>
+              )}
+              {popularSuggestions && popularSuggestions.length > 0 && (
+                <div style={{ marginTop: "2rem" }}>
+                  <p className="section-subtitle" style={{ marginBottom: "1rem" }}>
+                    {t(lang, "grid.suggestions-label")}
+                  </p>
+                  <div className="grid-games">
+                    {popularSuggestions.map((game) => (
+                      <GameCard key={game.slug} game={game} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="section-subtitle">
+              {t(lang, "grid.empty-catalog")}
+            </p>
+          )
         ) : (
           <div className="grid-games">
             {displayedGames.map((game, index) => (
@@ -138,7 +173,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref 
       {backHref && (
         <div className="section-footer-back">
           <Link href={backHref} className="button-ghost button-ghost--nav btn-padding-site">
-            {lang === "en" ? "← Back" : "← Inicio"}
+            {t(lang, "grid.back")}
           </Link>
         </div>
       )}

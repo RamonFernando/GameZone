@@ -3,6 +3,7 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import { t } from "@/lib/i18n";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -229,7 +230,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
         {/* PLATAFORMAS */}
 <nav
   className="nav-platforms nav-platforms--desktop"
-  aria-label={lang === "en" ? "Platforms" : "Plataformas"}
+  aria-label={t(lang, "nav.platforms")}
 >
   {PLATFORMS.map((platformName) => {
     const iconMap: Record<string, string> = {
@@ -289,15 +290,17 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
             type="button"
             className="button-primary button-ghost button-ghost-cart"
             onClick={() => setOpen(true)}
+            aria-label={t(lang, "header.cart-open")(totalItems)}
           >
             <Image
               src="/iconos_platforms/carritoCompra2.svg"
-              alt={lang === "en" ? "Cart" : "Carrito"}
+              alt=""
+              aria-hidden="true"
               width={16}
               height={16}
               className="nav-cart-icon"
             />
-            <span className="nav-cart-badge">{totalItems}</span>
+            <span className="nav-cart-badge" aria-hidden="true">{totalItems}</span>
           </button>
            {/* LOGIN / REGISTRO */}
           <Link href="/account" className="">
@@ -347,7 +350,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
         <button
           type="button"
           className="nav-mobile-toggle"
-          aria-label={mobileMenuOpen ? (lang === "en" ? "Close menu" : "Cerrar menú") : (lang === "en" ? "Open menu" : "Abrir menú")}
+          aria-label={mobileMenuOpen ? t(lang, "nav.close-menu") : t(lang, "nav.open-menu")}
            aria-expanded={mobileMenuOpen ? "true" : "false"}
           onClick={() => setMobileMenuOpen((value) => !value)}
         >
@@ -370,7 +373,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
           />
         </div>
 
-        <nav className="nav-mobile-section nav-mobile-platforms" aria-label={lang === "en" ? "Platforms" : "Plataformas"}>
+        <nav className="nav-mobile-section nav-mobile-platforms" aria-label={t(lang, "nav.platforms")}>
           {PLATFORMS.map((platformName) => {
             const iconMap: Record<string, string> = {
               PlayStation: "/iconos_platforms/icon-play.svg",
@@ -414,15 +417,17 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
               setOpen(true);
               setMobileMenuOpen(false);
             }}
+            aria-label={t(lang, "header.cart-open")(totalItems)}
           >
             <Image
               src="/iconos_platforms/carritoCompra2.svg"
-              alt={lang === "en" ? "Cart" : "Carrito"}
+              alt=""
+              aria-hidden="true"
               width={16}
               height={16}
               className="nav-cart-icon"
             />
-            <span className="nav-cart-badge">{totalItems}</span>
+            <span className="nav-cart-badge" aria-hidden="true">{totalItems}</span>
           </button>
 
           <Link

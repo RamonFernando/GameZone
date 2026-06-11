@@ -4145,3 +4145,27 @@ html[data-hero-zoom="normal"] .hero--carousel {
     animation: skeleton-pulse 1.6s ease-in-out infinite;
   }
 }
+
+// Focus visible global: todos los elementos interactivos sin estilos específicos
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Desactiva animaciones continuas grandes para usuarios que lo prefieren
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-blur,
+  .hero-bg-art {
+    animation: none !important;
+  }
+
+  .nav-logo-mark::after {
+    animation: none !important;
+  }
+}
