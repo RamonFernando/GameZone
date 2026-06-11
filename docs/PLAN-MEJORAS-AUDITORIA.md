@@ -38,16 +38,16 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
 | 3.3 — Sentry | ✅ **HECHO** (verificado: `withSentryConfig` en `next.config.mjs`, configs server/edge/client) — la v1 lo marcaba pendiente por error |
 | 3.4 — CI GitHub Actions | ✅ hecho |
-| 3.5 — Tests de integración | ✅ **HECHO** (commit `c972114`, 11/06/2026; 32 tests: createPendingOrder, flujo completo checkout, idempotencia, rotación sesión) |
+| 3.5 — Tests de integración | ✅ **HECHO** (11/06/2026; 48 tests: servicios de checkout/sesión + rutas webhook Stripe/PayPal + login/2FA) |
 | 4.1 — SEO básico (sitemap/robots/OG/Search Console) | ✅ hecho |
-| 4.1b — SEO avanzado (metadata por juego + JSON-LD) | ⬜ **pendiente** (verificado: `games/[slug]/page.tsx` sigue siendo client component) → ver FASE 8 |
+| 4.1b — SEO avanzado (metadata por juego + JSON-LD) | ✅ **HECHO** (11/06/2026; ficha split server/client, `generateMetadata` y JSON-LD `Product`) |
 | 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
 | 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
 | **FASE 6 — Rendimiento** | ⚠️ en curso — **6.1 ✅ hecha el 11/06/2026** (commit `9533064`); 6.2-6.5 pendientes |
 | **FASE 7 — Seguridad avanzada** | ⬜ NUEVA |
-| **FASE 8 — SEO avanzado** | ⬜ NUEVA (absorbe 4.1b) |
+| **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3 ✅ hechas**; 8.4 y 8.5 pendientes |
 | **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
-| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (commit `c972114`); 10.2-10.4 pendientes |
+| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); 10.2-10.4 pendientes |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
 
@@ -55,8 +55,8 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 ## FASES 0–5 (v1) — resumen
 
-Las fases 0–3 están completas salvo 3.2 (Upstash, opcional) y 3.5 (absorbida por FASE 10).
-La fase 4 está completa salvo 4.1b (absorbida por FASE 8) y 4.2 (dominio, manual).
+Las fases 0–3 están completas salvo 3.2 (Upstash, opcional). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
+La fase 4 está completa salvo 4.2 (dominio, manual). 4.1b quedó cerrada en FASE 8 con metadata por ficha y JSON-LD.
 La fase 5 (roadmap: Xbox API, GA4, reseñas, wishlist, PWA, cupones) sigue vigente como futuro.
 El detalle histórico completo está en el commit anterior de este archivo (`git log -- docs/PLAN-MEJORAS-AUDITORIA.md`).
 
@@ -193,7 +193,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 > El SEO básico (sitemap, robots, OG global, Search Console) está hecho. Esto es lo que hace
 > que cada juego aparezca en Google con su propio título, precio y estrellas.
 
-### 8.1 — `generateMetadata` por juego (split server/client)  🟠 ALTA
+### 8.1 — `generateMetadata` por juego (split server/client)  🟠 ALTA  ✅ HECHA (11/06/2026)
 - **Problema (verificado):** `src/app/games/[slug]/page.tsx` es `"use client"` → todas las
   fichas comparten el metadato genérico del layout. Google las ve idénticas.
 - **Acción (el mismo patrón que la home en 6.1 — hacer después de 6.1 para reaprovechar el criterio):**
@@ -209,7 +209,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Precaución:** probar añadir al carrito, likes y galería tras el split. Commit separado.
 - **Verificar:** `view-source:` de una ficha muestra title/OG propios; carrito y likes funcionan.
 
-### 8.2 — JSON-LD `Product` por ficha  🟠 ALTA
+### 8.2 — JSON-LD `Product` por ficha  🟠 ALTA  ✅ HECHA (11/06/2026)
 - **Acción:** en el `page.tsx` server de 8.1, inyectar
   `<script type="application/ld+json">` con schema.org `Product`: `name`, `image`,
   `description`, `offers` (`price` final calculado, `priceCurrency: "EUR"`, `availability`
@@ -309,9 +309,11 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 
 ## FASE 10 — TESTING Y ROBUSTEZ  🟡
 
-### 10.1 — Tests de integración de los flujos críticos (absorbe 3.5)  🟠 ALTA
-- **Estado:** 7 archivos de test unitario (session ×2, oauth, order-service, totp-secret,
-  games, validation). Los flujos de dinero no tienen test de integración.
+### 10.1 — Tests de integración de los flujos críticos (absorbe 3.5)  🟠 ALTA  ✅ HECHA
+- **Estado validado el 11/06/2026:** 10 archivos de test y 48 tests verdes con `npm run test:unit`.
+  Hay cobertura a nivel servicio para `createPendingOrder`, `completePaidOrder`,
+  idempotencia de estado/email y rotación de sesión. También hay cobertura route-level para
+  webhooks Stripe/PayPal y flujo login + 2FA email.
 - **Acción (en Vitest, mockeando Stripe/PayPal con sus payloads reales):**
   1. **Idempotencia de webhooks:** el mismo `checkout.session.completed` dos veces NO crea dos
      pedidos ni manda dos emails. Ídem PayPal.

@@ -1,4 +1,10 @@
-# Traspaso para Sonnet — tareas 3.5, 3.3 y 3.2  ✅ CERRADO 11/06/2026
+# Traspaso para Sonnet — tareas 3.5, 3.3 y 3.2  ⚠️ VALIDADO 11/06/2026
+
+> **Validación Codex 11/06/2026:** 3.5 y 3.3 están hechas y verificadas en el árbol actual.
+> 3.2 sigue pendiente de forma consciente porque requiere credenciales Upstash del usuario.
+> Tras completar la cobertura route-level pendiente, comprobaciones ejecutadas:
+> `npx tsc --noEmit` ✅, `npm run lint` ✅, `npm run test:unit` ✅ (10 archivos, 48 tests),
+> `npm run build` ✅.
 
 > Contexto: GameZone (Next.js App Router + Prisma + PostgreSQL/Neon). El plan de
 > auditoría está en `docs/PLAN-MEJORAS-AUDITORIA.md`. Tareas 1.1, 1.2, 2.1 y 3.1 ya
@@ -13,11 +19,11 @@
 
 ---
 
-## 3.5 — Tests de integración  ✅ HECHO (commit `c972114`, 11/06/2026; 32 tests verdes)
+## 3.5 — Tests de integración  ✅ HECHO (11/06/2026; 48 tests verdes)
 
 **Objetivo:** cubrir flujos que cruzan varias piezas, no solo funciones sueltas.
 
-**Setup actual:** Vitest, entorno `node`, patrón `src/**/*.test.ts` (ver `vitest.config.ts`). Hay 17 tests unitarios. Alias `@` → `src`.
+**Setup actual:** Vitest, entorno `node`, patrón `src/**/*.test.ts` (ver `vitest.config.ts`). Hay 48 tests verdes en 10 archivos. Alias `@` → `src`.
 
 **Qué cubrir (prioridad):**
 1. **Idempotencia de webhooks** (lo más valioso):
