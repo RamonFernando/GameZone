@@ -784,6 +784,7 @@ html,
 body {
   padding: 0;
   margin: 0;
+  overflow-x: clip;
   background: #f8f9fa;
   color: var(--text-main);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
