@@ -1,5 +1,7 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
@@ -97,6 +99,9 @@ export async function PATCH(
       data: updateData,
     });
 
+    // Refresca la home cacheada para que el cambio se vea al instante.
+    revalidateTag(PRODUCTS_CACHE_TAG, "max");
+
     const response = NextResponse.json(
       {
         message: "Producto actualizado correctamente.",
@@ -139,6 +144,9 @@ export async function DELETE(
     await prisma.product.delete({
       where: { id },
     });
+
+    // Refresca la home cacheada para que el producto desaparezca al instante.
+    revalidateTag(PRODUCTS_CACHE_TAG, "max");
 
     const response = NextResponse.json(
       { message: "Producto eliminado correctamente." },

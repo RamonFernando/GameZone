@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
+import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
@@ -52,6 +54,11 @@ export async function POST(request: Request) {
 
   const enrichment = await enrichCatalogProductsFromRawg({ dryRun, limit });
   const report = await getCatalogQualityReport(24);
+
+  // Un dry run no escribe en DB; solo invalidar la home cacheada tras enriquecer.
+  if (!dryRun) {
+    revalidateTag(PRODUCTS_CACHE_TAG, "max");
+  }
 
   return withRotatedCookie(
     {

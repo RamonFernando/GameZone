@@ -1,5 +1,7 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
@@ -122,6 +124,9 @@ export async function POST(request: Request) {
         isActive,
       },
     });
+
+    // Refresca la home cacheada para que el catálogo muestre el alta al instante.
+    revalidateTag(PRODUCTS_CACHE_TAG, "max");
 
     const response = NextResponse.json(
       {
