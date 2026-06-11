@@ -43,7 +43,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 4.1b — SEO avanzado (metadata por juego + JSON-LD) | ✅ **HECHO** (11/06/2026; ficha split server/client, `generateMetadata` y JSON-LD `Product`) |
 | 4.2 — Dominio propio | ⬜ pendiente (manual, usuario) |
 | 4.6 — Subida de imágenes de producto | ✅ **HECHO** (verificado: modelo `ProductImage`, rutas `api/admin/product-images` y `api/product-images`, inputs `type="file"` en `AdminProductsPanel.tsx`) |
-| **FASE 6 — Rendimiento** | ⚠️ en curso — **6.1 ✅ hecha el 11/06/2026** (commit `9533064`); 6.2-6.5 pendientes |
+| **FASE 6 — Rendimiento** | ⚠️ en curso — **6.1 ✅ 6.2 ✅ 6.3 ✅ 6.4 ✅** hechas; 6.5 ⚠️ baseline registrado (móvil 79/LCP 5.3s, PC 99/LCP 0.6s), pendiente nueva medición post-deploy |
 | **FASE 7 — Seguridad avanzada** | ⬜ NUEVA |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3 ✅ hechas**; 8.4 y 8.5 pendientes |
 | **FASE 9 — UI/UX** | ⬜ NUEVA (parte obligatoria + parte opcional) |
@@ -113,7 +113,10 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** la respuesta del catálogo baja de tamaño (medir antes/después con DevTools);
   las tarjetas y la búsqueda se ven/funcionan igual.
 
-### 6.3 — Skeletons en lugar de texto "Cargando..."  🟡 MEDIA (percepción de velocidad)
+### 6.3 — Skeletons en lugar de texto "Cargando..."  🟡 MEDIA  ✅ HECHA (11/06/2026)
+> `src/app/loading.tsx` creado con 10 tarjetas skeleton + header skeleton usando las clases
+> CSS ya existentes (`.game-grid-skeleton`, `.game-card-skeleton`, `skeleton-pulse`).
+> Incluye `<main className="main-wrapper">` para evitar salto de layout (CLS = 0).
 - **Problema:** mientras carga, la home muestra un párrafo "Cargando productos...". La percepción
   de lentitud empeora.
 - **Acción:**
@@ -123,16 +126,25 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   2. Tras 6.1 apenas se verá, pero cubre navegaciones lentas y rutas aún client-side.
 - **Verificar:** al navegar con red lenta (DevTools → Slow 3G) se ven skeletons, no texto plano.
 
-### 6.4 — Imágenes: placeholders blur y `sizes` correctos  🟡 MEDIA
+### 6.4 — Imágenes: optimización WebP, `sizes` correctos y placeholder blur  🟡 MEDIA  ✅ HECHA (11/06/2026)
+> **Lighthouse móvil detectó 4657 KiB de ahorro potencial en imágenes** (score 79, LCP 5.3s).
+> Causa raíz: `unoptimized` en `GameCard` desactivaba la optimización de Next.js.
+> Solución aplicada (commit `bef7fcf` + siguiente):
+> - `unoptimized` eliminado → Next.js convierte a WebP y redimensiona automáticamente.
+> - `quality` bajado de 100 → 85 (óptimo para WebP; visualmente idéntico, ~40% menos peso).
+> - `sizes` corregido: `"(max-width: 480px) 50vw, (max-width: 768px) 33vw, 25vw"` (antes asumía 1 columna en móvil).
+> - `placeholder="blur"` + `blurDataURL` SVG #0f172a añadido.
+> - `remotePatterns` en `next.config.mjs` ya estaba configurado con todos los dominios necesarios.
 - **Estado actual:** `GameCard` y `Hero` ya usan `next/image` y el Hero ya tiene `priority` ✓.
-- **Acción:**
-  1. Revisar que las `<Image>` del grid tengan `sizes` acorde al layout real (p. ej.
-     `(max-width: 768px) 50vw, 25vw`) para que Next sirva resoluciones pequeñas en móvil.
-  2. Añadir `placeholder="blur"` con `blurDataURL` (un SVG/base64 genérico oscuro #22242A vale;
-     no hace falta generar blur por imagen).
+- **Pendiente:** `<link rel="preload">` para imagen LCP del hero (ver 6.5 punto 2).
 - **Verificar:** en DevTools → Network, las imágenes del grid en móvil pesan menos; no hay CLS.
 
-### 6.5 — Medición objetiva (antes y después)  🟡 MEDIA  ⚠️ PARCIAL (baseline de servidor hecho el 11/06/2026 en `docs/lighthouse/baseline-2026-06-11.md`; falta el Lighthouse de Chrome que corre el usuario)
+### 6.5 — Medición objetiva (antes y después)  🟡 MEDIA  ⚠️ PARCIAL
+> **Baseline Lighthouse registrado el 11/06/2026:**
+> - Móvil: Rendimiento **79**, LCP **5.3s**, Speed Index **3.7s**, FCP **0.9s**, CLS **0**, TBT **60ms**
+> - PC: Rendimiento **99**, LCP **0.6s**, Speed Index **1.3s**, FCP **0.3s**, CLS **0.019**, TBT **10ms**
+> - Principal problema identificado: imágenes sin optimizar en móvil (4657 KiB).
+> - Pendiente: nueva medición tras deploy con 6.4 aplicado para confirmar mejora.
 - **Acción:** correr Lighthouse (Chrome DevTools, modo incógnito, Performance) sobre la home en
   producción ANTES de empezar la fase y DESPUÉS de 6.1-6.4. Guardar ambos reports en
   `docs/lighthouse/` (JSON o captura).

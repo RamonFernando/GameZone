@@ -77,8 +77,7 @@ export function GameCard({ game }: Props) {
           alt={game.name}
           fill
           sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, 25vw"
-          quality={100}
-          unoptimized
+          quality={85}
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IGZpbGw9IiMwZjE3MmEiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz48L3N2Zz4="
           style={{ objectFit: "contain", objectPosition: "center center" }}
