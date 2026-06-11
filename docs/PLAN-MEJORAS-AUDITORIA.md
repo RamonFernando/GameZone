@@ -46,8 +46,8 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
 | **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
-| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; B1-B8 opcionales pendientes |
-| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); 10.2-10.4 pendientes |
+| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1 ✅ B3 ✅**, B2/B4/B5/B6/B7/B8 pendientes |
+| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); **10.3 parcial ✅** (ESLint + audit en CI), 10.2/10.4 y Lighthouse CI pendientes |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
 
@@ -319,15 +319,17 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 > independiente. El diseño actual (tema oscuro #22242A, grid de tarjetas, hero) se mantiene
 > como base — esto son capas encima, no un rediseño.
 
-- **B1 — Fila de confianza** bajo el hero: iconos de "Entrega inmediata", "Pago seguro"
+- **B1 — Fila de confianza** bajo el hero: ✅ **HECHA** (11/06/2026, commit `5e57af5`).
+  Iconos de "Entrega inmediata", "Pago seguro"
   (logos Visa/Mastercard/PayPal), "Soporte 24h". Patrón universal en Eneba/Instant Gaming/G2A;
-  es lo que más "tienda real" transmite de toda la lista. Coste: bajo (HTML+SCSS).
+  es lo que más "tienda real" transmite de toda la lista.
 - **B2 — Chips de filtro** sobre el grid: género/plataforma/oferta como botones-píldora
   clicables, en lugar de solo búsqueda por texto. Coste: medio (los datos de género ya existen
   vía RAWG).
-- **B3 — Micro-interacciones en tarjetas:** hover con `transform: translateY(-4px)` + sombra +
+- **B3 — Micro-interacciones en tarjetas:** ✅ **HECHA** (11/06/2026, commit `5e57af5`).
+  Hover con `transform: translateY(-4px)` + sombra +
   zoom sutil de la imagen (`scale(1.05)` con `overflow: hidden`). Respetar
-  `prefers-reduced-motion`. Coste: bajo.
+  `prefers-reduced-motion`.
 - **B4 — CTA pegajoso en ficha móvil:** barra inferior fija con precio + "Añadir al carrito"
   al hacer scroll en la ficha (patrón Epic/Steam móvil). Coste: bajo-medio.
 - **B5 — "Vistos recientemente":** carrusel al final de la home/ficha con los últimos 6 juegos
@@ -367,10 +369,12 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   recargar. Integrarlo como job manual/nightly en CI (no en cada PR, es lento).
 - **Verificar:** `npx playwright test` verde en local contra build de producción.
 
-### 10.3 — CI ampliado  🟡 MEDIA
-- **Acción:** al workflow actual (tsc + vitest + build) añadir: `eslint`, `npm audit
-  --audit-level=high` (de 7.4), y opcionalmente **Lighthouse CI** contra el deploy preview de
-  Netlify con presupuesto (Performance ≥ 85) para que una regresión de rendimiento falle el PR.
+### 10.3 — CI ampliado  🟡 MEDIA  ⚠️ PARCIAL
+- **Hecho (11/06/2026):** `eslint` ya es hard-fail en CI (`npx eslint . --max-warnings 0`
+  sin `continue-on-error`) y `npm audit --omit=dev --audit-level=high` ya falla el pipeline
+  ante vulnerabilidades high/critical.
+- **Pendiente opcional:** **Lighthouse CI** contra el deploy preview de Netlify con presupuesto
+  (Performance ≥ 85) para que una regresión de rendimiento falle el PR.
 - **Verificar:** un PR con un error de lint o una dependencia vulnerable no pasa el CI.
 
 ### 10.4 — Operacional  🟡 MEDIA (manual, usuario)
@@ -415,14 +419,14 @@ npm run build
 | 1 | Rendimiento | **Solicitudes que bloquean el renderizado** — chunk CSS `0k1w7_h05lnt_.css` en ruta crítica | ❌ Lo genera Next.js internamente |
 | 2 | Rendimiento | **Descubrimiento de solicitudes de LCP** — imagen hero no descubierta en HTML inicial | ✅ **Resuelto en 6.4** — `priority` en Hero activa el preload automático de Next.js |
 | 3 | Rendimiento | **Redistribución forzada** — JS lee layout y escribe DOM en el mismo frame | ⚠️ Requiere profiling en DevTools |
-| 4 | Accesibilidad | **Encabezados fuera de orden secuencial** — salto de nivel `<h>` (ej. h1→h3) en Hero/GameGrid | ✅ Fácil — revisar jerarquía `<h>` |
-| 5 | Prácticas | **Errores en consola** — `/api/account/me` falla en carga (usuario no autenticado); error externo de `wikia.nocookie.net` | ✅ Suprimir fetch si no hay sesión |
+| 4 | Accesibilidad | **Encabezados fuera de orden secuencial** — salto de nivel `<h>` en paneles de market pulse | ✅ **Resuelto** (commit `67f2fea`) — subsecciones pasan de `h4` a `h3` |
+| 5 | Prácticas | **Errores en consola** — `/api/account/me` falla en carga (usuario no autenticado); error externo de `wikia.nocookie.net` | ✅ **Resuelto parcialmente** (commit `67f2fea`) — se evita `/api/account/me` sin cookie `gz_auth`; queda externo `wikia.nocookie.net` si reaparece |
 | 6 | Prácticas | **Sin source maps** para JS propio de gran tamaño | ❌ No afecta al usuario |
 
 ### Prioridad de acción
 
-1. 🟢 **Fácil + Accesibilidad:** corregir orden de `<h>` en componentes Hero/GameGrid (tarea 9.3).
-2. 🟢 **Fácil + Prácticas:** no llamar a `/api/account/me` si no hay cookie de sesión — evita el error de consola.
+1. ~~🟢 **Fácil + Accesibilidad:** corregir orden de `<h>` en componentes market pulse~~ — **resuelto** (commit `67f2fea`).
+2. ~~🟢 **Fácil + Prácticas:** no llamar a `/api/account/me` si no hay cookie de sesión~~ — **resuelto** con cookie indicadora `gz_auth` (commit `67f2fea`).
 3. ~~🟡 **Media:** añadir `<link rel="preload">` para la imagen LCP del hero~~ — **resuelto en 6.4**.
 4. 🔴 **Alta complejidad:** redistribución forzada — solo abordar si el Rendimiento baja de 95.
 
