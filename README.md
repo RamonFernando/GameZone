@@ -26,11 +26,103 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 - [Comandos de tests (ejecucion rapida)](#comandos-de-tests-ejecucion-rapida)
 - [Información del proyecto](#información-del-proyecto)
 
+### Modelo de trabajo IA
+
+- [Modelo de trabajo IA (Claude + GPT)](#modelo-de-trabajo-ia-claude--gpt)
+
 ### Changelog
 
+- [Novedades recientes (12-06-2026)](#novedades-recientes-12-06-2026)
 - [Novedades recientes (11-06-2026)](#novedades-recientes-11-06-2026)
 - [Novedades recientes (10-06-2026)](#novedades-recientes-10-06-2026)
 - [Novedades recientes (09-06-2026)](#novedades-recientes-09-06-2026)
+
+## Modelo de trabajo IA (Claude + GPT)
+
+> Documento completo de reglas y procedimiento: [`docs/REGLAS-IA.md`](docs/REGLAS-IA.md).
+> Estado de todas las tareas: [`docs/PLAN-MEJORAS-AUDITORIA.md`](docs/PLAN-MEJORAS-AUDITORIA.md).
+
+Este proyecto se desarrolla con dos IAs trabajando en paralelo bajo supervisión de Ramón.
+
+### Quién hace qué
+
+| Actor | Tipo de tareas |
+|---|---|
+| **Claude (VS Code)** | Implementador — tareas que requieren contexto profundo del codebase: migraciones de DB, instrumentación en múltiples archivos, E2E tests |
+| **GPT** | Implementador — tareas mecánicas y aisladas: configs, refactors de componentes grandes, documentación, PWA |
+| **Modelo superior** (Fable 5 / Opus 4.8, escritorio) | Auditor, árbitro de conflictos y planificador — no implementa tareas del reparto |
+| **Ramón** | Director — decisión final y acciones en paneles externos: Netlify, PayPal, DNS, Neon, OAuth |
+
+### Ramas y flujo diario
+
+```
+main                    ← producción (Netlify escucha solo aquí)
+└── dev-DDMMYYYY        ← rama del día
+    ├── dev-DDMMYYYY-claude   ← tareas de Claude
+    └── dev-DDMMYYYY-gpt      ← tareas de GPT
+```
+
+- Al final del día las sub-ramas se fusionan en `dev-DDMMYYYY` → merge a `main` → deploy.
+- **Excepción (fallo en producción):** hotfix directo en `main`.
+
+### Formato de commits y trazabilidad
+
+```
+<descripción breve> — hecho por <Claude|GPT>
+
+Ejemplo:
+  Audit log table: modelo Prisma + instrumentación — hecho por Claude
+  Lighthouse CI: .lighthouserc.js + step CI — hecho por GPT
+```
+
+Tras commitear, el hash corto (`git rev-parse --short HEAD`) se anota en
+`docs/PLAN-MEJORAS-AUDITORIA.md` y en `docs/HISTORIAL-TRABAJO.md`. **Si algo falla,
+el historial es el primer sitio donde mirar**: registra qué se hizo, quién y en qué
+commit, día a día, y funciona offline sin el repo remoto.
+
+### Resolución de conflictos entre IAs
+
+Si Claude y GPT discrepan en la implementación:
+1. Ambas exponen su propuesta con una línea de justificación.
+2. Cada una evalúa la del otro.
+3. Si hay consenso: se ejecuta la acción acordada.
+4. Si no hay acuerdo: se presenta a Ramón con opciones claras (máx. 3 líneas cada una). Si la decisión es demasiado técnica, se sugiere consultar a un modelo superior (Opus 4.8, Fable 5).
+5. Ninguna IA ejecuta una acción disputada hasta que haya resolución.
+
+### Verificación obligatoria antes de cada merge
+
+```bash
+npx tsc --noEmit    # sin errores de tipos
+npx vitest run      # todos los tests verdes
+npm run build       # build limpio
+```
+
+### Reglas de comportamiento (Sistema 3.1 APD)
+
+Todas las IAs operan bajo estas reglas en este proyecto:
+
+1. **No romper lo existente** — identificar qué NO tocar antes de proponer cambios.
+2. **No inventar estructura** — no inventar clases, archivos, métodos, endpoints ni jerarquías no mostradas en el código.
+3. **Mínimo cambio necesario** — preferir un ajuste pequeño antes de reescribir.
+4. **Flujos intocables** — auth, carrito y pagos no se modifican salvo que la tarea lo pida explícitamente.
+5. **Verificación siempre** — tsc + vitest + build limpios antes de marcar cualquier tarea como hecha.
+
+Reglas completas y procedimiento detallado en [`docs/REGLAS-IA.md`](docs/REGLAS-IA.md).
+
+---
+
+## Novedades recientes (12-06-2026)
+
+### Sistema de trabajo IA y procedimiento de colaboración
+
+- Creado `docs/REGLAS-IA.md` (v2): jerarquía de roles (implementadores + modelo superior auditor), reglas 3.1 APD, ramas diarias con sub-rama por IA, Definition of Done (7 puntos), economía de tokens, tests obligatorios, solicitudes de auditoría, resolución de conflictos y seguridad operacional (git, dependencias, secretos, DB producción).
+- Creado `docs/HISTORIAL-TRABAJO.md`: memoria operativa día a día — qué se hizo, quién y en qué commit. Primer sitio donde mirar en caso de fallo; funciona offline.
+- Creados `CLAUDE.md` y `AGENTS.md` en la raíz: los agentes cargan las reglas automáticamente al arrancar sesión.
+- Creado `docs/PLAN-MEJORAS-AUDITORIA.md` sección **REPARTO DE IMPLEMENTACIÓN v3**: tareas asignadas por IA (Claude/GPT/Usuario/Bloqueado) con instrucciones exactas, más secciones `FUTURAS MEJORAS` y `SOLICITUDES DE AUDITORÍA`.
+- Plantilla portable del sistema para futuros proyectos: `PLANTILLA-REGLAS-IA-PROYECTOS.md` (carpeta del Sistema 3.0/3.1, fuera del repo).
+- **PAYPAL_WEBHOOK_ID** configurado: `5WD229960R154935L` — webhook ya existía en sandbox de PayPal apuntando a `https://gamezone-digital-store.netlify.app/api/payments/paypal/webhook`. Actualizado en `.env` y en Netlify env vars.
+
+---
 
 ## Requisitos
 

@@ -3,6 +3,13 @@
 > **v2 — Auditoría revisada y ampliada el 2026-06-11** (revisión senior fullstack + seguridad + UX
 > sobre el código real del repo). Sustituye a la v1 del 2026-06-10, conservando su historial de estado.
 >
+> **⚠️ LEER PRIMERO:** `docs/REGLAS-IA.md` — contiene las reglas de comportamiento (Sistema 3.1 APD)
+> y el procedimiento completo de trabajo en paralelo Claude + GPT. Obligatorio antes de empezar.
+>
+> **🔍 En caso de fallo o regresión:** consultar `docs/HISTORIAL-TRABAJO.md` — registra qué se hizo,
+> quién lo hizo y en qué commit (hash corto), día a día. Es el primer sitio donde mirar para
+> localizar el cambio que rompió algo. Funciona offline, sin necesidad del repo remoto.
+>
 > **Contexto para quien implemente (Opus / Sonnet):** Proyecto Next.js 16 (App Router) + React 19 +
 > Prisma + PostgreSQL (Neon), auth propio con HMAC, 2FA (email/TOTP/push), pagos Stripe + PayPal,
 > deploy en **Netlify**. SCSS global (sin Tailwind). Sentry integrado.
@@ -96,7 +103,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 | # | Tarea | Dónde | Tiempo est. |
 |---|---|---|---|
-| U1 | **PAYPAL_WEBHOOK_ID** | Dashboard PayPal → Webhooks → crear endpoint `<APP_URL>/api/webhooks/paypal` → copiar Webhook ID al `.env` y a Netlify env vars | 30 min |
+| U1 | ✅ **PAYPAL_WEBHOOK_ID** | ID `5WD229960R154935L` añadido al `.env` el 2026-06-12. **Pendiente: añadir en Netlify env vars + redeploy.** | hecho |
 | U2 | **Rotación de secretos** (0.1) | Regenerar `SESSION_SECRET`, `ENCRYPTION_KEY`, claves Stripe, PayPal, SMTP, OAuth en cada panel. Actualizar en Netlify. Redeploy. | 1–2 h |
 | U3 | **Twitter OAuth credentials** | Twitter Developer Portal → crear app → copiar `TWITTER_CLIENT_ID` + `TWITTER_CLIENT_SECRET` al `.env` | 30 min |
 | U4 | **Backup Neon** | Dashboard Neon → confirmar retención de backups del tier. Hacer dump mensual manual: `pg_dump $DATABASE_URL_UNPOOLED > backup-$(date +%Y%m%d).sql` | 15 min |
@@ -503,10 +510,55 @@ npm run build
 
 ---
 
-## Tecnologías a incorporar en esta v2 (resumen)
+## TECNOLOGÍAS — stack actual, aprobadas y descartadas
+
+> Esta sección es lo que REGLAS-IA.md §7.2 consulta como **pre-aprobado**: las IAs pueden
+> instalar lo aprobado aquí o lo listado en su tarea; todo lo demás se pregunta a Ramón.
+> Las descartadas no se vuelven a proponer (ya se evaluaron con motivo).
+>
+> **⏳ Vigencia (escrito en 06/2026):** las tecnologías de esta lista caducan. Antes de
+> implementar una aprobada, comprobar su versión estable actual y si sigue siendo la opción
+> estándar — ej.: si aquí dice "Bootstrap 9.1" y hoy existe la 10.5, o algo superior a
+> Bootstrap para la misma tarea, se evalúa lo vigente, no lo escrito. Si la tecnología quedó
+> deprecada o claramente superada: **NO instalarla a ciegas ni decidir el reemplazo por
+> cuenta propia** — proponer la alternativa a Ramón (1-3 líneas: qué, por qué, riesgo) y
+> esperar aprobación.
+
+**Stack actual (no cambiar):** Next.js 16 (App Router) + React 19 + TypeScript estricto +
+Prisma + PostgreSQL (Neon) + SCSS global + Vitest + Sentry + Netlify.
+
+**Aprobadas a incorporar:**
 - **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
-- **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
-- **Dependabot** — actualizaciones de seguridad automáticas. Sin código.
-- **Lighthouse CI** (opcional) — presupuesto de rendimiento en CI.
-- **Cloudflare Turnstile** (opcional, solo si hay bots) — anti-bot sin fricción.
-- **Upstash Redis** (opcional, hereda de 3.2) — rate limit distribuido si crece el tráfico.
+- **Playwright** — E2E estándar (tarea C2; sustituye gradualmente los scripts a medida).
+- **@lhci/cli (Lighthouse CI)** — presupuesto de rendimiento en CI (tarea G1).
+- **Dependabot** — actualizaciones de seguridad automáticas. Sin código. ✅ ya activo.
+- **Cloudflare Turnstile** (condicional: solo si aparecen bots en registro) — anti-bot sin fricción.
+- **Upstash Redis** (condicional: bloqueado hasta tener cuenta, ver B4) — rate limit distribuido.
+- **Vercel** (condicional: migración de plataforma de deploy — **decisión exclusiva de Ramón**, ninguna IA la inicia por su cuenta) — plataforma de los creadores de Next.js, soporte nativo de primera clase (ISR, imágenes, middleware sin plugin). Migrar desbloquearía B1 (CSP nonce sin `unsafe-inline`). El `vercel.json` con el cron ya existe en el repo como base. Coste de migración: mover env vars, verificar cron y actualizar URLs de webhooks Stripe/PayPal si cambia el dominio.
+
+**Descartadas (no proponer de nuevo):**
+- **Tailwind CSS** — el proyecto usa SCSS global por decisión de diseño; migrar no aporta y arriesga regresiones visuales.
+- **Upgrades major automáticos de Next.js** — ignorados en Dependabot a propósito (evitar roturas).
+- **Cypress** — se eligió Playwright como herramienta E2E única; no mezclar dos frameworks E2E.
+
+---
+
+## FUTURAS MEJORAS
+
+> Ideas detectadas por los implementadores durante las tareas, **no pedidas y no implementadas**.
+> Formato: `- [fecha] <idea en 1 línea> — contexto breve — detectado por <IA>`.
+> Ramón decide cuáles se convierten en tareas del reparto. Nunca implementar sin aprobación.
+
+- (vacío — añadir aquí)
+
+---
+
+## SOLICITUDES DE AUDITORÍA
+
+> Riesgos detectados en código adyacente durante las tareas (seguridad, rendimiento, corrección).
+> Los implementadores NO auditan por su cuenta: anotan aquí y siguen con su tarea (REGLAS-IA.md §5).
+> Ramón pide la auditoría al modelo superior (Fable 5 / Opus 4.8), que la hace y convierte
+> los hallazgos en tareas del reparto.
+> Formato: `- [fecha] <archivo o área> — <riesgo en 1 línea> — detectado por <IA>`.
+
+- (vacío — añadir aquí)
