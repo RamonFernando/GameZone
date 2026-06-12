@@ -4754,11 +4754,11 @@ h1,
 
 .featured-genres-row {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.6rem;
 
-  @media (max-width: 1599px) {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  @media (min-width: 1500px) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
   @media (max-width: 727px) {
