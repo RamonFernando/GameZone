@@ -8,6 +8,8 @@
  *   OAuth...). Si faltan solo se avisa por log; la app arranca igual.
  */
 
+import { logger } from "@/lib/logger";
+
 const REQUIRED_VARS = ["DATABASE_URL", "SESSION_SECRET"] as const;
 
 const RECOMMENDED_VARS = [
@@ -48,13 +50,17 @@ export function validateEnv(): { missingRequired: string[]; missingRecommended: 
     if (isProduction) {
       throw new Error(message);
     }
-    console.warn(`[env] ${message} (permitido en desarrollo)`);
+    logger.warn("[env] Variables obligatorias ausentes en desarrollo", {
+      missingRequired,
+      message,
+    });
   }
 
   if (missingRecommended.length > 0) {
-    console.warn(
-      `[env] Variables recomendadas ausentes (funcionalidades limitadas): ${missingRecommended.join(", ")}.`
-    );
+    logger.warn("[env] Variables recomendadas ausentes", {
+      missingRecommended,
+      message: "Algunas funcionalidades pueden quedar limitadas.",
+    });
   }
 
   return { missingRequired, missingRecommended };
