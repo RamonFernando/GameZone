@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+
+export const maxDuration = 30;
+
 import { enforceRateLimit } from "@/lib/auth/rate-limit";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { createPersistedSession } from "@/lib/auth/session-server";

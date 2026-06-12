@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+
+export const maxDuration = 30;
+
 import { sendVerificationEmail } from "@/lib/auth/email";
 import { enforceRateLimit } from "@/lib/auth/rate-limit";
 import {

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const maxDuration = 30;
 import {
   type OAuthProvider,
   fetchOAuthUserProfile,

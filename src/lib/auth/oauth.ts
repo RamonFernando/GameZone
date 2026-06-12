@@ -189,13 +189,12 @@ export function verifyOAuthStateCookie(input: {
 
   if (
     payload.provider !== input.expectedProvider ||
-    payload.state !== input.expectedState ||
-    !payload.nextPath
+    payload.state !== input.expectedState
   ) {
     return { ok: false as const };
   }
 
-  return { ok: true as const, nextPath: payload.nextPath };
+  return { ok: true as const, nextPath: payload.nextPath ?? "/" };
 }
 
 export function verifyOAuthPkceCookie(input: {
