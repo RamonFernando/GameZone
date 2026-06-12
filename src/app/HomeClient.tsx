@@ -135,7 +135,7 @@ type HomeClientProps = {
 };
 
 export function HomeClient({ initialProducts, initialHeroSections }: HomeClientProps) {
-  const { query, setQuery, platform, setPlatform } = useSearch();
+  const { query, setQuery, platform, setPlatform, filterGenre, setFilterGenre } = useSearch();
   const [products, setProducts] = useState<ProductPreview[]>(initialProducts);
   const lang = useLocale();
   const { getAll: getRecent } = useRecentlyViewed();
@@ -227,8 +227,11 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
           gamePlatform === normalizedPlatform ||
           gamePlatform.includes(normalizedPlatform);
         const matchesOffer = !filterOffer || game.discountPercent > 0;
+        const matchesGenre = !filterGenre || game.genres.some(
+          (g) => g.toLowerCase() === filterGenre.toLowerCase()
+        );
 
-        return score > 0 && matchesPlatform && matchesOffer;
+        return score > 0 && matchesPlatform && matchesOffer && matchesGenre;
       });
 
     if (!query.trim()) {
@@ -244,7 +247,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
         return a.game.name.localeCompare(b.game.name);
       })
       .map(({ game }) => game);
-  }, [query, platform, products, filterOffer]);
+  }, [query, platform, products, filterOffer, filterGenre]);
 
   return (
     <>
@@ -311,10 +314,10 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
         />
         <GameGrid
           games={filteredGames}
-          isFiltered={Boolean(query.trim()) || Boolean(platform) || filterOffer}
+          isFiltered={Boolean(query.trim()) || Boolean(platform) || filterOffer || Boolean(filterGenre)}
           emptyQuery={query}
           popularSuggestions={popularSuggestions}
-          onClearSearch={() => { setQuery(""); setPlatform(null); setFilterOffer(false); }}
+          onClearSearch={() => { setQuery(""); setPlatform(null); setFilterOffer(false); setFilterGenre(null); }}
         />
       </main>
       <ScrollToTop />

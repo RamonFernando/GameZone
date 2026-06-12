@@ -3,38 +3,59 @@
 import { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Icon } from "@iconify/react";
+import lightningBolt   from "@iconify-icons/mdi/lightning-bolt";
+import crosshairs      from "@iconify-icons/mdi/crosshairs";
+import sword           from "@iconify-icons/mdi/sword";
+import swordCross      from "@iconify-icons/mdi/sword-cross";
+import compass         from "@iconify-icons/mdi/compass";
+import gamepadVariant  from "@iconify-icons/mdi/gamepad-variant";
+import chessPawn       from "@iconify-icons/mdi/chess-pawn";
+import earth           from "@iconify-icons/mdi/earth";
+import cog             from "@iconify-icons/mdi/cog";
+import soccer          from "@iconify-icons/mdi/soccer";
+import carSports       from "@iconify-icons/mdi/car-sports";
+import puzzle          from "@iconify-icons/mdi/puzzle";
+import boxingGlove     from "@iconify-icons/mdi/boxing-glove";
+import ghost           from "@iconify-icons/mdi/ghost";
+import runFast         from "@iconify-icons/mdi/run-fast";
+import cardsPlaying    from "@iconify-icons/mdi/cards-playing";
+import joystick        from "@iconify-icons/mdi/controller-classic";
 import { useLocale } from "@/hooks/useLocale";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";
 
 type Props = { products: ProductPreview[] };
 
-const GENRE_SVG: Record<string, string> = {
-  Action: "/iconos_generos/icon-action.svg",
-  Shooter: "/iconos_generos/icon-shooter.svg",
-  RPG: "/iconos_generos/icon-rpg.svg",
-  "Action RPG": "/iconos_generos/icon-rpg.svg",
-  Adventure: "/iconos_generos/icon-adventure.svg",
-  Indie: "/iconos_generos/icon-indie.svg",
-  Strategy: "/iconos_generos/icon-strategy.svg",
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GENRE_ICON: Record<string, any> = {
+  Action:                  lightningBolt,
+  Shooter:                 crosshairs,
+  RPG:                     sword,
+  "Action RPG":            swordCross,
+  Adventure:               compass,
+  Indie:                   gamepadVariant,
+  Strategy:                chessPawn,
+  "Massively Multiplayer": earth,
+  Simulation:              cog,
+  Sports:                  soccer,
+  Racing:                  carSports,
+  Puzzle:                  puzzle,
+  Fighting:                boxingGlove,
+  Horror:                  ghost,
+  Platformer:              runFast,
+  Card:                    cardsPlaying,
 };
 
-const GENRE_EMOJI: Record<string, string> = {
-  Simulation: "🎮", Sports: "⚽", Racing: "🏎️",
-  Puzzle: "🧩", Fighting: "🥊", Horror: "👻", Platformer: "🏃",
-  "Massively Multiplayer": "🌐", "Card": "🃏",
-};
-
-// Shorten labels that overflow the chip
 const GENRE_SHORT: Record<string, string> = {
   "Massively Multiplayer": "MMO",
   "Action RPG": "ARPG",
   "Point-and-click": "P&C",
 };
 
-function getGenreIcon(genre: string): { type: "svg"; src: string } | { type: "emoji"; char: string } {
-  if (GENRE_SVG[genre]) return { type: "svg", src: GENRE_SVG[genre] };
-  return { type: "emoji", char: GENRE_EMOJI[genre] ?? "🎮" };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getGenreIcon(genre: string): any {
+  return GENRE_ICON[genre] ?? joystick;
 }
 
 function fmt(n: number) { return n.toString().padStart(2, "0"); }
@@ -127,7 +148,7 @@ function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string 
 
 export function FeaturedSection({ products }: Props) {
   const lang = useLocale();
-  const { setPlatform, setQuery } = useSearch();
+  const { setFilterGenre, filterGenre } = useSearch();
 
   const topGenres = useMemo(() => {
     const counts = new Map<string, number>();
@@ -172,22 +193,23 @@ export function FeaturedSection({ products }: Props) {
               <p className="featured-genres-label">{lang === "en" ? "Browse by genre" : "Explorar por género"}</p>
               <div className="featured-genres-row">
                 {topGenres.map((genre) => {
-                  const icon = getGenreIcon(genre);
+                  const iconName = getGenreIcon(genre);
                   const label = GENRE_SHORT[genre] ?? genre;
                   return (
                     <button
                       key={genre}
                       type="button"
-                      className="featured-genre-chip"
+                      className={`featured-genre-chip${filterGenre === genre ? " featured-genre-chip--active" : ""}`}
+                      data-genre={genre}
                       onClick={() => {
-                        setPlatform(null);
-                        setQuery(genre);
+                        setFilterGenre(filterGenre === genre ? null : genre);
+                        requestAnimationFrame(() => {
+                          document.getElementById("game-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        });
                       }}
                     >
                       <span className="featured-genre-icon" aria-hidden="true">
-                        {icon.type === "svg"
-                          ? <Image src={icon.src} alt="" width={40} height={40} unoptimized />
-                          : icon.char}
+                        <Icon icon={iconName} width={40} height={40} />
                       </span>
                       <span className="featured-genre-name">{label}</span>
                     </button>

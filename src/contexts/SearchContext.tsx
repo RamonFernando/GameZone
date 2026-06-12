@@ -7,6 +7,8 @@ type SearchContextValue = {
   setQuery: (value: string) => void;
   platform: string | null;
   setPlatform: (value: string | null) => void;
+  filterGenre: string | null;
+  setFilterGenre: (value: string | null) => void;
 };
 
 const SearchContext = createContext<SearchContextValue | undefined>(undefined);
@@ -18,8 +20,9 @@ type Props = {
 export function SearchProvider({ children }: Props) {
   const [query, setQuery] = useState("");
   const [platform, setPlatform] = useState<string | null>(null);
+  const [filterGenre, setFilterGenre] = useState<string | null>(null);
   return (
-    <SearchContext.Provider value={{ query, setQuery, platform, setPlatform }}>
+    <SearchContext.Provider value={{ query, setQuery, platform, setPlatform, filterGenre, setFilterGenre }}>
       {children}
     </SearchContext.Provider>
   );
