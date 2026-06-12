@@ -4,6 +4,9 @@ import { completePaidOrder } from "@/lib/checkout/order-service";
 import { prisma } from "@/lib/prisma";
 import { getStripeClient } from "@/lib/payments/stripe";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!endpointSecret) {

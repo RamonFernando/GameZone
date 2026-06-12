@@ -24,7 +24,8 @@ export function useScrollMemory(ready = false) {
 
   // Si hay posicion guardada: ocultar pagina para evitar el flash visual
   useEffect(() => {
-    const saved = sessionStorage.getItem(storageKey);
+    let saved: string | null = null;
+    try { saved = sessionStorage.getItem(storageKey); } catch { return; }
     if (!saved || parseInt(saved, 10) === 0) return;
 
     document.body.style.opacity = "0";
@@ -42,7 +43,7 @@ export function useScrollMemory(ready = false) {
   useEffect(() => {
     const saveNow = () => {
       const y = getScrollY();
-      if (y > 0) sessionStorage.setItem(storageKey, String(y));
+      if (y > 0) try { sessionStorage.setItem(storageKey, String(y)); } catch { /* private mode */ }
     };
 
     document.addEventListener("click", saveNow, true);
@@ -76,7 +77,8 @@ export function useScrollMemory(ready = false) {
     if (!ready || restoredRef.current) return;
     restoredRef.current = true;
 
-    const saved = sessionStorage.getItem(storageKey);
+    let saved: string | null = null;
+    try { saved = sessionStorage.getItem(storageKey); } catch { /* private mode */ }
     const y = saved ? parseInt(saved, 10) : 0;
 
     requestAnimationFrame(() => {

@@ -370,7 +370,8 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
     }
 
     const storageKey = createPaymentProgressStorageKey(paymentResult.id);
-    const storedStartedAt = window.sessionStorage.getItem(storageKey);
+    let storedStartedAt: string | null = null;
+    try { storedStartedAt = window.sessionStorage.getItem(storageKey); } catch { /* private mode */ }
     const startedAt = storedStartedAt ? Number(storedStartedAt) : 0;
 
     if (!Number.isFinite(startedAt) || startedAt <= 0) {
@@ -385,7 +386,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       const nextStep = getPaymentProgressStepFromStartedAt(startedAt);
       setPaymentProgressStep(nextStep);
       if (nextStep === "complete") {
-        window.sessionStorage.removeItem(storageKey);
+        try { window.sessionStorage.removeItem(storageKey); } catch { /* private mode */ }
       }
       return nextStep;
     };

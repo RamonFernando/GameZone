@@ -74,10 +74,12 @@ function CheckoutSuccessContent() {
 
       if (nextOrderId) {
         setOrderId(nextOrderId);
-        window.sessionStorage.setItem(
-          createPaymentProgressStorageKey(nextOrderId),
-          String(Date.now())
-        );
+        try {
+          window.sessionStorage.setItem(
+            createPaymentProgressStorageKey(nextOrderId),
+            String(Date.now())
+          );
+        } catch { /* Safari private mode */ }
       }
 
       setValidationStep("paymentConfirmed");
