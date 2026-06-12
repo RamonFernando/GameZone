@@ -53,6 +53,74 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 ---
 
+## REPARTO DE IMPLEMENTACIÓN — v3 (2026-06-12)
+
+> Revisión de auditoría completa. Tareas divididas por dificultad y dependencias.
+> **Claude** = tareas que requieren leer el codebase en profundidad.
+> **GPT** = tareas mecánicas/aisladas sin riesgo de romper flujos existentes.
+> **Usuario** = requieren acción en paneles externos (PayPal, DNS, etc.).
+> **Bloqueado** = no se puede hacer sin prerequisito externo.
+>
+> ⚠️ **Falso positivo corregido:** la validación de magic bytes en avatar upload YA ESTÁ
+> implementada en `src/app/api/account/avatar/route.ts` (función `detectImageType`, línea 16).
+> La auditoría la marcaba como faltante por error — no hacer nada ahí.
+
+### Para Claude (difícil — requieren contexto profundo del codebase)
+
+| # | Tarea | Archivo(s) clave | Tiempo est. | Ref. plan |
+|---|---|---|---|---|
+| C1 | **Audit log table** — modelo Prisma `AuditLog` + migración + instrumentar ~15 puntos clave (login, logout, register, orden pagada, admin CRUD, 2FA on/off, reset password) | `prisma/schema.prisma`, `src/lib/auth/store.ts`, `src/app/api/auth/*/route.ts`, `src/app/api/admin/*/route.ts` | 5–8 h | nuevo |
+| C2 | **E2E Playwright** — setup completo + 3 specs: (1) compra con tarjeta Stripe test, (2) registro + verificación + login, (3) búsqueda + carrito + persistencia tras recarga | `playwright.config.ts` (nuevo), `tests/e2e/` (nuevo), `.github/workflows/ci.yml` | 2–3 días | 10.2 |
+
+### Para GPT (fácil/mecánico — aislados, sin riesgo de regresión)
+
+> **Reglas obligatorias para GPT antes de entregar:**
+> 1. `npx tsc --noEmit` limpio.
+> 2. `npx vitest run` — todos los tests siguen verdes.
+> 3. `npm run build` limpio.
+> 4. NO tocar flujos de auth, carrito ni pago.
+> 5. Mínimo cambio: no refactorizar lo que no pide la tarea.
+
+| # | Tarea | Qué hacer exactamente | Archivos a tocar | Tiempo est. |
+|---|---|---|---|---|
+| G1 | **Lighthouse CI automatizado** | Instalar `@lhci/cli` como devDep. Crear `.lighthouserc.js` en raíz con `url: ["http://localhost:3000"]`, `assert: { preset: "lighthouse:recommended", assertions: { "categories:performance": ["warn", { minScore: 0.85 }] } }`. Añadir job `lighthouse` en CI que haga `npm run build && npx lhci autorun` tras el job de tests. | `.lighthouserc.js` (nuevo), `.github/workflows/ci.yml` | 2–3 h |
+| G2 | **MarketIntelligenceSections.tsx refactor** | Extraer cada sección grande en su propio componente dentro de `src/components/market/`. El archivo principal importa y compone. Sin cambios de lógica ni estilos. | `src/components/MarketIntelligenceSections.tsx`, `src/components/market/` (nuevo dir) | 3–4 h |
+| G3 | **Header.tsx refactor** | Extraer `NavMenu`, `SearchBar` y `CartDropdown` a `src/components/header/`. El `Header.tsx` principal los importa. Sin cambios de lógica ni estilos. Probar con `npm run build` — si hay regresiones en SSR, revertir. | `src/components/Header.tsx`, `src/components/header/` (nuevo dir) | 4–6 h |
+| G4 | **auth/store.ts refactor** | Dividir los 28 exports en 3 submodules: `src/lib/auth/users.ts` (CRUD de usuario), `src/lib/auth/sessions.ts` (sesiones + tokens), `src/lib/auth/password.ts` (hash + verify). `store.ts` re-exporta todo para no romper imports existentes. | `src/lib/auth/store.ts`, nuevos subfiles | 2–3 h |
+| G5 | **CORS explícito** | En `next.config.mjs`, añadir `headers()` que devuelva `Access-Control-Allow-Origin: <APP_BASE_URL>` para rutas `/api/*`. Documentar en un comentario la política elegida. | `next.config.mjs` | 30 min |
+| G6 | **6× console.log → logger** | Buscar con `grep -r "console\.log" src/` y reemplazar cada instancia por `logger.info(...)` / `logger.error(...)` según contexto. Verificar que `src/lib/logger.ts` exporta esos métodos. | los 6 archivos que contengan `console.log` en `src/` | 20 min |
+| G7 | **PWA manifest.json** | Crear `public/manifest.json` con `name`, `short_name`, `start_url`, `display: "standalone"`, `theme_color`, `background_color` e `icons` (usar los favicons existentes en `public/`). Añadir `<link rel="manifest">` en `src/app/layout.tsx`. Sin service worker por ahora. | `public/manifest.json` (nuevo), `src/app/layout.tsx` | 1–2 h |
+| G8 | **OpenAPI/Swagger spec** | Crear `docs/openapi.yaml` documentando los 60+ endpoints de `src/app/api/`. Para cada ruta: método, path, descripción, parámetros, body (schema Zod → JSON Schema), responses (200/400/401/500). No es necesario integrar Swagger UI, solo el archivo YAML. | `docs/openapi.yaml` (nuevo) | 4–6 h |
+
+### Para el usuario (acción en paneles externos)
+
+| # | Tarea | Dónde | Tiempo est. |
+|---|---|---|---|
+| U1 | **PAYPAL_WEBHOOK_ID** | Dashboard PayPal → Webhooks → crear endpoint `<APP_URL>/api/webhooks/paypal` → copiar Webhook ID al `.env` y a Netlify env vars | 30 min |
+| U2 | **Rotación de secretos** (0.1) | Regenerar `SESSION_SECRET`, `ENCRYPTION_KEY`, claves Stripe, PayPal, SMTP, OAuth en cada panel. Actualizar en Netlify. Redeploy. | 1–2 h |
+| U3 | **Twitter OAuth credentials** | Twitter Developer Portal → crear app → copiar `TWITTER_CLIENT_ID` + `TWITTER_CLIENT_SECRET` al `.env` | 30 min |
+| U4 | **Backup Neon** | Dashboard Neon → confirmar retención de backups del tier. Hacer dump mensual manual: `pg_dump $DATABASE_URL_UNPOOLED > backup-$(date +%Y%m%d).sql` | 15 min |
+| U5 | **Dominio propio** (4.2/8.5) | Registrar dominio (~10 €/año) → configurar DNS en Netlify → actualizar `APP_BASE_URL`, OAuth redirects, webhooks Stripe/PayPal, `metadataBase` | 1 h |
+
+### Bloqueado (no se puede implementar ahora)
+
+| # | Tarea | Por qué bloqueado | Prerequisito |
+|---|---|---|---|
+| B1 | **CSP nonce** (quitar `unsafe-inline`) | Next.js inyecta inline scripts en hidratación; soporte de nonces requiere upgrade de plan Netlify o cambio de infraestructura | Upgrade Netlify o migrar a Vercel |
+| B2 | **Twitter OAuth** (código) | El stub existe pero sin credenciales no se puede probar ni activar | Completar U3 primero |
+| B3 | **SMS 2FA** | Requiere cuenta en proveedor SMS (Twilio/Vonage) y sus credenciales | Crear cuenta externa |
+| B4 | **Upstash Redis** (rate limit distribuido) | Requiere cuenta Upstash y `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | Crear cuenta externa |
+
+### Phase 5 — features futuras (posponer)
+
+| Tarea | Complejidad | Tiempo est. |
+|---|---|---|
+| Sistema de cupones | Alta | 3–5 días |
+| Reseñas / ratings de usuarios | Alta | 3–4 días |
+| Full-text search backend | Alta | 2–3 días |
+
+---
+
 ## FASES 0–5 (v1) — resumen
 
 Las fases 0–3 están completas salvo 3.2 (Upstash, opcional). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
