@@ -4531,13 +4531,14 @@ h1,
   color: #475569;
   cursor: pointer;
   flex-shrink: 0;
-  transition: border-color 150ms, background 150ms, color 150ms, box-shadow 150ms;
+  transition: border-color 150ms, background 150ms, color 150ms, box-shadow 150ms, transform 150ms;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 
   &:hover {
     border-color: rgba(99, 102, 241, 0.4);
     color: #1e293b;
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+    transform: translateY(-2px);
   }
 
   &--active {
@@ -4562,20 +4563,42 @@ h1,
   width: 32px;
   height: 32px;
   font-size: 1.2rem;
+
+  img {
+    transition: transform 0.18s ease;
+    filter:
+      drop-shadow(0 -1px 1px rgba(255, 255, 255, 0.35))
+      drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18))
+      drop-shadow(0 3px 6px rgba(0, 0, 0, 0.08));
+
+    .platform-bar-item:hover & {
+      transform: scale(1.12);
+    }
+  }
 }
 
 .platform-bar-icon--all {
   font-size: 1.1rem;
   color: #94a3b8;
   line-height: 1;
+  transition: transform 0.18s ease;
 
   .platform-bar-item--active & {
     color: #6366f1;
+  }
+
+  .platform-bar-item:hover & {
+    transform: scale(1.12);
   }
 }
 
 .platform-bar-icon--offer {
   font-size: 1.35rem;
+  transition: transform 0.18s ease;
+
+  .platform-bar-item:hover & {
+    transform: scale(1.12);
+  }
 }
 
 .platform-bar-label {
@@ -4730,9 +4753,25 @@ h1,
 }
 
 .featured-genres-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 0.6rem;
-  flex-wrap: wrap;
+
+  @media (max-width: 1599px) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  @media (max-width: 727px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 360px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .featured-genre-chip {
@@ -4746,8 +4785,6 @@ h1,
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   cursor: pointer;
-  flex: 1;
-  min-width: 72px;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.12s;
 
   &:hover {
@@ -4790,7 +4827,7 @@ h1,
     transition: transform 0.18s ease;
 
     .featured-genre-chip:hover & {
-      transform: scale(1.2);
+      transform: scale(1.12);
     }
 
     filter:
@@ -5007,8 +5044,7 @@ h1,
   }
 
   .featured-genres-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .featured-genre-chip {
