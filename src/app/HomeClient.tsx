@@ -211,11 +211,6 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
     });
   }, [recentSlugs, products]);
 
-  const popularSuggestions = useMemo(
-    () => [...products].sort((a, b) => b.discountPercent - a.discountPercent).slice(0, 4),
-    [products]
-  );
-
   const filteredGames = useMemo(() => {
     const normalizedPlatform = platform ? normalizeSearchText(platform) : "";
     const rankedGames = products
@@ -316,7 +311,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
           games={filteredGames}
           isFiltered={Boolean(query.trim()) || Boolean(platform) || filterOffer || Boolean(filterGenre)}
           emptyQuery={query}
-          popularSuggestions={popularSuggestions}
+          allGames={products}
           onClearSearch={() => { setQuery(""); setPlatform(null); setFilterOffer(false); setFilterGenre(null); }}
         />
       </main>

@@ -60,7 +60,7 @@ export default function GamesPage() {
         ) : (
           <GameGrid
             games={filteredGames}
-            isFiltered={isFiltered}
+            isFiltered={true}
             backHref="/"
             title="Catálogo completo"
             subtitle={
@@ -70,7 +70,7 @@ export default function GamesPage() {
             }
             emptyQuery={query.trim() || undefined}
             allGames={products}
-            onClearSearch={() => { setQuery(""); setPlatform(null); }}
+            onClearSearch={isFiltered ? () => { setQuery(""); setPlatform(null); } : undefined}
           />
         )}
       </main>

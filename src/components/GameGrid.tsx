@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ProductPreview } from "@/types/product";
 import { GameCard } from "@/components/GameCard";
 import { useLocale } from "@/hooks/useLocale";
@@ -23,12 +23,23 @@ type Props = {
   /** Texto de búsqueda activo, para mostrarlo en el mensaje de sin resultados */
   emptyQuery?: string;
   /** Juegos populares a sugerir cuando la búsqueda no da resultados */
+  allGames?: ProductPreview[];
   popularSuggestions?: ProductPreview[];
   /** Callback para limpiar la búsqueda activa */
   onClearSearch?: () => void;
 };
 
-export function GameGrid({ games, isFiltered = false, title, subtitle, backHref, emptyQuery, popularSuggestions, onClearSearch }: Props) {
+export function GameGrid({
+  games,
+  isFiltered = false,
+  title,
+  subtitle,
+  backHref,
+  emptyQuery,
+  allGames,
+  popularSuggestions,
+  onClearSearch,
+}: Props) {
   const lang = useLocale();
   const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
@@ -92,6 +103,20 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
   const limit = isFiltered ? undefined : (isMobile ? MOBILE_LIMIT : DESKTOP_LIMIT);
   const displayedGames = limit ? games.slice(0, limit) : games;
   const hasMore = !isFiltered && games.length > (limit ?? 0);
+  const suggestions = useMemo(() => {
+    if (popularSuggestions) return popularSuggestions.slice(0, 4);
+    if (!allGames) return [];
+
+    return [...allGames]
+      .sort((a, b) => {
+        if (b.discountPercent !== a.discountPercent) {
+          return b.discountPercent - a.discountPercent;
+        }
+        return a.name.localeCompare(b.name);
+      })
+      .slice(0, 4);
+  }, [allGames, popularSuggestions]);
+  const isEmpty = displayedGames.length === 0;
 
   return (
     <section id="game-results">
@@ -115,8 +140,8 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
           </Link>
         )}
       </div>
-      <div className="grid-games">
-        {displayedGames.length === 0 ? (
+      <div className={isEmpty ? "game-grid-empty-shell" : "grid-games"}>
+        {isEmpty ? (
           isFiltered ? (
             <div className="game-grid-empty">
               <p className="section-subtitle">
@@ -129,18 +154,17 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
                   type="button"
                   className="button-ghost btn-padding-site"
                   onClick={onClearSearch}
-                  style={{ marginTop: "0.75rem" }}
                 >
                   {t(lang, "grid.clear-search")}
                 </button>
               )}
-              {popularSuggestions && popularSuggestions.length > 0 && (
-                <div style={{ marginTop: "2rem" }}>
-                  <p className="section-subtitle" style={{ marginBottom: "1rem" }}>
+              {suggestions.length > 0 && (
+                <div className="game-grid-empty-suggestions">
+                  <p className="section-subtitle game-grid-empty-suggestions-title">
                     {t(lang, "grid.suggestions-label")}
                   </p>
                   <div className="grid-games">
-                    {popularSuggestions.map((game) => (
+                    {suggestions.map((game) => (
                       <GameCard key={game.slug} game={game} />
                     ))}
                   </div>
@@ -153,21 +177,19 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
             </p>
           )
         ) : (
-          <div className="grid-games">
-            {displayedGames.map((game, index) => (
-              <div
-                key={game.slug}
-                className={
-                  "game-card-reveal" +
-                  ` reveal-delay-${Math.min(index, 8)}` +
-                  (visibleCards.has(game.slug) ? " game-card-reveal--visible" : "")
-                }
-                data-reveal-slug={game.slug}
-              >
-                <GameCard game={game} />
-              </div>
-            ))}
-          </div>
+          displayedGames.map((game, index) => (
+            <div
+              key={game.slug}
+              className={
+                "game-card-reveal" +
+                ` reveal-delay-${Math.min(index, 8)}` +
+                (visibleCards.has(game.slug) ? " game-card-reveal--visible" : "")
+              }
+              data-reveal-slug={game.slug}
+            >
+              <GameCard game={game} />
+            </div>
+          ))
         )}
       </div>
       {backHref && (
