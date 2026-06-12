@@ -63,6 +63,7 @@ export const metadata: Metadata = {
   verification: {
     google: "BkE1639rD38Uq4aXVpdrrztMOZzz1bE2RNu8AHR-6KI",
   },
+  manifest: "/manifest.json",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
