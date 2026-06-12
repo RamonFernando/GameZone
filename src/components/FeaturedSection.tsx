@@ -21,11 +21,34 @@ import ghost           from "@iconify-icons/mdi/ghost";
 import runFast         from "@iconify-icons/mdi/run-fast";
 import cardsPlaying    from "@iconify-icons/mdi/cards-playing";
 import joystick        from "@iconify-icons/mdi/controller-classic";
+import spaceInvaders   from "@iconify-icons/mdi/space-invaders";
+import puzzleOutline   from "@iconify-icons/mdi/puzzle-outline";
 import { useLocale } from "@/hooks/useLocale";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";
 
 type Props = { products: ProductPreview[] };
+
+const GENRE_COLOR: Record<string, string> = {
+  Action:                  "#b91c1c",
+  Shooter:                 "#1d4ed8",
+  RPG:                     "#6d28d9",
+  "Action RPG":            "#7c3aed",
+  Adventure:               "#047857",
+  Indie:                   "#be185d",
+  Strategy:                "#1e3a8a",
+  "Massively Multiplayer": "#0e7490",
+  Simulation:              "#92400e",
+  Sports:                  "#15803d",
+  Racing:                  "#b45309",
+  Puzzle:                  "#0369a1",
+  Fighting:                "#9f1239",
+  Horror:                  "#292524",
+  Platformer:              "#6d28d9",
+  Card:                    "#0f766e",
+  Arcade:                  "#7e22ce",
+  Casual:                  "#0891b2",
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GENRE_ICON: Record<string, any> = {
@@ -45,6 +68,8 @@ const GENRE_ICON: Record<string, any> = {
   Horror:                  ghost,
   Platformer:              runFast,
   Card:                    cardsPlaying,
+  Arcade:                  spaceInvaders,
+  Casual:                  puzzleOutline,
 };
 
 const GENRE_SHORT: Record<string, string> = {
@@ -155,7 +180,7 @@ export function FeaturedSection({ products }: Props) {
     for (const p of products) {
       for (const g of p.genres) counts.set(g, (counts.get(g) ?? 0) + 1);
     }
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([g]) => g);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([g]) => g);
   }, [products]);
 
   const featuredGame = useMemo(
@@ -201,6 +226,7 @@ export function FeaturedSection({ products }: Props) {
                       type="button"
                       className={`featured-genre-chip${filterGenre === genre ? " featured-genre-chip--active" : ""}`}
                       data-genre={genre}
+                      style={{ "--genre-color": GENRE_COLOR[genre] ?? "#6366f1" } as React.CSSProperties}
                       onClick={() => {
                         setFilterGenre(filterGenre === genre ? null : genre);
                         requestAnimationFrame(() => {
