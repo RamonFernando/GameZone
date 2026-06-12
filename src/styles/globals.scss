@@ -4633,6 +4633,7 @@ h1,
 
 .featured-side-card__img {
   object-fit: cover;
+  object-position: top center;
 }
 
 .featured-side-card__overlay {
@@ -4759,6 +4760,17 @@ h1,
   &:active {
     transform: translateY(0);
   }
+
+  &--active {
+    background: #ffffff;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+
+    .featured-genre-name {
+      color: #7c3aed;
+      font-weight: 700;
+    }
+  }
 }
 
 .featured-genre-icon {
@@ -4769,13 +4781,27 @@ h1,
   height: 40px;
   font-size: 1.6rem;
   line-height: 1;
+  color: #6366f1; // color por defecto — Iconify usa currentColor
 
-  img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-  }
+  svg { width: 40px; height: 40px; }
+  img { width: 40px; height: 40px; object-fit: contain; }
 }
+
+// Colores por género
+.featured-genre-chip[data-genre="Action"]                  .featured-genre-icon { color: #ef4444; }
+.featured-genre-chip[data-genre="Shooter"]                 .featured-genre-icon { color: #0ea5e9; }
+.featured-genre-chip[data-genre="RPG"]                     .featured-genre-icon { color: #a855f7; }
+.featured-genre-chip[data-genre="Action RPG"]              .featured-genre-icon { color: #a855f7; }
+.featured-genre-chip[data-genre="Adventure"]               .featured-genre-icon { color: #10b981; }
+.featured-genre-chip[data-genre="Indie"]                   .featured-genre-icon { color: #ec4899; }
+.featured-genre-chip[data-genre="Strategy"]                .featured-genre-icon { color: #3b82f6; }
+.featured-genre-chip[data-genre="Massively Multiplayer"]   .featured-genre-icon { color: #06b6d4; }
+.featured-genre-chip[data-genre="Simulation"]              .featured-genre-icon { color: #f59e0b; }
+.featured-genre-chip[data-genre="Sports"]                  .featured-genre-icon { color: #22c55e; }
+.featured-genre-chip[data-genre="Racing"]                  .featured-genre-icon { color: #f97316; }
+.featured-genre-chip[data-genre="Puzzle"]                  .featured-genre-icon { color: #8b5cf6; }
+.featured-genre-chip[data-genre="Fighting"]                .featured-genre-icon { color: #dc2626; }
+.featured-genre-chip[data-genre="Horror"]                  .featured-genre-icon { color: #6b7280; }
 
 .featured-genre-name {
   font-size: 0.72rem;
@@ -4882,11 +4908,15 @@ h1,
 .featured-deal__cover {
   position: relative;
   width: 100%;
-  height: 80px;
+  height: 120px;
   border-radius: 7px;
   overflow: hidden;
   flex-shrink: 0;
   background: #e2e8f0;
+
+  img {
+    object-position: top center !important;
+  }
 }
 
 .featured-deal__info {
@@ -5002,12 +5032,12 @@ h1,
 
   .featured-deal__row {
     display: grid;
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 100px minmax(0, 1fr);
     align-items: center;
   }
 
   .featured-deal__cover {
-    height: 72px;
+    height: 80px;
   }
 }
 

@@ -4,10 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { computeDiscountedPrice, ensureProductsSeeded, listActiveProducts, resolveStoreLabel } from "@/lib/products";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
-// Tag compartido: cualquier mutación del catálogo (admin) llama a
+// Tag compartido: cualquier mutación del catálogo (admin o cron) llama a
 // revalidateTag(PRODUCTS_CACHE_TAG, "max") para refrescar la home al instante.
-// El cron de Netlify queda cubierto por el revalidate temporal (5 min),
-// ya que corre fuera de Next y no puede invalidar tags.
 export const PRODUCTS_CACHE_TAG = "products";
 const CACHE_REVALIDATE_SECONDS = 300;
 const HERO_SECTION_SIZE = 5;

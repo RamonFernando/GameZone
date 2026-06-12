@@ -1,7 +1,10 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
+import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
 import { CatalogSyncBlockedError, runCatalogSync } from "@/lib/market/catalog-sync";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 function getBearerToken(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
@@ -27,6 +30,8 @@ async function handleCatalogCron(request: Request) {
       dryRun: false,
       triggeredBy: "cron",
     });
+
+    revalidateTag(PRODUCTS_CACHE_TAG, "max");
 
     return NextResponse.json(
       {
