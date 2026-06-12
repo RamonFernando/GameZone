@@ -673,6 +673,36 @@
   .account-recovery-row dd {
     text-align: left;
   }
+
+  // Tabs: scroll horizontal en móvil para no romper layout
+  .account-tabs {
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .account-tab {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  // Avatar header: avatar centrado debajo del título
+  .account-avatar-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .account-avatar-circle {
+    align-self: center;
+  }
+
+  // Botones de acción: ancho completo en móvil
+  .auth-form > div > .button-primary.auth-submit-compact {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Panel de control y Pedidos globales: mismo estilo blanco que las cartas */
