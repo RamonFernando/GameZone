@@ -18,7 +18,7 @@
 
 - [U1 ✅] PAYPAL_WEBHOOK_ID configurado: webhook sandbox `5WD229960R154935L` → `.env` + Netlify env vars (Production)
 - [docs ✅] Sistema de trabajo IA creado: REGLAS-IA.md (v2 pulida con jerarquía, DoD, economía de tokens, seguridad operacional), HISTORIAL-TRABAJO.md, CLAUDE.md y AGENTS.md en raíz, secciones FUTURAS MEJORAS y SOLICITUDES DE AUDITORÍA en auditoría, plantilla portable para futuros proyectos
-- [docs ✅] Auditoría v3: sección REPARTO DE IMPLEMENTACIÓN con tareas C/G/U/Bloqueado y falso positivo de magic bytes en avatar corregido
+- [docs ✅] Auditoría v3: sección REPARTO DE IMPLEMENTACIÓN con tareas C/G/U/Bloqueado y falso positivo de magic bytes en avatar corregido — commit e1ee6e9 (todo el sistema de docs)
 
 ### Claude (VS Code)
 
