@@ -22,11 +22,23 @@ const SECURITY_HEADERS = [
   },
 ];
 
+// Solo el origen propio puede llamar a la API (bloquea peticiones cross-origin no autorizadas).
+const APP_ORIGIN = process.env.APP_BASE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "*";
+
+const CORS_HEADERS = [
+  { key: "Access-Control-Allow-Origin", value: APP_ORIGIN },
+  { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, PATCH, DELETE, OPTIONS" },
+  { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   async headers() {
-    return [{ source: "/(.*)", headers: SECURITY_HEADERS }];
+    return [
+      { source: "/(.*)", headers: SECURITY_HEADERS },
+      { source: "/api/(.*)", headers: CORS_HEADERS },
+    ];
   },
   images: {
     remotePatterns: [
