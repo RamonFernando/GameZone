@@ -19,7 +19,7 @@ function normalizeText(value: string) {
 export default function GamesPage() {
   const [products, setProducts] = useState<ProductPreview[]>([]);
   const [loading, setLoading] = useState(true);
-  const { query, platform } = useSearch();
+  const { query, setQuery, platform, setPlatform } = useSearch();
   useScrollMemory(!loading);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function GamesPage() {
         ) : (
           <GameGrid
             games={filteredGames}
-            isFiltered={true}
+            isFiltered={isFiltered}
             backHref="/"
             title="Catálogo completo"
             subtitle={
@@ -68,6 +68,9 @@ export default function GamesPage() {
                 ? `${filteredGames.length} juego${filteredGames.length !== 1 ? "s" : ""} encontrado${filteredGames.length !== 1 ? "s" : ""}`
                 : `${products.length} juego${products.length !== 1 ? "s" : ""} disponible${products.length !== 1 ? "s" : ""} en GameZone`
             }
+            emptyQuery={query.trim() || undefined}
+            allGames={products}
+            onClearSearch={() => { setQuery(""); setPlatform(null); }}
           />
         )}
       </main>
