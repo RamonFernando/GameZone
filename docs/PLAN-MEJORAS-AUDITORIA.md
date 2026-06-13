@@ -314,6 +314,11 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** el componente migrado se ve igual en desktop y móvil; no hay clases huérfanas
   evidentes en `globals.scss`; `npx tsc --noEmit`, `npx vitest run` y `npm run build` pasan.
 
+- **Estado 13/06/2026:** Footer migrado a CSS Modules en commit `4d1bf0b`
+  (`src/components/Footer.module.scss`, `Footer.tsx`, limpieza en `globals.scss` y
+  `responsive-refinements.scss`). Validado con `npx tsc --noEmit`, `npx vitest run` (76/76)
+  y revision visual local por Ramon. Pendiente progresivo: Hero -> GameCard -> GameGrid -> Header.
+
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
 
 > Inspirado en patrones estándar de las tiendas de videojuegos actuales. Cada punto es
