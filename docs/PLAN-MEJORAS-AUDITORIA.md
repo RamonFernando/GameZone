@@ -47,9 +47,12 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
 | **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1/B2/B3/B4/B5/B6/B8 ✅**, B7 pendiente |
-| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); **10.3 parcial ✅** (ESLint + audit en CI), 10.2/10.4 y Lighthouse CI pendientes |
+| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); **10.3 parcial ✅** (ESLint + audit en CI), 10.2/10.4 pendientes; Lighthouse CI incorporado el 13/06/2026 |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
+
+**Consistencia documental 13/06/2026:** commits GPT del 12/06 detectados en Git y reflejados en historial:
+`G5` CORS explicito (`b2eb426`) y `G7` PWA manifest (`9bfe327`).
 
 ---
 
@@ -443,6 +446,6 @@ npm run build
 - **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
 - **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
 - **Dependabot** — actualizaciones de seguridad automáticas. Sin código.
-- **Lighthouse CI** (opcional) — presupuesto de rendimiento en CI.
+- **Lighthouse CI** — presupuesto de rendimiento en CI. ✅ incorporado el 13/06/2026 (commit `dc5bf61`).
 - **Cloudflare Turnstile** (opcional, solo si hay bots) — anti-bot sin fricción.
 - **Upstash Redis** (opcional, hereda de 3.2) — rate limit distribuido si crece el tráfico.
