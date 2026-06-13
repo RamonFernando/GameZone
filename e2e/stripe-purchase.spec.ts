@@ -1,8 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-// Mocked session cookie to simulate a logged-in user
-const MOCK_SESSION = "mock-session-token-for-e2e";
-
 test.describe("Stripe purchase flow", () => {
   test.beforeEach(async ({ page }) => {
     // Mock session validation so we appear logged in

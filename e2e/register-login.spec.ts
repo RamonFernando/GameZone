@@ -1,7 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-const UNIQUE_EMAIL = `e2e-test-${Date.now()}@gamezone.dev`;
-
 test.describe("Register + Login flow", () => {
   test("shows register form and validates required fields", async ({ page }) => {
     await page.goto("/auth");
