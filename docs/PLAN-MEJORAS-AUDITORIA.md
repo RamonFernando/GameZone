@@ -48,7 +48,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
 | **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1/B2/B3/B4/B5/B6/B8 ✅**, B7 pendiente |
 | **Audit Log (C1)** | ✅ HECHO 13/06/2026 -- tabla AuditLog en Neon, logAudit(), 18 puntos en 14 rutas. Migracion aplicada. |
-| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ 11/06**, **10.2 ✅ 13/06** (Playwright 3 specs mocked), **10.3 parcial ✅**; 10.4 pendiente |
+| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ 11/06**, **10.2 ✅ 13/06** (Playwright 3 specs), **10.3 ✅ 13/06** (ESLint CI + Lighthouse CI); 10.4 pendiente |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
 

@@ -1,31 +1,42 @@
-# Historial de trabajo -- GameStopV4
+# Historial de trabajo — GameZone (GameStopV4)
 
-## Sesion 13/06/2026 -- Branch: dev-13062026-claude
+> **Memoria operativa del proyecto.** Cuando algo falle, este es el primer sitio donde mirar:
+> qué se hizo, quién lo hizo y en qué commit. Funciona offline — no necesita el repo remoto.
+>
+> **Formato:** una sección por día (`## DD-MM-YYYY (rama dev-DDMMYYYY)`) con una subsección
+> por actor. **Cada IA escribe SOLO en su subsección** — así el archivo nunca genera
+> conflictos de merge entre las sub-ramas.
+>
+> **Formato de entrada:** `- [<ID-tarea> ✅] <descripción en 1 línea> — commit <hash-corto>`
+> Para encontrar un commit: `git show <hash-corto>` o buscar el hash en `git log --oneline`.
 
-### Claude
-| Tarea | Commit | Estado |
-|---|---|---|
-| C1 Audit log (Prisma + migracion + 18 puntos) | 5b30d6c | HECHO. Migracion aplicada en Neon |
-| C2 E2E Playwright (config + 3 specs) | 9f95d8b | HECHO. Chromium instalado |
+---
 
-C1 instrumenta: LOGIN_SUCCESS/FAILED, LOGOUT, REGISTER, EMAIL_VERIFIED,
-PASSWORD_RESET_REQUESTED/COMPLETED, 2FA_CODE_VERIFY_SUCCESS, TOTP_VERIFY_SUCCESS,
-OAUTH_LOGIN, 2FA_EMAIL/TOTP ENABLED/DISABLED, ADMIN_PRODUCT CREATED/UPDATED/DELETED,
-ADMIN_USER_ROLE_CHANGED, ORDER_PAID
+## 13-06-2026 (rama dev-13062026)
 
-C2: e2e/register-login.spec.ts (4 tests), e2e/search-cart.spec.ts (3 tests),
-e2e/stripe-purchase.spec.ts (3 tests). Todos con mocked API.
+### Claude (VS Code)
 
-### Tareas pendientes Claude
-- Correr test:e2e contra servidor real con usuario de prueba
+- [C1 ✅] Audit log: modelo `AuditLog` en Prisma + migración SQL + `logAudit()` + 18 puntos en 14 rutas. Migración aplicada en Neon — commit 5b30d6c
+- [C2 ✅] E2E Playwright: `playwright.config.ts` + 3 specs (register-login, search-cart, stripe) con mocked API — commit 9f95d8b
 
-### Tareas pendientes GPT
-- G1 commit (Lighthouse CI: .lighthouserc.js + ci.yml sin stagear)
-- G2, G3, G4, G8 -- ver PLAN-MEJORAS-AUDITORIA.md
+### GPT
 
-### Acciones manuales pendientes (Ramon)
-- U1 Netlify redeploy con PAYPAL_WEBHOOK_ID
-- U2 Rotacion de secretos (CRITICO)
-- U3 Twitter OAuth
-- U4 Neon backup mensual
-- U5 Dominio propio
+- [G1 ✅] Lighthouse CI automatizado con `@lhci/cli`, `.lighthouserc.js` y job `lighthouse` en GitHub Actions — commit dc5bf61
+
+## 12-06-2026 (rama dev-12062026)
+
+### Ramón + modelo superior (escritorio)
+
+- [U1 ✅] PAYPAL_WEBHOOK_ID configurado: webhook sandbox `5WD229960R154935L` → `.env` + Netlify env vars (Production)
+- [docs ✅] Sistema de trabajo IA creado: REGLAS-IA.md (v2 pulida con jerarquía, DoD, economía de tokens, seguridad operacional), HISTORIAL-TRABAJO.md, CLAUDE.md y AGENTS.md en raíz, secciones FUTURAS MEJORAS y SOLICITUDES DE AUDITORÍA en auditoría, plantilla portable para futuros proyectos
+- [docs ✅] Auditoría v3: sección REPARTO DE IMPLEMENTACIÓN con tareas C/G/U/Bloqueado y falso positivo de magic bytes en avatar corregido — commit e1ee6e9 (todo el sistema de docs)
+
+### Claude (VS Code)
+
+- (sin entradas aún)
+
+### GPT
+
+- [9.2 ✅] Estado vacío de búsqueda con sugerencias en games/page y GameGrid — commits c03d077 + d3f2454
+- [G5 ✅] CORS explícito en rutas `/api/*` con `Access-Control-Allow-Origin` desde `APP_BASE_URL` — commit b2eb426
+- [G7 ✅] PWA manifest.json y enlace de manifest en layout — commit 9bfe327
