@@ -24,6 +24,7 @@
 ### GPT
 
 - [G1 ✅] Lighthouse CI automatizado con `@lhci/cli`, `.lighthouserc.js` y job `lighthouse` en GitHub Actions — commit dc5bf61
+- [9.5 ✅] Hero migrado a CSS Modules: `Hero.module.scss`, `Hero.tsx`, limpieza de estilos `hero*` en globales y validación con tsc/vitest/build — commit 0b375f7
 
 ## 12-06-2026 (rama dev-12062026)
 

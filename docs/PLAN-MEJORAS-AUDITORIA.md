@@ -316,8 +316,10 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 
 - **Estado 13/06/2026:** Footer migrado a CSS Modules en commit `4d1bf0b`
   (`src/components/Footer.module.scss`, `Footer.tsx`, limpieza en `globals.scss` y
-  `responsive-refinements.scss`). Validado con `npx tsc --noEmit`, `npx vitest run` (76/76)
-  y revision visual local por Ramon. Pendiente progresivo: Hero -> GameCard -> GameGrid -> Header.
+  `responsive-refinements.scss`). Hero migrado a CSS Modules en commit `0b375f7`
+  (`src/components/Hero.module.scss`, `Hero.tsx`, limpieza de estilos `hero*` en `globals.scss`
+  y `responsive-refinements.scss`). Validado con `npx tsc --noEmit`, `npx vitest run` (76/76)
+  y `npx next build`. Pendiente progresivo: GameCard -> GameGrid -> Header.
 
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
 
