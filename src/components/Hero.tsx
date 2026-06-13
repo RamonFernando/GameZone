@@ -9,6 +9,7 @@ import type { HomeHeroSection, ProductPreview } from "@/types/product";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ReactNode } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import styles from "./Hero.module.scss";
 
 // Estructura interna que usamos para representar cada slide del hero.
 type Slide = {
@@ -264,9 +265,15 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
   const money = (value: number) => formatPublicPrice(value, lang);
 
   return (
-    <section className={`hero hero--carousel${headerSlot ? " hero--with-header" : ""}`}>
+    <section
+      className={[
+        styles.hero,
+        styles["hero--carousel"],
+        headerSlot ? styles["hero--with-header"] : "",
+      ].filter(Boolean).join(" ")}
+    >
       {/* Background: la imagen cubre toda la section, incluida la zona del header */}
-      <div className="hero-bg">
+      <div className={styles["hero-bg"]}>
         {/* Capa de fondo borrosa: llena la pantalla y aporta profundidad cinematografica */}
         <Image
           src={displayedHeroSrc}
@@ -276,7 +283,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
           priority
           sizes="100vw"
           quality={50}
-          className="hero-bg-blur"
+          className={styles["hero-bg-blur"]}
         />
         {/* Arte nitido y completo, sin recorte */}
         <Image
@@ -289,47 +296,47 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
           onError={() => {
             setHeroBgSrc((current) => (current === active.image ? current : active.image));
           }}
-          className="hero-bg-art"
+          className={styles["hero-bg-art"]}
         />
-        <div className="hero-bg-gradient" />
+        <div className={styles["hero-bg-gradient"]} />
       </div>
 
       {/* Header dentro de la section para que la imagen coja la barra superior */}
       {headerSlot}
 
       {/* Content */}
-      <div className="hero-inner">
-        <div className="hero-main">
-          {active.badge && <span className="badge-soft">{active.badge}</span>}
+      <div className={styles["hero-inner"]}>
+        <div className={styles["hero-main"]}>
+          {active.badge && <span className={`badge-soft ${styles["badge-soft"]}`}>{active.badge}</span>}
 
-          <h1 className="hero-title">
-            <Link className="hero-title-link" href={`/games/${active.game.slug}`}>
+          <h1 className={styles["hero-title"]}>
+            <Link className={styles["hero-title-link"]} href={`/games/${active.game.slug}`}>
               {active.title}
             </Link>
           </h1>
 
-          <p className="hero-subtitle">{active.subtitle}</p>
+          <p className={styles["hero-subtitle"]}>{active.subtitle}</p>
 
-          <div className="hero-meta-row">
-            <div className="hero-price-box">
+          <div className={styles["hero-meta-row"]}>
+            <div className={styles["hero-price-box"]}>
               {active.discountPercent > 0 ? (
                 <>
-                  <span className="hero-discount">-{active.discountPercent}%</span>
-                  <span className="hero-price-old">{money(active.priceOriginal)}</span>
+                  <span className={styles["hero-discount"]}>-{active.discountPercent}%</span>
+                  <span className={styles["hero-price-old"]}>{money(active.priceOriginal)}</span>
                 </>
               ) : null}
-              <span className="hero-price">{money(active.priceFinal)}</span>
+              <span className={styles["hero-price"]}>{money(active.priceFinal)}</span>
             </div>
 
             {active.cashbackPercent > 0 ? (
-              <span className="hero-cashback-chip">
+              <span className={styles["hero-cashback-chip"]}>
                 {active.cashbackPercent}% {lang === "en" ? "Cashback" : "Cashback"}
               </span>
             ) : null}
 
             <button
               type="button"
-              className="button-primary hero-cta btn-padding-site"
+              className={`button-primary btn-padding-site ${styles["hero-cta"]}`}
               onClick={() => addToCart(active.game)}
             >
               {lang === "en" ? "Add to cart" : "Añadir al carrito"}
@@ -337,7 +344,7 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
 
           </div>
 
-          <p className="hero-subcopy">
+          <p className={styles["hero-subcopy"]}>
             {lang === "en"
               ? "Browse the latest releases and prepare your gaming catalog."
               : "Desliza entre los últimos lanzamientos y prepara tu catálogo gaming."}
@@ -347,17 +354,17 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
         </div>
 
         {/* Mini carrusel de últimos lanzamientos */}
-        <div className="hero-thumbs-wrapper">
-          <div className="hero-thumbs-header">
-            <h2 className="section-title">
+        <div className={styles["hero-thumbs-wrapper"]}>
+          <div className={styles["hero-thumbs-header"]}>
+            <h2 className={`section-title ${styles["section-title"]}`}>
               {activeSection?.title ?? (lang === "en" ? "Featured" : "Destacados")}
             </h2>
             {/* <p className="section-subtitle">Explora juegos recientes de tu catálogo.</p> */}
           </div>
 
-          <div className="hero-thumbs-row-wrap">
+          <div className={styles["hero-thumbs-row-wrap"]}>
             <div
-              className="hero-thumbs-row hero-thumbs-row--slider"
+              className={`${styles["hero-thumbs-row"]} ${styles["hero-thumbs-row--slider"]}`}
               style={
                 {
                   "--thumbs-offset": thumbScrollIndex,
@@ -379,15 +386,15 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
                 return (
                   <div
                     key={`${slide.id}-${index}`}
-                    className={
-                      "hero-thumb hero-thumb--" +
-                      position +
-                      (realIndex === activeIndex ? " hero-thumb--active" : "")
-                    }
+                    className={[
+                      styles["hero-thumb"],
+                      styles[`hero-thumb--${position}`],
+                      realIndex === activeIndex ? styles["hero-thumb--active"] : "",
+                    ].filter(Boolean).join(" ")}
                   >
                     <button
                       type="button"
-                      className="hero-thumb-image hero-thumb-image-button"
+                      className={`${styles["hero-thumb-image"]} ${styles["hero-thumb-image-button"]}`}
                       onClick={() => {
                         setActiveIndex(realIndex);
                         setThumbScrollIndex((realIndex - 1 + slides.length) % slides.length);
@@ -403,14 +410,14 @@ export function Hero({ products, heroSections = [], headerSlot }: Props) {
                         style={{ objectFit: "contain", objectPosition: "center center" }}
                       />
                     </button>
-                    <div className="hero-thumb-info">
-                      <Link href={`/games/${slide.game.slug}`} className="hero-thumb-title">
+                    <div className={styles["hero-thumb-info"]}>
+                      <Link href={`/games/${slide.game.slug}`} className={styles["hero-thumb-title"]}>
                         {slide.title}
                       </Link>
-                      <div className="hero-thumb-meta">
+                      <div className={styles["hero-thumb-meta"]}>
                         <span>{money(slide.priceFinal)}</span>
                         {slide.discountPercent > 0 ? (
-                          <span className="hero-thumb-discount">-{slide.discountPercent}%</span>
+                          <span className={styles["hero-thumb-discount"]}>-{slide.discountPercent}%</span>
                         ) : null}
                       </div>
                     </div>
