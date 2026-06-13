@@ -352,6 +352,12 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 ## FASE 10 — TESTING Y ROBUSTEZ  🟡
 
 ### 10.1 — Tests de integración de los flujos críticos (absorbe 3.5)  🟠 ALTA  ✅ HECHA
+- **Estado validado el 13/06/2026:** 12 archivos de test y 76 tests verdes con `npx vitest run`.
+  C3 anadio `src/lib/audit-log.test.ts` (8 tests), `src/lib/products.test.ts` (22 tests)
+  y una asercion `ORDER_PAID` en `src/app/api/payments/stripe/webhook/route.test.ts`.
+  Verificado por GPT con `npx tsc --noEmit`, `npx vitest run` y `npx next build`.
+  `npm run build` en Windows/Dropbox puede fallar por lock de Prisma DLL (`EPERM`) aunque
+  `next build` pase; detener procesos Node/VS Code si se necesita regenerar Prisma Client.
 - **Estado validado el 11/06/2026:** 10 archivos de test y 48 tests verdes con `npm run test:unit`.
   Hay cobertura a nivel servicio para `createPendingOrder`, `completePaidOrder`,
   idempotencia de estado/email y rotación de sesión. También hay cobertura route-level para
@@ -377,8 +383,8 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Hecho (11/06/2026):** `eslint` ya es hard-fail en CI (`npx eslint . --max-warnings 0`
   sin `continue-on-error`) y `npm audit --omit=dev --audit-level=high` ya falla el pipeline
   ante vulnerabilidades high/critical.
-- **Pendiente opcional:** **Lighthouse CI** contra el deploy preview de Netlify con presupuesto
-  (Performance ≥ 85) para que una regresión de rendimiento falle el PR.
+- **Hecho (13/06/2026):** **Lighthouse CI** automatizado con `@lhci/cli`, `.lighthouserc.js`
+  y job `lighthouse` en GitHub Actions. Presupuesto Performance >= 0.85 como warning.
 - **Verificar:** un PR con un error de lint o una dependencia vulnerable no pasa el CI.
 
 ### 10.4 — Operacional  🟡 MEDIA (manual, usuario)
@@ -440,6 +446,6 @@ npm run build
 - **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
 - **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
 - **Dependabot** — actualizaciones de seguridad automáticas. Sin código.
-- **Lighthouse CI** (opcional) — presupuesto de rendimiento en CI.
+- **Lighthouse CI** — presupuesto de rendimiento en CI. Incorporado el 13/06/2026.
 - **Cloudflare Turnstile** (opcional, solo si hay bots) — anti-bot sin fricción.
 - **Upstash Redis** (opcional, hereda de 3.2) — rate limit distribuido si crece el tráfico.
