@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import styles from "./Footer.module.scss";
 
 const PAYMENT_METHODS = [
   { name: "PayPal", src: "/payment/paypal.svg", size: "large" as const, wide: false },
@@ -27,16 +28,20 @@ export function Footer() {
   const currentLocale = LOCALE_OPTIONS[localeIndex];
 
   return (
-    <footer className="footer">
+    <footer className={styles.footer}>
       {/* Barra métodos de pago + selector idioma/moneda (estilo G2A) */}
-      <div className="footer-bar">
-        <div className="footer-bar-inner">
-          <div className="footer-payments">
-            <div className="footer-payment-icons">
+      <div className={styles["footer-bar"]}>
+        <div className={styles["footer-bar-inner"]}>
+          <div className={styles["footer-payments"]}>
+            <div className={styles["footer-payment-icons"]}>
               {PAYMENT_METHODS.map((method) => (
                 <span
                   key={method.name}
-                  className={`footer-payment-icon footer-payment-icon--${method.size}${method.wide ? " footer-payment-icon--wide" : ""}`}
+                  className={[
+                    styles["footer-payment-icon"],
+                    styles[`footer-payment-icon--${method.size}`],
+                    method.wide ? styles["footer-payment-icon--wide"] : "",
+                  ].filter(Boolean).join(" ")}
                   title={method.name}
                 >
                   <Image
@@ -44,18 +49,18 @@ export function Footer() {
                     alt={method.name}
                     width={method.wide ? 108 : 80}
                     height={44}
-                    className="footer-payment-img"
+                    className={styles["footer-payment-img"]}
                     unoptimized
                   />
                 </span>
               ))}
             </div>
           </div>
-          <div className="footer-locale-wrap">
-            <div className="footer-locale">
+          <div className={styles["footer-locale-wrap"]}>
+            <div className={styles["footer-locale"]}>
               <button
                 type="button"
-                className="footer-locale-trigger"
+                className={styles["footer-locale-trigger"]}
                 onClick={() => setLocaleOpen((o) => !o)}
                 aria-expanded={localeOpen}
                 aria-haspopup="listbox"
@@ -65,25 +70,25 @@ export function Footer() {
                     : "Seleccionar idioma y moneda"
                 }
               >
-                <span className="footer-locale-globe" aria-hidden>
+                <span className={styles["footer-locale-globe"]} aria-hidden>
                   🌐
                 </span>
-                <span className="footer-locale-value">
+                <span className={styles["footer-locale-value"]}>
                   {currentLocale.code} / {currentLocale.currency}
                 </span>
-                <span className="footer-locale-chevron" aria-hidden>
+                <span className={styles["footer-locale-chevron"]} aria-hidden>
                   ▼
                 </span>
               </button>
               {localeOpen && (
                 <>
                   <div
-                    className="footer-locale-backdrop"
+                    className={styles["footer-locale-backdrop"]}
                     aria-hidden
                     onClick={() => setLocaleOpen(false)}
                   />
                   <ul
-                    className="footer-locale-dropdown"
+                    className={styles["footer-locale-dropdown"]}
                     role="listbox"
                     aria-label={
                       lang === "en"
@@ -95,7 +100,7 @@ export function Footer() {
                       <li key={opt.code} role="option" aria-selected={i === localeIndex}>
                         <button
                           type="button"
-                          className="footer-locale-option"
+                          className={styles["footer-locale-option"]}
                           onClick={() => {
                             setLocaleOpen(false);
                             document.cookie = `uiLocale=${i === 0 ? "es-ES" : "en-US"}; path=/; max-age=31536000`;
@@ -114,80 +119,80 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="footer-wrapper">
+      <div className={styles["footer-wrapper"]}>
         {/* IZQUIERDA – INFO */}
-        <div className="footer-info">
-          <h3 className="footer-title footer-brand-title" aria-label="Game Zone">
-            <span className="footer-brand-logo-lockup" aria-hidden="true">
-              <span className="footer-brand-disc" />
-              <span className="footer-brand-word">
+        <div className={styles["footer-info"]}>
+          <h3 className={`${styles["footer-title"]} ${styles["footer-brand-title"]}`} aria-label="Game Zone">
+            <span className={styles["footer-brand-logo-lockup"]} aria-hidden="true">
+              <span className={styles["footer-brand-disc"]} />
+              <span className={styles["footer-brand-word"]}>
                 <span>Game</span>
-                <span className="footer-brand-word-z">Z</span>
+                <span className={styles["footer-brand-word-z"]}>Z</span>
                 <span>one</span>
               </span>
             </span>
             <span>Game Zone</span>
           </h3>
-          <p className="footer-text">
+          <p className={styles["footer-text"]}>
             {lang === "en"
               ? "Your digital store for videogames and gaming content. UI designed to offer the best experience on PlayStation, Xbox, Nintendo and PC."
               : "Tu tienda digital de videojuegos y contenido gaming. UI creada para ofrecer la mejor experiencia en plataformas PlayStation, Xbox, Nintendo y PC."}
           </p>
-          <span className="footer-copy">
+          <span className={styles["footer-copy"]}>
             © {year} Game Zone.{" "}
             {lang === "en" ? "All rights reserved." : "Todos los derechos reservados."}
           </span>
         </div>
 
         {/* DERECHA – REDES SOCIALES */}
-        <div className="footer-social">
-          <h4 className="footer-social-title">
+        <div className={styles["footer-social"]}>
+          <h4 className={styles["footer-social-title"]}>
             {lang === "en" ? "Follow us" : "Síguenos"}
           </h4>
 
-          <div className="footer-icons">
+          <div className={styles["footer-icons"]}>
             {/* youtube */}
-            <a href="#" aria-label="YouTube" className="footer-icon">
+            <a href="#" aria-label="YouTube" className={styles["footer-icon"]}>
               <Image
                 src="/iconos_platforms/youtube2.svg"
                 alt="YouTube"
                 width={28}
                 height={28}
-                className="footer-icon-img"
+                className={styles["footer-icon-img"]}
                 unoptimized
               />
             </a>
             {/* Instagram */}
-            <a href="#" aria-label="Instagram" className="footer-icon">
+            <a href="#" aria-label="Instagram" className={styles["footer-icon"]}>
               <Image
                 src="/iconos_platforms/instagram.svg"
                 alt="Instagram"
                 width={28}
                 height={28}
-                className="footer-icon-img"
+                className={styles["footer-icon-img"]}
                 unoptimized
               />
             </a>
 
             {/* Twitter */}
-            <a href="#" aria-label="Twitter" className="footer-icon">
+            <a href="#" aria-label="Twitter" className={styles["footer-icon"]}>
               <Image
                 src="/iconos_platforms/twiter.svg"
                 alt="Twitter"
                 width={28}
                 height={28}
-                className="footer-icon-img"
+                className={styles["footer-icon-img"]}
               />
             </a>
 
             {/* facebook */}
-            <a href="#" aria-label="Facebook" className="footer-icon">
+            <a href="#" aria-label="Facebook" className={styles["footer-icon"]}>
               <Image
                 src="/iconos_platforms/facebook2.svg"
                 alt="Facebook"
                 width={28}
                 height={28}
-                className="footer-icon-img"
+                className={styles["footer-icon-img"]}
               />
             </a>
           </div>
@@ -195,17 +200,17 @@ export function Footer() {
       </div>
 
       {/* Línea legal / copyright (estilo G2A): separada por una línea del mismo ancho que footer-wrapper */}
-      <div className="footer-legal">
-        <div className="footer-legal-inner">
-        <p className="footer-legal-text">
+      <div className={styles["footer-legal"]}>
+        <div className={styles["footer-legal-inner"]}>
+        <p className={styles["footer-legal-text"]}>
           {lang === "en" ? (
             <>
               Use of the platform implies acceptance of our{" "}
-              <Link href="/terms" className="footer-legal-link">
+              <Link href="/terms" className={styles["footer-legal-link"]}>
                 Terms and Conditions
               </Link>
               . You can find information about how we process your personal data in our{" "}
-              <Link href="/privacy" className="footer-legal-link">
+              <Link href="/privacy" className={styles["footer-legal-link"]}>
                 Privacy Policy
               </Link>
               . Copyright © {year} Game Zone. All rights reserved.
@@ -213,11 +218,11 @@ export function Footer() {
           ) : (
             <>
               El uso de la plataforma implica la aceptación de los{" "}
-              <Link href="/terms" className="footer-legal-link">
+              <Link href="/terms" className={styles["footer-legal-link"]}>
                 Términos y condiciones
               </Link>
               . Puedes encontrar información sobre cómo procesamos tus datos personales en la{" "}
-              <Link href="/privacy" className="footer-legal-link">
+              <Link href="/privacy" className={styles["footer-legal-link"]}>
                 Política de privacidad
               </Link>
               . Copyright © {year} Game Zone. Todos los derechos reservados.
