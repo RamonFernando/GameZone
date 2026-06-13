@@ -376,9 +376,13 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Hecho (11/06/2026):** `eslint` ya es hard-fail en CI (`npx eslint . --max-warnings 0`
   sin `continue-on-error`) y `npm audit --omit=dev --audit-level=high` ya falla el pipeline
   ante vulnerabilidades high/critical.
-- **Pendiente opcional:** **Lighthouse CI** contra el deploy preview de Netlify con presupuesto
-  (Performance ≥ 85) para que una regresión de rendimiento falle el PR.
 - **Verificar:** un PR con un error de lint o una dependencia vulnerable no pasa el CI.
+
+- **Hecho (13/06/2026):** **Lighthouse CI** automatizado en GitHub Actions con `@lhci/cli`,
+  `.lighthouserc.js`, URL local `http://localhost:3000` y presupuesto Performance >= 0.85
+  como warning. Archivos: `.lighthouserc.js`, `.github/workflows/ci.yml`, `package.json`,
+  `package-lock.json`. Verificado con `npx tsc --noEmit`, `npx vitest run` (48/48) y
+  `npm run build`. Commit `dc5bf61` - hecho por GPT.
 
 ### 10.4 — Operacional  🟡 MEDIA (manual, usuario)
 - **Backups:** confirmar el plan de Neon (el tier gratis tiene restore limitado — revisar
