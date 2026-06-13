@@ -18,6 +18,7 @@
 
 - [C1 ✅] Audit log: modelo `AuditLog` en Prisma + migración SQL + `logAudit()` + 18 puntos en 14 rutas. Migración aplicada en Neon — commit 5b30d6c
 - [C2 ✅] E2E Playwright: `playwright.config.ts` + 3 specs (register-login, search-cart, stripe) con mocked API — commit 9f95d8b
+- [C3 ✅] Tests unitarios: `audit-log.test.ts` (8 tests, cubre logAudit completo) + `products.test.ts` (22 tests, cubre clamps y precios) + audit log mock en stripe webhook test — 76/76 pasando — commit 0cc8c40
 
 ### GPT
 
