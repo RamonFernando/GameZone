@@ -42,6 +42,7 @@ const productSchema = z.object({
   likesCount: z.coerce.number().optional(),
   stock: z.coerce.number().optional(),
   isActive: z.boolean().optional(),
+  saleEndsAt: z.string().nullable().optional(),
 });
 
 export async function PATCH(
@@ -78,6 +79,11 @@ export async function PATCH(
   }
   if (payload.stock !== undefined) updateData.stock = Number(payload.stock);
   if (payload.isActive !== undefined) updateData.isActive = Boolean(payload.isActive);
+  if ("saleEndsAt" in payload) {
+    (updateData as Record<string, unknown>).saleEndsAt = payload.saleEndsAt
+      ? new Date(payload.saleEndsAt)
+      : null;
+  }
 
   if (updateData.priceOriginal !== undefined && (!Number.isFinite(updateData.priceOriginal) || updateData.priceOriginal <= 0)) {
     return NextResponse.json(

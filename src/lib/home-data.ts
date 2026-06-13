@@ -49,6 +49,7 @@ export function toProductPreview(product: Product): ProductPreview {
     priceFinal: computeDiscountedPrice(product.priceOriginal, product.discountPercent),
     stock: product.stock,
     genres: parseGenres(product.genresJson),
+    saleEndsAt: (product as { saleEndsAt?: Date | null }).saleEndsAt?.toISOString() ?? null,
   };
 }
 

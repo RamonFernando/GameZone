@@ -22,6 +22,7 @@ type ProductRow = {
   priceFinal: number;
   stock: number;
   isActive: boolean;
+  saleEndsAt?: string | null;
   createdAt: string;
 };
 
@@ -41,6 +42,7 @@ type ProductDraft = {
   likesCount: string;
   stock: string;
   isActive: boolean;
+  saleEndsAt: string;
 };
 
 // Tipos auxiliares para ordenar columnas y mostrar toasts de feedback.
@@ -131,6 +133,7 @@ const emptyDraft: ProductDraft = {
   likesCount: "0",
   stock: "",
   isActive: true,
+  saleEndsAt: "",
 };
 
 // Convierte un ProductRow en ProductDraft para prellenar el formulario de edición.
@@ -150,6 +153,9 @@ function toDraft(product: ProductRow): ProductDraft {
     likesCount: String(product.likesCount),
     stock: String(product.stock),
     isActive: product.isActive,
+    saleEndsAt: product.saleEndsAt
+      ? new Date(product.saleEndsAt).toISOString().slice(0, 16)
+      : "",
   };
 }
 
@@ -427,6 +433,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           likesCount: Number(draft.likesCount),
           stock: Number(draft.stock),
           isActive: draft.isActive,
+          saleEndsAt: draft.saleEndsAt || null,
         }),
       });
       const payload = (await response.json()) as { message?: string };
@@ -644,6 +651,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           likesCount: Number(modalDraft.likesCount),
           stock: Number(modalDraft.stock),
           isActive: modalDraft.isActive,
+          saleEndsAt: modalDraft.saleEndsAt || null,
         }),
       });
 
@@ -772,6 +780,15 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           }
         />
         Producto activo
+      </label>
+      <label className="auth-alt" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        Fin de oferta (opcional — deja vacío para sin límite)
+        <input
+          className="auth-input"
+          type="datetime-local"
+          value={draft.saleEndsAt}
+          onChange={(event) => setDraft((prev) => ({ ...prev, saleEndsAt: event.target.value }))}
+        />
       </label>
       {createErrors.map((error) => (
         <p key={error} className="auth-alt" role="alert">
@@ -1229,6 +1246,17 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   }
                 />
                 Producto activo
+              </label>
+              <label className="auth-alt" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                Fin de oferta (opcional)
+                <input
+                  className="auth-input"
+                  type="datetime-local"
+                  value={modalDraft.saleEndsAt}
+                  onChange={(event) =>
+                    setModalDraft((prev) => ({ ...prev, saleEndsAt: event.target.value }))
+                  }
+                />
               </label>
               {modalErrors.map((error) => (
                 <p key={error} className="auth-alt" role="alert">

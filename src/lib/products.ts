@@ -17,6 +17,7 @@ export type StoreProduct = {
   likesCount: number;
   stock: number;
   isActive: boolean;
+  saleEndsAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };

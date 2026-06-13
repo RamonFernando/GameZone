@@ -32,6 +32,7 @@ const productSchema = z.object({
   likesCount: z.coerce.number().optional(),
   stock: z.coerce.number().optional(),
   isActive: z.boolean().optional(),
+  saleEndsAt: z.string().nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -91,6 +92,7 @@ export async function POST(request: Request) {
   const likesCount = Math.max(0, Math.floor(Number(payload.likesCount ?? 0) || 0));
   const stock = Number(payload.stock ?? 0);
   const isActive = payload.isActive ?? true;
+  const saleEndsAt = payload.saleEndsAt ? new Date(payload.saleEndsAt) : null;
 
   if (!name || !slug || !description || !coverImage || !Number.isFinite(priceOriginal) || priceOriginal <= 0) {
     return NextResponse.json(
@@ -123,6 +125,7 @@ export async function POST(request: Request) {
         likesCount,
         stock,
         isActive,
+        saleEndsAt,
       },
     });
 

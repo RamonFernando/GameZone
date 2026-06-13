@@ -20,7 +20,24 @@ export function GameCard({ game }: Props) {
   const [likesCount, setLikesCount] = useState(game.likesCount);
   const [isLiking, setIsLiking] = useState(false);
   const [liked, setLiked] = useState(Boolean(game.likedByCurrentUser));
+  const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const lang = useLocale();
+
+  useEffect(() => {
+    if (!game.saleEndsAt) return;
+    function tick() {
+      const ms = new Date(game.saleEndsAt!).getTime() - Date.now();
+      if (ms <= 0) { setTimeLeft(null); return; }
+      const d = Math.floor(ms / 86400000);
+      const h = String(Math.floor((ms % 86400000) / 3600000)).padStart(2, "0");
+      const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, "0");
+      const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
+      setTimeLeft(d > 0 ? `${d}d ${h}:${m}:${s}` : `${h}:${m}:${s}`);
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [game.saleEndsAt]);
 
   // Sincroniza el estado local de likes cuando cambian los datos del juego.
   useEffect(() => {
@@ -87,6 +104,11 @@ export function GameCard({ game }: Props) {
         ) : null}
         {game.discountPercent > 0 ? (
           <span className="game-card-discount-badge">-{game.discountPercent}%</span>
+        ) : null}
+        {timeLeft ? (
+          <span className="game-card-countdown" aria-label={`Oferta termina en ${timeLeft}`}>
+            ⏱ {timeLeft}
+          </span>
         ) : null}
         <span className="game-card-store-pill">
           {game.storeLabel.toLowerCase() === "steam" ? (
