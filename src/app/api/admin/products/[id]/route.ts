@@ -8,6 +8,7 @@ import { requirePermission } from "@/lib/auth/require-auth";
 import { clampCashbackPercent, clampDiscountPercent, computeDiscountedPrice } from "@/lib/products";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
+import { logAudit } from "@/lib/audit-log";
 
 type ProductPayload = {
   name?: string;
@@ -101,6 +102,7 @@ export async function PATCH(
 
     // Refresca la home cacheada para que el cambio se vea al instante.
     revalidateTag(PRODUCTS_CACHE_TAG, "max");
+    await logAudit({ userId: authResult.auth.userId, action: "ADMIN_PRODUCT_UPDATED", request, meta: { productId: id } });
 
     const response = NextResponse.json(
       {
@@ -147,6 +149,7 @@ export async function DELETE(
 
     // Refresca la home cacheada para que el producto desaparezca al instante.
     revalidateTag(PRODUCTS_CACHE_TAG, "max");
+    await logAudit({ userId: authResult.auth.userId, action: "ADMIN_PRODUCT_DELETED", request, meta: { productId: id } });
 
     const response = NextResponse.json(
       { message: "Producto eliminado correctamente." },

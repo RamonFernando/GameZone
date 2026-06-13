@@ -15,6 +15,8 @@ import {
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { ensureMasterAdminUser, upsertOAuthUser } from "@/lib/auth/store";
+import { logAudit } from "@/lib/audit-log";
+
 
 function resolveProvider(rawProvider: string): OAuthProvider | null {
   if (rawProvider === "google" || rawProvider === "facebook" || rawProvider === "twitter") {
@@ -84,6 +86,7 @@ export async function GET(
       email: profile.email,
       name: profile.name,
     });
+    await logAudit({ userId: user.id, action: "OAUTH_LOGIN", request, meta: { provider } });
     const sessionToken = await createPersistedSession(
       {
         userId: user.id,

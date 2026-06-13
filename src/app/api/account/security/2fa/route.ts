@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
+import { logAudit } from "@/lib/audit-log";
+
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 
@@ -54,6 +56,8 @@ export async function PATCH(request: Request) {
       twoFactorChannel: true,
     },
   });
+
+  await logAudit({ userId: authResult.auth.userId, action: enabled ? "2FA_EMAIL_ENABLED" : "2FA_EMAIL_DISABLED", request });
 
   return NextResponse.json(
     {

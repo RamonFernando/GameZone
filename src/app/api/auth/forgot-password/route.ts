@@ -6,6 +6,8 @@ import {
   setPasswordResetToken,
 } from "@/lib/auth/store";
 import { logger } from "@/lib/logger";
+import { logAudit } from "@/lib/audit-log";
+
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 
@@ -42,6 +44,8 @@ export async function POST(request: Request) {
     resetToken,
     resetTokenExpiresAt,
   });
+
+  await logAudit({ userId: user.id, action: "PASSWORD_RESET_REQUESTED", request });
 
   const baseUrl = process.env.APP_BASE_URL ?? new URL(request.url).origin;
   const resetUrl = `${baseUrl}/auth/reset-password?token=${encodeURIComponent(resetToken)}`;

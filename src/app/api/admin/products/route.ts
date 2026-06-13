@@ -13,6 +13,7 @@ import {
 } from "@/lib/products";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
+import { logAudit } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,7 @@ export async function POST(request: Request) {
 
     // Refresca la home cacheada para que el catálogo muestre el alta al instante.
     revalidateTag(PRODUCTS_CACHE_TAG, "max");
+    await logAudit({ userId: authResult.auth.userId, action: "ADMIN_PRODUCT_CREATED", request, meta: { productId: product.id, slug: product.slug } });
 
     const response = NextResponse.json(
       {

@@ -15,6 +15,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { sendTwoFactorCodeEmail } from "@/lib/auth/email";
 import { logger } from "@/lib/logger";
+import { logAudit } from "@/lib/audit-log";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 
@@ -205,6 +206,8 @@ export async function POST(request: Request) {
       request
     );
 
+    await logAudit({ userId: user.id, action: "LOGIN_SUCCESS", request });
+
     const response = NextResponse.json(
       {
         message: `Bienvenido de nuevo, ${user.name}.`,
@@ -232,6 +235,7 @@ export async function POST(request: Request) {
     }
 
     if (error instanceof InvalidCredentialsError) {
+      await logAudit({ userId: null, action: "LOGIN_FAILED", request, meta: { identifier } });
       return NextResponse.json(
         { message: "Credenciales inválidas.", code: "INVALID_CREDENTIALS" },
         { status: 401 }

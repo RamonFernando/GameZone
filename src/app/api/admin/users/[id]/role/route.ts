@@ -5,6 +5,7 @@ import { PERMISSIONS } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/require-auth";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
+import { logAudit } from "@/lib/audit-log";
 
 const updateRoleSchema = z.object({
   role: z.string().optional(),
@@ -78,6 +79,8 @@ export async function PATCH(
       createdAt: true,
     },
   });
+
+  await logAudit({ userId: authResult.auth.userId, action: "ADMIN_USER_ROLE_CHANGED", request, meta: { targetUserId: id, newRole: nextRole } });
 
   const response = NextResponse.json(
     {

@@ -5,6 +5,7 @@ import {
   VerificationTokenExpiredError,
   VerificationTokenNotFoundError,
 } from "@/lib/auth/store";
+import { logAudit } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
   const rateLimit = await enforceRateLimit(request, "verify");
@@ -28,7 +29,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    await verifyUserFromToken(token);
+    const verifiedUser = await verifyUserFromToken(token);
+    await logAudit({ userId: verifiedUser.id, action: "EMAIL_VERIFIED", request });
     return NextResponse.json(
       { message: "Cuenta verificada correctamente. Ya puedes iniciar sesión." },
       { status: 200 }

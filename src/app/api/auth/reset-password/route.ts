@@ -4,6 +4,7 @@ import {
   PasswordResetTokenExpiredError,
   resetPasswordWithToken,
 } from "@/lib/auth/store";
+import { logAudit } from "@/lib/audit-log";
 
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
@@ -36,7 +37,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    await resetPasswordWithToken({ token, password });
+    const resetUser = await resetPasswordWithToken({ token, password });
+    await logAudit({ userId: resetUser.id, action: "PASSWORD_RESET_COMPLETED", request });
     return NextResponse.json(
       { message: "Contraseña actualizada. Ya puedes iniciar sesión." },
       { status: 200 }

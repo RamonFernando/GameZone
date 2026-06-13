@@ -5,6 +5,8 @@ import { decryptSecret } from "@/lib/crypto/totp-secret";
 import { createPersistedSession } from "@/lib/auth/session-server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 import { enforceRateLimit } from "@/lib/auth/rate-limit";
+import { logAudit } from "@/lib/audit-log";
+
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 
@@ -58,6 +60,8 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+
+  await logAudit({ userId: user.id, action: "TOTP_VERIFY_SUCCESS", request });
 
   const sessionToken = await createPersistedSession(
     {

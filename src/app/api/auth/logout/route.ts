@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSessionCookieOptions } from "@/lib/auth/session";
-import { getSessionTokenFromRequest, revokeSessionByToken } from "@/lib/auth/session-server";
+import { getSessionTokenFromRequest, revokeSessionByToken, getActiveSessionFromToken } from "@/lib/auth/session-server";
+import { logAudit } from "@/lib/audit-log";
+
 
 export async function POST(request: Request) {
   const token = getSessionTokenFromRequest(request);
   if (token) {
+    const session = await getActiveSessionFromToken(token);
     await revokeSessionByToken(token);
+    await logAudit({ userId: session?.userId ?? null, action: "LOGOUT", request });
   }
 
   const response = NextResponse.json(
