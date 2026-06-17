@@ -17,6 +17,7 @@ export type ProductPreview = {
   priceFinal: number;
   stock: number;
   genres: string[];
+  saleEndsAt?: string | null;
 };
 
 export type HomeHeroSection = {

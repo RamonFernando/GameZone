@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { createPendingOrder } from "@/lib/checkout/order-service";
-import { createPaypalOrder, getPaypalAccessToken } from "@/lib/payments/paypal";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { createPendingOrder } from "@/services/checkout/order-service";
+import { createPaypalOrder, getPaypalAccessToken } from "@/services/payments/paypal";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 

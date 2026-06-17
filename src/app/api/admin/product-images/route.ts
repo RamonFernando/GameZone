@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import sharp from "sharp";
 import { prisma } from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
 
 export const dynamic = "force-dynamic";
 

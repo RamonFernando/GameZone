@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-import { sendVerificationEmail } from "@/lib/auth/email";
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
+import { sendVerificationEmail } from "@/services/auth/email";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
 import {
   createRawVerificationToken,
   createUserWithVerificationToken,
   deleteUserByEmail,
   DuplicateEmailError,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 
+import { logAudit } from "@/lib/audit-log";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
     );
   }
 
+  let newUserId: string | undefined;
   const verificationToken = createRawVerificationToken();
   const verificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const baseUrl = process.env.APP_BASE_URL ?? new URL(request.url).origin;
@@ -82,13 +84,14 @@ export async function POST(request: Request) {
   )}`;
 
   try {
-    await createUserWithVerificationToken({
+    const newUser = await createUserWithVerificationToken({
       name,
       email,
       password,
       verificationToken,
       verificationTokenExpiresAt,
     });
+    newUserId = newUser?.id;
   } catch (error) {
     if (error instanceof DuplicateEmailError) {
       return NextResponse.json(
@@ -116,6 +119,8 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+
+  await logAudit({ userId: newUserId ?? null, action: "REGISTER", request, meta: { email } });
 
   return NextResponse.json(
     { message: "Cuenta creada. Revisa tu email para verificarla." },

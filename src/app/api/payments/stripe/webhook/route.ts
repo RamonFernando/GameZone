@@ -1,8 +1,9 @@
-import Stripe from "stripe";
+﻿import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { completePaidOrder } from "@/lib/checkout/order-service";
+import { completePaidOrder } from "@/services/checkout/order-service";
 import { prisma } from "@/lib/prisma";
-import { getStripeClient } from "@/lib/payments/stripe";
+import { getStripeClient } from "@/services/payments/stripe";
+import { logAudit } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
       fallbackEmail: userEmail || "no-reply@gamezone.local",
       fallbackUsername: userEmail.includes("@") ? userEmail.split("@")[0] : "gamer",
     });
+    await logAudit({ userId, action: "ORDER_PAID", meta: { orderId, provider: "stripe" } });
   }
 
   if (event.type === "checkout.session.expired" && orderId && userId) {

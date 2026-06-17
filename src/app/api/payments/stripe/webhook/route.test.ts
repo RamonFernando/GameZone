@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const constructEvent = vi.hoisted(() => vi.fn());
+const logAuditMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
-vi.mock("@/lib/payments/stripe", () => ({
+vi.mock("@/services/payments/stripe", () => ({
   getStripeClient: () => ({
     webhooks: {
       constructEvent,
@@ -10,7 +11,7 @@ vi.mock("@/lib/payments/stripe", () => ({
   }),
 }));
 
-vi.mock("@/lib/checkout/order-service", () => ({
+vi.mock("@/services/checkout/order-service", () => ({
   completePaidOrder: vi.fn().mockResolvedValue({ order: { id: "order-1" }, emailSent: true }),
 }));
 
@@ -19,10 +20,18 @@ vi.mock("@/lib/prisma", () => ({
     order: {
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
+    auditLog: {
+      create: vi.fn().mockResolvedValue({}),
+    },
   },
 }));
 
-import { completePaidOrder } from "@/lib/checkout/order-service";
+vi.mock("@/lib/audit-log", () => ({
+  logAudit: logAuditMock,
+}));
+
+import { completePaidOrder } from "@/services/checkout/order-service";
+import { logAudit } from "@/lib/audit-log";
 import { prisma } from "@/lib/prisma";
 import { POST } from "./route";
 
@@ -114,6 +123,33 @@ describe("Stripe webhook route", () => {
         paymentReference: "pi_test",
         fallbackEmail: "gamer@example.com",
         fallbackUsername: "gamer",
+      })
+    );
+  });
+
+  it("registra ORDER_PAID en el audit log para checkout.session.completed", async () => {
+    constructEvent.mockReturnValueOnce({
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_test",
+          payment_intent: "pi_test",
+          metadata: {
+            orderId: "order-1",
+            userId: "user-1",
+            userEmail: "gamer@example.com",
+          },
+        },
+      },
+    });
+
+    await POST(stripeRequest());
+
+    expect(logAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "ORDER_PAID",
+        userId: "user-1",
+        meta: expect.objectContaining({ orderId: "order-1", provider: "stripe" }),
       })
     );
   });

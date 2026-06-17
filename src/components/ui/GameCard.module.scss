@@ -1,0 +1,284 @@
+.gameCardMedia {
+  position: relative;
+  overflow: hidden;
+  height: 240px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(59, 130, 246, 0.18), transparent 58%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.94));
+}
+
+.gameCardMedia img {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.gameCardMedia::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.85));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gameCardPlus {
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow:
+    0 1px 0 rgba(226, 232, 240, 0.05) inset,
+    0 2px 5px rgba(15, 23, 42, 0.2),
+    0 10px 12px -10px rgba(2, 6, 23, 0.62);
+}
+
+:global(.card):global(.card-hover).gameCardPlus:hover {
+  transform: translateY(-3px);
+  border-color: rgba(129, 140, 248, 0.72);
+  box-shadow:
+    0 1px 0 rgba(226, 232, 240, 0.06) inset,
+    0 4px 10px rgba(15, 23, 42, 0.23),
+    0 12px 14px -10px rgba(2, 6, 23, 0.66),
+    0 0 0 1px rgba(99, 102, 241, 0.32);
+}
+
+:global(.card):global(.card-hover).gameCardPlus:focus-within {
+  transform: none;
+  border-color: rgba(129, 140, 248, 0.72);
+  box-shadow:
+    0 1px 0 rgba(226, 232, 240, 0.06) inset,
+    0 4px 10px rgba(15, 23, 42, 0.23),
+    0 12px 14px -10px rgba(2, 6, 23, 0.66),
+    0 0 0 1px rgba(99, 102, 241, 0.32);
+}
+
+/* B3 — Zoom sutil de portada en hover (respeta prefers-reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .gameCardMedia img {
+    transition: transform 220ms ease-out;
+  }
+
+  :global(.card):global(.card-hover).gameCardPlus:hover .gameCardMedia img {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.card):global(.card-hover).gameCardPlus:hover {
+    transform: none;
+  }
+
+  .gameCardLikeIcon {
+    transition: none;
+  }
+}
+
+.gameCardCashbackBadge {
+  position: absolute;
+  left: 0.55rem;
+  top: 0.6rem;
+  z-index: 2;
+  background: #34d399;
+  color: #064e3b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.45rem;
+}
+
+.gameCardDiscountBadge {
+  position: absolute;
+  right: 0.55rem;
+  top: 0.6rem;
+  z-index: 2;
+  background: #b91c1c;
+  color: #fef2f2;
+  opacity: 0.9;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+}
+
+.gameCardCountdown {
+  position: absolute;
+  left: 50%;
+  bottom: 2.4rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  background: rgba(185, 28, 28, 0.92);
+  color: #fef2f2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 0.4rem;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.gameCardStorePill {
+  position: absolute;
+  left: 50%;
+  bottom: 0.45rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  background: rgba(2, 6, 23, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.gameCardStoreIcon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+}
+
+.gameCardBody {
+  padding: 0.7rem 0.75rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gameCardTitle {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6rem;
+}
+
+.gameCardSubtitle {
+  font-size: 0.78rem;
+  color: #b8c4d4;
+  margin: 0;
+}
+
+.gameCardRegion {
+  margin: 0.05rem 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #34d399;
+  letter-spacing: 0.03em;
+}
+
+.gameCardPrice {
+  padding: 0 0.05rem;
+  min-height: 3.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.gameCardOriginalLine {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #b8c4d4;
+}
+
+.gameCardOriginalLineEmpty {
+  visibility: hidden;
+}
+
+.gameCardOriginalPrice {
+  text-decoration: line-through;
+}
+
+.gameCardDiscount {
+  color: #b91c1c;
+  opacity: 0.9;
+  font-weight: 700;
+}
+
+.gameCardFinalPrice {
+  margin: 0.2rem 0 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #b8c4d4;
+}
+
+.gameCardCashbackText {
+  margin: 0.1rem 0 0.2rem;
+  color: #34d399;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.gameCardLikeButton {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: #b8c4d4;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  width: fit-content;
+}
+
+.gameCardLikeButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.gameCardLikeIcon {
+  display: inline-block;
+  margin-right: 0.12rem;
+  font-size: 1.1em;
+  transform: scaleX(1.1);
+  transform-origin: center center;
+  transition: transform 0.25s ease;
+}
+
+.gameCardLikeIconActive {
+  color: #7f1d1d;
+  opacity: 0.8;
+  text-shadow: 0 0 6px rgba(127, 29, 29, 0.3);
+}
+
+.gameCardActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0 0.4rem 0.1rem;
+}
+
+.gameCardActions :global(.button-ghost) {
+  color: #cbd5e1;
+}
+
+.gameCardActions :global(.button-ghost):hover {
+  color: #e2e8f0;
+}
+
+.gameCardActions :global(.button-primary) {
+  color: #cbd5e1;
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.98) 0%, rgba(92, 61, 184, 0.9) 25%, rgba(127, 88, 231, 0.95) 50%, rgba(92, 61, 184, 0.9) 75%, rgba(30, 41, 59, 0.98) 100%);
+  background-size: 200% 100%;
+  background-position: 100% 50%;
+  animation: badge-gradient-sweep 30s linear infinite;
+}
+
+.gameCardActions :global(.button-primary):hover {
+  color: #e2e8f0;
+}
+
+.gameCardButton {
+  font-size: 0.64rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gameCardActions .gameCardButton {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+}

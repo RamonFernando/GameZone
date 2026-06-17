@@ -1,4 +1,4 @@
-// Panel principal de "Mi cuenta": perfil, pedidos recientes y sesiones activas.
+﻿// Panel principal de "Mi cuenta": perfil, pedidos recientes y sesiones activas.
 "use client";
 
 import Image from "next/image";
@@ -11,7 +11,7 @@ import {
   createPaymentProgressStorageKey,
   getPaymentProgressStepFromStartedAt,
   type PaymentProgressStep,
-} from "@/lib/checkout/payment-progress";
+} from "@/services/checkout/payment-progress";
 
 // Datos completos del perfil editable del usuario.
 type Profile = {

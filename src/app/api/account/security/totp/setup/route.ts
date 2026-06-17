@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getUserById } from "@/lib/auth/store";
+﻿import { NextResponse } from "next/server";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getUserById } from "@/services/auth/store";
 import { generateSecret, generateURI } from "otplib";
 import QRCode from "qrcode";
 

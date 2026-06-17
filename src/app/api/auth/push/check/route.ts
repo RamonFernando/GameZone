@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createPersistedSession } from "@/lib/auth/session-server";
-import { getSessionCookieOptions } from "@/lib/auth/session";
+import { createPersistedSession } from "@/services/auth/session-server";
+import { getSessionCookieOptions } from "@/services/auth/session";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 

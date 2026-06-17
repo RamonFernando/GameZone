@@ -1,0 +1,1162 @@
+/* ─── Animaciones ─── */
+@keyframes nav-logo-circle-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes nav-logo-gradient-sweep {
+  0%   { background-position: 100% 50%; }
+  40%  { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* ─── Header shell ─── */
+.headerShell {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.4), transparent);
+  border-bottom: 1px solid rgba(30, 64, 175, 0.5);
+  color: #f1f5f9;
+  transition: backdrop-filter 220ms ease-out, opacity 220ms ease-out;
+}
+
+.headerShellTopTransparent {
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0), rgba(15, 23, 42, 0));
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+.headerShellFixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+}
+
+.headerShellTopTransparent.headerShellScrolled {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.4), transparent);
+  border-bottom-color: rgba(30, 64, 175, 0.5);
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+}
+
+/* ─── Navbar ─── */
+.navbar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.65rem 1.25rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  /* default refinements from responsive-refinements.scss */
+  gap: 1rem;
+}
+
+/* ─── Logo ─── */
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.navLogoMark {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.3s ease-out;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    transform-origin: center center;
+    animation: nav-logo-circle-rotate 25s linear infinite;
+    z-index: -1;
+  }
+
+  &:hover {
+    transform: scale(0.92);
+  }
+
+  &:hover::after {
+    animation-play-state: paused;
+    border-color: rgba(249, 115, 22, 0.85);
+    background: radial-gradient(circle at top, rgba(249, 115, 22, 0.18), rgba(15, 23, 42, 0.96));
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    background: url("/iconos_platforms/icon-play.svg") center/90% no-repeat;
+    opacity: 0.8;
+    filter: brightness(0) invert(1);
+  }
+}
+
+.navLogoMark span {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: transform 0.3s ease-out;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  transform: scale(1);
+  transform-origin: center center;
+  text-shadow:
+    0 0 3px rgba(59, 130, 246, 0.4),
+    0 0 6px rgba(37, 99, 235, 0.35);
+}
+
+.navLogoMark:hover span {
+  color: #bfdbfe;
+  transform: scale(1.12);
+  text-shadow:
+    0 0 6px rgba(59, 130, 246, 0.8),
+    0 0 14px rgba(37, 99, 235, 0.9);
+}
+
+.navLogoLetter {
+  display: inline-block;
+  -webkit-text-stroke: 0.4px rgba(8, 11, 23, 0.95);
+  text-stroke: 0.4px rgba(8, 11, 23, 0.95);
+  font-size: 1rem;
+}
+
+.navLogoLetterBig {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.navLogoLetterG,
+.navLogoLetter:not(.navLogoLetterZ) {
+  color: #ffffff;
+}
+
+.navLogoLetterZ {
+  color: #fb923c;
+}
+
+.navLogoText {
+  display: flex;
+  flex-direction: column;
+  margin: 0 25px 0 25px;
+  transform: scale(1);
+  transform-origin: left center;
+  transition: transform 0.3s ease-out;
+
+  &:hover {
+    transform: scale(0.92);
+  }
+}
+
+.navLogoText1 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  background: linear-gradient(45deg, #9ca3af 0%, #a8acb2 50%, #b5b9be 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 6px transparent, 0 0 14px transparent;
+  transition: text-shadow 0.3s ease;
+}
+
+.navLogoText2 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #1e293b 0%, #475569 25%, #64748b 50%, #475569 75%, #1e293b 100%);
+  background-size: 200% 100%;
+  background-position: 100% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 6px transparent, 0 0 14px transparent;
+  transition: text-shadow 0.3s ease;
+  animation: nav-logo-gradient-sweep 25s linear infinite;
+}
+
+.navLogoText:hover .navLogoText1,
+.navLogoText:hover .navLogoText2 {
+  text-shadow:
+    0 0 6px rgba(249, 115, 22, 0.12),
+    0 0 14px rgba(234, 88, 12, 0.08);
+}
+
+/* ─── Cart icon / badge ─── */
+.navCartIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  opacity: 0.88;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(42%) sepia(45%) saturate(1200%) hue-rotate(5deg);
+}
+
+.navCartBadge {
+  min-width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at top left, #4f46e5, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #d1dae6;
+}
+
+/* ─── Auth icons ─── */
+.navAuthIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 4px;
+  transform: scale(1);
+  transition:
+    transform 0.3s ease-out,
+    border-color 0.3s ease-out,
+    background 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.navAuthAvatarCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transform: scale(1);
+  transition:
+    transform 0.3s ease-out,
+    border-color 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.45);
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* ─── Platform pills ─── */
+.navPlatformWithIcon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 0.35rem 0.9rem;
+}
+
+.navPlatformIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  object-fit: contain;
+  opacity: 0.88;
+  filter: brightness(0) saturate(100%) invert(42%) sepia(45%) saturate(1200%) hue-rotate(5deg);
+}
+
+.navPlatformText {
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.navPlatforms {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.navPlatformPill {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  color: #f1f5f9;
+  cursor: pointer;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.3s ease-out;
+
+  &:hover {
+    transform: scale(0.92);
+    border-color: rgba(249, 115, 22, 0.85);
+    background: radial-gradient(circle at top, rgba(249, 115, 22, 0.18), rgba(15, 23, 42, 0.96));
+    color: #fdba74;
+  }
+}
+
+.navPlatformPillActive {
+  border-color: rgba(56, 189, 248, 0.9);
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.96));
+  color: #f0f9ff;
+
+  &:hover {
+    transform: scale(0.92);
+  }
+}
+
+/* ─── Search ─── */
+.navSearch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0.85rem;
+  height: 30px;
+  min-width: 150px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  transform: scale(1);
+  transform-origin: center center;
+  transition:
+    transform 0.3s ease-out,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+
+  &:hover {
+    transform: scale(0.92);
+    background: radial-gradient(circle at top, rgba(37, 99, 235, 0.18), rgba(15, 23, 42, 0.98));
+    border-color: rgba(191, 219, 254, 0.9);
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.95),
+      0 0 14px rgba(59, 130, 246, 0.55);
+  }
+
+  &:focus-within {
+    transform: scale(1);
+    border-color: rgba(148, 163, 184, 0.55);
+    box-shadow: none;
+  }
+}
+
+.navSearchIcon {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.95;
+  pointer-events: none;
+  color: #e2e8f0;
+}
+
+.navSearchInput {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  outline: none;
+  width: 100%;
+  min-width: 0;
+  transition:
+    width 0.25s ease,
+    color 0.2s ease;
+  /* default width from responsive-refinements.scss */
+  width: clamp(130px, 18vw, 190px);
+  max-width: 100%;
+
+  &::placeholder {
+    color: rgba(241, 245, 249, 0.45);
+  }
+
+  &:focus {
+    width: clamp(160px, 28vw, 240px);
+  }
+}
+
+/* ─── Actions ─── */
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* default refinement */
+  margin-left: auto;
+}
+
+/* ─── Cart button variant ─── */
+.buttonGhostCart {
+  padding: 0.35rem 0.9rem;
+  background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+}
+
+/* ─── Locale select ─── */
+.navLocaleSelect {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(
+    45deg,
+    rgba(15, 23, 42, 0.98) 0%,
+    rgba(30, 41, 59, 0.95) 45%,
+    rgba(51, 65, 85, 0.92) 55%,
+    rgba(15, 23, 42, 0.98) 100%
+  );
+  color: #f1f5f9;
+  font-size: 0.7rem;
+  padding: 0.26rem 0.5rem;
+  cursor: pointer;
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.3s ease-out;
+
+  option {
+    background-color: #e5e7eb;
+    color: #0f172a;
+  }
+
+  &:hover {
+    transform: scale(0.94);
+    border-color: rgba(56, 189, 248, 0.9);
+    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.96));
+    color: #f0f9ff;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: rgba(191, 219, 254, 0.9);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 0 0 3px rgba(191, 219, 254, 0.9);
+  }
+}
+
+/* ─── Mobile toggle ─── */
+.navMobileToggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.navMobileToggleLine {
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+/* ─── Mobile panel ─── */
+.navMobilePanel {
+  display: none;
+}
+
+.navMobileAccountLink {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ====================== */
+/* RESPONSIVE BREAKPOINTS */
+/* ====================== */
+
+/* Hasta 1024px — buscador toma todo el ancho disponible */
+@media (max-width: 1024px) {
+  .navActions {
+    width: 100%;
+  }
+
+  .navSearch {
+    flex: 1;
+    min-width: 0;
+
+    &:hover {
+      transform: scale(1);
+    }
+  }
+
+  .navSearchInput:focus {
+    width: 100%;
+  }
+}
+
+/* 1100px — navbar flex-wrap */
+@media (max-width: 1100px) {
+  .navbar {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .navPlatforms {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .navActions {
+    margin-left: 0;
+  }
+}
+
+/* 840px */
+@media (max-width: 840px) {
+  .navbar {
+    padding: 0.65rem 0.9rem 0.7rem;
+  }
+
+  .navLogoText {
+    margin: 0 0 0 0.55rem;
+  }
+
+  .navLogoText2 {
+    font-size: 0.82rem;
+  }
+
+  .navActions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.45rem;
+  }
+
+  .navSearchInput {
+    width: 100%;
+
+    &:focus {
+      width: 100%;
+    }
+  }
+}
+
+/* 480px — hamburger menu */
+@media (max-width: 480px) {
+  /* globals.scss block */
+  .navbar {
+    padding: 0.55rem 0.7rem 0.6rem;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    /* responsive-refinements.scss additions */
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem 0.75rem;
+    justify-content: space-between;
+  }
+
+  .navLogo {
+    margin-left: 0;
+    gap: 0.4rem;
+    min-width: 0;
+    /* responsive-refinements.scss */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 1.9rem;
+    flex: 0 0 auto;
+    overflow: visible;
+    position: static;
+  }
+
+  .navLogoMark {
+    width: 30px;
+    height: 30px;
+    /* responsive-refinements.scss */
+    flex-shrink: 0;
+  }
+
+  .navLogoText {
+    margin: 0;
+    /* responsive-refinements.scss */
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    max-width: 48vw;
+    align-items: center;
+    text-align: center;
+  }
+
+  .navLogoText1 {
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    /* responsive-refinements.scss */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .navLogoText2 {
+    font-size: 0.8rem;
+    /* responsive-refinements.scss */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .navPlatformsDesktop,
+  .navActionsDesktop {
+    display: none;
+  }
+
+  .navMobileToggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    /* responsive-refinements.scss */
+    width: 34px;
+    height: 34px;
+    max-width: 34px;
+    flex: 0 0 34px;
+    gap: 3px;
+    margin-left: auto;
+  }
+
+  .navMobileToggleLine {
+    width: 12px;
+    height: 1.5px;
+  }
+
+  .navMobilePanel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 1px);
+    background: rgba(2, 6, 23, 0.96);
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    padding: 0 0.75rem;
+    z-index: 45;
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform-origin: top center;
+    transform: translateY(-8px) scaleY(0.96);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.5s ease;
+  }
+
+  .navMobilePanelOpen {
+    max-height: 560px;
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    padding: 0.75rem;
+    border-top-color: rgba(30, 64, 175, 0.45);
+    border-bottom-color: rgba(30, 64, 175, 0.45);
+    pointer-events: auto;
+  }
+
+  .navMobileSection {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .navMobileSearch {
+    padding: 0.2rem 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  .navMobileSearch .navSearchInput {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .navMobilePlatforms {
+    display: grid;
+  }
+
+  .navMobilePlatforms .navPlatformPill {
+    padding: 0.35rem 0.75rem;
+  }
+
+  .navMobileActions {
+    margin-bottom: 0;
+    justify-content: space-between;
+  }
+
+  .navActions {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .navSearch {
+    width: 100%;
+  }
+
+  .navPlatforms {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: thin;
+  }
+
+  .navPlatformPill {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.25rem 0.8rem;
+    text-align: center;
+  }
+
+  .navPlatformWithIcon {
+    justify-content: center;
+    gap: 4px;
+  }
+}
+
+/* < 375px */
+@media (max-width: 374px) {
+  .navPlatforms {
+    justify-content: flex-start;
+  }
+
+  .navPlatformPill {
+    flex: 0 0 auto;
+    min-width: auto;
+    padding-inline: 0.7rem;
+    text-align: center;
+  }
+}
+
+/* 375–420px */
+@media (min-width: 375px) and (max-width: 420px) {
+  .navPlatformPill {
+    flex: 0 0 auto;
+    min-width: auto;
+    padding-inline: 0.8rem;
+    text-align: center;
+  }
+}
+
+/* 481–720px — tablet horizontal */
+@media (min-width: 481px) and (max-width: 720px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem 0.75rem;
+  }
+
+  .navLogo {
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .navLogoText {
+    margin: 0 0 0 0.5rem;
+    align-items: center;
+  }
+
+  .navActions {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .navSearch {
+    width: 100%;
+  }
+
+  .navPlatforms {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .navPlatformPill {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.25rem 0.8rem;
+    text-align: center;
+  }
+
+  .navPlatformWithIcon {
+    justify-content: center;
+    gap: 4px;
+  }
+}
+
+/* 721–1024px — tablet vertical */
+@media (min-width: 721px) and (max-width: 1024px) {
+  /* from globals.scss */
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding-inline: 1.5rem;
+    gap: 0.9rem;
+    /* responsive-refinements.scss */
+    flex-wrap: wrap;
+    row-gap: 0.7rem;
+    justify-content: center;
+    padding: 0.65rem 1.75rem 0.75rem;
+  }
+
+  .navLogo {
+    justify-content: flex-start;
+    margin-left: 0;
+    width: 100%;
+    /* responsive-refinements.scss */
+    justify-content: center;
+  }
+
+  .navLogoText {
+    margin: 0 1.5rem;
+    /* responsive-refinements.scss */
+    margin: 0 0 0 0.75rem;
+  }
+
+  .navLogoText1 {
+    font-size: 0.74rem;
+  }
+
+  .navLogoText2 {
+    font-size: 0.86rem;
+  }
+
+  .navActions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    /* responsive-refinements.scss */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+  }
+
+  .navActions .buttonGhostCart {
+    margin-left: auto;
+  }
+
+  .navSearch {
+    flex: 1;
+    min-width: 0;
+    /* responsive-refinements.scss */
+    flex: 0 0 auto;
+  }
+
+  .navPlatforms {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+    /* responsive-refinements.scss */
+    order: 3;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    justify-content: space-between;
+  }
+
+  .navPlatformPill {
+    flex: 1 1 auto;
+    justify-content: center;
+    /* responsive-refinements.scss */
+    padding-left: 1.9rem;
+    padding-right: 1.9rem;
+  }
+}
+
+/* 1024–1125px — desktop small */
+@media (min-width: 1024px) and (max-width: 1125px) {
+  .navbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "logo actions"
+      "platforms platforms";
+    align-items: center;
+    padding: 0.65rem 1.75rem 0.75rem;
+    column-gap: 1.1rem;
+    row-gap: 0.4rem;
+  }
+
+  .navLogo {
+    grid-area: logo;
+    justify-self: flex-start;
+    margin-left: 0.75rem;
+  }
+
+  .navPlatforms {
+    grid-area: platforms;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.15rem;
+  }
+
+  .navActions {
+    grid-area: actions;
+    justify-self: flex-end;
+    margin-left: 0;
+    gap: 0.55rem;
+  }
+}
+
+/* 721–1125px — buscador más grande */
+@media (min-width: 721px) and (max-width: 1125px) {
+  .navSearch {
+    min-width: 220px;
+  }
+
+  .navSearchInput {
+    width: clamp(200px, 30vw, 280px);
+
+    &:focus {
+      width: clamp(230px, 38vw, 320px);
+    }
+  }
+}
+
+/* 1025–1439px — desktop */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .navbar {
+    gap: 0.9rem;
+  }
+
+  .navActions {
+    gap: 0.55rem;
+  }
+}
+
+/* 1121px+ */
+@media (min-width: 1121px) {
+  .navLogo {
+    margin-left: 1rem;
+  }
+}
+
+/* 1440–2559px — desktop grande / 2K */
+@media (min-width: 1440px) and (max-width: 2559px) {
+  .navbar {
+    max-width: 1320px;
+    gap: 1.25rem;
+  }
+
+  .navLogoMark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navLogoLetter {
+    font-size: 1.05rem;
+  }
+
+  .navLogoLetterBig {
+    font-size: 1.3rem;
+  }
+
+  .navLogoText2 {
+    font-size: 0.95rem;
+  }
+
+  .navPlatforms {
+    gap: 0.9rem;
+    font-size: 0.82rem;
+  }
+
+  .navPlatformPill {
+    padding: 0.4rem 1rem;
+  }
+
+  .navSearch {
+    height: 32px;
+  }
+}
+
+/* 2560px+ — 4K */
+@media (min-width: 2560px) {
+  .navbar {
+    max-width: 1680px;
+    padding: 0.8rem 2.5rem 0.9rem;
+    gap: 1.6rem;
+  }
+
+  .navLogoMark {
+    width: 48px;
+    height: 48px;
+  }
+
+  .navLogoLetter {
+    font-size: 1.1rem;
+  }
+
+  .navLogoLetterBig {
+    font-size: 1.4rem;
+  }
+
+  .navLogoText1 {
+    font-size: 0.82rem;
+  }
+
+  .navLogoText2 {
+    font-size: 1rem;
+  }
+
+  .navPlatforms {
+    gap: 1rem;
+    font-size: 0.86rem;
+  }
+
+  .navPlatformPill {
+    padding: 0.45rem 1.1rem;
+  }
+
+  .navSearch {
+    height: 34px;
+    min-width: 190px;
+  }
+
+  .navSearchInput {
+    font-size: 0.9rem;
+  }
+}
+
+/* Táctil — anular :hover pegajoso */
+@media (hover: none) {
+  .navLogoMark:hover {
+    transform: scale(1);
+  }
+
+  .navLogoMark:hover::after {
+    animation-play-state: running;
+    border-color: rgba(148, 163, 184, 0.35);
+    background: linear-gradient(45deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 45%, rgba(51, 65, 85, 0.92) 55%, rgba(15, 23, 42, 0.98) 100%);
+  }
+
+  .navLogoMark:hover span {
+    transform: scale(1);
+    text-shadow:
+      0 0 3px rgba(59, 130, 246, 0.4),
+      0 0 6px rgba(37, 99, 235, 0.35);
+  }
+
+  .navLogoMark:hover .navLogoLetter:not(.navLogoLetterZ) {
+    color: #ffffff;
+  }
+
+  .navLogoMark:hover .navLogoLetterZ {
+    color: #fb923c;
+  }
+
+  .navLogoText:hover {
+    transform: none;
+  }
+
+  .navLogoText:hover .navLogoText1,
+  .navLogoText:hover .navLogoText2 {
+    text-shadow: none;
+  }
+
+  .navLogoMark:active {
+    transform: scale(0.92);
+  }
+
+  .navLogoMark:active::after {
+    animation-play-state: paused;
+    border-color: rgba(249, 115, 22, 0.85);
+    background: radial-gradient(circle at top, rgba(249, 115, 22, 0.18), rgba(15, 23, 42, 0.96));
+  }
+
+  .navLogoMark:active span {
+    transform: scale(1.12);
+    text-shadow:
+      0 0 6px rgba(59, 130, 246, 0.8),
+      0 0 14px rgba(37, 99, 235, 0.9);
+  }
+
+  .navLogoMark:active .navLogoLetter {
+    color: #bfdbfe;
+  }
+
+  .navLogoText:active {
+    transform: scale(0.92);
+  }
+
+  .navLogoText:active .navLogoText1,
+  .navLogoText:active .navLogoText2 {
+    text-shadow:
+      0 0 6px rgba(249, 115, 22, 0.12),
+      0 0 14px rgba(234, 88, 12, 0.08);
+  }
+
+  .navMobileToggle {
+    transition: transform 0.2s ease-out;
+
+    &:active {
+      transform: scale(0.92);
+    }
+  }
+
+  .navLogo,
+  .navLogoMark,
+  .navLogoText,
+  .navMobileToggle {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+}

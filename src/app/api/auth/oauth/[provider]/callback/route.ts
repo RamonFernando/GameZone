@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 import {
@@ -11,10 +11,12 @@ import {
   getOAuthStateCookieOptions,
   verifyOAuthPkceCookie,
   verifyOAuthStateCookie,
-} from "@/lib/auth/oauth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { createPersistedSession } from "@/lib/auth/session-server";
-import { ensureMasterAdminUser, upsertOAuthUser } from "@/lib/auth/store";
+} from "@/services/auth/oauth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { createPersistedSession } from "@/services/auth/session-server";
+import { ensureMasterAdminUser, upsertOAuthUser } from "@/services/auth/store";
+import { logAudit } from "@/lib/audit-log";
+
 
 function resolveProvider(rawProvider: string): OAuthProvider | null {
   if (rawProvider === "google" || rawProvider === "facebook" || rawProvider === "twitter") {
@@ -84,6 +86,7 @@ export async function GET(
       email: profile.email,
       name: profile.name,
     });
+    await logAudit({ userId: user.id, action: "OAUTH_LOGIN", request, meta: { provider } });
     const sessionToken = await createPersistedSession(
       {
         userId: user.id,

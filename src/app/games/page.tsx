@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GameGrid } from "@/components/GameGrid";
-import { ScrollToTop } from "@/components/ScrollToTop";
+import { GameGrid } from "@/components/ui/GameGrid";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
 import { useSearch } from "@/contexts/SearchContext";
 import type { ProductPreview } from "@/types/product";

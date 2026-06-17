@@ -1,9 +1,9 @@
-// Ficha de SOLO INFORMACION para juegos del Radar RAWG que no estan en el catalogo.
+﻿// Ficha de SOLO INFORMACION para juegos del Radar RAWG que no estan en el catalogo.
 // No tiene compra: muestra datos traidos de RAWG y enlaces externos.
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRawgGameMetadataBySlug } from "@/lib/market/games";
+import { getRawgGameMetadataBySlug } from "@/services/market/games";
 
 export const dynamic = "force-dynamic";
 

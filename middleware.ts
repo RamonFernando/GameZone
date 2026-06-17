@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE_NAME, SESSION_TTL_SECONDS, verifySessionToken } from "@/lib/auth/session";
+import { SESSION_COOKIE_NAME, SESSION_TTL_SECONDS, verifySessionToken } from "@/services/auth/session";
 
 const CART_COOKIE_NAME = "gamezone_cart_session";
 const CART_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;

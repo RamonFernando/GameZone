@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Exo_2 } from "next/font/google";
 import "@/styles/globals.scss";
 import "@/styles/responsive-refinements.scss";
@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { CartProvider } from "@/contexts/CartContext";
 import { SearchProvider } from "@/contexts/SearchContext";
-import { SiteShell } from "@/components/SiteShell";
+import { SiteShell } from "@/components/layout/SiteShell";
 
 const exoDisplay = Exo_2({
   subsets: ["latin"],
@@ -72,6 +72,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const lang = uiLocale.slice(0, 2);
   return (
     <html lang={lang} className={exoDisplay.variable}>
+      <head>
+        <link rel="preconnect" href="https://shared.akamai.steamstatic.com" />
+        <link rel="preconnect" href="https://cdn.akamai.steamstatic.com" />
+        <link rel="preconnect" href="https://media.rawg.io" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+        <link rel="dns-prefetch" href="https://www.paypal.com" />
+      </head>
       <body>
         <CartProvider>
           <SearchProvider>

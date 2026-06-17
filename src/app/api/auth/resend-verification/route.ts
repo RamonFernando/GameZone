@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
-import { sendVerificationEmail } from "@/lib/auth/email";
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
+﻿import { NextResponse } from "next/server";
+import { sendVerificationEmail } from "@/services/auth/email";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
 import {
   AccountAlreadyVerifiedError,
   createRawVerificationToken,
   getUserByEmail,
   InvalidCredentialsError,
   refreshVerificationTokenForEmail,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";

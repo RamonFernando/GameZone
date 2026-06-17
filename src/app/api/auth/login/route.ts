@@ -1,20 +1,21 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { createPersistedSession } from "@/lib/auth/session-server";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { createPersistedSession } from "@/services/auth/session-server";
 import {
   authenticateUser,
   AccountNotVerifiedError,
   InvalidCredentialsError,
   hashToken,
   hashTwoFactorCode,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 import { prisma } from "@/lib/prisma";
-import { sendTwoFactorCodeEmail } from "@/lib/auth/email";
+import { sendTwoFactorCodeEmail } from "@/services/auth/email";
 import { logger } from "@/lib/logger";
+import { logAudit } from "@/lib/audit-log";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 
@@ -205,6 +206,8 @@ export async function POST(request: Request) {
       request
     );
 
+    await logAudit({ userId: user.id, action: "LOGIN_SUCCESS", request });
+
     const response = NextResponse.json(
       {
         message: `Bienvenido de nuevo, ${user.name}.`,
@@ -232,6 +235,7 @@ export async function POST(request: Request) {
     }
 
     if (error instanceof InvalidCredentialsError) {
+      await logAudit({ userId: null, action: "LOGIN_FAILED", request, meta: { identifier } });
       return NextResponse.json(
         { message: "Credenciales inválidas.", code: "INVALID_CREDENTIALS" },
         { status: 401 }

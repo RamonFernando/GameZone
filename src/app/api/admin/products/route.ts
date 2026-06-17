@@ -1,10 +1,10 @@
-import { revalidateTag } from "next/cache";
+﻿import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
 import {
   clampCashbackPercent,
   clampDiscountPercent,
@@ -13,6 +13,7 @@ import {
 } from "@/lib/products";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
+import { logAudit } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ const productSchema = z.object({
   likesCount: z.coerce.number().optional(),
   stock: z.coerce.number().optional(),
   isActive: z.boolean().optional(),
+  saleEndsAt: z.string().nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -90,6 +92,7 @@ export async function POST(request: Request) {
   const likesCount = Math.max(0, Math.floor(Number(payload.likesCount ?? 0) || 0));
   const stock = Number(payload.stock ?? 0);
   const isActive = payload.isActive ?? true;
+  const saleEndsAt = payload.saleEndsAt ? new Date(payload.saleEndsAt) : null;
 
   if (!name || !slug || !description || !coverImage || !Number.isFinite(priceOriginal) || priceOriginal <= 0) {
     return NextResponse.json(
@@ -122,11 +125,13 @@ export async function POST(request: Request) {
         likesCount,
         stock,
         isActive,
+        saleEndsAt,
       },
     });
 
     // Refresca la home cacheada para que el catálogo muestre el alta al instante.
     revalidateTag(PRODUCTS_CACHE_TAG, "max");
+    await logAudit({ userId: authResult.auth.userId, action: "ADMIN_PRODUCT_CREATED", request, meta: { productId: product.id, slug: product.slug } });
 
     const response = NextResponse.json(
       {

@@ -9,6 +9,7 @@ import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
+import styles from "./GameDetailClient.module.scss";
 
 function SteamIcon() {
   return (
@@ -177,12 +178,12 @@ export default function GameDetailClient({
   return (
     <>
     <main className="main-wrapper">
-    <div className="game-detail-shell">
-      <div className="card game-detail-card">
+    <div className={styles.gameDetailShell}>
+      <div className={`card ${styles.gameDetailCard}`}>
 
         {/* IMAGEN */}
-        <div className="game-detail-media-stack">
-          <div className="game-detail-media">
+        <div className={styles.gameDetailMediaStack}>
+          <div className={styles.gameDetailMedia}>
             <Image
               src={selectedMedia}
               alt={game.name}
@@ -195,15 +196,12 @@ export default function GameDetailClient({
           </div>
 
           {mediaImages.length > 1 ? (
-            <div className="game-detail-media-thumbs" aria-label={isEnglish ? "Game images" : "Imagenes del juego"}>
+            <div className={styles.gameDetailMediaThumbs} aria-label={isEnglish ? "Game images" : "Imagenes del juego"}>
               {mediaImages.map((image, index) => (
                 <button
                   key={image}
                   type="button"
-                  className={
-                    "game-detail-media-thumb" +
-                    (index === selectedMediaIndex ? " game-detail-media-thumb--active" : "")
-                  }
+                  className={`${styles.gameDetailMediaThumb}${index === selectedMediaIndex ? ` ${styles.gameDetailMediaThumbActive}` : ""}`}
                   onClick={() => setSelectedMediaIndex(index)}
                   aria-label={`${isEnglish ? "Show image" : "Mostrar imagen"} ${index + 1}`}
                 >
@@ -224,42 +222,42 @@ export default function GameDetailClient({
 
         {/* INFO */}
         <div>
-          <h1 className="game-detail-title">{localizedName}</h1>
+          <h1 className={styles.gameDetailTitle}>{localizedName}</h1>
 
           {tagsToShow.length > 0 ? (
-            <div className="game-detail-chip-row">
+            <div className={styles.gameDetailChipRow}>
               {tagsToShow.map((tag) => (
-                <span key={tag} className="game-detail-chip">
+                <span key={tag} className={styles.gameDetailChip}>
                   {tag}
                 </span>
               ))}
             </div>
           ) : null}
 
-          <p className="game-detail-copy">{detailDescription}</p>
-          <p className="game-detail-copy game-detail-price-line">
+          <p className={styles.gameDetailCopy}>{detailDescription}</p>
+          <p className={`${styles.gameDetailCopy} ${styles.gameDetailPriceLine}`}>
             {lang === "en" ? "Price: " : "Precio: "}
             {game.discountPercent > 0 ? (
               <>
-                <span className="game-detail-price-old">
+                <span className={styles.gameDetailPriceOld}>
                   {formatPublicPrice(game.priceOriginal, lang)}
                 </span>
-                <strong className="game-detail-price-final">
+                <strong className={styles.gameDetailPriceFinal}>
                   {formatPublicPrice(game.priceFinal, lang)}
                 </strong>
-                <span className="game-detail-price-discount">-{game.discountPercent}%</span>
+                <span className={styles.gameDetailPriceDiscount}>-{game.discountPercent}%</span>
               </>
             ) : (
-              <strong className="game-detail-price-final">
+              <strong className={styles.gameDetailPriceFinal}>
                 {formatPublicPrice(game.priceFinal, lang)}
               </strong>
             )}
           </p>
 
           {specs.length > 0 ? (
-            <dl className="game-detail-specs">
+            <dl className={styles.gameDetailSpecs}>
               {specs.map((item) => (
-                <div key={item.label} className="game-detail-spec">
+                <div key={item.label} className={styles.gameDetailSpec}>
                   <dt>{item.label}</dt>
                   <dd>{item.value}</dd>
                 </div>
@@ -268,7 +266,7 @@ export default function GameDetailClient({
           ) : null}
 
           {/* BOTÓN VOLVER */}
-          <div className="game-detail-back">
+          <div className={styles.gameDetailBack}>
             <button
               type="button"
               className="game-detail-cart-button"
@@ -297,26 +295,26 @@ export default function GameDetailClient({
       </div>
 
       {(game.requirements || game.website || game.externalStoreUrl) && (
-        <section className="game-detail-extra">
-          <div className="card game-detail-info-card">
+        <section className={styles.gameDetailExtra}>
+          <div className={`card ${styles.gameDetailInfoCard}`}>
             <h2 className="section-title">
               {isEnglish ? "Additional information" : "Informacion adicional"}
             </h2>
             {game.requirements ? (
-              <pre className="game-detail-requirements">{game.requirements}</pre>
+              <pre className={styles.gameDetailRequirements}>{game.requirements}</pre>
             ) : null}
             {(game.website || game.externalStoreUrl) && (
-              <div className="game-detail-links">
-                <span className="game-detail-links-label">
+              <div className={styles.gameDetailLinks}>
+                <span className={styles.gameDetailLinksLabel}>
                   {isEnglish ? "Links" : "Enlaces"}
                 </span>
-                <div className="game-detail-links-row">
+                <div className={styles.gameDetailLinksRow}>
                   {game.website ? (
                     <a
                       href={game.website}
                       target="_blank"
                       rel="noreferrer"
-                      className="game-detail-link"
+                      className={styles.gameDetailLink}
                     >
                       <span aria-hidden="true">🌐</span>
                       {isEnglish ? "Official website" : "Web oficial"}
@@ -327,9 +325,9 @@ export default function GameDetailClient({
                       href={game.externalStoreUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className={`game-detail-link${
+                      className={`${styles.gameDetailLink}${
                         game.externalStoreLabel?.toLowerCase().includes("steam")
-                          ? " game-detail-link--steam"
+                          ? ` ${styles.gameDetailLinkSteam}`
                           : ""
                       }`}
                     >
@@ -362,7 +360,7 @@ export default function GameDetailClient({
             </p>
           </div>
 
-          <div className="grid-games">
+          <div className={styles.suggestionGrid}>
             {suggestions.map((g) => {
               const isUnchartedLegacySuggestion =
                 g.slug === "uncharted-coleccio-un-legado-de-los-ladrones";
@@ -396,7 +394,7 @@ export default function GameDetailClient({
               return (
                 <article
                   key={g.slug}
-                  className="card card-hover game-suggestion-card"
+                  className={`card card-hover ${styles.gameSuggestionCard}`}
                   onClick={() => router.push(`/games/${g.slug}`)}
                 >
                   <Image
@@ -407,10 +405,10 @@ export default function GameDetailClient({
                     quality={100}
                     unoptimized
                     sizes="(max-width: 768px) 100vw, 500px"
-                    className="game-suggestion-cover"
+                    className={styles.gameSuggestionCover}
                   />
-                  <div className="game-suggestion-body">
-                    <h3 className="game-suggestion-title">{suggestionName}</h3>
+                  <div className={styles.gameSuggestionBody}>
+                    <h3 className={styles.gameSuggestionTitle}>{suggestionName}</h3>
                     <div
                       style={{
                         marginTop: 4,
@@ -421,21 +419,21 @@ export default function GameDetailClient({
                       }}
                     >
                       <p
-                        className="game-detail-copy game-suggestion-price"
+                        className={`${styles.gameDetailCopy} ${styles.gameSuggestionPrice}`}
                         style={{ marginTop: 0 }}
                       >
                         {g.discountPercent > 0 ? (
                           <>
-                            <span className="game-detail-price-old">
+                            <span className={styles.gameDetailPriceOld}>
                               {formatPublicPrice(g.priceOriginal, lang)}
                             </span>
-                            <strong className="game-detail-price-final">
+                            <strong className={styles.gameDetailPriceFinal}>
                               {formatPublicPrice(g.priceFinal, lang)}
                             </strong>
-                            <span className="game-detail-price-discount">-{g.discountPercent}%</span>
+                            <span className={styles.gameDetailPriceDiscount}>-{g.discountPercent}%</span>
                           </>
                         ) : (
-                          <strong className="game-detail-price-final">
+                          <strong className={styles.gameDetailPriceFinal}>
                             {formatPublicPrice(g.priceFinal, lang)}
                           </strong>
                         )}
@@ -475,19 +473,19 @@ export default function GameDetailClient({
     {/* B4 — CTA pegajoso en móvil (solo visible en scroll > 300px) */}
     {showStickyCta && (
       <div
-        className="game-detail-sticky-cta"
+        className={styles.gameDetailStickyCta}
         aria-label={lang === "en" ? "Quick buy" : "Compra rápida"}
       >
-        <span className="game-detail-sticky-title">{localizedName}</span>
-        <span className="game-detail-sticky-price">
+        <span className={styles.gameDetailStickyTitle}>{localizedName}</span>
+        <span className={styles.gameDetailStickyPrice}>
           {formatPublicPrice(game.priceFinal, lang)}
           {game.discountPercent > 0 && (
-            <span className="game-detail-sticky-discount">-{game.discountPercent}%</span>
+            <span className={styles.gameDetailStickyDiscount}>-{game.discountPercent}%</span>
           )}
         </span>
         <button
           type="button"
-          className="button-primary btn-padding-site game-detail-sticky-btn"
+          className={`button-primary btn-padding-site ${styles.gameDetailStickyBtn}`}
           onClick={() => addToCart(mainPreview)}
         >
           {lang === "en" ? "Add to cart" : "Añadir al carrito"}

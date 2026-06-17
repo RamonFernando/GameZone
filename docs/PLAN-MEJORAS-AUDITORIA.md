@@ -35,7 +35,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 2.4 — Cabeceras de seguridad | ✅ hecho · 7.1 ✅ hecho · ⚠️ pendiente validación manual en producción (home, ficha, auth, checkout) |
 | 2.5 — Validación `event.type` webhooks | ✅ hecho |
 | 3.1 — Zod en bodies de API | ✅ hecho |
-| 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
+| 3.2 — Rate limit distribuido (Upstash) | ✅ hecho (17/06/2026; usa Upstash con fallback PostgreSQL si faltan env vars) |
 | 3.3 — Sentry | ✅ **HECHO** (verificado: `withSentryConfig` en `next.config.mjs`, configs server/edge/client) — la v1 lo marcaba pendiente por error |
 | 3.4 — CI GitHub Actions | ✅ hecho |
 | 3.5 — Tests de integración | ✅ **HECHO** (11/06/2026; 48 tests: servicios de checkout/sesión + rutas webhook Stripe/PayPal + login/2FA) |
@@ -46,8 +46,9 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
 | **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
-| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1/B2/B3/B4/B5/B6/B8 ✅**, B7 pendiente |
-| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ hecha el 11/06/2026** (48 tests verdes; webhooks Stripe/PayPal y login+2FA cubiertos); **10.3 parcial ✅** (ESLint + audit en CI), 10.2/10.4 y Lighthouse CI pendientes |
+| **FASE 9 — UI/UX** | ✅ **COMPLETA** — 9.1/9.2/9.3/9.4/9.5 ✅; Parte B: B1/B2/B3/B4/B5/B6/B7/B8 ✅ todos hechos |
+| **Audit Log (C1)** | ✅ HECHO 13/06/2026 -- tabla AuditLog en Neon, logAudit(), 18 puntos en 14 rutas. Migracion aplicada. |
+| **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ 11/06**, **10.2 ✅ 13/06** (Playwright 3 specs), **10.3 ✅ 13/06** (ESLint CI + Lighthouse CI); 10.4 pendiente |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
 
@@ -55,7 +56,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 ## FASES 0–5 (v1) — resumen
 
-Las fases 0–3 están completas salvo 3.2 (Upstash, opcional). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
+Las fases 0–3 están completas, incluida 3.2 (Upstash con fallback PostgreSQL, 17/06/2026). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
 La fase 4 está completa salvo 4.2 (dominio, manual). 4.1b quedó cerrada en FASE 8 con metadata por ficha y JSON-LD.
 La fase 5 (roadmap: Xbox API, GA4, reseñas, wishlist, PWA, cupones) sigue vigente como futuro.
 El detalle histórico completo está en el commit anterior de este archivo (`git log -- docs/PLAN-MEJORAS-AUDITORIA.md`).
@@ -313,6 +314,21 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** el componente migrado se ve igual en desktop y móvil; no hay clases huérfanas
   evidentes en `globals.scss`; `npx tsc --noEmit`, `npx vitest run` y `npm run build` pasan.
 
+- **Estado 17/06/2026 (rama dev-17062026-gpt):**
+  - ✅ Footer — commit `4d1bf0b`
+  - ✅ Hero — commit `0b375f7`
+  - ✅ GameCard — commit `6b313a1` (`src/components/ui/GameCard.module.scss`)
+  - ✅ GameGrid — commit `6b313a1` (`src/components/ui/GameGrid.module.scss`)
+  - ✅ CartDrawer — commit `4396a46` (`src/components/features/CartDrawer.module.scss`)
+  - ✅ GameDetailClient — commit `9435b0f` (`src/app/games/[slug]/GameDetailClient.module.scss`)
+  - ✅ Header — commit `11857b0` (`src/components/layout/Header.module.scss`, 15+ breakpoints)
+  - ✅ MarketIntelligenceSections — commit `0fcea97` (`src/components/features/MarketIntelligenceSections.module.scss`, ~1500 líneas, THUMB_POSITION_CLASS map)
+  - ✅ **FeaturedSection** — commit `3d4384d` (`src/components/features/FeaturedSection.module.scss`)
+  - ✅ **PromoAppBanner** — commit `3d4384d` (`src/components/features/PromoAppBanner.module.scss`)
+  - ✅ **auth.scss / account.scss** (17/06/2026): GPT había creado `auth.module.scss` + `account.module.scss` con `:global()` en todas las clases (falsos CSS Modules). Corregido renombrando a `auth.scss` + `account.scss` (SCSS global real); eliminados todos los `:global()` y side-effect imports.
+  - ✅ **Auth layout components CSS Modules** (17/06/2026): `AuthShell` · `AuthCard` · `AuthFormPanel` · `AuthMediaPanel` creados en `src/components/auth/layout/` con sus `*.module.scss` reales. 11 páginas migradas (auth, register, forgot-password, reset-password, verify, checkout, checkout/success, account, account/orders, admin/control, admin/orders). `tsc` limpio + 76/76 tests.
+  - Validado con `npx tsc --noEmit`, `npx.cmd vitest run` (76/76), `npx.cmd next build` y revisión visual pública desktop/móvil.
+
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
 
 > Inspirado en patrones estándar de las tiendas de videojuegos actuales. Cada punto es
@@ -336,21 +352,25 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   Carrusel en home con los últimos juegos visitados mediante `localStorage` (`useRecentlyViewed`).
 - **B6 — Wishlist visible:** ✅ **HECHA** (11/06/2026, commit `e6a3525`).
   `GET /api/account/wishlist` y pestaña "Mi lista" en cuenta, alimentada desde `ProductLike`.
-- **B7 — Cuenta atrás en ofertas:** si un producto tiene oferta con fecha fin, mostrar countdown
-  en la tarjeta (urgencia, patrón Instant Gaming). Requiere campo `saleEndsAt` en Product.
-  Coste: medio.
+- **B7 — Cuenta atrás en ofertas:** ✅ **HECHA** (verificado 17/06/2026). `GameCard.tsx` ya tiene countdown completo: `useState<string | null>` + `useEffect` que calcula tiempo restante desde `game.saleEndsAt`, renderizado con `styles.gameCardCountdown`. Admin panel con input `datetime-local` para `saleEndsAt`. Campo en BD desde migración `20260613000002`.
 - **B8 — Tipografía display propia:** ✅ **HECHA** (11/06/2026, commit `ae61b54`).
   Exo 2 vía `next/font/google` como variable `--font-display` para títulos principales.
 
 > **Validación local 11/06/2026:** `npx tsc --noEmit` ✅ y `npm run test:unit` ✅ (48/48).
-> `npm run lint` ❌ pendiente por resolver en código: dos `eslint-disable-next-line react-hooks/exhaustive-deps`
-> apuntan a una regla no configurada y `dataSources` queda sin uso en `MarketIntelligenceSections.tsx`.
+> `npm run lint` ✅ verificado el 17/06/2026: no quedan `eslint-disable-next-line react-hooks/exhaustive-deps`
+> ni `dataSources` sin uso en `MarketIntelligenceSections.tsx`.
 
 ---
 
 ## FASE 10 — TESTING Y ROBUSTEZ  🟡
 
 ### 10.1 — Tests de integración de los flujos críticos (absorbe 3.5)  🟠 ALTA  ✅ HECHA
+- **Estado validado el 13/06/2026:** 12 archivos de test y 76 tests verdes con `npx vitest run`.
+  C3 anadio `src/lib/audit-log.test.ts` (8 tests), `src/lib/products.test.ts` (22 tests)
+  y una asercion `ORDER_PAID` en `src/app/api/payments/stripe/webhook/route.test.ts`.
+  Verificado por GPT con `npx tsc --noEmit`, `npx vitest run` y `npx next build`.
+  `npm run build` en Windows/Dropbox puede fallar por lock de Prisma DLL (`EPERM`) aunque
+  `next build` pase; detener procesos Node/VS Code si se necesita regenerar Prisma Client.
 - **Estado validado el 11/06/2026:** 10 archivos de test y 48 tests verdes con `npm run test:unit`.
   Hay cobertura a nivel servicio para `createPendingOrder`, `completePaidOrder`,
   idempotencia de estado/email y rotación de sesión. También hay cobertura route-level para
@@ -364,7 +384,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** `npx vitest run` verde; los tests fallan si se rompe la idempotencia (probar
   rompiéndola a propósito una vez).
 
-### 10.2 — E2E reales con Playwright  🟡 MEDIA
+### 10.2 — E2E reales con Playwright  🟡 MEDIA  ✅ HECHA (13/06/2026)
 - **Estado:** existen scripts e2e a medida (`scripts/e2e-*.mjs`) — útiles pero frágiles y fuera
   del runner estándar.
 - **Acción:** montar Playwright con 3 specs: (1) compra completa con tarjeta test de Stripe,
@@ -376,8 +396,8 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Hecho (11/06/2026):** `eslint` ya es hard-fail en CI (`npx eslint . --max-warnings 0`
   sin `continue-on-error`) y `npm audit --omit=dev --audit-level=high` ya falla el pipeline
   ante vulnerabilidades high/critical.
-- **Pendiente opcional:** **Lighthouse CI** contra el deploy preview de Netlify con presupuesto
-  (Performance ≥ 85) para que una regresión de rendimiento falle el PR.
+- **Hecho (13/06/2026):** **Lighthouse CI** automatizado con `@lhci/cli`, `.lighthouserc.js`
+  y job `lighthouse` en GitHub Actions. Presupuesto Performance >= 0.85 como warning.
 - **Verificar:** un PR con un error de lint o una dependencia vulnerable no pasa el CI.
 
 ### 10.4 — Operacional  🟡 MEDIA (manual, usuario)
@@ -439,6 +459,6 @@ npm run build
 - **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
 - **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
 - **Dependabot** — actualizaciones de seguridad automáticas. Sin código.
-- **Lighthouse CI** (opcional) — presupuesto de rendimiento en CI.
-- **Cloudflare Turnstile** (opcional, solo si hay bots) — anti-bot sin fricción.
-- **Upstash Redis** (opcional, hereda de 3.2) — rate limit distribuido si crece el tráfico.
+- **Lighthouse CI** — presupuesto de rendimiento en CI. Incorporado el 13/06/2026.
+- **Cloudflare Turnstile** (opcional, diferido; solo si hay bots) — anti-bot sin fricción.
+- **Upstash Redis** — incorporado el 17/06/2026 para rate limit distribuido con fallback PostgreSQL.

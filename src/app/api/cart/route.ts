@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
+﻿import { NextResponse } from "next/server";
+import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/services/auth/session-server";
 import {
   clearUserCartItems,
   getUserCartItems,
   replaceUserCartItems,
-} from "@/lib/cart/persistent-cart";
+} from "@/services/cart/persistent-cart";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 

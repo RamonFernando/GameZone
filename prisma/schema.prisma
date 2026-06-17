@@ -52,6 +52,7 @@ model User {
   pushDevices                PushDevice[]
   loginChallenges            LoginChallenge[]
   avatar                     UserAvatar?
+  auditLogs                  AuditLog[]
 }
 
 // Avatar del usuario almacenado como bytes en la BD (compatible con Netlify
@@ -144,6 +145,7 @@ model Product {
   likesCount      Int      @default(0)
   stock           Int      @default(0)
   isActive        Boolean  @default(true)
+  saleEndsAt      DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -278,6 +280,23 @@ model RateLimitBucket {
   updatedAt DateTime @updatedAt
 
   @@index([resetAt])
+}
+
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    String?
+  action    String
+  ip        String?
+  userAgent String?
+  meta      Json?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action, createdAt])
+  @@index([createdAt])
 }
 
 model CatalogSyncRun {

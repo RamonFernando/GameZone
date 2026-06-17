@@ -1,8 +1,8 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/lib/market/trending";
-import { createMarketMeta } from "@/lib/market/response";
+import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/services/market/trending";
+import { createMarketMeta } from "@/services/market/response";
 
 function parseLimit(request: Request) {
   const url = new URL(request.url);

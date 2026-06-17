@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
+﻿import { NextResponse } from "next/server";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
 import {
   verifyUserFromToken,
   VerificationTokenExpiredError,
   VerificationTokenNotFoundError,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
+import { logAudit } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
   const rateLimit = await enforceRateLimit(request, "verify");
@@ -28,7 +29,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    await verifyUserFromToken(token);
+    const verifiedUser = await verifyUserFromToken(token);
+    await logAudit({ userId: verifiedUser.id, action: "EMAIL_VERIFIED", request });
     return NextResponse.json(
       { message: "Cuenta verificada correctamente. Ya puedes iniciar sesión." },
       { status: 200 }

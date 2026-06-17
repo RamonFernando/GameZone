@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashToken } from "@/lib/auth/store";
+import { hashToken } from "@/services/auth/store";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

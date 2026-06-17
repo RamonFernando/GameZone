@@ -1,7 +1,7 @@
-import { revalidateTag } from "next/cache";
+﻿import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
-import { CatalogSyncBlockedError, runCatalogSync } from "@/lib/market/catalog-sync";
+import { CatalogSyncBlockedError, runCatalogSync } from "@/services/market/catalog-sync";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;

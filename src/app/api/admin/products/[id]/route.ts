@@ -1,13 +1,14 @@
-import { revalidateTag } from "next/cache";
+﻿import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PRODUCTS_CACHE_TAG } from "@/lib/home-data";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
 import { clampCashbackPercent, clampDiscountPercent, computeDiscountedPrice } from "@/lib/products";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
+import { logAudit } from "@/lib/audit-log";
 
 type ProductPayload = {
   name?: string;
@@ -41,6 +42,7 @@ const productSchema = z.object({
   likesCount: z.coerce.number().optional(),
   stock: z.coerce.number().optional(),
   isActive: z.boolean().optional(),
+  saleEndsAt: z.string().nullable().optional(),
 });
 
 export async function PATCH(
@@ -77,6 +79,11 @@ export async function PATCH(
   }
   if (payload.stock !== undefined) updateData.stock = Number(payload.stock);
   if (payload.isActive !== undefined) updateData.isActive = Boolean(payload.isActive);
+  if ("saleEndsAt" in payload) {
+    (updateData as Record<string, unknown>).saleEndsAt = payload.saleEndsAt
+      ? new Date(payload.saleEndsAt)
+      : null;
+  }
 
   if (updateData.priceOriginal !== undefined && (!Number.isFinite(updateData.priceOriginal) || updateData.priceOriginal <= 0)) {
     return NextResponse.json(
@@ -101,6 +108,7 @@ export async function PATCH(
 
     // Refresca la home cacheada para que el cambio se vea al instante.
     revalidateTag(PRODUCTS_CACHE_TAG, "max");
+    await logAudit({ userId: authResult.auth.userId, action: "ADMIN_PRODUCT_UPDATED", request, meta: { productId: id } });
 
     const response = NextResponse.json(
       {
@@ -147,6 +155,7 @@ export async function DELETE(
 
     // Refresca la home cacheada para que el producto desaparezca al instante.
     revalidateTag(PRODUCTS_CACHE_TAG, "max");
+    await logAudit({ userId: authResult.auth.userId, action: "ADMIN_PRODUCT_DELETED", request, meta: { productId: id } });
 
     const response = NextResponse.json(
       { message: "Producto eliminado correctamente." },

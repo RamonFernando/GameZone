@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import {
   type OAuthProvider,
   buildOAuthAuthorizationUrl,
@@ -6,7 +6,7 @@ import {
   createOAuthStateCookieValue,
   getOAuthPkceCookieOptions,
   getOAuthStateCookieOptions,
-} from "@/lib/auth/oauth";
+} from "@/services/auth/oauth";
 
 function resolveProvider(rawProvider: string): OAuthProvider | null {
   if (rawProvider === "google" || rawProvider === "facebook" || rawProvider === "twitter") {

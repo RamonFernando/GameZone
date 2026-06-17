@@ -28,6 +28,7 @@ Documentación de pruebas centralizada en: `TESTING.md`.
 
 ### Changelog
 
+- [Novedades recientes (13-06-2026)](#novedades-recientes-13-06-2026)
 - [Novedades recientes (11-06-2026)](#novedades-recientes-11-06-2026)
 - [Novedades recientes (10-06-2026)](#novedades-recientes-10-06-2026)
 - [Novedades recientes (09-06-2026)](#novedades-recientes-09-06-2026)
@@ -68,6 +69,14 @@ npm install
 npm run db:migrate
 npm run dev
 ```
+
+## Novedades recientes (13-06-2026)
+
+### Lighthouse CI
+
+- GitHub Actions incluye un job `lighthouse` posterior al CI principal.
+- Nueva configuracion `.lighthouserc.js` con presupuesto Performance >= 0.85 como warning sobre `http://localhost:3000`.
+- `@lhci/cli` queda registrado como devDependency.
 
 ## Novedades recientes (11-06-2026)
 

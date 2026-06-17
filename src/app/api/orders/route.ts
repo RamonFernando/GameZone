@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
 
 export async function GET(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.ORDER_READ);

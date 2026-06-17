@@ -1,11 +1,15 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminProductsPanel } from "@/components/auth/AdminProductsPanel";
 import { AdminUsersPanel } from "@/components/auth/AdminUsersPanel";
-import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { getActiveSessionFromToken } from "@/lib/auth/session-server";
+import { SESSION_COOKIE_NAME } from "@/services/auth/session";
+import { getActiveSessionFromToken } from "@/services/auth/session-server";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
 import "../../../styles/auth.scss";
+import "../../../styles/account.scss";
 
 export default async function AdminControlPage() {
   const cookieStore = await cookies();
@@ -21,9 +25,9 @@ export default async function AdminControlPage() {
   }
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-form-panel">
+    <AuthShell>
+      <AuthCard>
+        <AuthFormPanel>
           <header className="auth-header">
             <p className="auth-kicker">Admin Console</p>
             <h1 className="auth-title">Panel de control</h1>
@@ -49,8 +53,8 @@ export default async function AdminControlPage() {
               Volver a mi cuenta
             </Link>
           </div>
-        </div>
-      </div>
-    </section>
+        </AuthFormPanel>
+      </AuthCard>
+    </AuthShell>
   );
 }

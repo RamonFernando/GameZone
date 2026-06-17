@@ -1,0 +1,933 @@
+/* Hero component styles migrated from globals.scss. */
+
+/* === HERO SECTION STYLES === */
+/* ========================= */
+
+.hero {
+  display: grid;
+  gap: 1.4rem;
+  margin: 1.6rem 0 1.8rem;
+}
+
+.hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0; /* permite que el grid child se encoja y no recorte contenido */
+}
+
+.hero-title {
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: clamp(1.9rem, 4vw, 2.3rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0a0f1a;
+}
+
+.hero-title-link {
+  display: block;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  transform: scale(1);
+  transform-origin: left center;
+  transition: filter 120ms ease-out, text-shadow 120ms ease-out, transform 0.3s ease-out;
+}
+
+.hero-title-link:hover,
+.hero-title-link:focus-visible {
+  color: #ffffff;
+  text-decoration: none;
+  filter: brightness(1.07);
+  text-shadow:
+    0 1px 0 rgba(2, 6, 23, 0.9),
+    0 12px 30px rgba(88, 28, 135, 0.8),
+    0 0 22px rgba(251, 146, 60, 0.35);
+  transform: scale(0.92);
+}
+
+.hero-title-link:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.95);
+  outline-offset: 0.12em;
+  border-radius: 0.12em;
+}
+
+.hero-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-soft);
+  max-width: 32rem;
+  font-weight: 500;
+}
+
+.hero--carousel .hero-subtitle {
+  font-size: 1.05rem;
+  color: #cbd5e1;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.hero-visual {
+  border-radius: 1.2rem;
+  overflow: hidden;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.4), rgba(8, 11, 23, 0.99));
+  min-height: 190px;
+  position: relative;
+}
+
+.hero-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.94;
+}
+
+.hero-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-soft);
+}
+
+.hero-platforms-icons {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.hero-platform-icon {
+  width: 18px;
+  height: 18px;
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(55, 65, 81, 0.85);
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98));
+}
+
+
+/* Banner hero a ancho completo (estilo G2A) */
+
+.hero--carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  /* El contenedor mantiene el mismo aspect ratio que las imagenes de fondo
+     (16:9), de modo que object-fit: cover no recorte ni amplie el arte.
+     max-height evita que se desborde en pantallas bajas. */
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 400px;
+  max-height: 100vh;
+  background: #020617;
+  display: flex;
+  align-items: center;
+}
+
+/* Escritorio con zoom ~100%: el aspect-ratio ya define la altura.
+   Se mantiene el selector por compatibilidad con data-hero-zoom. */
+:global(html[data-hero-zoom="normal"]) .hero--carousel {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  max-height: 100vh;
+}
+
+/* Tablet y móvil horizontal (768–1023px): altura generosa pero no forzosamente full-screen */
+@media (max-width: 1023px) {
+  .hero--carousel {
+    aspect-ratio: auto;
+    height: auto;
+    min-height: 60svh;
+    min-height: 60vh; /* fallback navegadores sin svh */
+    max-height: none;
+  }
+
+  :global(html[data-hero-zoom="normal"]) .hero--carousel {
+    aspect-ratio: auto;
+    height: auto;
+    min-height: 60svh;
+    min-height: 60vh;
+    max-height: none;
+  }
+
+  .hero-inner {
+    width: 98%;
+    height: auto;
+    min-height: 320px;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .hero-thumbs-wrapper {
+    width: 100%;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  .hero-thumbs-row {
+    min-height: 140px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Móvil vertical (≤768px): hero a pantalla completa como Steam / Epic Games */
+@media (max-width: 768px) {
+  .hero--carousel,
+  :global(html[data-hero-zoom="normal"]) .hero--carousel {
+    min-height: 100svh;
+    min-height: 100vh; /* fallback */
+  }
+
+  .hero-inner {
+    width: 96%;
+    padding-bottom: 1.5rem;
+  }
+}
+
+/* Con el header dentro de la section: columna, header arriba, contenido centrado en el resto */
+.hero--with-header {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hero--with-header :global(.header-shell) {
+  flex-shrink: 0;
+}
+
+.hero--with-header .hero-inner {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Padding base para 1 fila de header (escritorio) */
+.hero--with-header :global(.header-shell--fixed) + .hero-inner {
+  padding-top: calc(2.5rem + 4.25rem);
+}
+
+/* 481–1023px: el navbar tiene 3 filas (logo + buscador + plataformas) → header ~160px.
+   El padding base de 6.75rem no cubre esa altura; esta regla va DESPUÉS para ganar en cascade. */
+@media (min-width: 481px) and (max-width: 1023px) {
+  .hero--with-header :global(.header-shell--fixed) + .hero-inner {
+    padding-top: 12rem;
+  }
+}
+
+/* ≤480px: header de 1 fila (logo + hamburger), el padding base de 6.75rem es suficiente. */
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0f172a;
+}
+
+.hero-bg img {
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Capa borrosa de fondo: cubre toda la pantalla y crea profundidad cinematografica.
+   Al desbordar el arte nitido, rellena los lados/bordes con un halo difuminado. */
+.hero-bg-blur {
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.18);
+  filter: blur(30px) saturate(1.3) brightness(0.5);
+  animation: heroZoom 22s ease-in-out infinite alternate;
+}
+
+/* Arte nitido y completo: contain para que nunca se recorte ni se amplie de mas. */
+.hero-bg-art {
+  object-fit: contain;
+  object-position: center center;
+  transform: scale(1.01);
+  animation: heroZoom 22s ease-in-out infinite alternate;
+}
+
+.hero-bg-gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Vineta radial (oscurece bordes = mas cine) + gradiente lateral para legibilidad del texto */
+  background:
+    radial-gradient(125% 125% at 50% 45%, transparent 52%, rgba(2, 6, 23, 0.78) 100%),
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.95) 0%,
+      rgba(15, 23, 42, 0.55) 35%,
+      rgba(15, 23, 42, 0.25) 65%,
+      rgba(15, 23, 42, 0.92) 100%
+    );
+}
+
+/* 90% del ancho y 80% de la altura de .hero--carousel; centrado */
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  padding: 2.5rem 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+  gap: 2rem;
+  width: 90%;
+  min-width: 0;
+  height: 80%;
+  min-height: 280px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  align-self: center;
+}
+
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  row-gap: 0.75rem; /* al hacer wrap, los descuentos/precio/cta no se solapan */
+}
+
+.hero-price-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  flex-shrink: 0; /* evita que la caja de precio/descuento se comprima y desaparezca */
+}
+
+.hero-discount {
+  background: #f97316;
+  color: #020617;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.hero-price {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.hero--carousel .hero-inner {
+  color: #e5e7eb;
+}
+
+.hero--carousel .hero-title {
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  color: #f1f5f9;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  text-shadow: 0 2px 12px rgba(2, 6, 23, 0.7);
+}
+
+.hero--carousel .hero-price {
+  color: #f1f5f9;
+}
+
+.hero--carousel .hero-subcopy {
+  color: #cbd5e1;
+}
+
+.hero--carousel .hero-thumbs-header .section-title {
+  font-size: 1.15rem;
+  color: #e5e7eb;
+}
+
+.hero-cta {
+  padding-inline: 1.1rem;
+}
+
+.hero--carousel .hero-cta {
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.98) 0%, rgba(92, 61, 184, 0.9) 25%, rgba(127, 88, 231, 0.95) 50%, rgba(92, 61, 184, 0.9) 75%, rgba(30, 41, 59, 0.98) 100%);
+  background-size: 200% 100%;
+  background-position: 100% 50%;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #ffffff;
+  box-shadow: none;
+  opacity: 0.9;
+  animation: badge-gradient-sweep 30s linear infinite;
+}
+
+.hero--carousel .hero-cta:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.6);
+}
+
+.hero-subcopy {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  max-width: 30rem;
+}
+
+/* Thumbnails row – más espacio con el banner grande; responsive según resolución */
+
+.hero-thumbs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-self: flex-end;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.hero-thumbs-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Contenedor que muestra 3 miniaturas; PRIORIDAD: nunca más de 3 visibles en ningún ancho */
+.hero-thumbs-row-wrap {
+  overflow: hidden;
+  width: 100%;
+  max-width: min(100%, calc(3 * 220px + 2 * 1.25rem));
+  padding: 0.5rem 0 0.75rem;
+  border-radius: 20px;
+  container-type: inline-size;
+  container-name: hero-thumbs;
+  box-sizing: border-box;
+}
+
+/* En el banner hero: mismo tope estricto de 3 miniaturas */
+.hero--carousel .hero-thumbs-row-wrap {
+  width: 100%;
+  max-width: min(100%, calc(3 * 220px + 2 * 1.25rem));
+  box-sizing: border-box;
+}
+
+/* Centrar el bloque Destacados (título + fila) cuando hay espacio, para que las 3 imágenes no se corten */
+.hero--carousel .hero-thumbs-wrapper {
+  align-items: center;
+}
+
+/* iPad y tablets (10", 11", 12", 14"): miniaturas centradas en su zona en vez de a la derecha */
+@media (min-width: 601px) and (max-width: 1280px) {
+  .hero--carousel .hero-thumbs-wrapper {
+    align-self: center;
+  }
+}
+
+/* Header de thumbs: mismo tope que la fila (máx. 3 miniaturas) */
+.hero--carousel .hero-thumbs-header {
+  width: 100%;
+  max-width: min(100%, calc(3 * 220px + 2 * 1.25rem));
+  box-sizing: border-box;
+}
+.hero--carousel .hero-thumbs-header .section-title {
+  padding-left: 1rem;
+}
+
+/* Thumbs fluidos: 3 siempre visibles, tamaño según ancho del wrapper (container query) */
+@container hero-thumbs (min-width: 0px) {
+  .hero-thumbs-row-wrap .hero-thumb {
+    min-width: 0;
+    flex: 0 0 min(220px, max(90px, calc((100cqw - 2.5rem) / 3)));
+  }
+  .hero-thumbs-row-wrap .hero-thumbs-row--slider {
+    transform: translateX(calc(-1 * var(--thumbs-offset, 0) * ((100cqw + 1.25rem) / 3)));
+  }
+}
+
+
+/* Hero: adaptar complementos del banner a pantallas tipo 17", 15", 14", 12" */
+@media (max-width: 1600px) {
+  .hero--carousel .hero-inner {
+    width: 92%;
+    padding: 2rem 1.75rem;
+    gap: 1.5rem;
+  }
+  .hero--carousel .hero-title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .hero-thumbs-row {
+    gap: 1rem;
+  }
+  .hero--carousel .hero-thumbs-header .section-title {
+    font-size: 1.05rem;
+  }
+  .hero-subcopy {
+    font-size: 0.78rem;
+  }
+  .badge-soft {
+    font-size: 0.68rem;
+    padding: 0.25rem 0.6rem;
+  }
+}
+@media (max-width: 1440px) {
+  .hero--carousel .hero-inner {
+    width: 94%;
+    padding: 1.75rem 1.5rem;
+    gap: 1.25rem;
+  }
+  .hero--carousel .hero-title {
+    font-size: clamp(1.6rem, 3.8vw, 2.25rem);
+  }
+  .hero-thumb-image {
+    height: 100px;
+  }
+  .hero-thumbs-row {
+    gap: 0.9rem;
+  }
+  .hero--carousel .hero-thumbs-header .section-title {
+    font-size: 1rem;
+  }
+  .hero-subtitle {
+    font-size: 0.8rem;
+  }
+  .hero-subcopy {
+    font-size: 0.76rem;
+  }
+  .badge-soft {
+    font-size: 0.64rem;
+    padding: 0.2rem 0.5rem;
+  }
+  .hero-meta-row {
+    gap: 0.85rem;
+    row-gap: 0.6rem;
+  }
+  .hero-price {
+    font-size: 0.95rem;
+  }
+  .hero-discount {
+    font-size: 0.75rem;
+  }
+  .hero-cta {
+    padding-inline: 1rem;
+    font-size: 0.9rem;
+  }
+}
+@media (max-width: 1280px) {
+  .hero--carousel .hero-inner {
+    width: 96%;
+    padding: 1.5rem 1.25rem;
+    gap: 1rem;
+  }
+  .hero--carousel .hero-title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+  }
+  .hero-thumb-image {
+    height: 90px;
+  }
+  .hero-thumbs-row {
+    gap: 0.75rem;
+    padding: 0.4rem 0 0.6rem;
+  }
+  .hero--carousel .hero-thumbs-header .section-title {
+    font-size: 0.95rem;
+  }
+  .hero-subtitle {
+    font-size: 0.78rem;
+  }
+  .hero-subcopy {
+    font-size: 0.74rem;
+  }
+  .badge-soft {
+    font-size: 0.62rem;
+    padding: 0.18rem 0.45rem;
+  }
+  .hero-meta-row {
+    gap: 0.7rem;
+    row-gap: 0.55rem;
+  }
+  .hero-price-box {
+    padding: 0.3rem 0.65rem;
+  }
+  .hero-price {
+    font-size: 0.9rem;
+  }
+  .hero-discount {
+    font-size: 0.72rem;
+  }
+  .hero-cta {
+    padding-inline: 0.95rem;
+    font-size: 0.85rem;
+  }
+}
+@media (max-width: 1100px) {
+  .hero--carousel .hero-inner {
+    width: 98%;
+    padding: 1.5rem 1rem;
+    gap: 0.9rem;
+  }
+  .hero--carousel .hero-title {
+    font-size: clamp(1.4rem, 3.2vw, 1.85rem);
+  }
+  .hero-thumb-image {
+    height: 82px;
+  }
+  .hero-thumbs-row {
+    gap: 0.65rem;
+    padding: 0.35rem 0 0.5rem;
+  }
+  .hero-thumb-info {
+    font-size: 0.8rem;
+  }
+  .hero--carousel .hero-thumbs-header .section-title {
+    font-size: 0.9rem;
+  }
+  .hero-subtitle {
+    font-size: 0.76rem;
+  }
+  .hero-subcopy {
+    font-size: 0.72rem;
+  }
+  .badge-soft {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+  }
+  .hero-meta-row {
+    gap: 0.6rem;
+    row-gap: 0.5rem;
+  }
+  .hero-price-box {
+    padding: 0.25rem 0.55rem;
+  }
+  .hero-price {
+    font-size: 0.85rem;
+  }
+  .hero-discount {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.3rem;
+  }
+  .hero-cta {
+    padding-inline: 0.9rem;
+    font-size: 0.82rem;
+  }
+}
+
+.hero-thumbs-row {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0 0.75rem;
+  border-radius: 20px;
+}
+
+/* Variante slider: traslación controlada por JS (--thumbs-offset), 5 s por imagen */
+.hero-thumbs-row--slider {
+  overflow: visible;
+  transform: translateX(calc(-1 * var(--thumbs-offset, 0) * (220px + 1.25rem)));
+  will-change: transform;
+}
+
+.hero-thumb {
+  display: flex;
+  flex-direction: column;
+  background: rgba(15, 23, 42, 0.96);
+  border-radius: 1rem;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 0.5rem;
+  min-width: 220px;
+  cursor: default;
+  transform-origin: center center;
+  transition: transform 0.5s ease-in-out;
+  will-change: transform;
+}
+
+/* Efecto rotación: la del centro más grande, laterales más pequeñas */
+.hero-thumb--left,
+.hero-thumb--right {
+  transform: scale(0.88);
+}
+
+.hero-thumb--center {
+  transform: scale(1.06);
+}
+
+.hero-thumb--off {
+  transform: scale(0.82);
+  opacity: 0.75;
+}
+
+.hero-thumb--left:hover,
+.hero-thumb--right:hover {
+  transform: scale(0.92);
+}
+
+.hero-thumb--center:hover {
+  transform: scale(1.03);
+}
+
+.hero-thumb--off:hover {
+  transform: scale(0.86);
+}
+
+.hero-thumb--active {
+  border-color: rgba(249, 115, 22, 0.9);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+}
+
+.hero-thumb--active.hero-thumb--center {
+  transform: scale(1.06);
+}
+
+.hero-thumb--active.hero-thumb--center:hover {
+  transform: scale(1.03);
+}
+
+.hero-thumb-image {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(59, 130, 246, 0.16), transparent 58%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.92));
+}
+
+.hero-thumb-image-button {
+  display: block;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.hero-thumb-image img {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.hero-thumb-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.hero-thumb-title {
+  font-weight: 500;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.hero-thumb-title:hover,
+.hero-thumb-title:focus-visible {
+  text-decoration: none;
+}
+
+.hero--carousel .hero-thumb-title,
+.hero--carousel .hero-thumb-meta span:first-of-type {
+  color: #e5e7eb;
+}
+
+.hero--carousel .hero-thumb-title:hover,
+.hero--carousel .hero-thumb-title:focus-visible {
+  color: #f97316;
+  text-decoration: none;
+}
+
+.hero-thumb-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.hero-thumb-discount {
+  font-size: 0.75rem;
+  color: #f97316;
+}
+
+/* Hero carousel responsive: que los descuentos y precio sigan visibles; inner ancho para que salga hero-thumbs-row */
+@media (max-width: 960px) {
+  .hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 2rem 1.5rem;
+    width: 98%;
+    height: auto;
+    min-height: 260px;
+  }
+
+  .hero--carousel .hero-title {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+  }
+
+  .hero-meta-row {
+    gap: 0.75rem;
+    row-gap: 0.65rem;
+  }
+
+  .hero-price-box {
+    padding: 0.3rem 0.65rem;
+  }
+
+  .hero-discount {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .hero-price {
+    font-size: 0.9rem;
+  }
+
+  .hero-thumbs-wrapper {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-inner {
+    padding: 1.5rem 1rem;
+    width: 100%;
+    min-height: 240px;
+  }
+
+  .hero-bg img {
+    transform: scale(1);
+    animation: none;
+  }
+
+  .hero-thumb {
+    min-width: 160px;
+  }
+
+  .hero-thumbs-row-wrap {
+    width: calc(3 * (160px + 0.75rem) - 0.75rem);
+  }
+
+  .hero-thumbs-row--slider {
+    transform: translateX(calc(-1 * var(--thumbs-offset, 0) * (160px + 0.75rem)));
+  }
+
+  .hero-thumbs-row {
+    gap: 0.75rem;
+    padding: 0.4rem 0 0.5rem;
+  }
+
+  .hero--carousel .hero-title {
+    max-width: calc(100vw - 2rem);
+    font-size: clamp(1.1rem, 4vw, 1.45rem);
+    line-height: 1.15;
+  }
+
+  .hero-meta-row {
+    gap: 0.6rem;
+    row-gap: 0.5rem;
+  }
+
+  .hero-price-box {
+    padding: 0.25rem 0.55rem;
+  }
+
+  .hero-discount {
+    font-size: 0.7rem;
+    padding: 0.08rem 0.3rem;
+  }
+
+  .hero-price {
+    font-size: 0.85rem;
+  }
+
+  .hero-cta {
+    padding-inline: 0.9rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Móvil (≤600px): 1 sola miniatura centrada, sin reguero — anula el layout fluido de 3 thumbs */
+@media (max-width: 600px) {
+  .hero--carousel .hero-thumbs-row-wrap,
+  .hero--carousel .hero-thumbs-header {
+    max-width: calc(260px + 0.5rem);
+  }
+  .hero--carousel .hero-thumbs-row-wrap {
+    width: calc(260px + 0.5rem);
+  }
+  .hero--carousel .hero-thumbs-row--slider {
+    transform: translateX(calc(-1 * var(--thumbs-offset-center, 0) * (260px + 0.5rem)));
+  }
+  /* Forzar 1 thumb: selectores más específicos que el @container para que ganen */
+  .hero--carousel .hero-thumbs-row-wrap .hero-thumb {
+    min-width: 260px;
+    flex: 0 0 260px;
+  }
+  .hero-thumbs-row {
+    gap: 0.5rem;
+    padding: 0.4rem 0 0.5rem;
+  }
+  .hero--carousel .hero-thumb--left,
+  .hero--carousel .hero-thumb--center,
+  .hero--carousel .hero-thumb--right,
+  .hero--carousel .hero-thumb--off {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .hero--carousel .hero-thumb--left:hover,
+  .hero--carousel .hero-thumb--center:hover,
+  .hero--carousel .hero-thumb--right:hover,
+  .hero--carousel .hero-thumb--off:hover {
+    transform: scale(1);
+  }
+  .hero-thumb-image {
+    height: 100px;
+  }
+}
+
+@keyframes heroZoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+.hero-thumb-meta span:first-of-type {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+
+
+.hero-price-old {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.hero-cashback-chip {
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  background: rgba(132, 204, 22, 0.18);
+  border: 1px solid rgba(132, 204, 22, 0.55);
+  color: #bef264;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg img,
+  .hero-thumbs-row--slider,
+  .hero-thumb {
+    will-change: auto;
+  }
+
+  .hero-bg-blur,
+  .hero-bg-art {
+    animation: none !important;
+  }
+}

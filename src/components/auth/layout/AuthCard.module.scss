@@ -1,0 +1,21 @@
+.authCard {
+  padding: 0;
+}
+
+/* Grid de dos columnas: formulario + panel media */
+.authGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  min-height: 420px;
+}
+
+/* Variante de columna única: limita el ancho del contenido */
+.singleInner {
+  width: min(100%, 560px);
+}
+
+@media (max-width: 960px) {
+  .authGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

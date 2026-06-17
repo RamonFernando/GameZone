@@ -3,11 +3,14 @@
 import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
 import "../../../styles/auth.scss";
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<section className="auth-shell"><p className="auth-alt">Cargando...</p></section>}>
+    <Suspense fallback={<AuthShell><p className="auth-alt">Cargando...</p></AuthShell>}>
       <ResetPasswordContent />
     </Suspense>
   );
@@ -59,9 +62,9 @@ function ResetPasswordContent() {
   };
 
   return (
-    <section className="auth-shell auth-shell--center">
-      <div className="card card-hover auth-card auth-card--single">
-        <div className="auth-form-panel">
+    <AuthShell center>
+      <AuthCard single>
+        <AuthFormPanel>
           <header className="auth-header">
             <p className="auth-kicker">GameZone Access</p>
             <h1 className="auth-title">Nueva contraseña</h1>
@@ -134,8 +137,8 @@ function ResetPasswordContent() {
               </p>
             ) : null}
           </form>
-        </div>
-      </div>
-    </section>
+        </AuthFormPanel>
+      </AuthCard>
+    </AuthShell>
   );
 }

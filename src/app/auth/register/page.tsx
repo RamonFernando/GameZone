@@ -4,6 +4,10 @@ import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import { AuthMediaPanel } from "@/components/auth/layout/AuthMediaPanel";
 import "../../../styles/auth.scss";
 
 export default function RegisterPage() {
@@ -68,10 +72,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-grid">
-          <div className="auth-form-panel">
+    <AuthShell>
+      <AuthCard withGrid>
+          <AuthFormPanel>
             <header className="auth-header">
               <p className="auth-kicker">GameZone Access</p>
               <h1 className="auth-title">Crea tu cuenta</h1>
@@ -218,32 +221,14 @@ export default function RegisterPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </AuthFormPanel>
 
-          <div className="auth-media-panel">
-            <div className="auth-media-inner">
-              <Image
-                src="/Recursos/sign-wallpaper.jpg"
-                alt="Arte promocional de registro GameZone Access"
-                fill
-                priority
-                className="auth-media-image"
-                sizes="(min-width: 1024px) 480px, 100vw"
-              />
-
-              <div className="auth-media-gradient" />
-
-              <div className="auth-media-brand">
-                <span className="auth-media-tag">READY PLAYER</span>
-                <span className="auth-media-text">
-                  Crea tu cuenta y empieza a construir tu perfil gamer con
-                  recomendaciones, wishlist y ventajas exclusivas.
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          <AuthMediaPanel
+            image={{ src: "/Recursos/sign-wallpaper.jpg", alt: "Arte promocional de registro GameZone Access" }}
+            tag="READY PLAYER"
+            text="Crea tu cuenta y empieza a construir tu perfil gamer con recomendaciones, wishlist y ventajas exclusivas."
+          />
+      </AuthCard>
+    </AuthShell>
   );
 }

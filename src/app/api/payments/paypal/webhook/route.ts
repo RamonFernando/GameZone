@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   capturePaypalOrder,
   getPaypalAccessToken,
   verifyPaypalWebhookSignature,
-} from "@/lib/payments/paypal";
-import { completePaidOrder } from "@/lib/checkout/order-service";
+} from "@/services/payments/paypal";
+import { completePaidOrder } from "@/services/checkout/order-service";
 import { logger } from "@/lib/logger";
 
 function headerValue(headers: Headers, key: string) {

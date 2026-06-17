@@ -1,6 +1,6 @@
-import { createHash, randomUUID } from "node:crypto";
+﻿import { createHash, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { getSessionTokenFromRequest, getActiveSessionFromToken } from "@/lib/auth/session-server";
+import { getSessionTokenFromRequest, getActiveSessionFromToken } from "@/services/auth/session-server";
 
 const CART_COOKIE_NAME = "gamezone_cart_session";
 const CART_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;
