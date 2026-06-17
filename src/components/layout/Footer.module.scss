@@ -329,6 +329,12 @@
   opacity: 1 !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .footer-icon {
+    will-change: auto;
+  }
+}
+
 .footer-legal {
   max-width: 1200px;
   margin: 0 auto;

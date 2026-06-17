@@ -538,13 +538,17 @@ h1,
   .card-hover:hover {
     transition: none;
     transform: none;
+    will-change: auto;
   }
 
-  .button-primary {
+  .button-primary,
+  .button-ghost {
     transition: none;
+    will-change: auto;
   }
 
-  .button-primary:hover {
+  .button-primary:hover,
+  .button-ghost:hover {
     transform: none;
   }
 

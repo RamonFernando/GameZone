@@ -920,6 +920,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-bg img,
+  .hero-thumbs-row--slider,
+  .hero-thumb {
+    will-change: auto;
+  }
+
   .hero-bg-blur,
   .hero-bg-art {
     animation: none !important;
