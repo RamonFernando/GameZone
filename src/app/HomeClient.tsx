@@ -13,9 +13,17 @@ import { useLocale } from "@/hooks/useLocale";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { GameCard } from "@/components/ui/GameCard";
 import { PlatformBar } from "@/components/layout/PlatformBar";
-import { FeaturedSection } from "@/components/features/FeaturedSection";
-import { PromoAppBanner } from "@/components/features/PromoAppBanner";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
+
+const FeaturedSection = dynamic(
+  () => import("../components/features/FeaturedSection").then((m) => m.FeaturedSection),
+  { loading: () => null }
+);
+
+const PromoAppBanner = dynamic(
+  () => import("../components/features/PromoAppBanner").then((m) => m.PromoAppBanner),
+  { ssr: false, loading: () => null }
+);
 
 const MarketIntelligenceSections = dynamic(
   () =>

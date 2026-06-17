@@ -1,4 +1,7 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -82,7 +85,7 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withBundleAnalyzer(withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
@@ -118,4 +121,4 @@ export default withSentryConfig(nextConfig, {
       removeDebugLogging: true,
     },
   },
-});
+}));
