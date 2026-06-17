@@ -110,10 +110,23 @@ export default async function GameDetailPage({
   const productView = buildProductView(product);
 
   const allProducts = await listActiveProducts();
-  const suggestions = allProducts
-    .filter((p) => p.slug !== slug)
-    .slice(0, 3)
-    .map(buildProductView);
+  const currentGenres = new Set(parseJsonList(product.genresJson));
+  const currentPlatform = product.platform;
+  const others = allProducts.filter((p) => p.slug !== slug);
+  const byGenre = others
+    .filter(
+      (p) =>
+        parseJsonList(p.genresJson).some((g) => currentGenres.has(g)) ||
+        p.platform === currentPlatform
+    )
+    .sort((a, b) => b.discountPercent - a.discountPercent)
+    .slice(0, 3);
+  const byGenreSlugs = new Set(byGenre.map((p) => p.slug));
+  const filler = others
+    .filter((p) => !byGenreSlugs.has(p.slug))
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3 - byGenre.length);
+  const suggestions = [...byGenre, ...filler].slice(0, 3).map(buildProductView);
 
   // JSON-LD Product schema (8.2)
   const appUrl = process.env.APP_BASE_URL ?? "https://gamezone-digital-store.netlify.app";

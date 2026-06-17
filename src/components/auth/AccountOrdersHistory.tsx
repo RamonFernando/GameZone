@@ -4,17 +4,17 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
+import { useSearch } from "@/contexts/SearchContext";
 
-// Ítem individual dentro de un pedido del usuario.
 type OrderItem = {
   id: string;
+  gameSlug: string;
   title: string;
   quantity: number;
   unitPrice: number;
   subtotal: number;
 };
 
-// Pedido del usuario con estado y conjunto de ítems.
 type Order = {
   id: string;
   currency: string;
@@ -23,9 +23,9 @@ type Order = {
   items: OrderItem[];
 };
 
-// Fila "aplanada" que representa una compra de un juego concreto.
 type PurchaseRow = {
   rowId: string;
+  gameSlug: string;
   gameName: string;
   quantity: number;
   price: number;
@@ -34,23 +34,24 @@ type PurchaseRow = {
   orderStatus: string;
 };
 
-// Formatea importes para mostrarlos en la tabla de historial.
 function formatMoney(amount: number, currency = "EUR", locale = "es-ES") {
   return amount.toLocaleString(locale, { style: "currency", currency });
 }
 
-// Componente que lista el historial completo de compras del usuario.
 export function AccountOrdersHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [slugPlatformMap, setSlugPlatformMap] = useState<Record<string, string>>({});
   const lang = useLocale();
+  const { platform } = useSearch();
 
   const rows = useMemo<PurchaseRow[]>(() => {
     return orders
       .flatMap((order) =>
         order.items.map((item) => ({
           rowId: `${order.id}-${item.id}`,
+          gameSlug: item.gameSlug ?? "",
           gameName: item.title,
           quantity: item.quantity,
           price: item.subtotal,
@@ -62,15 +63,22 @@ export function AccountOrdersHistory() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [orders]);
 
+  const filteredRows = useMemo(() => {
+    if (!platform) return rows;
+    const p = platform.toLowerCase();
+    return rows.filter((row) => {
+      const rowPlatform = slugPlatformMap[row.gameSlug]?.toLowerCase() ?? "";
+      return rowPlatform.includes(p);
+    });
+  }, [rows, platform, slugPlatformMap]);
+
   useEffect(() => {
     const loadOrders = async () => {
       setErrorMessage("");
-
       try {
         setIsLoading(true);
         const response = await fetch("/api/orders", { cache: "no-store" });
         const payload = (await response.json()) as { orders?: Order[]; message?: string };
-
         if (!response.ok) {
           setErrorMessage(
             payload.message ??
@@ -80,7 +88,6 @@ export function AccountOrdersHistory() {
           );
           return;
         }
-
         setOrders(payload.orders ?? []);
       } catch {
         setErrorMessage(
@@ -92,9 +99,20 @@ export function AccountOrdersHistory() {
         setIsLoading(false);
       }
     };
-
     void loadOrders();
   }, [lang]);
+
+  useEffect(() => {
+    fetch("/api/products", { cache: "force-cache" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { products?: { slug: string; platform: string }[] } | null) => {
+        if (!data?.products) return;
+        const map: Record<string, string> = {};
+        for (const p of data.products) map[p.slug] = p.platform;
+        setSlugPlatformMap(map);
+      })
+      .catch(() => {});
+  }, []);
 
   if (isLoading) {
     return (
@@ -134,6 +152,13 @@ export function AccountOrdersHistory() {
 
   return (
     <div className="auth-form">
+      {platform && (
+        <p className="auth-alt" style={{ marginBottom: 8 }}>
+          {lang === "en"
+            ? `Filtering by platform: ${platform} (${filteredRows.length} result${filteredRows.length !== 1 ? "s" : ""})`
+            : `Filtrando por plataforma: ${platform} (${filteredRows.length} resultado${filteredRows.length !== 1 ? "s" : ""})`}
+        </p>
+      )}
       <div className="account-orders-table-wrap">
         <table className="account-orders-table">
           <thead>
@@ -145,7 +170,7 @@ export function AccountOrdersHistory() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {filteredRows.map((row) => (
               <tr key={row.rowId}>
                 <td>
                   {row.gameName}
@@ -169,13 +194,6 @@ export function AccountOrdersHistory() {
           </tbody>
         </table>
       </div>
-
-      <Link
-        href="/account"
-        className="button-primary auth-submit-compact auth-center-button btn-padding-site"
-      >
-        {lang === "en" ? "Back to my account" : "Volver a mi cuenta"}
-      </Link>
     </div>
   );
 }
