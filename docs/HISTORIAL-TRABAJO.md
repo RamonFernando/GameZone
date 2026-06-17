@@ -16,16 +16,17 @@
 
 ### Claude (VS Code)
 
-- [fix ✅] auth/account split corregido: auth.module.scss+account.module.scss (falsos CSS Modules con :global()) → auth.scss+account.scss (estilos de dominio globales correctos); 11 imports actualizados; tsc+76/76 tests verdes — pendiente commit
-- [9.5 ✅] Auth layout components CSS Modules: AuthShell/AuthCard/AuthFormPanel/AuthMediaPanel creados en components/auth/layout/ con sus *.module.scss; 11 páginas actualizadas (auth, register, forgot-password, reset-password, verify, checkout, checkout/success, account, account/orders, admin/control, admin/orders); tsc limpio + 76/76 tests — pendiente commit
+- [fix ✅] auth/account split corregido: auth.module.scss+account.module.scss (falsos CSS Modules con :global()) → auth.scss+account.scss (estilos de dominio globales correctos); 11 imports actualizados; tsc+76/76 tests verdes — commit previo
+- [9.5 ✅] Auth layout components CSS Modules: AuthShell/AuthCard/AuthFormPanel/AuthMediaPanel creados en components/auth/layout/ con sus *.module.scss; 11 páginas actualizadas; tsc limpio + 76/76 tests — commit previo
 - [MVC ✅] Reorganización MVC: components/layout, ui, features; services/auth, cart, checkout, market, payments; 97 imports actualizados; CLAUDE.md + docs/REGLAS-IA.md creados — sin commit único (sesión anterior)
 - [9.3 ✅] Accesibilidad: prefers-reduced-motion para .card-hover, .button-primary, .game-card-actions .button-primary (badge-gradient-sweep), .card.game-card-plus:hover, .game-card-like-icon — en globals.scss + responsive-refinements.scss
-- [9.5 ✅] CSS Modules GameCard: GameCard.module.scss creado, game-card-* extraídos de responsive-refinements.scss, GameCard.tsx actualizado con styles.xxx
-- [9.5 ✅] CSS Modules GameGrid: GameGrid.module.scss creado, .grid-games + .game-card-reveal* extraídos de globals.scss, GameGrid.tsx actualizado (querySelectorAll → data-reveal-slug)
-- [9.5 ✅] CSS Modules GameDetailClient: GameDetailClient.module.scss creado, game-detail-* + game-suggestion-* + game-detail-sticky-* extraídos de responsive-refinements.scss y globals.scss, grid-games→suggestionGrid corregido
-- [9.5 ✅] CSS Modules Header: Header.module.scss creado, todos los nav-*/header-shell-* extraídos de globals.scss y responsive-refinements.scss (15+ breakpoints)
-- [9.5 ✅] CSS Modules MarketIntelligenceSections: MarketIntelligenceSections.module.scss creado, market-pulse-*/market-intel-*/deal-*/recommendation-* extraídos (~1500 líneas de globals.scss + compound selectors de responsive-refinements.scss); THUMB_POSITION_CLASS map; gameDetailTitle font-family añadido; B8 typography rule simplificada
+- [9.5 ✅] CSS Modules GameCard, GameGrid, GameDetailClient, Header, MarketIntelligenceSections — commits varios
 - [Netlify ✅] Deploy bloqueado en ramas distintas de main: netlify.toml ignore="node -e process.exit(...)"
+- [perf ✅] HomeClient: FeaturedSection y PromoAppBanner convertidos a next/dynamic (code splitting) — commit sesión actual
+- [perf ✅] Cache-Control headers en netlify.toml: /iconos_platforms/* immutable, /Recursos/* 7d, /manifest.json 1d — commit sesión actual
+- [perf ✅] Animaciones no-compositadas (49 elementos Lighthouse): eliminados box-shadow/background/border-color/color de todos los transition en 11 archivos SCSS — commit 588ced4
+- [perf ✅] will-change: transform en .card-hover, .button-primary, .button-ghost, hero-thumb, footer-icon — commit ecd9c6f
+- [perf ✅] Preconnect steam cdn + rawg; dns-prefetch stripe + paypal en layout.tsx — commit b3637ff
 
 ### GPT
 
