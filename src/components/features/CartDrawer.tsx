@@ -8,6 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import { useLocale } from "@/hooks/useLocale";
 import { t } from "@/lib/i18n";
+import styles from "./CartDrawer.module.scss";
 
 // Props mínimos del CartDrawer: callback para cerrarlo.
 type Props = {
@@ -82,43 +83,39 @@ export function CartDrawer({ onClose }: Props) {
   };
 
   return (
-    <div className="cart-drawer-backdrop" onClick={onClose}>
+    <div className={styles.cartDrawerBackdrop} onClick={onClose}>
       <aside
-        className="cart-drawer"
+        className={styles.cartDrawer}
         role="dialog"
         aria-modal="true"
         aria-label={t(lang, "cart.aria-label")}
         ref={drawerRef}
         onClick={(event) => event.stopPropagation()}
       >
-        {/* NUEVO CONTENEDOR INTERNO */}
-        <div className="cart-drawer-inner">
+        <div className={styles.cartDrawerInner}>
 
-          {/* HEADER */}
-          <header className="cart-drawer-header">
-            <h2 className="cart-title">
-              <span className="cart-icon-button cart-drawer-cart-icon-button">
+          <header className={styles.cartDrawerHeader}>
+            <h2 className={styles.cartTitle}>
+              <span className={`cart-icon-button ${styles.cartDrawerCartIconButton}`}>
                 <Image
                   src="/iconos_platforms/carritoCompra2.svg"
                   alt=""
                   aria-hidden="true"
                   width={20}
                   height={20}
-                  className="cart-drawer-cart-icon"
+                  className={styles.cartDrawerCartIcon}
                 />
               </span>
               {t(lang, "cart.title")}
             </h2>
-
             <button type="button" className="button-ghost btn-padding-site" onClick={onClose}>
               {t(lang, "cart.close")}
             </button>
           </header>
 
-          {/* BODY */}
-          <div className="cart-drawer-body">
+          <div className={styles.cartDrawerBody}>
             {!hasItems && (
-              <p className="cart-empty-text">
+              <p className={styles.cartEmptyText}>
                 {t(lang, "cart.empty")}
               </p>
             )}
@@ -127,7 +124,7 @@ export function CartDrawer({ onClose }: Props) {
               items.map((item) => (
                 <div
                   key={item.slug}
-                  className="cart-item cart-item--clickable"
+                  className={`${styles.cartItem} ${styles.cartItemClickable}`}
                   role="button"
                   tabIndex={0}
                   onClick={() => openGameDetail(item.slug)}
@@ -160,14 +157,14 @@ export function CartDrawer({ onClose }: Props) {
                     />
                   </div>
 
-                  <div className="cart-item-info">
-                    <div className="cart-item-title">{item.game.name}</div>
+                  <div className={styles.cartItemInfo}>
+                    <div className={styles.cartItemTitle}>{item.game.name}</div>
 
-                    <div className="cart-item-actions">
-                      <div className="qty-control">
+                    <div className={styles.cartItemActions}>
+                      <div className={styles.qtyControl}>
                         <button
                           type="button"
-                          className="button-ghost cart-inline-button btn-padding-site"
+                          className={`button-ghost ${styles.cartInlineButton} btn-padding-site`}
                           onClick={(event) => {
                             event.stopPropagation();
                             decreaseFromCart(item.slug);
@@ -177,13 +174,13 @@ export function CartDrawer({ onClose }: Props) {
                           −
                         </button>
 
-                        <span className="qty-value" aria-live="polite">
+                        <span className={styles.qtyValue} aria-live="polite">
                           {item.quantity}
                         </span>
 
                         <button
                           type="button"
-                          className="button-primary cart-inline-button btn-padding-site"
+                          className={`button-primary ${styles.cartInlineButton} btn-padding-site`}
                           onClick={(event) => {
                             event.stopPropagation();
                             addToCart(item.game);
@@ -210,44 +207,32 @@ export function CartDrawer({ onClose }: Props) {
               ))}
           </div>
 
-          {/* FOOTER */}
-          {/* cart-drawer-footer */}
-          <div className="cart-drawer-footer">
-            <div className="cart-drawer-summary">
+          <div className={styles.cartDrawerFooter}>
+            <div className={styles.cartDrawerSummary}>
               <strong>{t(lang, "cart.summary")}</strong>
-              <div>
-                {t(lang, "cart.total-items")} {totalItems}
-              </div>
-
-              <div>
-                {t(lang, "cart.total")}{" "}
-                {formatPublicPrice(totalAmount, lang)}
-              </div>
+              <div>{t(lang, "cart.total-items")} {totalItems}</div>
+              <div>{t(lang, "cart.total")}{" "}{formatPublicPrice(totalAmount, lang)}</div>
             </div>
 
-            <div className="button-group cart-drawer-footer-button">
-              {/* Botón principal: PAGAR */}
-            <button
-              type="button"
-              className="button-primary cart-full-width btn-padding-site"
-              disabled={!hasItems}
-              onClick={goToCheckout}
-            >
-              {t(lang, "cart.checkout")}
-            </button>
-
-            {/* Botón secundario: VACIAR */}
-            <button
-              type="button"
-              className="button-ghost cart-full-width btn-padding-site"
-              onClick={clearCart}
-            >
-              {t(lang, "cart.clear")}
-            </button>
+            <div className={styles.buttonGroup}>
+              <button
+                type="button"
+                className={`button-primary ${styles.cartFullWidth} btn-padding-site`}
+                disabled={!hasItems}
+                onClick={goToCheckout}
+              >
+                {t(lang, "cart.checkout")}
+              </button>
+              <button
+                type="button"
+                className={`button-ghost ${styles.cartFullWidth} btn-padding-site`}
+                onClick={clearCart}
+              >
+                {t(lang, "cart.clear")}
+              </button>
             </div>
           </div>
-        </div> {/* cart-drawer-inner */}
-      
+        </div>
       </aside>
     </div>
   );
