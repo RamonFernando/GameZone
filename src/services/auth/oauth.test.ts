@@ -1,4 +1,4 @@
-import {
+﻿import {
   createOAuthPkceCookieValue,
   createOAuthStateCookieValue,
   getCookieValueFromRequest,
@@ -6,7 +6,7 @@ import {
   getOAuthStateCookieName,
   verifyOAuthPkceCookie,
   verifyOAuthStateCookie,
-} from "@/lib/auth/oauth";
+} from "@/services/auth/oauth";
 
 describe("oauth helpers", () => {
   beforeEach(() => {

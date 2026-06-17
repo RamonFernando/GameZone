@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { completePaidOrder } from "@/lib/checkout/order-service";
-import { capturePaypalOrder, getPaypalAccessToken } from "@/lib/payments/paypal";
+﻿import { NextResponse } from "next/server";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { completePaidOrder } from "@/services/checkout/order-service";
+import { capturePaypalOrder, getPaypalAccessToken } from "@/services/payments/paypal";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 

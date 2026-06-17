@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import { sendPurchaseConfirmationEmail } from "@/lib/auth/email";
-import { clearUserCartItems } from "@/lib/cart/persistent-cart";
+﻿import { prisma } from "@/lib/prisma";
+import { sendPurchaseConfirmationEmail } from "@/services/auth/email";
+import { clearUserCartItems } from "@/services/cart/persistent-cart";
 import { computeDiscountedPrice, ensureProductsSeeded } from "@/lib/products";
 import { logger } from "@/lib/logger";
 

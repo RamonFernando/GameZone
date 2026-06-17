@@ -1,8 +1,8 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { getMarketGameMetadata, RAWG_METADATA_CACHE_SECONDS } from "@/lib/market/games";
-import { createMarketMeta } from "@/lib/market/response";
+import { getMarketGameMetadata, RAWG_METADATA_CACHE_SECONDS } from "@/services/market/games";
+import { createMarketMeta } from "@/services/market/response";
 
 export async function GET(_request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug: routeSlug } = await context.params;

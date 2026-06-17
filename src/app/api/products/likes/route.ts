@@ -1,11 +1,11 @@
-// Endpoint ligero para hidratar los likes del usuario en la home cacheada:
+﻿// Endpoint ligero para hidratar los likes del usuario en la home cacheada:
 // el catálogo se sirve cacheado (igual para todos) y el estado personal
 // (likedByCurrentUser) se resuelve aparte con esta llamada.
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
+import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/services/auth/session-server";
 
 export async function GET(request: Request) {
   try {

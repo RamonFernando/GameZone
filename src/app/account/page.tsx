@@ -1,13 +1,13 @@
-import { cookies } from "next/headers";
+﻿import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountDashboard } from "@/components/auth/AccountDashboard";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { SessionRefresher } from "@/components/auth/SessionRefresher";
-import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { getActiveSessionFromToken } from "@/lib/auth/session-server";
+import { SESSION_COOKIE_NAME } from "@/services/auth/session";
+import { getActiveSessionFromToken } from "@/services/auth/session-server";
 import { prisma } from "@/lib/prisma";
-import { getUserById } from "@/lib/auth/store";
+import { getUserById } from "@/services/auth/store";
 import "../../styles/auth.scss";
 
 export default async function AccountPage({

@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
+﻿import { NextResponse } from "next/server";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
 import { prisma } from "@/lib/prisma";
-import { completePaidOrder } from "@/lib/checkout/order-service";
-import { getStripeClient } from "@/lib/payments/stripe";
+import { completePaidOrder } from "@/services/checkout/order-service";
+import { getStripeClient } from "@/services/payments/stripe";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: Request) {

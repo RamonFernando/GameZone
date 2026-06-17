@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { getSessionCookieOptions } from "@/lib/auth/session";
+﻿import { NextResponse } from "next/server";
+import { getSessionCookieOptions } from "@/services/auth/session";
 import {
   getActiveSessionFromToken,
   getSessionTokenFromRequest,
   rotateSessionToken,
-} from "@/lib/auth/session-server";
+} from "@/services/auth/session-server";
 
 export async function POST(request: Request) {
   const token = getSessionTokenFromRequest(request);

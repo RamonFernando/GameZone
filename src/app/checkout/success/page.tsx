@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,7 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 import {
   createPaymentProgressStorageKey,
   PAYMENT_PROGRESS_STEP_DELAY_MS,
-} from "@/lib/checkout/payment-progress";
+} from "@/services/checkout/payment-progress";
 import "../../../styles/auth.scss";
 
 type FinalizationState = "loading" | "success" | "error";

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Exo_2 } from "next/font/google";
 import "@/styles/globals.scss";
 import "@/styles/responsive-refinements.scss";
@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { CartProvider } from "@/contexts/CartContext";
 import { SearchProvider } from "@/contexts/SearchContext";
-import { SiteShell } from "@/components/SiteShell";
+import { SiteShell } from "@/components/layout/SiteShell";
 
 const exoDisplay = Exo_2({
   subsets: ["latin"],

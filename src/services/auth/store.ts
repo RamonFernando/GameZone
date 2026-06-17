@@ -1,8 +1,8 @@
-import { randomUUID, scrypt as scryptCallback, createHash, timingSafeEqual } from "node:crypto";
+﻿import { randomUUID, scrypt as scryptCallback, createHash, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { Prisma } from "@prisma/client";
 import type { UserRole } from "@prisma/client";
-import { ensurePermissionSystemInitialized } from "@/lib/auth/permissions";
+import { ensurePermissionSystemInitialized } from "@/services/auth/permissions";
 import { prisma } from "@/lib/prisma";
 
 const scrypt = promisify(scryptCallback);

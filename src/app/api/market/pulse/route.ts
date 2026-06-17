@@ -1,8 +1,8 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 export const revalidate = 1800;
 
 import { NextResponse } from "next/server";
-import { listMarketPulse } from "@/lib/market/pulse";
+import { listMarketPulse } from "@/services/market/pulse";
 
 export async function GET() {
   const pulse = await listMarketPulse();

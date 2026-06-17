@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
+﻿import { NextResponse } from "next/server";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
 import { logAudit } from "@/lib/audit-log";
 
 import { prisma } from "@/lib/prisma";

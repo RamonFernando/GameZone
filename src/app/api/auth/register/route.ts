@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-import { sendVerificationEmail } from "@/lib/auth/email";
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
+import { sendVerificationEmail } from "@/services/auth/email";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
 import {
   createRawVerificationToken,
   createUserWithVerificationToken,
   deleteUserByEmail,
   DuplicateEmailError,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 
 import { logAudit } from "@/lib/audit-log";
 import { z } from "zod";

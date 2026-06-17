@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import {
   computeDiscountedPrice,
@@ -7,9 +7,9 @@ import {
   resolveStoreLabel,
 } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
+import { requireAuth } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/services/auth/session-server";
 
 function parseJsonList(value: string | null | undefined): string[] {
   if (!value) return [];

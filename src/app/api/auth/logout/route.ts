@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { getSessionTokenFromRequest, revokeSessionByToken, getActiveSessionFromToken } from "@/lib/auth/session-server";
+﻿import { NextResponse } from "next/server";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { getSessionTokenFromRequest, revokeSessionByToken, getActiveSessionFromToken } from "@/services/auth/session-server";
 import { logAudit } from "@/lib/audit-log";
 
 

@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ProductPreview } from "@/types/product";
-import { GameCard } from "@/components/GameCard";
+import { GameCard } from "@/components/ui/GameCard";
 import { useLocale } from "@/hooks/useLocale";
 import { t } from "@/lib/i18n";
 

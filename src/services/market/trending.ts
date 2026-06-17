@@ -1,9 +1,9 @@
-import { type StoreProduct, listActiveProducts } from "@/lib/products";
+﻿import { type StoreProduct, listActiveProducts } from "@/lib/products";
 import {
   createCatalogMatch,
   findBestCatalogMatch,
   type MarketCatalogMatch,
-} from "@/lib/market/catalog-match";
+} from "@/services/market/catalog-match";
 
 const RAWG_BASE_URL = "https://api.rawg.io/api";
 export const RAWG_TRENDING_CACHE_SECONDS = 3600;

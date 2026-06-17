@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { clampDiscountPercent, resolveStoreLabel } from "@/lib/products";
 import { slugify } from "@/lib/games";
-import { listMarketPulse, type MarketPulseItem } from "@/lib/market/pulse";
-import { enrichCatalogProductsFromRawg } from "@/lib/market/rawg-enrichment";
+import { listMarketPulse, type MarketPulseItem } from "@/services/market/pulse";
+import { enrichCatalogProductsFromRawg } from "@/services/market/rawg-enrichment";
 
 type SyncAction = "created" | "updated" | "skipped";
 type SyncMode = "dry-run" | "write";

@@ -1,25 +1,25 @@
-"use client";
+﻿"use client";
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
-import { Hero } from "@/components/Hero";
-import { Header } from "@/components/Header";
-import { GameGrid } from "@/components/GameGrid";
-import { ScrollToTop } from "@/components/ScrollToTop";
+import { Hero } from "@/components/features/Hero";
+import { Header } from "@/components/layout/Header";
+import { GameGrid } from "@/components/ui/GameGrid";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { useSearch } from "@/contexts/SearchContext";
 import { useLocale } from "@/hooks/useLocale";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-import { GameCard } from "@/components/GameCard";
-import { PlatformBar } from "@/components/PlatformBar";
-import { FeaturedSection } from "@/components/FeaturedSection";
-import { PromoAppBanner } from "@/components/PromoAppBanner";
+import { GameCard } from "@/components/ui/GameCard";
+import { PlatformBar } from "@/components/layout/PlatformBar";
+import { FeaturedSection } from "@/components/features/FeaturedSection";
+import { PromoAppBanner } from "@/components/features/PromoAppBanner";
 import type { HomeHeroSection, ProductPreview } from "@/types/product";
 
 const MarketIntelligenceSections = dynamic(
   () =>
-    import("../components/MarketIntelligenceSections").then(
+    import("../components/features/MarketIntelligenceSections").then(
       (module) => module.MarketIntelligenceSections
     ),
   {

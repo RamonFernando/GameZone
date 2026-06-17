@@ -1,4 +1,4 @@
-// Header principal del sitio: logo, filtros de plataforma, buscador, carrito y avatar.
+﻿// Header principal del sitio: logo, filtros de plataforma, buscador, carrito y avatar.
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
-import { CartDrawer } from "@/components/CartDrawer";
+import { CartDrawer } from "@/components/features/CartDrawer";
 import { useSearch } from "@/contexts/SearchContext";
 
 // Datos mínimos del usuario para mostrar en el avatar de la nav.

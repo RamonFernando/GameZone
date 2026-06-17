@@ -1,8 +1,8 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
+import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/services/auth/session-server";
 
 export type WishlistItem = {
   id: string;

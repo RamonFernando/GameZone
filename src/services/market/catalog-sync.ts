@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { syncProductsFromMarketPulse } from "@/lib/market/product-sync";
+﻿import { prisma } from "@/lib/prisma";
+import { syncProductsFromMarketPulse } from "@/services/market/product-sync";
 
 export type CatalogSyncTrigger = "admin" | "cron";
 export type CatalogSyncStatus = "running" | "success" | "failed" | "skipped";

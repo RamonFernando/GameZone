@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
 import {
@@ -11,10 +11,10 @@ import {
   getOAuthStateCookieOptions,
   verifyOAuthPkceCookie,
   verifyOAuthStateCookie,
-} from "@/lib/auth/oauth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { createPersistedSession } from "@/lib/auth/session-server";
-import { ensureMasterAdminUser, upsertOAuthUser } from "@/lib/auth/store";
+} from "@/services/auth/oauth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { createPersistedSession } from "@/services/auth/session-server";
+import { ensureMasterAdminUser, upsertOAuthUser } from "@/services/auth/store";
 import { logAudit } from "@/lib/audit-log";
 
 

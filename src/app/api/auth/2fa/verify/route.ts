@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyTwoFactorCode } from "@/lib/auth/store";
-import { createPersistedSession } from "@/lib/auth/session-server";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
+import { verifyTwoFactorCode } from "@/services/auth/store";
+import { createPersistedSession } from "@/services/auth/session-server";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
 import { logAudit } from "@/lib/audit-log";
 
 import { z } from "zod";

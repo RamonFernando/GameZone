@@ -1,9 +1,9 @@
-import { computeDiscountedPrice, type StoreProduct } from "@/lib/products";
+﻿import { computeDiscountedPrice, type StoreProduct } from "@/lib/products";
 import {
   createCatalogMatch,
   scoreTitleMatch,
   type MarketCatalogMatch,
-} from "@/lib/market/catalog-match";
+} from "@/services/market/catalog-match";
 
 const CHEAPSHARK_DEALS_URL = "https://www.cheapshark.com/api/1.0/deals";
 const CHEAPSHARK_REDIRECT_URL = "https://www.cheapshark.com/redirect";

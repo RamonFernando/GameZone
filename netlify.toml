@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  ignore = "node -e \"process.exit(process.env.BRANCH === 'main' ? 1 : 0)\""
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

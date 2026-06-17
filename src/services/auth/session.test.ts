@@ -1,4 +1,4 @@
-import { createSessionToken, verifySessionToken } from "@/lib/auth/session";
+﻿import { createSessionToken, verifySessionToken } from "@/services/auth/session";
 
 describe("session token", () => {
   it("crea y verifica un token válido", async () => {

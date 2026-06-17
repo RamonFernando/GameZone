@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createHash } from "node:crypto";
-import { createSessionToken, verifySessionToken } from "@/lib/auth/session";
-import { rotateSessionToken } from "@/lib/auth/session-server";
+import { createSessionToken, verifySessionToken } from "@/services/auth/session";
+import { rotateSessionToken } from "@/services/auth/session-server";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {

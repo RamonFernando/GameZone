@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth/rate-limit", () => ({
+vi.mock("@/services/auth/rate-limit", () => ({
   enforceRateLimit: vi.fn().mockResolvedValue({ blocked: false, remaining: 4 }),
 }));
 
-vi.mock("@/lib/auth/session", () => ({
+vi.mock("@/services/auth/session", () => ({
   getSessionCookieOptions: vi.fn(() => ({
     name: "gamezone_session",
     httpOnly: true,
@@ -14,15 +14,15 @@ vi.mock("@/lib/auth/session", () => ({
   })),
 }));
 
-vi.mock("@/lib/auth/session-server", () => ({
+vi.mock("@/services/auth/session-server", () => ({
   createPersistedSession: vi.fn().mockResolvedValue("session-token"),
 }));
 
-vi.mock("@/lib/auth/email", () => ({
+vi.mock("@/services/auth/email", () => ({
   sendTwoFactorCodeEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/lib/auth/store", () => {
+vi.mock("@/services/auth/store", () => {
   class AccountNotVerifiedError extends Error {}
   class InvalidCredentialsError extends Error {}
 
@@ -48,9 +48,9 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { sendTwoFactorCodeEmail } from "@/lib/auth/email";
-import { createPersistedSession } from "@/lib/auth/session-server";
-import { authenticateUser, verifyTwoFactorCode } from "@/lib/auth/store";
+import { sendTwoFactorCodeEmail } from "@/services/auth/email";
+import { createPersistedSession } from "@/services/auth/session-server";
+import { authenticateUser, verifyTwoFactorCode } from "@/services/auth/store";
 import { prisma } from "@/lib/prisma";
 import { POST as loginPost } from "./login/route";
 import { POST as verifyEmail2faPost } from "./2fa/verify/route";

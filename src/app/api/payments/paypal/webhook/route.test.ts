@@ -1,12 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/payments/paypal", () => ({
+vi.mock("@/services/payments/paypal", () => ({
   verifyPaypalWebhookSignature: vi.fn().mockResolvedValue(true),
   getPaypalAccessToken: vi.fn().mockResolvedValue("access-token"),
   capturePaypalOrder: vi.fn().mockResolvedValue({ id: "capture-1", status: "COMPLETED" }),
 }));
 
-vi.mock("@/lib/checkout/order-service", () => ({
+vi.mock("@/services/checkout/order-service", () => ({
   completePaidOrder: vi.fn().mockResolvedValue({ order: { id: "order-1" }, emailSent: true }),
 }));
 
@@ -27,13 +27,13 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-import { completePaidOrder } from "@/lib/checkout/order-service";
+import { completePaidOrder } from "@/services/checkout/order-service";
 import { logger } from "@/lib/logger";
 import {
   capturePaypalOrder,
   getPaypalAccessToken,
   verifyPaypalWebhookSignature,
-} from "@/lib/payments/paypal";
+} from "@/services/payments/paypal";
 import { prisma } from "@/lib/prisma";
 import { POST } from "./route";
 

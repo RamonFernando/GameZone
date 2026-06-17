@@ -1,6 +1,6 @@
-import { computeDiscountedPrice, listActiveProducts, type StoreProduct } from "@/lib/products";
-import { createCatalogMatch, type MarketCatalogMatch } from "@/lib/market/catalog-match";
-import { listMarketTrendingGames } from "@/lib/market/trending";
+﻿import { computeDiscountedPrice, listActiveProducts, type StoreProduct } from "@/lib/products";
+import { createCatalogMatch, type MarketCatalogMatch } from "@/services/market/catalog-match";
+import { listMarketTrendingGames } from "@/services/market/trending";
 
 export type MarketRecommendation = {
   score: number;

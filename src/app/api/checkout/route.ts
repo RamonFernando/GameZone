@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
-import { getSessionCookieOptions } from "@/lib/auth/session";
+﻿import { NextResponse } from "next/server";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
 import {
   CheckoutValidationError,
   completePaidOrder,
   createPendingOrder,
-} from "@/lib/checkout/order-service";
+} from "@/services/checkout/order-service";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 

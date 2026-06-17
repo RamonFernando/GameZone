@@ -1,11 +1,11 @@
-// Evita que Next intente prerenderizar esta ruta en el build:
+﻿// Evita que Next intente prerenderizar esta ruta en el build:
 // siempre se ejecuta de forma dinámica en el servidor.
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { computeDiscountedPrice, listActiveProducts, resolveStoreLabel } from "@/lib/products";
-import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
+import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/services/auth/session-server";
 
 export async function GET(request: Request) {
   const products = await listActiveProducts();

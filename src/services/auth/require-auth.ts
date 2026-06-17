@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import type { UserRole } from "@prisma/client";
 import {
   type PermissionKey,
   ensurePermissionSystemInitialized,
   userHasPermission,
-} from "@/lib/auth/permissions";
+} from "@/services/auth/permissions";
 import {
   getActiveSessionFromToken,
   getSessionTokenFromRequest,
   rotateSessionToken,
-} from "@/lib/auth/session-server";
+} from "@/services/auth/session-server";
 
 export type AuthContext = {
   userId: string;

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   computeTotalAmount,
   completePaidOrder,
@@ -48,16 +48,16 @@ vi.mock("@/lib/products", () => ({
   ),
 }));
 
-vi.mock("@/lib/auth/email", () => ({
+vi.mock("@/services/auth/email", () => ({
   sendPurchaseConfirmationEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/lib/cart/persistent-cart", () => ({
+vi.mock("@/services/cart/persistent-cart", () => ({
   clearUserCartItems: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { prisma } from "@/lib/prisma";
-import { sendPurchaseConfirmationEmail } from "@/lib/auth/email";
+import { sendPurchaseConfirmationEmail } from "@/services/auth/email";
 import { computeDiscountedPrice } from "@/lib/products";
 
 const MOCK_CATALOG = [

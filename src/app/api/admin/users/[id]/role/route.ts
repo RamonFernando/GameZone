@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSessionCookieOptions } from "@/lib/auth/session";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
+import { getSessionCookieOptions } from "@/services/auth/session";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 import { logAudit } from "@/lib/audit-log";

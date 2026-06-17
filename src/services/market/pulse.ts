@@ -1,6 +1,6 @@
-import { computeDiscountedPrice, listActiveProducts, type StoreProduct } from "@/lib/products";
-import { createCatalogMatch, findBestCatalogMatch, type MarketCatalogMatch } from "@/lib/market/catalog-match";
-import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/lib/market/trending";
+﻿import { computeDiscountedPrice, listActiveProducts, type StoreProduct } from "@/lib/products";
+import { createCatalogMatch, findBestCatalogMatch, type MarketCatalogMatch } from "@/services/market/catalog-match";
+import { listMarketTrendingGames, RAWG_TRENDING_CACHE_SECONDS } from "@/services/market/trending";
 
 export const MARKET_PULSE_CACHE_SECONDS = 1800;
 const CATALOG_MATCH_SYNC_SCORE = 80;

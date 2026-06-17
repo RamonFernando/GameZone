@@ -1,4 +1,4 @@
-export const revalidate = 1800;
+﻿export const revalidate = 1800;
 
 import { NextResponse } from "next/server";
 import { listActiveProducts } from "@/lib/products";
@@ -7,8 +7,8 @@ import {
   createCatalogFallbackDeal,
   fetchCheapSharkDealForProduct,
   type MarketDeal,
-} from "@/lib/market/deals";
-import { createMarketMeta } from "@/lib/market/response";
+} from "@/services/market/deals";
+import { createMarketMeta } from "@/services/market/response";
 
 function parseLimit(request: Request) {
   const url = new URL(request.url);

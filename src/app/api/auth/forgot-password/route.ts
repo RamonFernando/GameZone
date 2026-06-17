@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { sendPasswordResetEmail } from "@/lib/auth/email";
+﻿import { NextResponse } from "next/server";
+import { sendPasswordResetEmail } from "@/services/auth/email";
 import {
   createRawPasswordResetToken,
   getUserByEmail,
   setPasswordResetToken,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 import { logger } from "@/lib/logger";
 import { logAudit } from "@/lib/audit-log";
 

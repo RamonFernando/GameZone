@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import {
   InvalidPasswordResetTokenError,
   PasswordResetTokenExpiredError,
   resetPasswordWithToken,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 import { logAudit } from "@/lib/audit-log";
 
 import { z } from "zod";

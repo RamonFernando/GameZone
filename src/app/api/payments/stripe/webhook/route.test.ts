@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const constructEvent = vi.hoisted(() => vi.fn());
 const logAuditMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
-vi.mock("@/lib/payments/stripe", () => ({
+vi.mock("@/services/payments/stripe", () => ({
   getStripeClient: () => ({
     webhooks: {
       constructEvent,
@@ -11,7 +11,7 @@ vi.mock("@/lib/payments/stripe", () => ({
   }),
 }));
 
-vi.mock("@/lib/checkout/order-service", () => ({
+vi.mock("@/services/checkout/order-service", () => ({
   completePaidOrder: vi.fn().mockResolvedValue({ order: { id: "order-1" }, emailSent: true }),
 }));
 
@@ -30,7 +30,7 @@ vi.mock("@/lib/audit-log", () => ({
   logAudit: logAuditMock,
 }));
 
-import { completePaidOrder } from "@/lib/checkout/order-service";
+import { completePaidOrder } from "@/services/checkout/order-service";
 import { logAudit } from "@/lib/audit-log";
 import { prisma } from "@/lib/prisma";
 import { POST } from "./route";

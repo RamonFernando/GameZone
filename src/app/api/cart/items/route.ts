@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/lib/auth/session-server";
-import { addUserCartItemDelta } from "@/lib/cart/persistent-cart";
+﻿import { NextResponse } from "next/server";
+import { getActiveSessionFromToken, getSessionTokenFromRequest } from "@/services/auth/session-server";
+import { addUserCartItemDelta } from "@/services/cart/persistent-cart";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";
 

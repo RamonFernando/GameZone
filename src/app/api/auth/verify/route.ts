@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { enforceRateLimit } from "@/lib/auth/rate-limit";
+﻿import { NextResponse } from "next/server";
+import { enforceRateLimit } from "@/services/auth/rate-limit";
 import {
   verifyUserFromToken,
   VerificationTokenExpiredError,
   VerificationTokenNotFoundError,
-} from "@/lib/auth/store";
+} from "@/services/auth/store";
 import { logAudit } from "@/lib/audit-log";
 
 export async function GET(request: Request) {

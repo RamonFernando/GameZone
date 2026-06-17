@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import { requirePermission } from "@/lib/auth/require-auth";
+﻿import { NextResponse } from "next/server";
+import { PERMISSIONS } from "@/services/auth/permissions";
+import { requirePermission } from "@/services/auth/require-auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { parseJsonBody } from "@/lib/validation";

@@ -1,8 +1,8 @@
-import { cookies } from "next/headers";
+﻿import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccountOrdersHistory } from "@/components/auth/AccountOrdersHistory";
-import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { getActiveSessionFromToken } from "@/lib/auth/session-server";
+import { SESSION_COOKIE_NAME } from "@/services/auth/session";
+import { getActiveSessionFromToken } from "@/services/auth/session-server";
 import "../../../styles/auth.scss";
 
 export default async function AccountOrdersPage() {

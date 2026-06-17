@@ -11,7 +11,7 @@ export async function register() {
 
     // Garantiza que el usuario master admin existe una sola vez al arrancar,
     // en lugar de recalcular en cada petición de login.
-    const { ensureMasterAdminUser } = await import("@/lib/auth/store");
+    const { ensureMasterAdminUser } = await import("@/services/auth/store");
     await ensureMasterAdminUser();
   }
 }

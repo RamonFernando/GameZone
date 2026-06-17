@@ -1,8 +1,8 @@
-import Stripe from "stripe";
+﻿import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { completePaidOrder } from "@/lib/checkout/order-service";
+import { completePaidOrder } from "@/services/checkout/order-service";
 import { prisma } from "@/lib/prisma";
-import { getStripeClient } from "@/lib/payments/stripe";
+import { getStripeClient } from "@/services/payments/stripe";
 import { logAudit } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";

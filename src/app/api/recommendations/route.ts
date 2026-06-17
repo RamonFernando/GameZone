@@ -1,9 +1,9 @@
-export const revalidate = 1800;
+﻿export const revalidate = 1800;
 
 import { NextResponse } from "next/server";
-import { listMarketRecommendations } from "@/lib/market/recommendations";
-import { RAWG_TRENDING_CACHE_SECONDS } from "@/lib/market/trending";
-import { createMarketMeta } from "@/lib/market/response";
+import { listMarketRecommendations } from "@/services/market/recommendations";
+import { RAWG_TRENDING_CACHE_SECONDS } from "@/services/market/trending";
+import { createMarketMeta } from "@/services/market/response";
 
 function parseLimit(request: Request) {
   const url = new URL(request.url);

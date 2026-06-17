@@ -1,11 +1,11 @@
-import type { UserRole } from "@prisma/client";
+﻿import type { UserRole } from "@prisma/client";
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import {
   SESSION_COOKIE_NAME,
   createSessionToken,
   verifySessionToken,
-} from "@/lib/auth/session";
+} from "@/services/auth/session";
 
 const ROTATION_WINDOW_SECONDS = 60 * 60 * 24; // 24h
 const LAST_SEEN_DEBOUNCE_MS = 5 * 60 * 1000; // 5 min
