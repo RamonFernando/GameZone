@@ -119,6 +119,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<AccountTab>(initialTab);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
   const wishlistLoadedRef = useRef(false);
@@ -997,67 +998,91 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
 
       {activeTab === "account" ? (
         <>
-          <div className="auth-field">
-            <label htmlFor="profile-name" className="auth-label">
-              {lang === "en" ? "Name" : "Nombre"}
-            </label>
-            <input
-              id="profile-name"
-              type="text"
-              className="auth-input"
-              value={nameDraft}
-              onChange={(event) => setNameDraft(event.target.value)}
-            />
-          </div>
+          {!isEditingProfile ? (
+            <div className="account-details-summary">
+              <div className="account-details-summary-head">
+                <div>
+                  <span className="auth-label">{profile?.name || "—"}</span>
+                  <p className="auth-alt">{profile?.email || "—"}</p>
+                </div>
+                <button
+                  type="button"
+                  className="button-primary auth-submit-compact btn-padding-site account-details-edit-button"
+                  onClick={() => setIsEditingProfile(true)}
+                >
+                  {lang === "en" ? "Edit profile" : "Editar perfil"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="auth-field">
+                <label htmlFor="profile-name" className="auth-label">
+                  {lang === "en" ? "Name" : "Nombre"}
+                </label>
+                <input
+                  id="profile-name"
+                  type="text"
+                  className="auth-input"
+                  value={nameDraft}
+                  onChange={(event) => setNameDraft(event.target.value)}
+                />
+              </div>
 
-          <div className="auth-field">
-            <label htmlFor="profile-email" className="auth-label">
-              {lang === "en" ? "Email" : "Correo electrónico"}
-            </label>
-            <input
-              id="profile-email"
-              type="email"
-              className="auth-input"
-              value={emailDraft}
-              onChange={(event) => setEmailDraft(event.target.value)}
-            />
-          </div>
+              <div className="auth-field">
+                <label htmlFor="profile-email" className="auth-label">
+                  {lang === "en" ? "Email" : "Correo electrónico"}
+                </label>
+                <input
+                  id="profile-email"
+                  type="email"
+                  className="auth-input"
+                  value={emailDraft}
+                  onChange={(event) => setEmailDraft(event.target.value)}
+                />
+              </div>
 
-          <button
-            type="button"
-            className="button-primary auth-submit-compact auth-center-button btn-padding-site"
-            onClick={handleSaveProfile}
-            disabled={isSavingProfile}
-          >
-            {isSavingProfile
-              ? lang === "en"
-                ? "Saving..."
-                : "Guardando..."
-              : hasProfileChanges
-                ? lang === "en"
-                  ? "Save profile"
-                  : "Guardar perfil"
-                : lang === "en"
-                  ? "No changes"
-                  : "Sin cambios"}
-          </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  className="button-primary auth-submit-compact btn-padding-site"
+                  onClick={async () => {
+                    await handleSaveProfile();
+                    if (!profileMessage || profileMessageType === "success") {
+                      setIsEditingProfile(false);
+                    }
+                  }}
+                  disabled={isSavingProfile}
+                >
+                  {isSavingProfile
+                    ? lang === "en" ? "Saving..." : "Guardando..."
+                    : lang === "en" ? "Save" : "Guardar"}
+                </button>
+                <button
+                  type="button"
+                  className="button-ghost auth-submit-compact btn-padding-site"
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setNameDraft(profile?.name ?? "");
+                    setEmailDraft(profile?.email ?? "");
+                  }}
+                  disabled={isSavingProfile}
+                >
+                  {lang === "en" ? "Cancel" : "Cancelar"}
+                </button>
+              </div>
 
-          {profileMessage ? (
-            <p
-              className="auth-alt"
-              role={profileMessageType === "error" ? "alert" : "status"}
-              aria-live="polite"
-            >
-              {profileMessage}
-            </p>
-          ) : null}
-
-          {profile ? (
-            <p className="auth-alt">
-              {lang === "en" ? "Active user:" : "Usuario activo:"}{" "}
-              <strong>{profile.email}</strong>
-            </p>
-          ) : null}
+              {profileMessage ? (
+                <p
+                  className="auth-alt"
+                  role={profileMessageType === "error" ? "alert" : "status"}
+                  aria-live="polite"
+                >
+                  {profileMessage}
+                </p>
+              ) : null}
+            </>
+          )}
 
           <p className="auth-alt">
             {lang === "en" ? "Total spent:" : "Total gastado:"}{" "}
