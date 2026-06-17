@@ -6,6 +6,7 @@ import type { ProductPreview } from "@/types/product";
 import { GameCard } from "@/components/ui/GameCard";
 import { useLocale } from "@/hooks/useLocale";
 import { t } from "@/lib/i18n";
+import styles from "./GameGrid.module.scss";
 
 const DESKTOP_LIMIT = 40;
 const MOBILE_LIMIT = 20;
@@ -46,7 +47,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
     if (typeof window === "undefined") return;
 
     const cardNodes = Array.from(
-      document.querySelectorAll<HTMLElement>(".game-card-reveal[data-reveal-slug]")
+      document.querySelectorAll<HTMLElement>("[data-reveal-slug]")
     );
 
     if (cardNodes.length === 0) return;
@@ -115,7 +116,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
           </Link>
         )}
       </div>
-      <div className="grid-games">
+      <div className={styles.gridGames}>
         {displayedGames.length === 0 ? (
           isFiltered ? (
             <div className="game-grid-empty">
@@ -139,7 +140,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
                   <p className="section-subtitle" style={{ marginBottom: "1rem" }}>
                     {t(lang, "grid.suggestions-label")}
                   </p>
-                  <div className="grid-games">
+                  <div className={styles.gridGames}>
                     {popularSuggestions.map((game) => (
                       <GameCard key={game.slug} game={game} />
                     ))}
@@ -153,15 +154,15 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
             </p>
           )
         ) : (
-          <div className="grid-games">
+          <div className={styles.gridGames}>
             {displayedGames.map((game, index) => (
               <div
                 key={game.slug}
-                className={
-                  "game-card-reveal" +
-                  ` reveal-delay-${Math.min(index, 8)}` +
-                  (visibleCards.has(game.slug) ? " game-card-reveal--visible" : "")
-                }
+                className={[
+                  styles.gameCardReveal,
+                  styles[`revealDelay${Math.min(index, 8)}` as keyof typeof styles],
+                  visibleCards.has(game.slug) ? styles.gameCardRevealVisible : "",
+                ].filter(Boolean).join(" ")}
                 data-reveal-slug={game.slug}
               >
                 <GameCard game={game} />

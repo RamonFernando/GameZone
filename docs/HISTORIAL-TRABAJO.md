@@ -12,6 +12,17 @@
 
 ---
 
+## 17-06-2026 (rama dev-17062026-claude)
+
+### Claude (VS Code)
+
+- [MVC ✅] Reorganización MVC: components/layout, ui, features; services/auth, cart, checkout, market, payments; 97 imports actualizados; CLAUDE.md + docs/REGLAS-IA.md creados — sin commit único (sesión anterior)
+- [9.3 ✅] Accesibilidad: prefers-reduced-motion para .card-hover, .button-primary, .game-card-actions .button-primary (badge-gradient-sweep), .card.game-card-plus:hover, .game-card-like-icon — en globals.scss + responsive-refinements.scss
+- [9.5 ✅] CSS Modules GameCard: GameCard.module.scss creado, game-card-* extraídos de responsive-refinements.scss, GameCard.tsx actualizado con styles.xxx
+- [9.5 ✅] CSS Modules GameGrid: GameGrid.module.scss creado, .grid-games + .game-card-reveal* extraídos de globals.scss, GameGrid.tsx actualizado (querySelectorAll → data-reveal-slug)
+- [9.5 ⏳] CSS Modules Header — pendiente (scope demasiado grande para mínimo cambio: 900+ líneas CSS, 50+ clases, responsive complejo)
+- [Netlify ✅] Deploy bloqueado en ramas distintas de main: netlify.toml ignore="node -e process.exit(...)"
+
 ## 13-06-2026 (rama dev-13062026)
 
 ### Claude (VS Code)

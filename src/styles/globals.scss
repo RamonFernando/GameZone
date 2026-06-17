@@ -868,13 +868,6 @@ img {
   transform: scale(0.92);
 }
 
-/* Botón Añadir/Add de la card: mismo efecto de gradiente (derecha→izquierda 15 s, vuelta 3 s) */
-.game-card-actions .button-primary {
-  background: linear-gradient(90deg, rgba(30, 41, 59, 0.98) 0%, rgba(92, 61, 184, 0.9) 25%, rgba(127, 88, 231, 0.95) 50%, rgba(92, 61, 184, 0.9) 75%, rgba(30, 41, 59, 0.98) 100%);
-  background-size: 200% 100%;
-  background-position: 100% 50%;
-  animation: badge-gradient-sweep 30s linear infinite;
-}
 
 .button-primary-edit-product-save{
   /* Igualar tamaño de los botones Guardar / Cancelar
@@ -1026,42 +1019,7 @@ img {
   color: #9ca3af;
 }
 
-.grid-games {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1.1rem;
-}
-
-.game-card-reveal {
-  opacity: 0;
-  transform: translate3d(-34px, 0, 0);
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease-out;
-  transition-delay: 0ms;
-  will-change: transform, opacity;
-}
-
-.reveal-delay-0 { transition-delay: 0ms; }
-.reveal-delay-1 { transition-delay: 70ms; }
-.reveal-delay-2 { transition-delay: 140ms; }
-.reveal-delay-3 { transition-delay: 210ms; }
-.reveal-delay-4 { transition-delay: 280ms; }
-.reveal-delay-5 { transition-delay: 350ms; }
-.reveal-delay-6 { transition-delay: 420ms; }
-.reveal-delay-7 { transition-delay: 490ms; }
-.reveal-delay-8 { transition-delay: 560ms; }
-
-.game-card-reveal--visible {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .game-card-reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
+/* .grid-games y .game-card-reveal migrados a src/components/ui/GameGrid.module.scss */
 
 @media (min-width: 768px) {
   .main-wrapper {
@@ -3064,6 +3022,26 @@ h1,
 @media (prefers-reduced-motion: reduce) {
   .nav-logo-mark::after {
     animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover,
+  .card-hover:hover {
+    transition: none;
+    transform: none;
+  }
+
+  .button-primary {
+    transition: none;
+  }
+
+  .button-primary:hover {
+    transform: none;
+  }
+
+  .game-card-actions .button-primary {
+    animation: none;
   }
 }
 

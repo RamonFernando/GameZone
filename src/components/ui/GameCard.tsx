@@ -7,6 +7,7 @@ import type { ProductPreview } from "@/types/product";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import { useLocale } from "@/hooks/useLocale";
+import styles from "./GameCard.module.scss";
 
 // Props que recibe la tarjeta de juego (información básica del producto).
 type Props = {
@@ -86,9 +87,9 @@ export function GameCard({ game }: Props) {
 
   return (
     // Componente de tarjeta que muestra un juego dentro de listados y rejillas.
-    <article className="card card-hover game-card-plus">
+    <article className={`card card-hover ${styles.gameCardPlus}`}>
       {/* INICIO DE LA IMAGEN */}
-      <div className="game-card-media">
+      <div className={styles.gameCardMedia}>
         <Image
           src={game.coverImage}
           alt={game.name}
@@ -100,17 +101,17 @@ export function GameCard({ game }: Props) {
           style={{ objectFit: "contain", objectPosition: "center center" }}
         />
         {game.cashbackPercent > 0 ? (
-          <span className="game-card-cashback-badge">+{game.cashbackPercent}% Cashback</span>
+          <span className={styles.gameCardCashbackBadge}>+{game.cashbackPercent}% Cashback</span>
         ) : null}
         {game.discountPercent > 0 ? (
-          <span className="game-card-discount-badge">-{game.discountPercent}%</span>
+          <span className={styles.gameCardDiscountBadge}>-{game.discountPercent}%</span>
         ) : null}
         {timeLeft ? (
-          <span className="game-card-countdown" aria-label={`Oferta termina en ${timeLeft}`}>
+          <span className={styles.gameCardCountdown} aria-label={`Oferta termina en ${timeLeft}`}>
             ⏱ {timeLeft}
           </span>
         ) : null}
-        <span className="game-card-store-pill">
+        <span className={styles.gameCardStorePill}>
           {game.storeLabel.toLowerCase() === "steam" ? (
             <>
               <Image
@@ -118,76 +119,76 @@ export function GameCard({ game }: Props) {
                 alt="Steam"
                 width={14}
                 height={14}
-                className="game-card-store-icon"
+                className={styles.gameCardStoreIcon}
               />
-              <span className="game-card-store-text">{game.storeLabel}</span>
+              <span>{game.storeLabel}</span>
             </>
           ) : (
-            <span className="game-card-store-text">{game.storeLabel}</span>
+            <span>{game.storeLabel}</span>
           )}
         </span>
       </div> {/* FIN DE LA IMAGEN */}
       {/* INICIO DEL CUERPO */}
-      <div className="game-card-body">
+      <div className={styles.gameCardBody}>
         {/*TÍTULO */}
-        <h3 className="game-card-title">{game.name}</h3>
+        <h3 className={styles.gameCardTitle}>{game.name}</h3>
         {displayCardSubtitle ? (
-          <p className="game-card-subtitle">{displayCardSubtitle}</p>
+          <p className={styles.gameCardSubtitle}>{displayCardSubtitle}</p>
         ) : null}
-        <p className="game-card-region">{displayRegion}</p>
+        <p className={styles.gameCardRegion}>{displayRegion}</p>
 
         {/* PRECIO */}
-        <div className="game-card-price">
+        <div className={styles.gameCardPrice}>
           {/* PRECIO ORIGINAL */}
           <p
             className={
-              "game-card-original-line" +
-              (game.discountPercent > 0 ? "" : " game-card-original-line--empty")
+              styles.gameCardOriginalLine +
+              (game.discountPercent > 0 ? "" : ` ${styles.gameCardOriginalLineEmpty}`)
             }
           >
             {game.discountPercent > 0 ? (
               <>
-                Desde <span className="game-card-original-price">{money(game.priceOriginal)}</span>{" "}
-                <span className="game-card-discount">-{game.discountPercent}%</span>
+                Desde <span className={styles.gameCardOriginalPrice}>{money(game.priceOriginal)}</span>{" "}
+                <span className={styles.gameCardDiscount}>-{game.discountPercent}%</span>
               </>
             ) : (
               "\u00A0"
             )}
           </p> {/* FIN DEL PRECIO ORIGINAL */}
           {/* PRECIO CON DESCUENTO */}
-          <p className="game-card-final-price">{money(game.priceFinal)}</p>
+          <p className={styles.gameCardFinalPrice}>{money(game.priceFinal)}</p>
         </div>
         {/* CASHBACK */}
         {game.cashbackPercent > 0 ? (
-          <p className="game-card-cashback-text">
+          <p className={styles.gameCardCashbackText}>
             {game.cashbackPercent}% Cashback
           </p>
         ) : null}
         {/* FIN DEL CASHBACK */}
         <button
           type="button"
-          className="game-card-like-button"
+          className={styles.gameCardLikeButton}
           onClick={handleLike}
           disabled={isLiking}
           aria-label={`${liked ? "Quitar me gusta de" : "Dar me gusta a"} ${game.name}`}
           title={liked ? "Quitar me gusta" : "Me gusta"}
         > 
-          <span className={`game-card-like-icon${liked ? " game-card-like-icon--active" : ""}`}>
+          <span className={`${styles.gameCardLikeIcon}${liked ? ` ${styles.gameCardLikeIconActive}` : ""}`}>
             {liked ? "♥" : "♡"}
           </span>{" "}
           {likesCount}
         </button>
         {/* INICIO DE LAS ACCIONES */}
-        <div className="game-card-actions">
+        <div className={styles.gameCardActions}>
           <Link
             href={`/games/${slug}`}
-            className="button-ghost game-card-button btn-padding-site"
+            className={`button-ghost ${styles.gameCardButton} btn-padding-site`}
           >
             {lang === "en" ? "View details" : "Ver detalles"}
           </Link>
           <button
             type="button"
-            className="button-primary game-card-button btn-padding-site"
+            className={`button-primary ${styles.gameCardButton} btn-padding-site`}
             onClick={() => addToCart(game)}
           >
             {lang === "en" ? "Add" : "Añadir"}
