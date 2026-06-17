@@ -35,7 +35,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | 2.4 — Cabeceras de seguridad | ✅ hecho · 7.1 ✅ hecho · ⚠️ pendiente validación manual en producción (home, ficha, auth, checkout) |
 | 2.5 — Validación `event.type` webhooks | ✅ hecho |
 | 3.1 — Zod en bodies de API | ✅ hecho |
-| 3.2 — Rate limit distribuido (Upstash) | ⬜ pendiente (opcional) |
+| 3.2 — Rate limit distribuido (Upstash) | ✅ hecho (17/06/2026; usa Upstash con fallback PostgreSQL si faltan env vars) |
 | 3.3 — Sentry | ✅ **HECHO** (verificado: `withSentryConfig` en `next.config.mjs`, configs server/edge/client) — la v1 lo marcaba pendiente por error |
 | 3.4 — CI GitHub Actions | ✅ hecho |
 | 3.5 — Tests de integración | ✅ **HECHO** (11/06/2026; 48 tests: servicios de checkout/sesión + rutas webhook Stripe/PayPal + login/2FA) |

@@ -30,6 +30,7 @@
 - [9.5 ✅] CSS Modules FeaturedSection: FeaturedSection.module.scss creado, featured-* extraídos de globals.scss, BADGE_CLASS map y featuredGenreChipActive migrados — commit 3d4384d
 - [9.5 ✅] CSS Modules PromoAppBanner: PromoAppBanner.module.scss creado, promo/promo-store/promo-phone/promo-qr extraídos de globals.scss, is-filled preservado como global — commit 3d4384d
 - [9.5 ✅] CSS Modules auth split: auth.module.scss + account.module.scss, imports actualizados en 11 pages; auth/checkout separado de account/admin — commit 1927cc1
+- [3.2 ✅] Upstash Redis rate limit distribuido: enforceRateLimit usa Upstash si hay env vars y fallback PostgreSQL si faltan o falla Redis — commit PENDIENTE
 
 ## 13-06-2026 (rama dev-13062026)
 

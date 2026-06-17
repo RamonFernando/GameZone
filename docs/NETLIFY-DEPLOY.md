@@ -81,6 +81,11 @@ G2A_API_KEY=
 # Sentry (opcional — monitorización de errores en producción)
 # Sin este valor Sentry no se inicializa y no rompe nada.
 SENTRY_DSN=<dashboard Sentry → Project Settings → Client Keys (DSN)>
+
+# Upstash Redis (opcional, recomendado para rate limit distribuido)
+# Si faltan estas variables, la app usa fallback en PostgreSQL.
+UPSTASH_REDIS_REST_URL=<dashboard Upstash Redis - REST URL>
+UPSTASH_REDIS_REST_TOKEN=<dashboard Upstash Redis - REST Token>
 ```
 
 ## Checklist del día del deploy
@@ -94,3 +99,4 @@ SENTRY_DSN=<dashboard Sentry → Project Settings → Client Keys (DSN)>
 7. [ ] Build command (`npm run build`, ya incluye `prisma generate`) y plugin `@netlify/plugin-nextjs` ya están en `netlify.toml`.
 8. [ ] Tras el primer deploy, comprobar que `instrumentation.ts` (`ensureMasterAdminUser`) funcionó o crear el admin de otra forma (ver tarea 1.4 del plan de auditoría).
 9. [ ] (Opcional) Añadir `SENTRY_DSN` para recibir alertas de errores en producción.
+10. [ ] (Recomendado) Crear Redis en Upstash y añadir `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` para rate limit distribuido.
