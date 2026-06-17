@@ -20,7 +20,8 @@
 - [9.3 ✅] Accesibilidad: prefers-reduced-motion para .card-hover, .button-primary, .game-card-actions .button-primary (badge-gradient-sweep), .card.game-card-plus:hover, .game-card-like-icon — en globals.scss + responsive-refinements.scss
 - [9.5 ✅] CSS Modules GameCard: GameCard.module.scss creado, game-card-* extraídos de responsive-refinements.scss, GameCard.tsx actualizado con styles.xxx
 - [9.5 ✅] CSS Modules GameGrid: GameGrid.module.scss creado, .grid-games + .game-card-reveal* extraídos de globals.scss, GameGrid.tsx actualizado (querySelectorAll → data-reveal-slug)
-- [9.5 ⏳] CSS Modules Header — pendiente (scope demasiado grande para mínimo cambio: 900+ líneas CSS, 50+ clases, responsive complejo)
+- [9.5 ✅] CSS Modules GameDetailClient: GameDetailClient.module.scss creado, game-detail-* + game-suggestion-* + game-detail-sticky-* extraídos de responsive-refinements.scss y globals.scss, grid-games→suggestionGrid corregido
+- [9.5 ⏳] CSS Modules Header — pendiente
 - [Netlify ✅] Deploy bloqueado en ramas distintas de main: netlify.toml ignore="node -e process.exit(...)"
 
 ## 13-06-2026 (rama dev-13062026)
