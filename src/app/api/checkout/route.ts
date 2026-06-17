@@ -14,17 +14,24 @@ const checkoutSchema = z.object({
   items: z
     .array(
       z.object({
-        slug: z.string().optional(),
-        quantity: z.number().optional(),
+        slug: z.string().min(1),
+        quantity: z.number().int().positive(),
       })
     )
-    .optional(),
+    .min(1, "El carrito no puede estar vacío"),
 });
 
 export async function POST(request: Request) {
   const authResult = await requirePermission(request, PERMISSIONS.CHECKOUT_CREATE);
   if (!authResult.ok) {
     return authResult.response;
+  }
+
+  if (authResult.auth.role !== "ADMIN") {
+    return NextResponse.json(
+      { message: "No autorizado.", code: "FORBIDDEN" },
+      { status: 403 }
+    );
   }
 
   const parsed = await parseJsonBody(request, checkoutSchema);
@@ -34,7 +41,7 @@ export async function POST(request: Request) {
   try {
     const pendingOrder = await createPendingOrder({
       userId: authResult.auth.userId,
-      items: payload.items ?? [],
+      items: payload.items,
       paymentProvider: "manual",
     });
 

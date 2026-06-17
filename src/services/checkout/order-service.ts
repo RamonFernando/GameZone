@@ -127,8 +127,16 @@ export async function createPendingOrder(input: {
   items: CheckoutItemInput[];
   paymentProvider: "stripe" | "paypal" | "manual";
 }) {
+  if (input.items.length === 0) {
+    throw new CheckoutValidationError("El carrito no puede estar vacío.", "EMPTY_CART", 400);
+  }
+
   const orderItems = await normalizeOrderItemsFromDb(input.items);
   const totalAmount = computeTotalAmount(orderItems);
+
+  if (totalAmount <= 0) {
+    throw new CheckoutValidationError("El importe total debe ser mayor que cero.", "INVALID_AMOUNT", 400);
+  }
 
   return prisma.order.create({
     data: {
