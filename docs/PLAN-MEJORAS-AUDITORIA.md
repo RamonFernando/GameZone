@@ -357,8 +357,8 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   Exo 2 vía `next/font/google` como variable `--font-display` para títulos principales.
 
 > **Validación local 11/06/2026:** `npx tsc --noEmit` ✅ y `npm run test:unit` ✅ (48/48).
-> `npm run lint` ❌ pendiente por resolver en código: dos `eslint-disable-next-line react-hooks/exhaustive-deps`
-> apuntan a una regla no configurada y `dataSources` queda sin uso en `MarketIntelligenceSections.tsx`.
+> `npm run lint` ✅ verificado el 17/06/2026: no quedan `eslint-disable-next-line react-hooks/exhaustive-deps`
+> ni `dataSources` sin uso en `MarketIntelligenceSections.tsx`.
 
 ---
 

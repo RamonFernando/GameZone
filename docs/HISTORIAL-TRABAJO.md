@@ -34,6 +34,8 @@
 - [9.5 ✅] CSS Modules PromoAppBanner: PromoAppBanner.module.scss creado, promo/promo-store/promo-phone/promo-qr extraídos de globals.scss, is-filled preservado como global — commit 3d4384d
 - [9.5 ✅] CSS Modules auth split: auth.module.scss + account.module.scss, imports actualizados en 11 pages; auth/checkout separado de account/admin — commit 1927cc1
 - [3.2 ✅] Upstash Redis rate limit distribuido: enforceRateLimit usa Upstash si hay env vars y fallback PostgreSQL si faltan o falla Redis — commit 83be33f
+- [perf ✅] Reduced motion libera capas GPU: `will-change: auto` añadido a card/button/hero/footer en bloques `prefers-reduced-motion` — commit 7195188
+- [fix ✅] ESLint MarketIntelligenceSections verificado: sin `dataSources` sin uso ni disables `react-hooks/exhaustive-deps`; nota de auditoría actualizada — commit este commit
 
 ## 13-06-2026 (rama dev-13062026)
 
