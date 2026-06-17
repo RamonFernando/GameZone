@@ -3,6 +3,7 @@
 import { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import styles from "./FeaturedSection.module.scss";
 import { Icon } from "@iconify/react";
 import lightningBolt   from "@iconify-icons/mdi/lightning-bolt";
 import crosshairs      from "@iconify-icons/mdi/crosshairs";
@@ -78,6 +79,11 @@ const GENRE_SHORT: Record<string, string> = {
   "Point-and-click": "P&C",
 };
 
+const BADGE_CLASS: Record<string, string> = {
+  "featured-side-card__badge--purple": styles.featuredSideCardBadgePurple,
+  "featured-side-card__badge--orange": styles.featuredSideCardBadgeOrange,
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getGenreIcon(genre: string): any {
   return GENRE_ICON[genre] ?? joystick;
@@ -107,18 +113,18 @@ function useCountdown() {
 
 function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: string; badgeClass: string }) {
   return (
-    <Link href={`/games/${game.slug}`} className="featured-side-card" aria-label={game.name}>
-      <div className="featured-side-card__media">
-        <Image src={game.coverImage} alt={game.name} fill sizes="220px" className="featured-side-card__img" unoptimized />
-        <div className="featured-side-card__overlay" />
-        <div className="featured-side-card__info">
-          <span className={`featured-side-card__badge ${badgeClass}`}>{badge}</span>
-          <p className="featured-side-card__name">{game.name}</p>
-          <div className="featured-side-card__price-row">
+    <Link href={`/games/${game.slug}`} className={styles.featuredSideCard} aria-label={game.name}>
+      <div className={styles.featuredSideCardMedia}>
+        <Image src={game.coverImage} alt={game.name} fill sizes="220px" className={styles.featuredSideCardImg} unoptimized />
+        <div className={styles.featuredSideCardOverlay} />
+        <div className={styles.featuredSideCardInfo}>
+          <span className={`${styles.featuredSideCardBadge} ${BADGE_CLASS[badgeClass] ?? ""}`}>{badge}</span>
+          <p className={styles.featuredSideCardName}>{game.name}</p>
+          <div className={styles.featuredSideCardPriceRow}>
             {game.discountPercent > 0 && (
-              <span className="featured-side-card__discount">-{game.discountPercent}%</span>
+              <span className={styles.featuredSideCardDiscount}>-{game.discountPercent}%</span>
             )}
-            <span className="featured-side-card__price">{formatPrice(game.priceFinal)}</span>
+            <span className={styles.featuredSideCardPrice}>{formatPrice(game.priceFinal)}</span>
           </div>
         </div>
       </div>
@@ -129,39 +135,39 @@ function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: st
 function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string }) {
   const { h, m, s } = useCountdown();
   return (
-    <div className="featured-deal">
-      <div className="featured-deal__header">
-        <span className="featured-deal__fire">🔥</span>
-        <span className="featured-deal__title">{lang === "en" ? "Deals of the day" : "Ofertas del día"}</span>
-        <div className="featured-deal__countdown">
-          <div className="featured-deal__cd-block">
-            <span className="featured-deal__cd-num">{fmt(h)}</span>
-            <span className="featured-deal__cd-unit">h</span>
+    <div className={styles.featuredDeal}>
+      <div className={styles.featuredDealHeader}>
+        <span className={styles.featuredDealFire}>🔥</span>
+        <span className={styles.featuredDealTitle}>{lang === "en" ? "Deals of the day" : "Ofertas del día"}</span>
+        <div className={styles.featuredDealCountdown}>
+          <div className={styles.featuredDealCdBlock}>
+            <span className={styles.featuredDealCdNum}>{fmt(h)}</span>
+            <span className={styles.featuredDealCdUnit}>h</span>
           </div>
-          <span className="featured-deal__cd-sep">:</span>
-          <div className="featured-deal__cd-block">
-            <span className="featured-deal__cd-num">{fmt(m)}</span>
-            <span className="featured-deal__cd-unit">min</span>
+          <span className={styles.featuredDealCdSep}>:</span>
+          <div className={styles.featuredDealCdBlock}>
+            <span className={styles.featuredDealCdNum}>{fmt(m)}</span>
+            <span className={styles.featuredDealCdUnit}>min</span>
           </div>
-          <span className="featured-deal__cd-sep">:</span>
-          <div className="featured-deal__cd-block">
-            <span className="featured-deal__cd-num">{fmt(s)}</span>
-            <span className="featured-deal__cd-unit">seg</span>
+          <span className={styles.featuredDealCdSep}>:</span>
+          <div className={styles.featuredDealCdBlock}>
+            <span className={styles.featuredDealCdNum}>{fmt(s)}</span>
+            <span className={styles.featuredDealCdUnit}>seg</span>
           </div>
         </div>
       </div>
-      <div className="featured-deal__list">
+      <div className={styles.featuredDealList}>
         {games.map((game) => (
-          <Link key={game.slug} href={`/games/${game.slug}`} className="featured-deal__row">
-            <div className="featured-deal__cover">
+          <Link key={game.slug} href={`/games/${game.slug}`} className={styles.featuredDealRow}>
+            <div className={styles.featuredDealCover}>
               <Image src={game.coverImage} alt={game.name} fill sizes="64px" style={{ objectFit: "cover" }} unoptimized />
             </div>
-            <div className="featured-deal__info">
-              <p className="featured-deal__name">{game.name}</p>
-              <div className="featured-deal__price-row">
-                <span className="featured-deal__badge">-{game.discountPercent}%</span>
-                <span className="featured-deal__price">{formatPrice(game.priceFinal)}</span>
-                <span className="featured-deal__original">{formatPrice(game.priceOriginal)}</span>
+            <div className={styles.featuredDealInfo}>
+              <p className={styles.featuredDealName}>{game.name}</p>
+              <div className={styles.featuredDealPriceRow}>
+                <span className={styles.featuredDealBadge}>-{game.discountPercent}%</span>
+                <span className={styles.featuredDealPrice}>{formatPrice(game.priceFinal)}</span>
+                <span className={styles.featuredDealOriginal}>{formatPrice(game.priceOriginal)}</span>
               </div>
             </div>
           </Link>
@@ -205,18 +211,18 @@ export function FeaturedSection({ products }: Props) {
   if (!featuredGame && topGenres.length === 0) return null;
 
   return (
-    <section className="featured-section" aria-label={lang === "en" ? "Featured section" : "Sección destacada"}>
-      <div className="featured-grid">
+    <section className={styles.featuredSection} aria-label={lang === "en" ? "Featured section" : "Sección destacada"}>
+      <div className={styles.featuredGrid}>
 
         {featuredGame && (
           <SideCard game={featuredGame} badge={lang === "en" ? "Most liked" : "Más destacado"} badgeClass="featured-side-card__badge--purple" />
         )}
 
-        <div className="featured-center">
+        <div className={styles.featuredCenter}>
           {topGenres.length > 0 && (
-            <div className="featured-genres">
-              <p className="featured-genres-label">{lang === "en" ? "Browse by genre" : "Explorar por género"}</p>
-              <div className="featured-genres-row">
+            <div className={styles.featuredGenres}>
+              <p className={styles.featuredGenresLabel}>{lang === "en" ? "Browse by genre" : "Explorar por género"}</p>
+              <div className={styles.featuredGenresRow}>
                 {topGenres.map((genre) => {
                   const iconName = getGenreIcon(genre);
                   const label = GENRE_SHORT[genre] ?? genre;
@@ -224,7 +230,7 @@ export function FeaturedSection({ products }: Props) {
                     <button
                       key={genre}
                       type="button"
-                      className={`featured-genre-chip${filterGenre === genre ? " featured-genre-chip--active" : ""}`}
+                      className={`${styles.featuredGenreChip}${filterGenre === genre ? ` ${styles.featuredGenreChipActive}` : ""}`}
                       data-genre={genre}
                       style={{ "--genre-color": GENRE_COLOR[genre] ?? "#6366f1" } as React.CSSProperties}
                       onClick={() => {
@@ -234,10 +240,10 @@ export function FeaturedSection({ products }: Props) {
                         });
                       }}
                     >
-                      <span className="featured-genre-icon" aria-hidden="true">
+                      <span className={styles.featuredGenreIcon} aria-hidden="true">
                         <Icon icon={iconName} width={40} height={40} />
                       </span>
-                      <span className="featured-genre-name">{label}</span>
+                      <span className={styles.featuredGenreName}>{label}</span>
                     </button>
                   );
                 })}

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import styles from "./PromoAppBanner.module.scss";
 
 import { useLocale } from "@/hooks/useLocale";
 
@@ -14,13 +15,13 @@ export function PromoAppBanner() {
   const alt = lang === "en" ? promoAlt.en : promoAlt.es;
 
   return (
-    <section className="promo-app-banner" aria-label={alt}>
+    <section className={styles.promoAppBanner} aria-label={alt}>
       <Image
         src="/banners/app-promo-gamezone.png"
         alt={alt}
         fill
         sizes="100vw"
-        className="promo-app-banner__image"
+        className={styles.promoAppBannerImage}
       />
     </section>
   );

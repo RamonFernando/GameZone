@@ -25,6 +25,11 @@
 - [9.5 ✅] CSS Modules MarketIntelligenceSections: MarketIntelligenceSections.module.scss creado, market-pulse-*/market-intel-*/deal-*/recommendation-* extraídos (~1500 líneas de globals.scss + compound selectors de responsive-refinements.scss); THUMB_POSITION_CLASS map; gameDetailTitle font-family añadido; B8 typography rule simplificada
 - [Netlify ✅] Deploy bloqueado en ramas distintas de main: netlify.toml ignore="node -e process.exit(...)"
 
+### GPT
+
+- [9.5 ✅] CSS Modules FeaturedSection: FeaturedSection.module.scss creado, featured-* extraídos de globals.scss, BADGE_CLASS map y featuredGenreChipActive migrados — commit aed2c53
+- [9.5 ✅] CSS Modules PromoAppBanner: PromoAppBanner.module.scss creado, promo/promo-store/promo-phone/promo-qr extraídos de globals.scss, is-filled preservado como global — commit aed2c53
+
 ## 13-06-2026 (rama dev-13062026)
 
 ### Claude (VS Code)

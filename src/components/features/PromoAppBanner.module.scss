@@ -1,0 +1,502 @@
+.promoAppBanner {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  width: 100vw;
+  max-width: 100vw;
+  min-height: 236px;
+  margin: 1.75rem calc(50% - 50vw);
+  padding: 1.1rem max(1.35rem, calc((100vw - 1200px) / 2 + 1.35rem));
+  overflow: hidden;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  border-radius: 0;
+  background:
+    linear-gradient(118deg, #0a0610 0%, #120712 44%, rgba(10, 6, 16, 0.92) 45%, rgba(10, 6, 16, 0.96) 100%),
+    radial-gradient(circle at 70% 35%, rgba(59, 130, 246, 0.22), transparent 34%);
+  box-shadow:
+    0 18px 48px rgba(2, 6, 23, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.promoAppStripe {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 260px;
+  height: 46px;
+  background: #ea580c;
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+  z-index: -1;
+}
+
+.promoAppBlueCut {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 230px;
+  height: 56px;
+  background: #38a3f1;
+  clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+  opacity: 0.95;
+  z-index: -1;
+}
+
+.promoAppCopy {
+  display: grid;
+  gap: 0.32rem;
+  min-width: 0;
+}
+
+.promoAppKicker {
+  margin: 0;
+  color: #fed7aa;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.promoAppTitle {
+  margin: 0;
+  max-width: 620px;
+  color: #ffffff;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: clamp(1.45rem, 3vw, 2.55rem);
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.promoAppSubtitle {
+  margin: 0;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.promoAppActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.promoAppCode {
+  display: inline-grid;
+  place-items: center;
+  min-width: 132px;
+  min-height: 54px;
+  padding: 0.3rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #60b8ff, #2d7eea);
+  border: 1px solid rgba(191, 219, 254, 0.7);
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 8px 8px 0 rgba(37, 99, 235, 0.55);
+}
+
+.promoStoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 132px;
+  padding: 0.32rem 0.55rem;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: #09090b;
+  color: #ffffff;
+}
+
+.promoStoreBadge small,
+.promoStoreBadge strong {
+  display: block;
+  line-height: 1.05;
+}
+
+.promoStoreBadge small {
+  font-size: 0.56rem;
+  color: #d1d5db;
+  text-transform: uppercase;
+}
+
+.promoStoreBadge strong {
+  margin-top: 0.12rem;
+  font-size: 0.86rem;
+}
+
+.promoStoreIcon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f97316;
+  font-weight: 900;
+}
+
+.promoStoreIconPlay {
+  background: linear-gradient(135deg, #22c55e, #38bdf8 48%, #f97316);
+}
+
+.promoAppPhone {
+  position: absolute;
+  right: max(306px, calc((100vw - 1200px) / 2 + 290px));
+  bottom: -126px;
+  width: 184px;
+  height: 307px;
+  padding: 0.42rem;
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, #243244, #020617 44%, #0f172a),
+    #020617;
+  transform: rotate(-12deg);
+  box-shadow:
+    0 34px 64px rgba(2, 6, 23, 0.76),
+    -10px 12px 0 rgba(15, 23, 42, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  z-index: 2;
+}
+
+.promoAppPhone::before {
+  content: "";
+  position: absolute;
+  inset: 9px 5px auto auto;
+  width: 42%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  filter: blur(5px);
+  transform: rotate(1deg);
+  pointer-events: none;
+}
+
+.promoAppPhone::after {
+  content: "";
+  position: absolute;
+  inset: auto 18px -10px 24px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.promoPhoneScreen {
+  position: relative;
+  height: 100%;
+  padding: 0.6rem 0.62rem 0.58rem;
+  overflow: hidden;
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(96, 165, 250, 0.22), transparent 32%),
+    linear-gradient(180deg, #050816 0%, #080b13 54%, #111827 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.promoPhoneStatus {
+  display: flex;
+  justify-content: space-between;
+  color: #e5e7eb;
+  font-size: 0.42rem;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+.promoPhoneSpeaker {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 38px;
+  height: 8px;
+  border-radius: 999px;
+  background: #020617;
+  transform: translateX(-50%);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+
+.promoPhoneLogo {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.08rem;
+  margin: 0.74rem auto 0.42rem;
+  width: 100%;
+  color: #f97316;
+  font-size: 1.22rem;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.promoPhoneLogo strong {
+  color: #60a5fa;
+  font-size: 1rem;
+  letter-spacing: -0.08em;
+}
+
+.promoPhoneSearch {
+  display: flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 0.45rem;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.12),
+    0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.promoPhoneSearch span {
+  overflow: hidden;
+  color: #475569;
+  font-size: 0.36rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promoPhoneCaption {
+  margin: 0.34rem 0 0;
+  color: #cbd5e1;
+  font-size: 0.4rem;
+  font-weight: 800;
+}
+
+.promoPhoneChips {
+  display: flex;
+  gap: 0.32rem;
+  margin-top: 0.34rem;
+}
+
+.promoPhoneChips span {
+  min-width: 0;
+  padding: 0.22rem 0.34rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #111827;
+  color: #e5e7eb;
+  font-size: 0.34rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promoPhoneProducts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.3rem;
+  margin-top: 0.44rem;
+}
+
+.promoPhoneProducts article {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0f172a;
+}
+
+.promoPhoneProductCover {
+  display: block;
+  min-height: 42px;
+  border-radius: 7px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 38%),
+    linear-gradient(135deg, #f97316, #7c3aed);
+}
+
+.promoPhoneProductCoverTwo {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 38%),
+    linear-gradient(135deg, #38bdf8, #1d4ed8);
+}
+
+.promoPhoneProductCoverThree {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 38%),
+    linear-gradient(135deg, #22c55e, #f59e0b);
+}
+
+.promoPhoneProducts strong,
+.promoPhoneProducts small {
+  display: block;
+  overflow: hidden;
+  padding: 0 0.24rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promoPhoneProducts strong {
+  margin-top: 0.18rem;
+  color: #ffffff;
+  font-size: 0.36rem;
+  line-height: 1.1;
+}
+
+.promoPhoneProducts small {
+  margin: 0.08rem 0 0.22rem;
+  color: #fed7aa;
+  font-size: 0.32rem;
+  font-weight: 800;
+}
+
+.promoAppQr {
+  position: relative;
+  position: absolute;
+  right: max(1.35rem, calc((100vw - 1200px) / 2 + 1.35rem));
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 2px;
+  width: 126px;
+  height: 126px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 14px 32px rgba(2, 6, 23, 0.35);
+  z-index: 3;
+}
+
+.promoAppQr span {
+  border-radius: 1px;
+  background: transparent;
+}
+
+.promoAppQr span:global(.is-filled) {
+  background: #050505;
+}
+
+.promoQrFinder {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 6px solid #050505;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 5px #ffffff, inset 0 0 0 11px #050505;
+}
+
+.promoQrFinderTl {
+  top: 10px;
+  left: 10px;
+}
+
+.promoQrFinderTr {
+  top: 10px;
+  right: 10px;
+}
+
+.promoQrFinderBl {
+  bottom: 10px;
+  left: 10px;
+}
+
+@media (max-width: 1024px) {
+  .promoAppBanner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .promoAppPhone {
+    right: 164px;
+    bottom: -104px;
+    width: 154px;
+    height: 257px;
+    transform: rotate(-12deg);
+  }
+
+  .promoAppQr {
+    right: 1rem;
+    width: 112px;
+    height: 112px;
+  }
+}
+
+@media (max-width: 640px) {
+  .promoAppBanner {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    padding: 1rem;
+  }
+
+  .promoAppStripe {
+    width: 190px;
+    height: 34px;
+  }
+
+  .promoAppTitle {
+    font-size: 1.35rem;
+    line-height: 1.05;
+  }
+
+  .promoAppActions {
+    align-items: stretch;
+  }
+
+  .promoAppCode {
+    min-width: 116px;
+    min-height: 46px;
+    font-size: 1.25rem;
+    box-shadow: 5px 5px 0 rgba(37, 99, 235, 0.5);
+  }
+
+  .promoStoreBadge {
+    min-width: 128px;
+  }
+
+  .promoAppPhone {
+    display: none;
+  }
+
+  .promoAppBlueCut {
+    width: 150px;
+    height: 42px;
+  }
+}
+
+.promoAppBanner {
+  position: relative;
+  display: block;
+  width: 100vw;
+  max-width: 100vw;
+  min-height: auto;
+  aspect-ratio: 2048 / 450;
+  margin: 1.75rem calc(50% - 50vw);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #09060d;
+  box-shadow: none;
+}
+
+.promoAppBannerImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 768px) {
+  .promoAppBanner {
+    aspect-ratio: 16 / 5;
+  }
+
+  .promoAppBannerImage {
+    object-position: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .promoAppBanner {
+    aspect-ratio: 16 / 7;
+  }
+
+  .promoAppBannerImage {
+    object-position: 42% center;
+  }
+}
+
