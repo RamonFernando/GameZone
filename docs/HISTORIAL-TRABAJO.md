@@ -12,7 +12,7 @@
 
 ---
 
-## 17-06-2026 (rama dev-17062026-claude)
+## 17-06-2026 (ramas dev-17062026-claude / dev-17062026-gpt)
 
 ### Claude (VS Code)
 

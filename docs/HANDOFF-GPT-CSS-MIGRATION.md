@@ -1,14 +1,15 @@
 # HANDOFF GPT — GameZoneV4 CSS Migration continuación
 
-> Documento de traspaso. Claude completó 8 de 11 migraciones CSS Modules.
-> Este doc es autosuficiente — no necesitas contexto previo.
+> Documento de traspaso y cierre. Claude completó 8 de 11 migraciones CSS Modules;
+> GPT completó las 3 restantes y el rate limit distribuido Upstash.
+> Queda diferido solo Turnstile, opcional según auditoría.
 
 ---
 
 ## 1. Contexto del proyecto
 
 **Stack:** Next.js 16 (App Router), React 19, TypeScript, Prisma, PostgreSQL (Neon), SCSS puro (sin Tailwind), Netlify  
-**Rama activa:** `dev-17062026-claude`  
+**Rama activa:** `dev-17062026-gpt`
 **Deploy:** BLOQUEADO intencionalmente en todas las ramas que no sean `main` (ver `netlify.toml`). No hacer deploy.  
 **Verificación obligatoria tras cada tarea:** `npx tsc --noEmit` (debe salir sin output) + `npx vitest run` (debe mostrar 76/76 passed)
 
@@ -87,18 +88,45 @@ className={`game-detail-cart-button ${styles.marketPulseCardCart}`}
 | `9435b0f` | GameDetailClient | `src/app/games/[slug]/GameDetailClient.module.scss` |
 | `11857b0` | Header | `src/components/layout/Header.module.scss` |
 | `0fcea97` | MarketIntelligenceSections | `src/components/features/MarketIntelligenceSections.module.scss` |
+| `3d4384d` | FeaturedSection | `src/components/features/FeaturedSection.module.scss` |
+| `3d4384d` | PromoAppBanner | `src/components/features/PromoAppBanner.module.scss` |
+| `1927cc1` | auth.scss split | `src/styles/auth.module.scss` + `src/styles/account.module.scss` |
+| `83be33f` | Upstash Redis rate limit | `src/services/auth/rate-limit.ts` |
+
+---
+
+## 3.1. Cierre GPT — estado final 17/06/2026
+
+**Rama GPT:** `dev-17062026-gpt`
+**Backup pre-auth:** `backup-pre-auth-split-17062026` en commit `75a2dd8`
+
+**Hecho por GPT:**
+- `3d4384d` — FeaturedSection + PromoAppBanner migrados a CSS Modules.
+- `1927cc1` — `auth.scss` dividido en `auth.module.scss` + `account.module.scss`, imports actualizados en 11 páginas.
+- `83be33f` — Upstash Redis rate limit distribuido con fallback PostgreSQL.
+- `e79edd3` — Historial actualizado con Upstash.
+
+**Verificación realizada:**
+- `npx tsc --noEmit` limpio.
+- `npx.cmd vitest run` — 76/76 passed.
+- `npx.cmd next build` pasó completo con permisos elevados.
+- `npm run build` sigue pudiendo fallar localmente por EPERM de Prisma DLL en Windows/Dropbox antes de llegar a Next.
+- Revisión visual pública hecha en desktop/móvil: home, auth, register, checkout, checkout success, account/admin sin sesión.
+
+**Queda diferido:**
+- Cloudflare Turnstile anti-bot (`7.5`) — opcional, solo si Ramón decide blindarlo o aparecen registros basura.
 
 ---
 
 ## 4. Estado actual de los ficheros de estilos globales
 
-### `src/styles/globals.scss` (1789 líneas tras las migraciones)
+### `src/styles/globals.scss` (809 líneas tras las migraciones)
 
 Estructura actual:
 - **Líneas 1–807:** Variables `:root`, reset, `html/body`, `.site-shell`, `.main-wrapper`, `.card`, `.card-hover`, `.button-primary`, `.button-ghost`, `.btn-padding-site`, `.badge-soft`, `.chip`, `.legal-page-*`, `.scroll-to-top`, `.error-boundary`, `.game-grid-skeleton`, `.recently-viewed`, `h1 / .section-title { font-family }`, `@media prefers-reduced-motion`. **NO tocar.**
-- **Líneas 808–1287:** ⬜ TODO el bloque `featured-*` — PENDIENTE → va a `FeaturedSection.module.scss`
-- **Líneas 1288:** Comentario de migración market-intel (ya migrado)
-- **Líneas 1289–1789:** ⬜ TODO el bloque `promo-app-*` — PENDIENTE → va a `PromoAppBanner.module.scss`
+- **Línea 808:** comentario `/* featured-* migrado a FeaturedSection.module.scss */`
+- **Línea 809:** comentario `/* promo-app-* migrado a PromoAppBanner.module.scss */`
+- Los bloques `featured-*`, `promo-*`, `promo-store-*`, `promo-phone-*` y `promo-qr-*` ya no viven en globales.
 
 ### `src/styles/responsive-refinements.scss` (76 líneas — mayormente comentarios de migración)
 
@@ -112,9 +140,13 @@ Lo que queda son reglas GLOBALES PERMANENTES (no tocar):
 @media (hover: none) { .scroll-to-top:hover { ... } }
 ```
 
-### `src/styles/auth.scss` (952 líneas — intacto, pendiente de split)
+### `src/styles/auth.scss` (eliminado tras split)
 
-Importado directamente (no como módulo) en 11 archivos page.tsx. El split consistirá en crear dos módulos y actualizar los imports.
+Reemplazado por:
+- `src/styles/auth.module.scss` — estilos globales preservados para `auth-*`, `checkout-*`, `form-*` y reglas dependientes de `.auth-shell`.
+- `src/styles/account.module.scss` — estilos globales preservados para `account-*`, `admin-*` y responsive asociado.
+
+Imports actualizados en 11 archivos page.tsx, incluyendo `src/app/checkout/success/page.tsx`.
 
 ---
 
@@ -500,7 +532,7 @@ feat: css modules featuredsection 17062026 — hecho por GPT
 feat: css modules promoappbanner 17062026 — hecho por GPT
 feat: css modules auth split 17062026 — hecho por GPT
 feat: upstash redis rate limit 17062026 — hecho por GPT
-feat: cloudflare turnstile registro 17062026 — hecho por GPT
+feat: cloudflare turnstile registro 17062026 — hecho por GPT (solo si se ejecuta más adelante)
 ```
 
 ---
@@ -518,12 +550,12 @@ feat: cloudflare turnstile registro 17062026 — hecho por GPT
 
 ## 12. Historial de trabajo (actualizar tras cada commit)
 
-Añadir entradas en `docs/HISTORIAL-TRABAJO.md` bajo la sección `## 17-06-2026` → `### GPT`:
+Entradas registradas en `docs/HISTORIAL-TRABAJO.md` bajo la sección `## 17-06-2026` → `### GPT`:
 
 ```markdown
-- [9.5 ✅] CSS Modules FeaturedSection: FeaturedSection.module.scss creado, featured-* extraídos de globals.scss (808-1287), BADGE_CLASS map, featuredGenreChipActive — commit XXXXXXX
-- [9.5 ✅] CSS Modules PromoAppBanner: PromoAppBanner.module.scss creado, promo-app-* extraídos de globals.scss (1289-1789) — commit XXXXXXX
-- [9.5 ✅] CSS Modules auth split: auth.module.scss + account.module.scss, imports actualizados en 11 pages — commit XXXXXXX
-- [3.2 ✅] Upstash Redis rate limit distribuido — commit XXXXXXX
-- [7.5 ✅] Cloudflare Turnstile anti-bot en registro — commit XXXXXXX
+- [9.5 ✅] CSS Modules FeaturedSection: FeaturedSection.module.scss creado, featured-* extraídos de globals.scss, BADGE_CLASS map y featuredGenreChipActive migrados — commit 3d4384d
+- [9.5 ✅] CSS Modules PromoAppBanner: PromoAppBanner.module.scss creado, promo/promo-store/promo-phone/promo-qr extraídos de globals.scss, is-filled preservado como global — commit 3d4384d
+- [9.5 ✅] CSS Modules auth split: auth.module.scss + account.module.scss, imports actualizados en 11 pages; auth/checkout separado de account/admin — commit 1927cc1
+- [3.2 ✅] Upstash Redis rate limit distribuido: enforceRateLimit usa Upstash si hay env vars y fallback PostgreSQL si faltan o falla Redis — commit 83be33f
+- [7.5 ⏸️] Cloudflare Turnstile anti-bot en registro queda diferido/opcional — sin commit
 ```

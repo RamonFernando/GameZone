@@ -56,7 +56,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 ## FASES 0–5 (v1) — resumen
 
-Las fases 0–3 están completas salvo 3.2 (Upstash, opcional). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
+Las fases 0–3 están completas, incluida 3.2 (Upstash con fallback PostgreSQL, 17/06/2026). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
 La fase 4 está completa salvo 4.2 (dominio, manual). 4.1b quedó cerrada en FASE 8 con metadata por ficha y JSON-LD.
 La fase 5 (roadmap: Xbox API, GA4, reseñas, wishlist, PWA, cupones) sigue vigente como futuro.
 El detalle histórico completo está en el commit anterior de este archivo (`git log -- docs/PLAN-MEJORAS-AUDITORIA.md`).
@@ -314,7 +314,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** el componente migrado se ve igual en desktop y móvil; no hay clases huérfanas
   evidentes en `globals.scss`; `npx tsc --noEmit`, `npx vitest run` y `npm run build` pasan.
 
-- **Estado 17/06/2026 (rama dev-17062026-claude):**
+- **Estado 17/06/2026 (rama dev-17062026-gpt):**
   - ✅ Footer — commit `4d1bf0b`
   - ✅ Hero — commit `0b375f7`
   - ✅ GameCard — commit `6b313a1` (`src/components/ui/GameCard.module.scss`)
@@ -323,10 +323,10 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   - ✅ GameDetailClient — commit `9435b0f` (`src/app/games/[slug]/GameDetailClient.module.scss`)
   - ✅ Header — commit `11857b0` (`src/components/layout/Header.module.scss`, 15+ breakpoints)
   - ✅ MarketIntelligenceSections — commit `0fcea97` (`src/components/features/MarketIntelligenceSections.module.scss`, ~1500 líneas, THUMB_POSITION_CLASS map)
-  - ⬜ **FeaturedSection** — pendiente (`src/components/features/FeaturedSection.tsx`, clases `featured-*`)
-  - ⬜ **PromoAppBanner** — pendiente (`src/components/features/PromoAppBanner.tsx`, clases `promo-app-*`)
-  - ⬜ **auth.scss split** — pendiente: separar `src/styles/auth.scss` en `Auth.module.scss` (~620 líneas) + `AccountDashboard.module.scss` (~330 líneas)
-  - Validado con `npx tsc --noEmit` + `npx vitest run` (76/76) tras cada migración.
+  - ✅ **FeaturedSection** — commit `3d4384d` (`src/components/features/FeaturedSection.module.scss`)
+  - ✅ **PromoAppBanner** — commit `3d4384d` (`src/components/features/PromoAppBanner.module.scss`)
+  - ✅ **auth.scss split** — commit `1927cc1`: `src/styles/auth.module.scss` + `src/styles/account.module.scss`, imports actualizados en 11 pages
+  - Validado con `npx tsc --noEmit`, `npx.cmd vitest run` (76/76), `npx.cmd next build` y revisión visual pública desktop/móvil.
 
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
 
@@ -461,5 +461,5 @@ npm run build
 - **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
 - **Dependabot** — actualizaciones de seguridad automáticas. Sin código.
 - **Lighthouse CI** — presupuesto de rendimiento en CI. Incorporado el 13/06/2026.
-- **Cloudflare Turnstile** (opcional, solo si hay bots) — anti-bot sin fricción.
-- **Upstash Redis** (opcional, hereda de 3.2) — rate limit distribuido si crece el tráfico.
+- **Cloudflare Turnstile** (opcional, diferido; solo si hay bots) — anti-bot sin fricción.
+- **Upstash Redis** — incorporado el 17/06/2026 para rate limit distribuido con fallback PostgreSQL.
