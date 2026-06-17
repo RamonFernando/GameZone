@@ -455,6 +455,108 @@ npm run build
 
 ---
 
+---
+
+## FASE 11 — BUGS CRÍTICOS (reportados por testers 18/06/2026) 🔴
+
+### 11.1 — Se puede comprar gratis 🔴 CRÍTICO
+- El flujo de checkout acepta órdenes sin validar que el importe > 0 o que el carrito tiene stock real.
+- **Acción:** en `/api/checkout` y `/api/payments/stripe/create-session` verificar que `totalAmount > 0` y que todos los slugs existen y tienen stock antes de crear la sesión/orden.
+
+### 11.2 — Faltan las claves de los juegos en el email de compra 🔴 CRÍTICO
+- El email de confirmación no incluye la clave del juego, descripción breve ni enlace de vuelta.
+- **Acción:** en el servicio de email post-pago añadir: logo de GameZone arriba, clave del juego, nombre + descripción corta, enlace a la ficha. Revisar `src/services/auth/email.ts` y el webhook de Stripe/PayPal.
+
+### 11.3 — No se puede eliminar datos personales ni cuenta 🔴 CRÍTICO
+- No existe endpoint `DELETE /api/account` ni forma de borrar campos opcionales (teléfono, dirección).
+- **Acción:** crear `DELETE /api/account` con confirmación por contraseña; permitir enviar `null` en los campos opcionales del `PATCH /api/account/me`.
+
+### 11.4 — Sin validación de formularios en datos de cuenta 🟠 ALTA
+- Email sin validación de formato, código postal acepta texto, teléfono sin prefijo de país.
+- **Acción:**
+  1. Validar email con regex en frontend y backend (ya hay Zod, añadir `.email()`).
+  2. Código postal: solo dígitos, longitud según país.
+  3. Teléfono: prefijo automático según campo `country` (ej. España → +34), editable manualmente. Usar librería `libphonenumber-js` o prefijos hardcodeados por país.
+
+---
+
+## FASE 12 — UX ROTA (reportada por testers 18/06/2026) 🟠
+
+### 12.1 — Nick de usuario no aparece — solo "Mi cuenta" 🟠 ALTA
+- La cabecera de cuenta muestra "Mi cuenta" fijo en lugar del nick/nombre del usuario.
+- **Acción:** en `AccountDashboard.tsx` leer `user.name` (o nick si se añade campo) desde `/api/account/me` y mostrarlo en el título. Añadir campo `username` a la BD si no existe.
+
+### 12.2 — Buscador con scope incorrecto 🟠 ALTA (fallo grave)
+- Desde la página "Ver todos los juegos" (`/games`) el buscador lleva a las cards de la home en lugar de filtrar en `/games`.
+- Sin panel de sugerencias al buscar desde ficha de detalle.
+- **Acción:**
+  1. Detectar ruta actual en el componente de búsqueda: si `pathname === "/"` filtrar en home; si `pathname === "/games"` filtrar en `/games`.
+  2. Añadir dropdown de sugerencias (top 5 resultados) visible desde cualquier página, con link directo a la ficha.
+
+### 12.3 — Botones PlayStation/Xbox/Nintendo/PC no filtran en cuenta ni pedidos 🟠 ALTA
+- Los chips de plataforma solo funcionan en la home. En historial de pedidos y en pedidos de admin no hacen nada.
+- **Acción:** en `AccountDashboard` (historial de pedidos) y en `AdminOrdersPanel` añadir filtro por plataforma usando los mismos chips. Si se está en la home, navegar y filtrar las cards.
+
+### 12.4 — Panel de cuenta muy básico y lento 🟠 ALTA
+- Los datos tardan en cargar (sin caché), siempre hay inputs visibles, la foto ocupa demasiado.
+- **Acción:**
+  1. Cachear respuesta de `/api/account/me` en el cliente con `stale-while-revalidate` o `useSWR`.
+  2. Modo visualización por defecto; inputs solo al pulsar icono "Editar".
+  3. Reducir tamaño del avatar en el panel; mostrar nombre/nick/email en la cabecera.
+
+### 12.5 — "También te puede interesar" siempre los mismos juegos 🟠 ALTA
+- La sección de recomendaciones en la ficha no cambia ni tiene en cuenta historial/categoría.
+- **Acción:** en `GameDetailClient` ordenar sugerencias: 1º misma categoría que el juego actual, 2º vistos recientemente, 3º random. Excluir el juego actual.
+
+### 12.6 — Contador en Juegos Destacados llega a 0 y no rota 🟠 ALTA
+- El countdown de ofertas llega a 0 y no avanza al siguiente juego ni se resetea.
+- **Acción:** en el componente de Juegos Destacados, cuando `timeLeft === 0` avanzar al siguiente item del carrusel y reiniciar el timer.
+
+### 12.7 — Pedidos de admin sin paginación ni filtros de plataforma 🟡 MEDIA
+- La auditoría de transacciones muestra todos los pedidos sin paginar.
+- **Acción:** paginación de 20 por página + filtros por estado (pendiente/pagado/reembolsado) y pasarela (Stripe/PayPal/manual) en `AdminOrdersPanel`.
+
+### 12.8 — Logo G2A incorrecto en ficha de detalle 🟡 MEDIA
+- En la sección "Enlaces" de la ficha aparece un icono genérico en lugar del logo de G2A.
+- **Acción:** usar el logo SVG correcto de G2A en `GameDetailClient` para los enlaces externos.
+
+### 12.9 — Formato de imágenes API mal recortado en PC 🟡 MEDIA
+- Las imágenes de la API (panorámicas 16:9) se recortan en la Sección Destacada en PC donde el contenedor es más alto que ancho.
+- **Acción:** en `FeaturedSection` aplicar `object-fit: contain` o `object-position: top` en el breakpoint de escritorio para imágenes de API externa; reservar `cover` para imágenes propias.
+
+---
+
+## FASE 13 — FEATURES PENDIENTES (roadmap activo 18/06/2026) 🔵
+
+### 13.1 — OAuth Google/Facebook/Twitter al registrarse
+- Los botones de social login no están activos en el registro.
+- **Acción:** activar los mismos providers OAuth que ya existen en login (`/api/auth/oauth/[provider]`) en la página de registro. Verificar que el flujo crea cuenta si no existe.
+
+### 13.2 — Logos de API en las cards (Steam/G2A/Xbox)
+- Las cards no indican de qué API proviene el precio.
+- **Acción:** en `GameCard` añadir badge pequeño con logo de la fuente (Steam/G2A/Xbox) encima del precio según el campo `storeLabel` o `platform`.
+
+### 13.3 — Comparador de precios entre APIs
+- No hay comparación de precios entre Steam, G2A y Xbox para el mismo juego.
+- **Acción (complejo):** en la ficha de detalle, sección "Mejor precio", llamar a las APIs disponibles con el slug/nombre del juego y mostrar los 3 mejores precios con logo de fuente.
+
+### 13.4 — Sección Xbox
+- No existe sección dedicada a juegos de Xbox en la home ni en el menú.
+- **Acción:** añadir filtro Xbox al `PlatformBar` y una sección en la home similar a la de PlayStation/Nintendo.
+
+### 13.5 — Sistema de planes Premium (estilo G2A Plus)
+- Los testers proponen un modal de suscripción mensual/trimestral/anual con ventajas (descuentos, puntos).
+- **Acción (futuro):** diseñar modelo de datos `Subscription` en Prisma + UI modal con planes 1/3/12 meses + integración Stripe recurring.
+
+### 13.6 — Traducción via API (no hardcodeada)
+- Los textos i18n están hardcodeados en ES/EN. No hay detección automática ni API de traducción.
+- **Acción (complejo):** evaluar integración con DeepL API o i18next con archivos de traducción por locale. Eliminar los ternarios `lang === "en" ? ... : ...` progresivamente.
+
+### 13.7 — Email de compra mejorado (ver 11.2)
+- Ver tarea 11.2 — misma acción, se registra aquí como feature UX además de bug crítico.
+
+---
+
 ## Tecnologías a incorporar en esta v2 (resumen)
 - **unstable_cache / revalidateTag** (Next.js, ya disponible) — caché del catálogo. Sin dependencias nuevas.
 - **Playwright** — E2E estándar (sustituye gradualmente los scripts a medida).
