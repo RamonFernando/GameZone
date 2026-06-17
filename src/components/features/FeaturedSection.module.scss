@@ -26,7 +26,7 @@
   text-decoration: none;
   position: relative;
   min-height: 300px;
-  transition: transform 0.18s, box-shadow 0.18s;
+  transition: transform 0.18s;
   box-shadow: 0 2px 12px rgba(2, 6, 23, 0.10);
 
   &:hover {
@@ -172,7 +172,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  transition: transform 0.12s;
 
   &:hover {
     background: #f1f5f9;
@@ -326,7 +326,7 @@
   padding: 0.6rem;
   border-radius: 8px;
   border: 1px solid rgba(71, 85, 105, 0.12);
-  transition: background 0.12s, border-color 0.12s;
+  transition: transform 0.12s;
 
   &:hover {
     background: #f8f9fa;

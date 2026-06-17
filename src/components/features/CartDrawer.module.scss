@@ -84,7 +84,7 @@
 
 .cartItemClickable {
   cursor: pointer;
-  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s ease;
 }
 
 .cartItemClickable:hover,

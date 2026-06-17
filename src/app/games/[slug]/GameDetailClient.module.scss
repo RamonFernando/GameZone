@@ -45,7 +45,7 @@
   padding: 0;
   opacity: 0.72;
   transform: translateY(0);
-  transition: border-color 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 
   &:hover,
   &:focus-visible {
@@ -188,7 +188,7 @@
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
-  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+  transition: transform 0.18s ease;
 
   svg {
     flex-shrink: 0;

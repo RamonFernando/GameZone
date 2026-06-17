@@ -641,7 +641,7 @@
   min-width: 220px;
   cursor: default;
   transform-origin: center center;
-  transition: border-color 140ms ease-out, transform 0.5s ease-in-out, box-shadow 140ms ease-out;
+  transition: transform 0.5s ease-in-out;
 }
 
 /* Efecto rotación: la del centro más grande, laterales más pequeñas */
@@ -720,7 +720,7 @@
   font-weight: 500;
   color: var(--text-main);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .hero-thumb-title:hover,

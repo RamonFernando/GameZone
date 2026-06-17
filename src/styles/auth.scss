@@ -167,8 +167,7 @@
   cursor: pointer;
   transform: scale(1);
   transform-origin: center center;
-  transition: background 140ms ease-out, border-color 140ms ease-out,
-    transform 0.3s ease-out, box-shadow 120ms ease-out;
+  transition: transform 0.3s ease-out;
 }
 
 .auth-social-button:hover {

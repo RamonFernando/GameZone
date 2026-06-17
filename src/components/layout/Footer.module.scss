@@ -115,7 +115,7 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: transform 0.2s;
 }
 
 .footer-locale-trigger:hover {
@@ -174,7 +174,7 @@
   border-radius: 4px;
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: opacity 0.2s;
 }
 
 .footer-locale-option:hover {
@@ -306,7 +306,7 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   transform: scale(1);
   transform-origin: center center;
-  transition: transform 0.3s ease-out, background 0.3s ease-out, border-color 0.3s ease-out;
+  transition: transform 0.3s ease-out;
 }
 
 .footer-icon-img {

@@ -234,7 +234,7 @@
   font-size: 1.1em;
   transform: scaleX(1.1);
   transform-origin: center center;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition: transform 0.25s ease;
 }
 
 .gameCardLikeIconActive {
