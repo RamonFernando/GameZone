@@ -38,17 +38,7 @@
   position: static;
 }
 
-.market-pulse-card-cart.game-detail-cart-button {
-  position: absolute;
-  right: 0.72rem;
-  bottom: 0.72rem;
-  z-index: 4;
-}
-
-.market-pulse-compact-card .market-pulse-card-cart.game-detail-cart-button {
-  right: 0.52rem;
-  bottom: 0.52rem;
-}
+/* market-pulse-card-cart + game-detail-cart-button migrado a MarketIntelligenceSections.module.scss */
 
 /* Estilos de GameCard migrados a src/components/ui/GameCard.module.scss */
 

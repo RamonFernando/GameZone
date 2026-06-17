@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import type { ProductPreview } from "@/types/product";
+import styles from "./MarketIntelligenceSections.module.scss";
 
 type TrendingGamePreview = {
   rank: number;
@@ -316,6 +317,15 @@ function openCartDrawer() {
 
 const PULSE_ROTATE_MS = 8000;
 
+const THUMB_POSITION_CLASS: Record<string, string> = {
+  center: styles.marketPulseThumbCenter,
+  left: styles.marketPulseThumbLeft,
+  right: styles.marketPulseThumbRight,
+  "far-left": styles.marketPulseThumbFarLeft,
+  "far-right": styles.marketPulseThumbFarRight,
+  entering: styles.marketPulseThumbEntering,
+};
+
 function MarketPulseCarousel({
   section,
   variant = "hero",
@@ -448,16 +458,16 @@ function MarketPulseCarousel({
 
   if (variant === "catalog") {
     return (
-      <article className="market-pulse-carousel market-pulse-carousel--catalog">
-        <div className="market-pulse-catalog-grid" aria-label={`${section.title} cards`}>
+      <article className={`${styles.marketPulseCarousel} ${styles.marketPulseCarouselCatalog}`}>
+        <div className={styles.marketPulseCatalogGrid} aria-label={`${section.title} cards`}>
           {section.items.slice(0, 5).map((game) => {
             const href = game.catalogMatch?.slug ? `/games/${game.catalogMatch.slug}` : null;
             const cartPreview = buildCartPreview(game);
             const content = (
               <>
-                <span className="market-pulse-catalog-card__media">
+                <span className={styles.marketPulseCatalogCardMedia}>
                   <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
-                  <span className="market-pulse-catalog-card__store">
+                  <span className={styles.marketPulseCatalogCardStore}>
                     {section.source === "Steam" ? (
                       <Image
                         src="/iconos_platforms/icon-steam.svg"
@@ -469,11 +479,11 @@ function MarketPulseCarousel({
                     {section.source}
                   </span>
                 </span>
-                <span className="market-pulse-catalog-card__body">
+                <span className={styles.marketPulseCatalogCardBody}>
                   <strong>{game.title}</strong>
                   <span>Codigo digital oficial</span>
                   <small>{game.platform}</small>
-                  <span className="market-pulse-catalog-card__prices">
+                  <span className={styles.marketPulseCatalogCardPrices}>
                     <span>
                       <small>GameZone</small>
                       <strong>
@@ -502,16 +512,16 @@ function MarketPulseCarousel({
 
             return href ? (
               <article
-                className="market-pulse-catalog-card"
+                className={styles.marketPulseCatalogCard}
                 key={`${section.id}-${game.rank}-${game.title}`}
               >
-                <Link className="market-pulse-card-link" href={href}>
+                <Link className={styles.marketPulseCardLink} href={href}>
                   {content}
                 </Link>
                 {cartPreview ? (
                   <button
                     type="button"
-                    className="game-detail-cart-button market-pulse-card-cart"
+                    className={`game-detail-cart-button ${styles.marketPulseCardCart}`}
                     onClick={() => {
                       addToCart(cartPreview);
                       openCartDrawer();
@@ -529,7 +539,7 @@ function MarketPulseCarousel({
                 ) : null}
               </article>
             ) : (
-              <article className="market-pulse-catalog-card" key={`${section.id}-${game.rank}-${game.title}`}>
+              <article className={styles.marketPulseCatalogCard} key={`${section.id}-${game.rank}-${game.title}`}>
                 {content}
               </article>
             );
@@ -547,17 +557,17 @@ function MarketPulseCarousel({
     });
 
     return (
-      <article className="market-pulse-carousel market-pulse-carousel--compact">
-        <div className="market-pulse-carousel__compact-strip" aria-label={`${section.title} cards`}>
+      <article className={`${styles.marketPulseCarousel} ${styles.marketPulseCarouselCompact}`}>
+        <div className={styles.marketPulseCarouselCompactStrip} aria-label={`${section.title} cards`}>
           {centeredItems.map((game) => {
             const href = game.catalogMatch?.slug ? `/games/${game.catalogMatch.slug}` : null;
             const cartPreview = buildCartPreview(game);
             const content = (
               <>
-                <span className="market-pulse-compact-card__media">
+                <span className={styles.marketPulseCompactCardMedia}>
                   <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
                 </span>
-                <span className="market-pulse-compact-card__copy">
+                <span className={styles.marketPulseCompactCardCopy}>
                   <strong>{game.title}</strong>
                   <small>{game.platform}</small>
                 </span>
@@ -567,15 +577,15 @@ function MarketPulseCarousel({
             return href ? (
               <article
                 key={`${section.id}-${game.rank}-${game.title}`}
-                className="market-pulse-compact-card"
+                className={styles.marketPulseCompactCard}
               >
-                <Link className="market-pulse-card-link" href={href}>
+                <Link className={styles.marketPulseCardLink} href={href}>
                   {content}
                 </Link>
                 {cartPreview ? (
                   <button
                     type="button"
-                    className="game-detail-cart-button market-pulse-card-cart"
+                    className={`game-detail-cart-button ${styles.marketPulseCardCart}`}
                     onClick={() => {
                       addToCart(cartPreview);
                       openCartDrawer();
@@ -595,7 +605,7 @@ function MarketPulseCarousel({
             ) : (
               <article
                 key={`${section.id}-${game.rank}-${game.title}`}
-                className="market-pulse-compact-card"
+                className={styles.marketPulseCompactCard}
               >
                 {content}
               </article>
@@ -614,15 +624,13 @@ function MarketPulseCarousel({
       : null;
 
   return (
-    <article className="market-pulse-carousel">
+    <article className={styles.marketPulseCarousel}>
       <div
-        className={`market-pulse-carousel__hero${
-          activeHref ? " market-pulse-carousel__hero--clickable" : ""
-        }`}
+        className={`${styles.marketPulseCarouselHero}${activeHref ? ` ${styles.marketPulseCarouselHeroClickable}` : ""}`}
         onClick={activeHref ? () => router.push(activeHref) : undefined}
       >
         {heroLayers.previous ? (
-          <div className="market-pulse-carousel__media market-pulse-carousel__media--previous is-visible">
+          <div className={`${styles.marketPulseCarouselMedia} ${styles.marketPulseCarouselMediaPrevious} ${styles.isVisible}`}>
             <Image
               src={heroLayers.previous}
               alt=""
@@ -634,9 +642,7 @@ function MarketPulseCarousel({
           </div>
         ) : null}
         <div
-          className={`market-pulse-carousel__media market-pulse-carousel__media--current${
-            heroLayers.animate ? " is-visible" : ""
-          }`}
+          className={`${styles.marketPulseCarouselMedia} ${styles.marketPulseCarouselMediaCurrent}${heroLayers.animate ? ` ${styles.isVisible}` : ""}`}
         >
           <Image
             src={heroLayers.current || active.image}
@@ -647,27 +653,23 @@ function MarketPulseCarousel({
             unoptimized={section.source === "G2A"}
           />
         </div>
-        <div className="market-pulse-carousel__overlay">
-          <div className="market-pulse-carousel__topline">
+        <div className={styles.marketPulseCarouselOverlay}>
+          <div className={styles.marketPulseCarouselTopline}>
             <span>{section.source}</span>
             <strong>{active.catalogStatus}</strong>
           </div>
           <h4>{active.title}</h4>
           <p>{active.signal}</p>
-          <div className="market-pulse-carousel__meta">
+          <div className={styles.marketPulseCarouselMeta}>
             <span>{active.platform}</span>
             <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
           </div>
         </div>
       </div>
 
-      <div className="market-pulse-carousel__thumbs-wrap">
+      <div className={styles.marketPulseCarouselThumbsWrap}>
         <div
-          className={
-            "market-pulse-carousel__thumbs market-pulse-carousel__thumbs--slider" +
-            (thumbCount === 3 ? " market-pulse-carousel__thumbs--three" : "") +
-            (thumbsEntering && thumbCount === 5 ? " is-entering-left" : "")
-          }
+          className={`${styles.marketPulseCarouselThumbs} ${styles.marketPulseCarouselThumbsSlider}${thumbCount === 3 ? ` ${styles.marketPulseCarouselThumbsThree}` : ""}${thumbsEntering && thumbCount === 5 ? ` ${styles.isEnteringLeft}` : ""}`}
           aria-label={`${section.title} thumbnails`}
         >
           {visibleThumbs.map((game) => {
@@ -677,10 +679,7 @@ function MarketPulseCarousel({
               <button
                 key={`${section.id}-${game.position}-${game.rank}-${game.title}`}
                 type="button"
-                className={
-                  `market-pulse-thumb market-pulse-thumb--${game.position}` +
-                  (isActiveThumb ? " is-active" : "")
-                }
+                className={`${styles.marketPulseThumb} ${THUMB_POSITION_CLASS[game.position] ?? ""}${isActiveThumb ? ` ${styles.isActive}` : ""}`}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => {
                   setActiveIndex(game.realIndex);
@@ -688,10 +687,10 @@ function MarketPulseCarousel({
                 }}
                 aria-label={`Mostrar ${game.title}`}
               >
-                <span className="market-pulse-thumb__media">
+                <span className={styles.marketPulseThumbMedia}>
                   <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 240px, 45vw" />
                 </span>
-                <span className="market-pulse-thumb__copy">
+                <span className={styles.marketPulseThumbCopy}>
                   <strong>{game.title}</strong>
                   <small>{game.platform}</small>
                 </span>
@@ -849,11 +848,11 @@ export function MarketIntelligenceSections() {
   const rawgSections = marketPulseSections.filter((section) => section.source === "RAWG");
 
   return (
-    <div className="market-intel-stack">
-      <section className="market-intel market-intel--popular" aria-label="Fuentes de tendencias de mercado">
-        <div className="market-pulse-source-stack">
-          <section className="market-pulse-source-panel market-pulse-source-panel--g2a" aria-labelledby="g2a-panel-title">
-            <div className="market-pulse-panel__head">
+    <div className={styles.marketIntelStack}>
+      <section className={`${styles.marketIntel} ${styles.marketIntelPopular}`} aria-label="Fuentes de tendencias de mercado">
+        <div className={styles.marketPulseSourceStack}>
+          <section className={`${styles.marketPulseSourcePanel} ${styles.marketPulseSourcePanelG2a}`} aria-labelledby="g2a-panel-title">
+            <div className={styles.marketPulsePanelHead}>
               <span>G2A</span>
               <div>
                 <h2 id="g2a-panel-title">G2A</h2>
@@ -861,18 +860,13 @@ export function MarketIntelligenceSections() {
               </div>
             </div>
 
-            <div className="market-pulse-section-stack">
+            <div className={styles.marketPulseSectionStack}>
               {g2aSections.map((section) => (
                 <article
-                  className={
-                    "market-pulse-subsection" +
-                    (section.title.toLowerCase().includes("mas vendidos")
-                      ? " market-pulse-subsection--bestsellers"
-                      : " market-pulse-subsection--featured")
-                  }
+                  className={`${styles.marketPulseSubsection}${section.title.toLowerCase().includes("mas vendidos") ? ` ${styles.marketPulseSubsectionBestsellers}` : ` ${styles.marketPulseSubsectionFeatured}`}`}
                   key={section.id}
                 >
-                  <div className="market-pulse-subsection__head">
+                  <div className={styles.marketPulseSubsectionHead}>
                     <h3>{section.title}</h3>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
@@ -886,8 +880,8 @@ export function MarketIntelligenceSections() {
             </div>
           </section>
 
-          <section className="market-pulse-source-panel market-pulse-source-panel--steam" aria-labelledby="steam-panel-title">
-            <div className="market-pulse-panel__head">
+          <section className={`${styles.marketPulseSourcePanel} ${styles.marketPulseSourcePanelSteam}`} aria-labelledby="steam-panel-title">
+            <div className={styles.marketPulsePanelHead}>
               <span>Steam</span>
               <div>
                 <h2 id="steam-panel-title">Steam</h2>
@@ -895,10 +889,10 @@ export function MarketIntelligenceSections() {
               </div>
             </div>
 
-            <div className="market-pulse-section-stack">
+            <div className={styles.marketPulseSectionStack}>
               {steamSections.map((section) => (
-                <article className="market-pulse-subsection" key={section.id}>
-                  <div className="market-pulse-subsection__head">
+                <article className={styles.marketPulseSubsection} key={section.id}>
+                  <div className={styles.marketPulseSubsectionHead}>
                     <h3>{section.title}</h3>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
@@ -911,8 +905,8 @@ export function MarketIntelligenceSections() {
             </div>
           </section>
 
-          <section className="market-pulse-source-panel market-pulse-source-panel--rawg" aria-labelledby="rawg-panel-title">
-            <div className="market-pulse-panel__head">
+          <section className={`${styles.marketPulseSourcePanel} ${styles.marketPulseSourcePanelRawg}`} aria-labelledby="rawg-panel-title">
+            <div className={styles.marketPulsePanelHead}>
               <span>RAWG</span>
               <div>
                 <h2 id="rawg-panel-title">RAWG</h2>
@@ -920,10 +914,10 @@ export function MarketIntelligenceSections() {
               </div>
             </div>
 
-            <div className="market-pulse-section-stack">
+            <div className={styles.marketPulseSectionStack}>
               {rawgSections.map((section) => (
-                <article className="market-pulse-subsection" key={section.id}>
-                  <div className="market-pulse-subsection__head">
+                <article className={styles.marketPulseSubsection} key={section.id}>
+                  <div className={styles.marketPulseSubsectionHead}>
                     <h3>{section.title}</h3>
                     <span>{section.fallbackUsed ? "Snapshot + cache" : section.signal}</span>
                   </div>
@@ -935,43 +929,43 @@ export function MarketIntelligenceSections() {
         </div>
       </section>
 
-      <section className="market-intel market-intel--roadmap" aria-labelledby="market-roadmap-title">
-        <div className="market-intel-head market-intel-head--compact">
-          <span className="market-intel-kicker">Motor de mercado</span>
+      <section className={`${styles.marketIntel} ${styles.marketIntelRoadmap}`} aria-labelledby="market-roadmap-title">
+        <div className={`${styles.marketIntelHead} ${styles.marketIntelHeadCompact}`}>
+          <span className={styles.marketIntelKicker}>Motor de mercado</span>
           <div>
-            <h2 id="market-roadmap-title" className="section-title market-intel-title">
+            <h2 id="market-roadmap-title" className={`section-title ${styles.marketIntelTitle}`}>
               Precios, ofertas, metadata y recomendaciones
             </h2>
-            <p className="section-subtitle market-intel-copy">
+            <p className={`section-subtitle ${styles.marketIntelCopy}`}>
               Debajo quedan las piezas que se conectaran despues a rutas internas:
               ofertas normalizadas y modulos tecnicos para alimentar la IA.
             </p>
           </div>
         </div>
 
-        <div className="market-engine-grid">
-          <div className="deals-panel">
-            <div className="market-panel-header">
-              <span className="market-panel-label">Comparador</span>
+        <div className={styles.marketEngineGrid}>
+          <div className={styles.dealsPanel}>
+            <div className={styles.marketPanelHeader}>
+              <span className={styles.marketPanelLabel}>Comparador</span>
               <div>
                 <h3>Ofertas normalizadas</h3>
-                <p className="market-panel-status">{dealStatus}</p>
+                <p className={styles.marketPanelStatus}>{dealStatus}</p>
               </div>
             </div>
 
-            <div className="deal-list">
+            <div className={styles.dealList}>
               {marketDeals.map((deal) => (
-                <article className="deal-row" key={deal.title}>
-                  <div className="deal-cover">
+                <article className={styles.dealRow} key={deal.title}>
+                  <div className={styles.dealCover}>
                     <Image src={deal.image} alt="" fill sizes="64px" />
                   </div>
-                  <div className="deal-info">
+                  <div className={styles.dealInfo}>
                     <h4>{deal.title}</h4>
                     <p>{deal.store}</p>
                     <code>{deal.sourceId}</code>
                   </div>
-                  <div className="deal-price">
-                    <span className="deal-discount">-{deal.saving}%</span>
+                  <div className={styles.dealPrice}>
+                    <span className={styles.dealDiscount}>-{deal.saving}%</span>
                     <strong>{formatEuro(deal.dealPrice)}</strong>
                     <small>GameZone {formatEuro(deal.gameZonePrice)}</small>
                   </div>
@@ -980,33 +974,33 @@ export function MarketIntelligenceSections() {
             </div>
           </div>
 
-          <div className="recommendation-panel">
-            <div className="market-panel-header">
-              <span className="market-panel-label">Recomendador</span>
+          <div className={styles.recommendationPanel}>
+            <div className={styles.marketPanelHeader}>
+              <span className={styles.marketPanelLabel}>Recomendador</span>
               <div>
                 <h3>Selecciones por senales</h3>
-                <p className="market-panel-status">{recommendationsStatus}</p>
+                <p className={styles.marketPanelStatus}>{recommendationsStatus}</p>
               </div>
             </div>
 
-            <div className="recommendation-list">
+            <div className={styles.recommendationList}>
               {marketRecommendations.map((item) => (
-                <article className="recommendation-card" key={item.slug}>
-                  <div className="recommendation-cover">
+                <article className={styles.recommendationCard} key={item.slug}>
+                  <div className={styles.recommendationCover}>
                     <Image src={item.image} alt="" fill sizes="72px" />
                   </div>
-                  <div className="recommendation-body">
-                    <div className="recommendation-top">
+                  <div className={styles.recommendationBody}>
+                    <div className={styles.recommendationTop}>
                       <h4>{item.title}</h4>
                       <strong>{item.score}</strong>
                     </div>
                     <p>{item.reason}</p>
-                    <div className="recommendation-meta">
+                    <div className={styles.recommendationMeta}>
                       <span>{item.platform}</span>
                       <span>{formatPublicPrice(item.priceFinal)}</span>
                       <span>Trend {item.trendScore}</span>
                     </div>
-                    <Link className="recommendation-link" href={item.nextAction.href}>
+                    <Link className={styles.recommendationLink} href={item.nextAction.href}>
                       {item.nextAction.label}
                     </Link>
                   </div>
