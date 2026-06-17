@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { useCart } from "@/contexts/CartContext";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
@@ -23,7 +23,17 @@ export default function CheckoutPage() {
   const [requiresLogin, setRequiresLogin] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
+  const [isAdmin, setIsAdmin] = useState(false);
   const lang = useLocale();
+
+  useEffect(() => {
+    fetch("/api/account/me", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { user?: { role?: string } } | null) => {
+        if (data?.user?.role === "ADMIN") setIsAdmin(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const totalAmount = useMemo(
     () => items.reduce((sum, item) => sum + item.game.priceFinal * item.quantity, 0),
@@ -247,9 +257,11 @@ export default function CheckoutPage() {
                     {lang === "en" ? "Visa / Mastercard / Google Pay" : "Visa / Mastercard / Google Pay"}
                   </option>
                   <option value="paypal">PayPal</option>
-                  <option value="manual">
-                    {lang === "en" ? "Local mode (no gateway)" : "Modo local (sin pasarela)"}
-                  </option>
+                  {isAdmin && (
+                    <option value="manual">
+                      {lang === "en" ? "Local mode (no gateway)" : "Modo local (sin pasarela)"}
+                    </option>
+                  )}
                 </select>
                 <span className="auth-alt">
                   {lang === "en"
