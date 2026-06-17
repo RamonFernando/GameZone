@@ -482,47 +482,56 @@ npm run build
 
 ## FASE 12 — UX ROTA (reportada por testers 18/06/2026) 🟠
 
-### 12.1 — Nick de usuario no aparece — solo "Mi cuenta" 🟠 ALTA
+### 12.1 — Nick de usuario no aparece — solo "Mi cuenta" 🟠 ALTA · ✅ VERIFICADO HECHO (18/06/2026)
 - La cabecera de cuenta muestra "Mi cuenta" fijo en lugar del nick/nombre del usuario.
 - **Acción:** en `AccountDashboard.tsx` leer `user.name` (o nick si se añade campo) desde `/api/account/me` y mostrarlo en el título. Añadir campo `username` a la BD si no existe.
+- **Verificado en código:** `src/app/account/page.tsx` línea 32 — `sessionDisplayName = user?.name?.trim() || session.email`; línea 85 — `<h1 className="auth-title">{sessionDisplayName}</h1>`. "Mi cuenta" solo queda como kicker secundario (línea 84), el `<h1>` ya muestra el nombre real. No requiere acción.
 
-### 12.2 — Buscador con scope incorrecto 🟠 ALTA (fallo grave)
+### 12.2 — Buscador con scope incorrecto 🟠 ALTA (fallo grave) · ⚠️ PARCIAL
 - Desde la página "Ver todos los juegos" (`/games`) el buscador lleva a las cards de la home en lugar de filtrar en `/games`.
 - Sin panel de sugerencias al buscar desde ficha de detalle.
 - **Acción:**
   1. Detectar ruta actual en el componente de búsqueda: si `pathname === "/"` filtrar en home; si `pathname === "/games"` filtrar en `/games`.
   2. Añadir dropdown de sugerencias (top 5 resultados) visible desde cualquier página, con link directo a la ficha.
+- **Verificado en código:** `Header.tsx` línea 219 — la redirección a `/?q=` solo ocurre si `pathname !== "/" && pathname !== "/games"`; en `/games` usa el mismo `SearchContext` que lee `games/page.tsx`. **El punto 1 ya está resuelto.** El punto 2 (dropdown de sugerencias) sigue sin existir — no hay ningún componente de sugerencias en `Header.tsx`. Falta solo el dropdown.
 
-### 12.3 — Botones PlayStation/Xbox/Nintendo/PC no filtran en cuenta ni pedidos 🟠 ALTA
+### 12.3 — Botones PlayStation/Xbox/Nintendo/PC no filtran en cuenta ni pedidos 🟠 ALTA · ⚠️ PARCIAL
 - Los chips de plataforma solo funcionan en la home. En historial de pedidos y en pedidos de admin no hacen nada.
 - **Acción:** en `AccountDashboard` (historial de pedidos) y en `AdminOrdersPanel` añadir filtro por plataforma usando los mismos chips. Si se está en la home, navegar y filtrar las cards.
+- **Verificado en código:** `AccountOrdersHistory.tsx` **ya filtra por plataforma** (usa `useSearch()`, mapea slug→platform, muestra "Filtrando por plataforma..."). Lado cuenta resuelto. `AdminOrdersPanel.tsx` no tiene ningún filtro de plataforma — sigue pendiente solo el lado admin.
 
-### 12.4 — Panel de cuenta muy básico y lento 🟠 ALTA
+### 12.4 — Panel de cuenta muy básico y lento 🟠 ALTA · ⚠️ PARCIAL
 - Los datos tardan en cargar (sin caché), siempre hay inputs visibles, la foto ocupa demasiado.
 - **Acción:**
   1. Cachear respuesta de `/api/account/me` en el cliente con `stale-while-revalidate` o `useSWR`.
   2. Modo visualización por defecto; inputs solo al pulsar icono "Editar".
   3. Reducir tamaño del avatar en el panel; mostrar nombre/nick/email en la cabecera.
+- **Verificado en código:** punto 2 **ya hecho** — `AccountDashboard.tsx` tiene `isEditingDetails`/`isEditingProfile` (default `false`) con patrón `!isEditingProfile ? <vista> : <form>` (líneas 1001 y 1160). Punto 1 (SWR/caché) **no implementado**, sigue siendo `fetch` simple. Punto 3 (tamaño avatar) no verificado todavía.
 
-### 12.5 — "También te puede interesar" siempre los mismos juegos 🟠 ALTA
+### 12.5 — "También te puede interesar" siempre los mismos juegos 🟠 ALTA · ✅ MAYORMENTE HECHO
 - La sección de recomendaciones en la ficha no cambia ni tiene en cuenta historial/categoría.
 - **Acción:** en `GameDetailClient` ordenar sugerencias: 1º misma categoría que el juego actual, 2º vistos recientemente, 3º random. Excluir el juego actual.
+- **Verificado en código:** `src/app/games/[slug]/page.tsx` líneas ~118-129 — ya construye `suggestions` como `byGenre` (misma categoría, ordenado por descuento, top 3) + `filler` aleatorio del resto que no esté en `byGenre`, recortado a 3. Falta solo el criterio "2º vistos recientemente" (usa random en su lugar) — mejora menor, no el bug grave reportado.
 
-### 12.6 — Contador en Juegos Destacados llega a 0 y no rota 🟠 ALTA
+### 12.6 — Contador en Juegos Destacados llega a 0 y no rota 🟠 ALTA · ✅ APARENTA RESUELTO (verificar visualmente)
 - El countdown de ofertas llega a 0 y no avanza al siguiente juego ni se resetea.
 - **Acción:** en el componente de Juegos Destacados, cuando `timeLeft === 0` avanzar al siguiente item del carrusel y reiniciar el timer.
+- **Verificado en código:** `FeaturedSection.tsx` (`DealsOfTheDay`) ya tiene `setInterval` que al llegar a `t<=1` hace `setActiveIndex((i) => (i+1) % games.length)` y resetea `timeLeft` a `DEAL_ROTATE_S` (8s). El carrusel de destacados rota correctamente. Posible confusión con el countdown individual de `GameCard.tsx` (campo `saleEndsAt` por producto): ese sí desaparece (`setTimeLeft(null)`) cuando la oferta caduca, lo cual es correcto si nadie actualiza la fecha — no es un bug de código, es dato de admin caducado. Recomendado confirmar con el tester a qué contador se refería antes de tocar nada.
 
-### 12.7 — Pedidos de admin sin paginación ni filtros de plataforma 🟡 MEDIA
+### 12.7 — Pedidos de admin sin paginación ni filtros de plataforma 🟡 MEDIA · 🔴 PENDIENTE CONFIRMADO
 - La auditoría de transacciones muestra todos los pedidos sin paginar.
 - **Acción:** paginación de 20 por página + filtros por estado (pendiente/pagado/reembolsado) y pasarela (Stripe/PayPal/manual) en `AdminOrdersPanel`.
+- **Verificado en código:** no hay rastro de paginación, `slice`, ni filtros de plataforma/estado en `AdminOrdersPanel.tsx`. Sigue pendiente en su totalidad.
 
-### 12.8 — Logo G2A incorrecto en ficha de detalle 🟡 MEDIA
+### 12.8 — Logo G2A incorrecto en ficha de detalle 🟡 MEDIA · 🔴 PENDIENTE CONFIRMADO
 - En la sección "Enlaces" de la ficha aparece un icono genérico en lugar del logo de G2A.
 - **Acción:** usar el logo SVG correcto de G2A en `GameDetailClient` para los enlaces externos.
+- **Verificado en código:** `GameDetailClient.tsx` líneas 323-338 — el enlace externo usa `<SteamIcon />` solo si `externalStoreLabel` contiene "steam"; para cualquier otra tienda (incluido G2A) cae al `<StoreIcon />` genérico. No existe `G2AIcon`. Confirmado pendiente.
 
-### 12.9 — Formato de imágenes API mal recortado en PC 🟡 MEDIA
+### 12.9 — Formato de imágenes API mal recortado en PC 🟡 MEDIA · 🔴 PENDIENTE CONFIRMADO
 - Las imágenes de la API (panorámicas 16:9) se recortan en la Sección Destacada en PC donde el contenedor es más alto que ancho.
 - **Acción:** en `FeaturedSection` aplicar `object-fit: contain` o `object-position: top` en el breakpoint de escritorio para imágenes de API externa; reservar `cover` para imágenes propias.
+- **Verificado en código:** `FeaturedSection.module.scss` línea 367 — solo se ajustó `object-position: top center !important` en `.featuredDealCover img`; no hay `object-fit: contain` ni distinción por breakpoint de escritorio. El recorte en PC sigue sin resolverse del todo.
 
 ---
 
@@ -554,6 +563,72 @@ npm run build
 
 ### 13.7 — Email de compra mejorado (ver 11.2)
 - Ver tarea 11.2 — misma acción, se registra aquí como feature UX además de bug crítico.
+
+---
+
+## FASE 14 — INVENTARIO DE CLAVES DE JUEGO 🔴 CRUCIAL ANTES DE VENTA REAL
+
+> **Contexto:** GameZone planea vender juegos reales en el futuro (modelo revendedor de claves,
+> igual que G2A, Instant Gaming o Eneba). Sin este sistema el checkout con Stripe/PayPal procesa
+> pagos reales pero no entrega nada al comprador. **No lanzar ventas reales sin esta fase.**
+>
+> **Nota sobre APIs de Steam/G2A/Xbox:** ninguna ofrece API pública de compra/reventa en tiempo
+> real. El modelo correcto es comprar claves a distribuidores (Genba, Fanatical, etc.) y subirlas
+> al sistema como inventario propio.
+
+### 14.1 — Modelo de datos `GameKey` 🔴 CRÍTICO
+- **Acción:** añadir al schema de Prisma:
+  ```prisma
+  model GameKey {
+    id              String    @id @default(uuid())
+    productSlug     String
+    keyCode         String    @unique
+    platform        String    @default("PC")
+    assignedOrderId String?
+    assignedItemId  String?
+    assignedAt      DateTime?
+    createdAt       DateTime  @default(now())
+    product         Product   @relation(fields: [productSlug], references: [slug])
+    @@index([productSlug, assignedOrderId])
+  }
+  ```
+- Añadir `keys GameKey[]` a `model Product`.
+- Migración: `npx prisma migrate dev --name add-game-keys`.
+
+### 14.2 — Panel admin: gestión de claves 🔴 CRÍTICO
+- En `AdminProductsPanel` añadir pestaña "Claves" por producto:
+  - Ver stock de claves disponibles (count de `assignedOrderId IS NULL`)
+  - Subir claves en bloque: textarea con una clave por línea o importación CSV
+  - Ver claves asignadas con el pedido correspondiente
+  - Eliminar claves no asignadas erróneas
+- Endpoint: `POST /api/admin/products/[slug]/keys` (subir), `GET /api/admin/products/[slug]/keys` (listar), `DELETE /api/admin/keys/[id]` (borrar)
+
+### 14.3 — Asignación automática en `completePaidOrder` 🔴 CRÍTICO
+- En `src/services/checkout/order-service.ts`, dentro de `completePaidOrder`, tras marcar el pedido como pagado:
+  1. Para cada `OrderItem`, buscar la primera `GameKey` disponible (`assignedOrderId IS NULL`) del `productSlug` correspondiente.
+  2. Asignarla atómicamente dentro de la misma transacción Prisma (`updateMany` con condición `assignedOrderId IS NULL`).
+  3. Si no hay claves disponibles para algún producto: marcar el pedido con `status: "paid_pending_key"` y enviar alerta por email al admin.
+  4. Guardar `keyCode` en el `OrderItem` (añadir campo `gameKey String?` al modelo `OrderItem`).
+
+### 14.4 — Mostrar clave en email de confirmación 🔴 CRÍTICO
+- En `sendPurchaseConfirmationEmail` (`src/services/auth/email.ts`): añadir sección por cada ítem con:
+  - Nombre del juego
+  - **Clave de activación:** `XXXXX-XXXXX-XXXXX` (formato Steam/Xbox/etc.)
+  - Instrucciones de activación según plataforma (Steam: ir a steam.com/activate, Xbox: redeem.microsoft.com, etc.)
+  - Enlace a la ficha del juego
+
+### 14.5 — Mostrar clave en panel de cuenta 🟠 ALTA
+- En `AccountOrdersHistory` y en la vista de pedido individual: mostrar la clave asignada a cada ítem.
+- La clave se puede copiar con un botón "Copiar clave".
+- Solo visible para pedidos con `status: "paid"`.
+
+### 14.6 — Alertas de stock bajo al admin 🟡 MEDIA
+- Cuando queden menos de 3 claves disponibles para un producto, enviar email de alerta al admin.
+- Se puede implementar como un cron diario o al momento de asignar la última clave.
+
+### 14.7 — Validación pre-checkout de stock de claves 🟡 MEDIA
+- Antes de redirigir a Stripe/PayPal, verificar que hay al menos 1 clave disponible por producto en el carrito.
+- Si no hay: bloquear el checkout y mostrar "Sin stock de claves — contacta con soporte".
 
 ---
 
