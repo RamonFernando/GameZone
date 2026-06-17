@@ -81,10 +81,10 @@ export default async function AccountPage({
           <AuthFormPanel>
             <div className="account-avatar-header">
               <header className="auth-header">
-                <p className="auth-kicker">GameZone Access</p>
-                <h1 className="auth-title">Mi cuenta</h1>
+                <p className="auth-kicker">Mi cuenta</p>
+                <h1 className="auth-title">{sessionDisplayName}</h1>
                 <p className="auth-subtitle">
-                  Sesión iniciada como <strong>{sessionDisplayName}</strong>.
+                  {user?.email ?? session.email}
                 </p>
               </header>
               <div className="account-avatar-circle" style={avatarStyle}>

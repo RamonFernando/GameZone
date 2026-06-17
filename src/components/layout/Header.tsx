@@ -216,7 +216,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     const shouldScrollToResults = !query.trim() && value.trim();
     setQuery(value);
 
-    if (pathname !== "/" && value.trim()) {
+    if (pathname !== "/" && pathname !== "/games" && value.trim()) {
       router.push(`/?q=${encodeURIComponent(value)}#game-results`);
       setMobileMenuOpen(false);
       return;
