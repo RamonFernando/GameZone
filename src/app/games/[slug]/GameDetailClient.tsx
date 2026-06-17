@@ -27,6 +27,15 @@ function StoreIcon() {
   );
 }
 
+function G2AIcon() {
+  return (
+    <svg viewBox="0 0 44 18" width="44" height="18" aria-hidden="true">
+      <rect width="44" height="18" rx="3" fill="#FF5500" />
+      <text x="22" y="13" fontFamily="Arial,Helvetica,sans-serif" fontSize="10" fontWeight="800" fill="#ffffff" textAnchor="middle" letterSpacing="0.5">G2A</text>
+    </svg>
+  );
+}
+
 export type ProductView = {
   id: string;
   name: string;
@@ -328,11 +337,15 @@ export default function GameDetailClient({
                       className={`${styles.gameDetailLink}${
                         game.externalStoreLabel?.toLowerCase().includes("steam")
                           ? ` ${styles.gameDetailLinkSteam}`
-                          : ""
+                          : game.externalStoreLabel?.toLowerCase().includes("g2a")
+                            ? ` ${styles.gameDetailLinkG2A}`
+                            : ""
                       }`}
                     >
                       {game.externalStoreLabel?.toLowerCase().includes("steam") ? (
                         <SteamIcon />
+                      ) : game.externalStoreLabel?.toLowerCase().includes("g2a") ? (
+                        <G2AIcon />
                       ) : (
                         <StoreIcon />
                       )}

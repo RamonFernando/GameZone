@@ -43,8 +43,9 @@
 }
 
 .featuredSideCardImg {
-  object-fit: cover;
-  object-position: top center;
+  object-fit: contain;
+  object-position: center center;
+  background: #0f172a;
 }
 
 .featuredSideCardOverlay {
