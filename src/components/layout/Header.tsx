@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/features/CartDrawer";
 import { useSearch } from "@/contexts/SearchContext";
+import styles from "./Header.module.scss";
 
 // Datos mínimos del usuario para mostrar en el avatar de la nav.
 type MiniProfile = {
@@ -186,11 +187,12 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     };
   }, [mobileMenuOpen]);
 
-  const headerClassName =
-    "header-shell" +
-    (topTransparentOnTop ? " header-shell--fixed" : "") +
-    (topTransparentOnTop ? " header-shell--top-transparent" : "") +
-    (isScrolled ? " header-shell--scrolled" : "");
+  const headerClassName = [
+    styles.headerShell,
+    topTransparentOnTop ? styles.headerShellFixed : "",
+    topTransparentOnTop ? styles.headerShellTopTransparent : "",
+    isScrolled ? styles.headerShellScrolled : "",
+  ].filter(Boolean).join(" ");
 
   const handleSearchEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter") return;
@@ -235,31 +237,31 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
 
   return (
     <header ref={headerRef} className={headerClassName}>
-      <div className="navbar">
+      <div className={styles.navbar}>
 
         {/* LOGO: reset de filtros */}
         <Link
           href="/"
-          className="nav-logo"
+          className={styles.navLogo}
           onClick={handleLogoClick}
         >
-          <div className="nav-logo-mark">
+          <div className={styles.navLogoMark}>
             <span>
-              <span className="nav-logo-letter nav-logo-letter--big nav-logo-letter-g">G</span>
-              <span className="nav-logo-letter">ame</span>
-              <span className="nav-logo-letter nav-logo-letter--big nav-logo-letter-z">Z</span>
-              <span className="nav-logo-letter">one</span>
+              <span className={`${styles.navLogoLetter} ${styles.navLogoLetterBig} ${styles.navLogoLetterG}`}>G</span>
+              <span className={styles.navLogoLetter}>ame</span>
+              <span className={`${styles.navLogoLetter} ${styles.navLogoLetterBig} ${styles.navLogoLetterZ}`}>Z</span>
+              <span className={styles.navLogoLetter}>one</span>
             </span>
           </div>
-          <div className="nav-logo-text">
-            <span className="nav-logo-text-1">Digital store</span>
-            <span className="nav-logo-text-2">GameZone Edition</span>
+          <div className={styles.navLogoText}>
+            <span className={styles.navLogoText1}>Digital store</span>
+            <span className={styles.navLogoText2}>GameZone Edition</span>
           </div>
         </Link>
 
         {/* PLATAFORMAS */}
 <nav
-  className="nav-platforms nav-platforms--desktop"
+  className={`${styles.navPlatforms} ${styles.navPlatformsDesktop}`}
   aria-label={t(lang, "nav.platforms")}
 >
   {PLATFORMS.map((platformName) => {
@@ -274,10 +276,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
       <button
         key={platformName}
         type="button"
-        className={
-          "nav-platform-pill nav-platform-with-icon" +
-          (platform === platformName ? " nav-platform-pill--active" : "")
-        }
+        className={`${styles.navPlatformPill} ${styles.navPlatformWithIcon}${platform === platformName ? ` ${styles.navPlatformPillActive}` : ""}`}
         onClick={() =>
           setPlatform(platform === platformName ? null : platformName)
         }
@@ -288,9 +287,9 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
           alt={platformName}
           width={16}
           height={16}
-          className="nav-platform-icon"
+          className={styles.navPlatformIcon}
         />
-        <span className="nav-platform-text">{platformName}</span>
+        <span className={styles.navPlatformText}>{platformName}</span>
       </button>
     );
   })}
@@ -300,15 +299,15 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
 
 
         {/* ACCIONES DERECHA */}
-        <div className="nav-actions nav-actions--desktop">
-          
+        <div className={`${styles.navActions} ${styles.navActionsDesktop}`}>
+
           {/* BUSCADOR */}
-          <div className="nav-search">
-            <span className="nav-search-icon" aria-hidden="true">🔍</span>
+          <div className={styles.navSearch}>
+            <span className={styles.navSearchIcon} aria-hidden="true">🔍</span>
             <input
               type="text"
               placeholder={lang === "en" ? "Search..." : "Buscar..."}
-              className="nav-search-input"
+              className={styles.navSearchInput}
               value={query}
               onChange={(event) => handleSearchChange(event.target.value)}
               onKeyDown={handleSearchEnter}
@@ -318,7 +317,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
           {/* CARRITO */}
           <button
             type="button"
-            className="button-primary button-ghost button-ghost-cart"
+            className={`button-primary button-ghost ${styles.buttonGhostCart}`}
             onClick={() => setOpen(true)}
             aria-label={t(lang, "header.cart-open")(totalItems)}
           >
@@ -328,15 +327,15 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
               aria-hidden="true"
               width={16}
               height={16}
-              className="nav-cart-icon"
+              className={styles.navCartIcon}
             />
-            <span className="nav-cart-badge" aria-hidden="true">{totalItems}</span>
+            <span className={styles.navCartBadge} aria-hidden="true">{totalItems}</span>
           </button>
            {/* LOGIN / REGISTRO */}
           <Link href="/account" className="">
             {miniProfile ? (
               <div
-                className="nav-auth-avatar-circle"
+                className={styles.navAuthAvatarCircle}
                 style={
                   miniProfile.avatarUrl && miniProfile.avatarUrl.trim().length > 0
                     ? {
@@ -356,14 +355,14 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
                 alt="avatar"
                 width={39}
                 height={39}
-                className="nav-auth-icon"
+                className={styles.navAuthIcon}
               />
             )}
           </Link>
 
           {/* Selector idioma/moneda */}
           <select
-            className="nav-locale-select"
+            className={styles.navLocaleSelect}
             aria-label="Idioma y moneda"
             value={uiLocale}
             onChange={(event) => handleUiLocaleChange(event.target.value)}
@@ -379,31 +378,31 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
 
         <button
           type="button"
-          className="nav-mobile-toggle"
+          className={styles.navMobileToggle}
           aria-label={mobileMenuOpen ? t(lang, "nav.close-menu") : t(lang, "nav.open-menu")}
            aria-expanded={mobileMenuOpen ? "true" : "false"}
           onClick={() => setMobileMenuOpen((value) => !value)}
         >
-          <span className="nav-mobile-toggle-line" />
-          <span className="nav-mobile-toggle-line" />
-          <span className="nav-mobile-toggle-line" />
+          <span className={styles.navMobileToggleLine} />
+          <span className={styles.navMobileToggleLine} />
+          <span className={styles.navMobileToggleLine} />
         </button>
       </div>
 
-      <div className={"nav-mobile-panel" + (mobileMenuOpen ? " nav-mobile-panel--open" : "")}>
-        <div className="nav-mobile-section nav-mobile-search">
-          <span className="nav-search-icon" aria-hidden="true">🔍</span>
+      <div className={`${styles.navMobilePanel}${mobileMenuOpen ? ` ${styles.navMobilePanelOpen}` : ""}`}>
+        <div className={`${styles.navMobileSection} ${styles.navMobileSearch}`}>
+          <span className={styles.navSearchIcon} aria-hidden="true">🔍</span>
           <input
             type="text"
             placeholder={lang === "en" ? "Search..." : "Buscar..."}
-            className="nav-search-input"
+            className={styles.navSearchInput}
             value={query}
             onChange={(event) => handleSearchChange(event.target.value)}
             onKeyDown={handleSearchEnter}
           />
         </div>
 
-        <nav className="nav-mobile-section nav-mobile-platforms" aria-label={t(lang, "nav.platforms")}>
+        <nav className={`${styles.navMobileSection} ${styles.navMobilePlatforms}`} aria-label={t(lang, "nav.platforms")}>
           {PLATFORMS.map((platformName) => {
             const iconMap: Record<string, string> = {
               PlayStation: "/iconos_platforms/icon-play.svg",
@@ -416,10 +415,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
               <button
                 key={`mobile-${platformName}`}
                 type="button"
-                className={
-                  "nav-platform-pill nav-platform-with-icon" +
-                  (platform === platformName ? " nav-platform-pill--active" : "")
-                }
+                className={`${styles.navPlatformPill} ${styles.navPlatformWithIcon}${platform === platformName ? ` ${styles.navPlatformPillActive}` : ""}`}
                 onClick={() => {
                   setPlatform(platform === platformName ? null : platformName);
                   setMobileMenuOpen(false);
@@ -431,18 +427,18 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
                   alt={platformName}
                   width={16}
                   height={16}
-                  className="nav-platform-icon"
+                  className={styles.navPlatformIcon}
                 />
-                <span className="nav-platform-text">{platformName}</span>
+                <span className={styles.navPlatformText}>{platformName}</span>
               </button>
             );
           })}
         </nav>
 
-        <div className="nav-mobile-section nav-mobile-actions">
+        <div className={`${styles.navMobileSection} ${styles.navMobileActions}`}>
           <button
             type="button"
-            className="button-primary button-ghost button-ghost-cart"
+            className={`button-primary button-ghost ${styles.buttonGhostCart}`}
             onClick={() => {
               setOpen(true);
               setMobileMenuOpen(false);
@@ -455,19 +451,19 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
               aria-hidden="true"
               width={16}
               height={16}
-              className="nav-cart-icon"
+              className={styles.navCartIcon}
             />
-            <span className="nav-cart-badge" aria-hidden="true">{totalItems}</span>
+            <span className={styles.navCartBadge} aria-hidden="true">{totalItems}</span>
           </button>
 
           <Link
             href="/account"
-            className="nav-mobile-account-link"
+            className={styles.navMobileAccountLink}
             onClick={() => setMobileMenuOpen(false)}
           >
             {miniProfile ? (
               <div
-                className="nav-auth-avatar-circle"
+                className={styles.navAuthAvatarCircle}
                 style={
                   miniProfile.avatarUrl && miniProfile.avatarUrl.trim().length > 0
                     ? {
@@ -487,13 +483,13 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
                 alt="avatar"
                 width={39}
                 height={39}
-                className="nav-auth-icon"
+                className={styles.navAuthIcon}
               />
             )}
           </Link>
 
           <select
-            className="nav-locale-select"
+            className={styles.navLocaleSelect}
             aria-label="Idioma y moneda"
             value={uiLocale}
             onChange={(event) => handleUiLocaleChange(event.target.value)}
