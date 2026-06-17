@@ -1,0 +1,416 @@
+/* =========================================
+   AUTH — Estilos de formulario y contenido
+   Layout (AuthShell, AuthCard, AuthFormPanel, AuthMediaPanel) en
+   src/components/auth/layout/*.module.scss
+   ========================================= */
+
+/* Encabezado del formulario */
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.auth-kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: #b8c4d4;
+  max-width: 26rem;
+}
+
+/* Bloque general del formulario */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Grupo de campo (label + input + helper) */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.auth-label {
+  font-size: 0.8rem;
+  color: #b8c4d4;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: rgba(15, 23, 42, 0.9);
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.auth-input::placeholder {
+  color: #94a3b8;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.6);
+}
+
+.auth-field-helper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.auth-link {
+  font-size: 0.8rem;
+  color: #a5b4fc;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+  color: #c7d2fe;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding-block: 0.7rem;
+  font-size: 0.9rem;
+}
+
+.auth-submit-compact {
+  margin-top: 0.4rem;
+  padding-block: 0.7rem;
+  font-size: 0.9rem;
+  padding-inline: 1.2rem;
+  align-self: flex-start;
+}
+
+.admin-center-button {
+  align-self: center;
+}
+
+.auth-center-button {
+  align-self: center;
+}
+
+.auth-alt {
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  color: #b8c4d4;
+}
+
+/* Separador "o continúa con" */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.6rem 0;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(148, 163, 184, 0.4),
+    transparent
+  );
+}
+
+.auth-divider-text {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #b8c4d4;
+}
+
+/* Botones sociales */
+.auth-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.auth-social-button {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: radial-gradient(
+    circle at top,
+    rgba(15, 23, 42, 0.98),
+    rgba(15, 23, 42, 0.94)
+  );
+  color: #e5e7eb;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: background 140ms ease-out, border-color 140ms ease-out,
+    transform 0.3s ease-out, box-shadow 120ms ease-out;
+}
+
+.auth-social-button:hover {
+  background: radial-gradient(
+    circle at top left,
+    rgba(124, 58, 237, 0.25),
+    rgba(15, 23, 42, 0.97)
+  );
+  border-color: var(--accent-strong);
+  box-shadow: 0 14px 28px rgba(30, 64, 175, 0.6);
+  transform: scale(0.92);
+}
+
+.auth-social-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.auth-social-icon-img {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---- Checkout inline login dialog ---- */
+
+.checkout-login-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.checkout-login-dialog {
+  position: relative;
+  width: min(100%, 430px);
+  padding: 1.4rem;
+  border: 1px solid rgba(165, 180, 252, 0.28);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98)),
+    radial-gradient(circle at top left, rgba(129, 140, 248, 0.2), transparent 42%);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.55);
+  color: #cbd5e1;
+}
+
+.checkout-login-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.checkout-login-close:hover,
+.checkout-login-close:focus-visible {
+  border-color: rgba(165, 180, 252, 0.65);
+  color: #f8fafc;
+  outline: none;
+}
+
+.checkout-login-title {
+  margin: 0.25rem 2.25rem 0.55rem 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.checkout-login-text {
+  margin: 0;
+  color: #b8c4d4;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.checkout-login-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+
+.checkout-login-actions .button-primary,
+.checkout-login-actions .button-ghost {
+  justify-content: center;
+  min-height: 2.75rem;
+}
+
+/* ---- Checkout status panel ---- */
+
+.checkout-status-panel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.checkout-status-spinner {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  border: 3px solid rgba(148, 163, 184, 0.28);
+  border-top-color: rgba(165, 180, 252, 0.95);
+  border-radius: 50%;
+  animation: checkout-status-spin 0.9s linear infinite;
+}
+
+.checkout-status-copy {
+  min-width: 0;
+}
+
+.checkout-status-title {
+  margin: 0 0 0.25rem;
+  color: #f8fafc;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ---- Checkout progress list ---- */
+
+.checkout-progress-list {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkout-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.checkout-progress-marker {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: 0 0 auto;
+  border: 2px solid rgba(148, 163, 184, 0.45);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.checkout-progress-item--active {
+  color: #dbeafe;
+}
+
+.checkout-progress-item--active .checkout-progress-marker {
+  border-color: rgba(165, 180, 252, 0.95);
+  box-shadow: 0 0 0 5px rgba(129, 140, 248, 0.12);
+}
+
+.checkout-progress-item--error {
+  color: #fecaca;
+}
+
+.checkout-progress-item--error .checkout-progress-marker {
+  border-color: rgba(248, 113, 113, 0.95);
+  background: rgba(127, 29, 29, 0.72);
+  box-shadow: 0 0 0 5px rgba(248, 113, 113, 0.12);
+}
+
+.checkout-progress-item--done {
+  color: #cbd5e1;
+}
+
+.checkout-progress-item--done .checkout-progress-marker {
+  border-color: rgba(34, 197, 94, 0.85);
+  background: rgba(34, 197, 94, 0.85);
+}
+
+.checkout-progress-list--complete {
+  padding: 1rem;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  background: rgba(20, 83, 45, 0.16);
+}
+
+.checkout-account-button {
+  justify-self: center;
+  width: auto;
+}
+
+@keyframes checkout-status-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .checkout-login-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-status-panel {
+    align-items: flex-start;
+  }
+
+  .checkout-account-button {
+    justify-self: stretch;
+    width: 100%;
+  }
+}
+
+/* Tabla de Pedidos del sistema */
+.auth-form table {
+  color: #cbd5e1;
+}
+.auth-form table th {
+  color: #b8c4d4;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.auth-form table td {
+  color: #cbd5e1;
+  padding: 8px 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+.auth-form table strong {
+  color: #cbd5e1;
+}

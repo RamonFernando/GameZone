@@ -46,7 +46,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 6 — Rendimiento** | ✅ **COMPLETA** — móvil 79→**96** (+17), PC 99→92 (cold-cache proxy, aceptable). Objetivo ≥ 90 móvil cumplido. |
 | **FASE 7 — Seguridad avanzada** | ⚠️ en curso — **7.1 ✅ 7.3 ✅ 7.4 ✅** hechas; 7.2 🔴 manual pendiente (usuario) |
 | **FASE 8 — SEO avanzado** | ⚠️ en curso — **8.1/8.2/8.3/8.4 ✅ hechas**; 8.5 pendiente (manual) |
-| **FASE 9 — UI/UX** | ⚠️ en curso — **9.1/9.2/9.3/9.4 ✅ hechas el 11/06/2026**; Parte B: **B1/B2/B3/B4/B5/B6/B8 ✅**, B7 pendiente |
+| **FASE 9 — UI/UX** | ✅ **COMPLETA** — 9.1/9.2/9.3/9.4/9.5 ✅; Parte B: B1/B2/B3/B4/B5/B6/B7/B8 ✅ todos hechos |
 | **Audit Log (C1)** | ✅ HECHO 13/06/2026 -- tabla AuditLog en Neon, logAudit(), 18 puntos en 14 rutas. Migracion aplicada. |
 | **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ 11/06**, **10.2 ✅ 13/06** (Playwright 3 specs), **10.3 ✅ 13/06** (ESLint CI + Lighthouse CI); 10.4 pendiente |
 
@@ -325,7 +325,8 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   - ✅ MarketIntelligenceSections — commit `0fcea97` (`src/components/features/MarketIntelligenceSections.module.scss`, ~1500 líneas, THUMB_POSITION_CLASS map)
   - ✅ **FeaturedSection** — commit `3d4384d` (`src/components/features/FeaturedSection.module.scss`)
   - ✅ **PromoAppBanner** — commit `3d4384d` (`src/components/features/PromoAppBanner.module.scss`)
-  - ✅ **auth.scss split** — commit `1927cc1`: `src/styles/auth.module.scss` + `src/styles/account.module.scss`, imports actualizados en 11 pages
+  - ✅ **auth.scss / account.scss** (17/06/2026): GPT había creado `auth.module.scss` + `account.module.scss` con `:global()` en todas las clases (falsos CSS Modules). Corregido renombrando a `auth.scss` + `account.scss` (SCSS global real); eliminados todos los `:global()` y side-effect imports.
+  - ✅ **Auth layout components CSS Modules** (17/06/2026): `AuthShell` · `AuthCard` · `AuthFormPanel` · `AuthMediaPanel` creados en `src/components/auth/layout/` con sus `*.module.scss` reales. 11 páginas migradas (auth, register, forgot-password, reset-password, verify, checkout, checkout/success, account, account/orders, admin/control, admin/orders). `tsc` limpio + 76/76 tests.
   - Validado con `npx tsc --noEmit`, `npx.cmd vitest run` (76/76), `npx.cmd next build` y revisión visual pública desktop/móvil.
 
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
@@ -351,9 +352,7 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
   Carrusel en home con los últimos juegos visitados mediante `localStorage` (`useRecentlyViewed`).
 - **B6 — Wishlist visible:** ✅ **HECHA** (11/06/2026, commit `e6a3525`).
   `GET /api/account/wishlist` y pestaña "Mi lista" en cuenta, alimentada desde `ProductLike`.
-- **B7 — Cuenta atrás en ofertas:** si un producto tiene oferta con fecha fin, mostrar countdown
-  en la tarjeta (urgencia, patrón Instant Gaming). Requiere campo `saleEndsAt` en Product.
-  Coste: medio.
+- **B7 — Cuenta atrás en ofertas:** ✅ **HECHA** (verificado 17/06/2026). `GameCard.tsx` ya tiene countdown completo: `useState<string | null>` + `useEffect` que calcula tiempo restante desde `game.saleEndsAt`, renderizado con `styles.gameCardCountdown`. Admin panel con input `datetime-local` para `saleEndsAt`. Campo en BD desde migración `20260613000002`.
 - **B8 — Tipografía display propia:** ✅ **HECHA** (11/06/2026, commit `ae61b54`).
   Exo 2 vía `next/font/google` como variable `--font-display` para títulos principales.
 

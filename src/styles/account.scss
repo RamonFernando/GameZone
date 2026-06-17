@@ -1,18 +1,23 @@
-:global(.account-orders-table-wrap) {
+/* =========================================
+   ACCOUNT / ADMIN - GameZone
+   Estilos de dominio para /account, /admin
+   ========================================= */
+
+.account-orders-table-wrap {
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--border-subtle);
   border-radius: 0.85rem;
 }
 
-:global(.account-orders-table) {
+.account-orders-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 640px;
 }
 
-:global(.account-orders-table) th,
-:global(.account-orders-table) td {
+.account-orders-table th,
+.account-orders-table td {
   text-align: left;
   padding: 0.7rem 0.8rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
@@ -21,7 +26,7 @@
   vertical-align: top;
 }
 
-:global(.account-orders-table) th {
+.account-orders-table th {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -29,28 +34,28 @@
   background: rgba(15, 23, 42, 0.5);
 }
 
-:global(.account-orders-table) tr:last-child td {
+.account-orders-table tr:last-child td {
   border-bottom: 0;
 }
 
-:global(.account-orders-qty) {
+.account-orders-qty {
   margin-left: 0.35rem;
 }
 
-:global(.auth-divider-rule) {
+.auth-divider-rule {
   width: 100%;
   border: 0;
   border-top: 1px solid rgba(148, 163, 184, 0.28);
   margin: 0.2rem 0 0.4rem;
 }
 
-:global(.account-tabs) {
+.account-tabs {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
-:global(.account-tab) {
+.account-tab {
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.35);
@@ -62,20 +67,20 @@
   cursor: pointer;
 }
 
-:global(.account-tab--active) {
+.account-tab--active {
   border-color: rgba(129, 140, 248, 0.9);
   background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.96));
   color: #cbd5e1;
 }
 
-:global(.account-avatar-header) {
+.account-avatar-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
 }
 
-:global(.account-avatar-circle) {
+.account-avatar-circle {
   width: 96px;
   height: 96px;
   border-radius: 50%;
@@ -93,13 +98,13 @@
   transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease-out;
 }
 
-:global(.account-avatar-circle):hover {
+.account-avatar-circle:hover {
   transform: scale(1.3);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
   border-color: rgba(191, 219, 254, 0.9);
 }
 
-:global(.account-details-summary) {
+.account-details-summary {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -110,31 +115,31 @@
   background: rgba(15, 23, 42, 0.38);
 }
 
-:global(.account-details-summary-head) {
+.account-details-summary-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
 
-:global(.account-details-edit-button) {
+.account-details-edit-button {
   min-width: 10.5rem;
   padding-inline: 1rem;
   white-space: nowrap;
 }
 
-:global(.account-details-list) {
+.account-details-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem 1rem;
   margin: 0;
 }
 
-:global(.account-details-row) {
+.account-details-row {
   min-width: 0;
 }
 
-:global(.account-details-row) dt {
+.account-details-row dt {
   margin: 0 0 0.2rem;
   color: #b8c4d4;
   font-size: 0.75rem;
@@ -142,21 +147,21 @@
   text-transform: uppercase;
 }
 
-:global(.account-details-row) dd {
+.account-details-row dd {
   margin: 0;
   color: #cbd5e1;
   font-size: 0.92rem;
   overflow-wrap: anywhere;
 }
 
-:global(.account-details-actions) {
+.account-details-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
 
-:global(.account-recovery-panel) {
+.account-recovery-panel {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -167,7 +172,7 @@
   background: rgba(15, 23, 42, 0.32);
 }
 
-:global(.account-pending-payment) {
+.account-pending-payment {
   display: grid;
   gap: 0.85rem;
   padding: 1rem;
@@ -176,21 +181,21 @@
   background: rgba(15, 23, 42, 0.42);
 }
 
-:global(.account-pending-payment-head) {
+.account-pending-payment-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
 
-:global(.account-pending-payment-title) {
+.account-pending-payment-title {
   margin: 0.25rem 0 0;
   color: #f8fafc;
   font-size: 1rem;
   line-height: 1.25;
 }
 
-:global(.account-pending-payment-badge) {
+.account-pending-payment-badge {
   padding: 0.3rem 0.7rem;
   border: 1px solid rgba(129, 140, 248, 0.45);
   border-radius: 999px;
@@ -199,24 +204,24 @@
   font-weight: 700;
 }
 
-:global(.account-pending-payment-grid) {
+.account-pending-payment-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
-:global(.account-pending-payment-grid) > div {
+.account-pending-payment-grid > div {
   display: grid;
   gap: 0.2rem;
   min-width: 0;
 }
 
-:global(.account-pending-payment-grid) strong {
+.account-pending-payment-grid strong {
   color: #cbd5e1;
   overflow-wrap: anywhere;
 }
 
-:global(.account-pending-payment-items) {
+.account-pending-payment-items {
   display: grid;
   gap: 0.45rem;
   margin: 0;
@@ -224,7 +229,7 @@
   list-style: none;
 }
 
-:global(.account-pending-payment-items) li {
+.account-pending-payment-items li {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
@@ -232,22 +237,22 @@
   font-size: 0.86rem;
 }
 
-:global(.account-pending-payment-items) strong {
+.account-pending-payment-items strong {
   color: #cbd5e1;
 }
 
-:global(.account-pending-payment) :global(.auth-submit-compact) {
+.account-pending-payment .auth-submit-compact {
   justify-self: center;
   width: auto;
 }
 
-:global(.account-recovery-list) {
+.account-recovery-list {
   display: grid;
   gap: 0.75rem;
   margin: 0;
 }
 
-:global(.account-recovery-row) {
+.account-recovery-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -255,7 +260,7 @@
   min-width: 0;
 }
 
-:global(.account-recovery-row) dt {
+.account-recovery-row dt {
   margin: 0;
   color: #b8c4d4;
   font-size: 0.78rem;
@@ -263,7 +268,7 @@
   text-transform: uppercase;
 }
 
-:global(.account-recovery-row) dd {
+.account-recovery-row dd {
   margin: 0;
   color: #dbeafe;
   font-size: 0.92rem;
@@ -272,71 +277,72 @@
 }
 
 @media (max-width: 640px) {
-  :global(.account-details-summary-head) {
+  .account-details-summary-head {
     flex-direction: column;
   }
 
-  :global(.account-details-summary-head) :global(.button-primary) {
+  .account-details-summary-head .button-primary {
     width: 100%;
   }
 
-  :global(.account-details-edit-button) {
+  .account-details-edit-button {
     min-width: 0;
   }
 
-  :global(.account-details-list) {
+  .account-details-list {
     grid-template-columns: 1fr;
   }
 
-  :global(.account-pending-payment-head),
-  :global(.account-pending-payment-items) li {
+  .account-pending-payment-head,
+  .account-pending-payment-items li {
     flex-direction: column;
   }
 
-  :global(.account-pending-payment-grid) {
+  .account-pending-payment-grid {
     grid-template-columns: 1fr;
   }
 
-  :global(.account-pending-payment) :global(.auth-submit-compact) {
+  .account-pending-payment .auth-submit-compact {
     justify-self: stretch;
     width: 100%;
   }
 
-  :global(.account-recovery-row) {
+  .account-recovery-row {
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  :global(.account-recovery-row) dd {
+  .account-recovery-row dd {
     text-align: left;
   }
 
-  // Tabs: scroll horizontal en mÃ³vil para no romper layout
-  :global(.account-tabs) {
+  /* Tabs: scroll horizontal en móvil */
+  .account-tabs {
     overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: none;
+
     &::-webkit-scrollbar { display: none; }
   }
 
-  :global(.account-tab) {
+  .account-tab {
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  // Avatar header: avatar centrado debajo del tÃ­tulo
-  :global(.account-avatar-header) {
+  /* Avatar header: centrado en móvil */
+  .account-avatar-header {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
 
-  :global(.account-avatar-circle) {
+  .account-avatar-circle {
     align-self: center;
   }
 
-  // Botones de acciÃ³n: ancho completo en mÃ³vil
-  :global(.auth-form) > div > :global(.button-primary).auth-submit-compact {
+  /* Botones de acción: ancho completo en móvil */
+  .auth-form > div > .button-primary.auth-submit-compact {
     width: 100%;
     justify-content: center;
   }

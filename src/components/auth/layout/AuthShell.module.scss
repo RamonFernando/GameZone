@@ -1,0 +1,38 @@
+.authShell {
+  margin-top: 1.75rem;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+/* Botones deshabilitados dentro del shell */
+.authShell :global(.button-primary):disabled,
+.authShell :global(.button-ghost):disabled {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #94a3b8;
+  cursor: not-allowed;
+  filter: grayscale(0.55) brightness(0.82);
+  box-shadow: none;
+  opacity: 0.72;
+  transform: none;
+}
+
+.authShell :global(.button-primary):disabled:hover,
+.authShell :global(.button-ghost):disabled:hover {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #94a3b8;
+  cursor: not-allowed;
+  filter: grayscale(0.55) brightness(0.82);
+  box-shadow: none;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .authShell {
+    margin-top: 1.25rem;
+  }
+}

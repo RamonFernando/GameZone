@@ -189,7 +189,9 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
 
   const headerClassName = [
     styles.headerShell,
+    "header-shell",
     topTransparentOnTop ? styles.headerShellFixed : "",
+    topTransparentOnTop ? "header-shell--fixed" : "",
     topTransparentOnTop ? styles.headerShellTopTransparent : "",
     isScrolled ? styles.headerShellScrolled : "",
   ].filter(Boolean).join(" ");

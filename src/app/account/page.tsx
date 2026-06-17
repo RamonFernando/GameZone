@@ -8,8 +8,12 @@ import { SESSION_COOKIE_NAME } from "@/services/auth/session";
 import { getActiveSessionFromToken } from "@/services/auth/session-server";
 import { prisma } from "@/lib/prisma";
 import { getUserById } from "@/services/auth/store";
-import "../../styles/auth.module.scss";
-import "../../styles/account.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import { AuthMediaPanel } from "@/components/auth/layout/AuthMediaPanel";
+import "../../styles/auth.scss";
+import "../../styles/account.scss";
 
 export default async function AccountPage({
   searchParams,
@@ -72,10 +76,9 @@ export default async function AccountPage({
       : undefined;
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-grid">
-          <div className="auth-form-panel">
+    <AuthShell>
+      <AuthCard withGrid>
+          <AuthFormPanel>
             <div className="account-avatar-header">
               <header className="auth-header">
                 <p className="auth-kicker">GameZone Access</p>
@@ -124,26 +127,16 @@ export default async function AccountPage({
             <AccountDashboard initialTab={searchParams?.tab === "payment" ? "payment" : "account"} />
             <LogoutButton />
             <SessionRefresher />
-          </div>
+          </AuthFormPanel>
 
-          <div className="auth-media-panel">
-            <div className="auth-media-inner">
-              <div
-                className="auth-media-gradient"
-                style={dynamicMediaBackground ? { backgroundImage: dynamicMediaBackground } : undefined}
-              />
-              <div className="auth-media-brand">
-                <span className="auth-media-tag">MY PROFILE</span>
-                <span className="auth-media-text">
-                  {latestPurchasedCover
-                    ? `Tu último juego comprado: ${latestPurchasedName}.`
-                    : "Gestiona tu cuenta y accede de forma segura a tus próximas secciones privadas."}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          <AuthMediaPanel
+            gradientStyle={dynamicMediaBackground ? { backgroundImage: dynamicMediaBackground } : undefined}
+            tag="MY PROFILE"
+            text={latestPurchasedCover
+              ? `Tu último juego comprado: ${latestPurchasedName}.`
+              : "Gestiona tu cuenta y accede de forma segura a tus próximas secciones privadas."}
+          />
+      </AuthCard>
+    </AuthShell>
   );
 }

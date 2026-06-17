@@ -6,7 +6,11 @@ import { useMemo, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { useCart } from "@/contexts/CartContext";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
-import "../../styles/auth.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import { AuthMediaPanel } from "@/components/auth/layout/AuthMediaPanel";
+import "../../styles/auth.scss";
 
 type PaymentMethod = "stripe" | "paypal" | "manual";
 
@@ -126,7 +130,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <section className="auth-shell">
+    <AuthShell>
       {showLoginPrompt ? (
         <div className="checkout-login-backdrop" role="presentation">
           <div
@@ -164,9 +168,8 @@ export default function CheckoutPage() {
           </div>
         </div>
       ) : null}
-      <div className="card card-hover auth-card">
-        <div className="auth-grid">
-          <div className="auth-form-panel">
+      <AuthCard withGrid>
+          <AuthFormPanel>
             <header className="auth-header">
               <p className="auth-kicker">GameZone Checkout</p>
               <h1 className="auth-title">
@@ -279,25 +282,15 @@ export default function CheckoutPage() {
                 </p>
               ) : null}
             </div>
-          </div>
+          </AuthFormPanel>
 
-          <div className="auth-media-panel">
-            <div className="auth-media-inner">
-              <div className="auth-media-gradient" />
-              <div className="auth-media-brand">
-                <span className="auth-media-tag">
-                  {lang === "en" ? "SECURE PAYMENT" : "PAGO SEGURO"}
-                </span>
-                <span className="auth-media-text">
-                  {lang === "en"
-                    ? "Your purchase is validated on the server and stored in your order history."
-                    : "Tu compra se valida en servidor y se guarda en tu historial de pedidos."}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          <AuthMediaPanel
+            tag={lang === "en" ? "SECURE PAYMENT" : "PAGO SEGURO"}
+            text={lang === "en"
+              ? "Your purchase is validated on the server and stored in your order history."
+              : "Tu compra se valida en servidor y se guarda en tu historial de pedidos."}
+          />
+      </AuthCard>
+    </AuthShell>
   );
 }

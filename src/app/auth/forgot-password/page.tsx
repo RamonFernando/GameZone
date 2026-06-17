@@ -2,7 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import "../../../styles/auth.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import "../../../styles/auth.scss";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -45,9 +48,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <section className="auth-shell auth-shell--center">
-      <div className="card card-hover auth-card auth-card--single">
-        <div className="auth-form-panel">
+    <AuthShell center>
+      <AuthCard single>
+        <AuthFormPanel>
           <header className="auth-header">
             <p className="auth-kicker">GameZone Access</p>
             <h1 className="auth-title">Recuperar contraseña</h1>
@@ -109,8 +112,8 @@ export default function ForgotPasswordPage() {
               </Link>
             </p>
           </form>
-        </div>
-      </div>
-    </section>
+        </AuthFormPanel>
+      </AuthCard>
+    </AuthShell>
   );
 }

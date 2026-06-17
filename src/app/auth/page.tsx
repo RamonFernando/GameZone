@@ -5,14 +5,18 @@ import { useLocale } from "@/hooks/useLocale";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import "../../styles/auth.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import { AuthMediaPanel } from "@/components/auth/layout/AuthMediaPanel";
+import "../../styles/auth.scss";
 
 
 
 // Página de acceso principal: GameZone Access
 export default function LoginPage() {
   return (
-    <Suspense fallback={<section className="auth-shell"><p className="auth-alt">Cargando login...</p></section>}>
+    <Suspense fallback={<AuthShell><p className="auth-alt">Cargando login...</p></AuthShell>}>
       <LoginContent />
     </Suspense>
   );
@@ -278,19 +282,9 @@ const handleTwoFactorSubmit = async (event: FormEvent<HTMLFormElement>) => {
   };
 
 return (
-    // ============================
-    // SECCIÓN GENERAL DE LA PÁGINA DE LOGIN
-    // ============================
-    <section className="auth-shell">
-        {/* ============================
-            CARD PRINCIPAL (usa estilos .card del proyecto)
-            ============================ */}
-        <div className="card card-hover auth-card">
-            <div className="auth-grid">
-                {/* ============================
-                    COLUMNA IZQUIERDA: FORMULARIO DE ACCESO
-                    ============================ */}
-                <div className="auth-form-panel">
+    <AuthShell>
+        <AuthCard withGrid>
+                <AuthFormPanel>
                     {/* Encabezado del login */}
                     <header className="auth-header">
                         <p className="auth-kicker">GameZone Access</p>
@@ -603,38 +597,14 @@ return (
                         </button>
                       </form>
                     )}
-                </div> {/* Fin columna izquierda */}
+                </AuthFormPanel>
 
-                    {/* ============================
-                        COLUMNA DERECHA: IMAGEN / BRANDING
-                        ============================ */}
-                    <div className="auth-media-panel">
-                        <div className="auth-media-inner">
-                        {/* Imagen reutilizando recursos del proyecto */}
-                        <Image
-                            src="/Recursos/sign-wallpaper.jpg"
-                            alt="Arte promocional GameZone Access"
-                            fill
-                            priority
-                            className="auth-media-image"
-                            sizes="(min-width: 1024px) 480px, 100vw"
-                        />
-
-                        {/* Capa de degradado para integrar colores del proyecto */}
-                        <div className="auth-media-gradient" />
-
-                        {/* Bloque de texto sobre la imagen */}
-                        <div className="auth-media-brand">
-                            <span className="auth-media-tag">XP BOOST</span>
-                            <span className="auth-media-text">
-                            Disfruta de una experiencia premium y mantén tu biblioteca
-                            digital sincronizada en todos tus dispositivos.
-                            </span>
-                        </div>
-                    </div> {/* Fin auth-media-inner */}
-                </div> {/* Fin auth-media-panel */}
-            </div> {/* Fin auth-grid */}
-        </div> {/* Fin card principal */}
-    </section>
+                <AuthMediaPanel
+                    image={{ src: "/Recursos/sign-wallpaper.jpg", alt: "Arte promocional GameZone Access" }}
+                    tag="XP BOOST"
+                    text="Disfruta de una experiencia premium y mantén tu biblioteca digital sincronizada en todos tus dispositivos."
+                />
+        </AuthCard>
+    </AuthShell>
 );
 }

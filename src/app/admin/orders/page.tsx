@@ -4,8 +4,11 @@ import { redirect } from "next/navigation";
 import { AdminOrdersPanel } from "@/components/auth/AdminOrdersPanel";
 import { SESSION_COOKIE_NAME } from "@/services/auth/session";
 import { getActiveSessionFromToken } from "@/services/auth/session-server";
-import "../../../styles/auth.module.scss";
-import "../../../styles/account.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import "../../../styles/auth.scss";
+import "../../../styles/account.scss";
 
 export default async function AdminOrdersPage() {
   const cookieStore = await cookies();
@@ -21,9 +24,9 @@ export default async function AdminOrdersPage() {
   }
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-form-panel">
+    <AuthShell>
+      <AuthCard>
+        <AuthFormPanel>
           <header className="auth-header">
             <p className="auth-kicker">Admin Console</p>
             <h1 className="auth-title">Pedidos del sistema</h1>
@@ -42,8 +45,8 @@ export default async function AdminOrdersPage() {
               Volver a mi cuenta
             </Link>
           </div>
-        </div>
-      </div>
-    </section>
+        </AuthFormPanel>
+      </AuthCard>
+    </AuthShell>
   );
 }

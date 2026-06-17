@@ -8,7 +8,11 @@ import {
   createPaymentProgressStorageKey,
   PAYMENT_PROGRESS_STEP_DELAY_MS,
 } from "@/services/checkout/payment-progress";
-import "../../../styles/auth.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import { AuthMediaPanel } from "@/components/auth/layout/AuthMediaPanel";
+import "../../../styles/auth.scss";
 
 type FinalizationState = "loading" | "success" | "error";
 type StripeStatus = "processing" | "paid" | "failed" | "error";
@@ -23,9 +27,9 @@ export default function CheckoutSuccessPage() {
   return (
     <Suspense
       fallback={
-        <section className="auth-shell">
+        <AuthShell>
           <p className="auth-alt">Cargando confirmación de pago...</p>
-        </section>
+        </AuthShell>
       }
     >
       <CheckoutSuccessContent />
@@ -235,10 +239,9 @@ function CheckoutSuccessContent() {
     (isActive ? " checkout-progress-item--active" : "");
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-grid">
-          <div className="auth-form-panel">
+    <AuthShell>
+      <AuthCard withGrid>
+          <AuthFormPanel>
             <header className="auth-header">
               <p className="auth-kicker">Checkout</p>
               <h1 className="auth-title">Resultado del pago</h1>
@@ -352,21 +355,13 @@ function CheckoutSuccessContent() {
                 </Link>
               </>
             ) : null}
-          </div>
+          </AuthFormPanel>
 
-          <div className="auth-media-panel">
-            <div className="auth-media-inner">
-              <div className="auth-media-gradient" />
-              <div className="auth-media-brand">
-                <span className="auth-media-tag">PAYMENT VERIFIED</span>
-                <span className="auth-media-text">
-                  Confirmamos con la pasarela en servidor antes de marcar el pedido como pagado.
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          <AuthMediaPanel
+            tag="PAYMENT VERIFIED"
+            text="Confirmamos con la pasarela en servidor antes de marcar el pedido como pagado."
+          />
+      </AuthCard>
+    </AuthShell>
   );
 }

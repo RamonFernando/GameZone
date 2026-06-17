@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import "../../../styles/auth.module.scss";
+import { AuthShell } from "@/components/auth/layout/AuthShell";
+import { AuthCard } from "@/components/auth/layout/AuthCard";
+import { AuthFormPanel } from "@/components/auth/layout/AuthFormPanel";
+import { AuthMediaPanel } from "@/components/auth/layout/AuthMediaPanel";
+import "../../../styles/auth.scss";
 
 type VerificationState = {
   status: "loading" | "success" | "error";
@@ -12,7 +16,7 @@ type VerificationState = {
 
 export default function VerifyAccountPage() {
   return (
-    <Suspense fallback={<section className="auth-shell"><p className="auth-alt">Validando enlace...</p></section>}>
+    <Suspense fallback={<AuthShell><p className="auth-alt">Validando enlace...</p></AuthShell>}>
       <VerifyAccountContent />
     </Suspense>
   );
@@ -75,10 +79,9 @@ function VerifyAccountContent() {
   }, [token]);
 
   return (
-    <section className="auth-shell">
-      <div className="card card-hover auth-card">
-        <div className="auth-grid">
-          <div className="auth-form-panel">
+    <AuthShell>
+      <AuthCard withGrid>
+          <AuthFormPanel>
             <header className="auth-header">
               <p className="auth-kicker">GameZone Access</p>
               <h1 className="auth-title">Verificación de cuenta</h1>
@@ -93,25 +96,15 @@ function VerifyAccountContent() {
                 Ir a iniciar sesión
               </Link>
             </div>
-          </div>
+          </AuthFormPanel>
 
-          <div className="auth-media-panel">
-            <div className="auth-media-inner">
-              <div className="auth-media-gradient" />
-              <div className="auth-media-brand">
-                <span className="auth-media-tag">
-                  {state.status === "success" ? "ACCOUNT VERIFIED" : "VERIFY EMAIL"}
-                </span>
-                <span className="auth-media-text">
-                  {state.status === "success"
-                    ? "Tu perfil está listo. Inicia sesión y empieza a jugar."
-                    : "Tu seguridad es prioridad: confirma tu correo para activar la cuenta."}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          <AuthMediaPanel
+            tag={state.status === "success" ? "ACCOUNT VERIFIED" : "VERIFY EMAIL"}
+            text={state.status === "success"
+              ? "Tu perfil está listo. Inicia sesión y empieza a jugar."
+              : "Tu seguridad es prioridad: confirma tu correo para activar la cuenta."}
+          />
+      </AuthCard>
+    </AuthShell>
   );
 }

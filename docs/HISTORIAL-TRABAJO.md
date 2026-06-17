@@ -16,6 +16,8 @@
 
 ### Claude (VS Code)
 
+- [fix ✅] auth/account split corregido: auth.module.scss+account.module.scss (falsos CSS Modules con :global()) → auth.scss+account.scss (estilos de dominio globales correctos); 11 imports actualizados; tsc+76/76 tests verdes — pendiente commit
+- [9.5 ✅] Auth layout components CSS Modules: AuthShell/AuthCard/AuthFormPanel/AuthMediaPanel creados en components/auth/layout/ con sus *.module.scss; 11 páginas actualizadas (auth, register, forgot-password, reset-password, verify, checkout, checkout/success, account, account/orders, admin/control, admin/orders); tsc limpio + 76/76 tests — pendiente commit
 - [MVC ✅] Reorganización MVC: components/layout, ui, features; services/auth, cart, checkout, market, payments; 97 imports actualizados; CLAUDE.md + docs/REGLAS-IA.md creados — sin commit único (sesión anterior)
 - [9.3 ✅] Accesibilidad: prefers-reduced-motion para .card-hover, .button-primary, .game-card-actions .button-primary (badge-gradient-sweep), .card.game-card-plus:hover, .game-card-like-icon — en globals.scss + responsive-refinements.scss
 - [9.5 ✅] CSS Modules GameCard: GameCard.module.scss creado, game-card-* extraídos de responsive-refinements.scss, GameCard.tsx actualizado con styles.xxx
