@@ -95,8 +95,10 @@ function formatPrice(price: number) {
   return price.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
 
+const DEAL_ROTATE_S = 8;
+
 function useCountdown() {
-  const [secs, setSecs] = useState(0);
+  const [secs, setSecs] = useState<number | null>(null);
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -108,6 +110,7 @@ function useCountdown() {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
+  if (secs === null) return { h: null, m: null, s: null };
   return { h: Math.floor(secs / 3600), m: Math.floor((secs % 3600) / 60), s: secs % 60 };
 }
 
@@ -134,6 +137,23 @@ function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: st
 
 function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string }) {
   const { h, m, s } = useCountdown();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(DEAL_ROTATE_S);
+
+  useEffect(() => {
+    if (games.length < 2) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          setActiveIndex((i) => (i + 1) % games.length);
+          return DEAL_ROTATE_S;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [games.length]);
+
   return (
     <div className={styles.featuredDeal}>
       <div className={styles.featuredDealHeader}>
@@ -141,24 +161,28 @@ function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string 
         <span className={styles.featuredDealTitle}>{lang === "en" ? "Deals of the day" : "Ofertas del día"}</span>
         <div className={styles.featuredDealCountdown}>
           <div className={styles.featuredDealCdBlock}>
-            <span className={styles.featuredDealCdNum}>{fmt(h)}</span>
+            <span className={styles.featuredDealCdNum} suppressHydrationWarning>{h !== null ? fmt(h) : "--"}</span>
             <span className={styles.featuredDealCdUnit}>h</span>
           </div>
           <span className={styles.featuredDealCdSep}>:</span>
           <div className={styles.featuredDealCdBlock}>
-            <span className={styles.featuredDealCdNum}>{fmt(m)}</span>
+            <span className={styles.featuredDealCdNum} suppressHydrationWarning>{m !== null ? fmt(m) : "--"}</span>
             <span className={styles.featuredDealCdUnit}>min</span>
           </div>
           <span className={styles.featuredDealCdSep}>:</span>
           <div className={styles.featuredDealCdBlock}>
-            <span className={styles.featuredDealCdNum}>{fmt(s)}</span>
+            <span className={styles.featuredDealCdNum} suppressHydrationWarning>{s !== null ? fmt(s) : "--"}</span>
             <span className={styles.featuredDealCdUnit}>seg</span>
           </div>
         </div>
       </div>
       <div className={styles.featuredDealList}>
-        {games.map((game) => (
-          <Link key={game.slug} href={`/games/${game.slug}`} className={styles.featuredDealRow}>
+        {games.map((game, index) => (
+          <Link
+            key={game.slug}
+            href={`/games/${game.slug}`}
+            className={`${styles.featuredDealRow}${index === activeIndex ? ` ${styles.featuredDealRowActive}` : ""}`}
+          >
             <div className={styles.featuredDealCover}>
               <Image src={game.coverImage} alt={game.name} fill sizes="64px" style={{ objectFit: "cover" }} unoptimized />
             </div>
@@ -169,6 +193,14 @@ function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string 
                 <span className={styles.featuredDealPrice}>{formatPrice(game.priceFinal)}</span>
                 <span className={styles.featuredDealOriginal}>{formatPrice(game.priceOriginal)}</span>
               </div>
+              {index === activeIndex && games.length > 1 && (
+                <div className={styles.featuredDealProgress}>
+                  <div
+                    className={styles.featuredDealProgressBar}
+                    style={{ width: `${(timeLeft / DEAL_ROTATE_S) * 100}%` }}
+                  />
+                </div>
+              )}
             </div>
           </Link>
         ))}
