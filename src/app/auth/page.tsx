@@ -5,7 +5,7 @@ import { useLocale } from "@/hooks/useLocale";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import "../../styles/auth.scss";
+import "../../styles/auth.module.scss";
 
 
 

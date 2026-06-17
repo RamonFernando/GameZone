@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import "../../../styles/auth.scss";
+import "../../../styles/auth.module.scss";
 
 export default function RegisterPage() {
   const router = useRouter();

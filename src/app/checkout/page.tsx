@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { useCart } from "@/contexts/CartContext";
 import { formatMoneyWithGeo } from "@/lib/geo-format";
-import "../../styles/auth.scss";
+import "../../styles/auth.module.scss";
 
 type PaymentMethod = "stripe" | "paypal" | "manual";
 

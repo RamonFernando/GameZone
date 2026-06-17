@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { AdminOrdersPanel } from "@/components/auth/AdminOrdersPanel";
 import { SESSION_COOKIE_NAME } from "@/services/auth/session";
 import { getActiveSessionFromToken } from "@/services/auth/session-server";
-import "../../../styles/auth.scss";
+import "../../../styles/auth.module.scss";
+import "../../../styles/account.module.scss";
 
 export default async function AdminOrdersPage() {
   const cookieStore = await cookies();

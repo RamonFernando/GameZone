@@ -1,35 +1,35 @@
     /* =========================================
     AUTH / LOGIN - GameZone Access
-    Sección específica para la página /login
+    SecciÃ³n especÃ­fica para la pÃ¡gina /login
     ========================================= */
 
-    .auth-shell {
+    :global(.auth-shell) {
     margin-top: 1.75rem;
     }
 
-    .auth-shell--center {
+    :global(.auth-shell--center) {
     display: flex;
     justify-content: center;
     }
 
-    /* Card de login: reutiliza .card, pero ajustamos padding interno */
-    .auth-card {
+    /* Card de login: reutiliza :global(.card), pero ajustamos padding interno */
+    :global(.auth-card) {
     padding: 0;
     }
 
-    .auth-card--single .auth-form-panel {
+    :global(.auth-card--single) :global(.auth-form-panel) {
     width: min(100%, 560px);
     }
 
     /* Grid principal: formulario + imagen lateral */
-    .auth-grid {
+    :global(.auth-grid) {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     min-height: 420px;
     }
 
     /* Panel izquierdo: formulario */
-    .auth-form-panel {
+    :global(.auth-form-panel) {
     padding: 2.25rem 2.25rem 2.5rem;
     display: flex;
     flex-direction: column;
@@ -37,52 +37,52 @@
     }
 
     /* Encabezado del formulario */
-    .auth-header {
+    :global(.auth-header) {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     }
 
-    .auth-kicker {
+    :global(.auth-kicker) {
     font-size: 0.75rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: #A78BFA;
     }
 
-    .auth-title {
+    :global(.auth-title) {
     font-size: 1.5rem;
     font-weight: 700;
     color: #cbd5e1;
     }
 
-    .auth-subtitle {
+    :global(.auth-subtitle) {
     font-size: 0.9rem;
     color: #b8c4d4;
     max-width: 26rem;
     }
 
     /* Bloque general del formulario */
-    .auth-form {
+    :global(.auth-form) {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     }
 
     /* Grupo de campo (label + input + helper) */
-    .auth-field {
+    :global(.auth-field) {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
     }
 
-    .auth-label {
+    :global(.auth-label) {
     font-size: 0.8rem;
     color: #b8c4d4;
     }
 
-    /* Inputs adaptados al estilo de tu navbar/búsqueda */
-    .auth-input {
+    /* Inputs adaptados al estilo de tu navbar/bÃºsqueda */
+    :global(.auth-input) {
     width: 100%;
     padding: 0.65rem 0.8rem;
     border-radius: 0.75rem;
@@ -92,35 +92,35 @@
     font-size: 0.9rem;
     }
 
-    .auth-input::placeholder {
+    :global(.auth-input)::placeholder {
     color: #94a3b8;
     }
 
-    .auth-input:focus {
+    :global(.auth-input):focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.6);
     }
 
-    /* Texto auxiliar bajo el campo (ej. "¿Olvidaste la contraseña?") */
-    .auth-field-helper {
+    /* Texto auxiliar bajo el campo (ej. "Â¿Olvidaste la contraseÃ±a?") */
+    :global(.auth-field-helper) {
     display: flex;
     justify-content: flex-end;
     }
 
     /* Enlaces dentro del login */
-    .auth-link {
+    :global(.auth-link) {
     font-size: 0.8rem;
     color: var(--accent);
     text-decoration: none;
     }
 
-    .auth-link:hover {
+    :global(.auth-link):hover {
     text-decoration: underline;
     }
 
-    /* Botón principal de acceso (usa button-primary) */
-    .auth-submit {
+    /* BotÃ³n principal de acceso (usa button-primary) */
+    :global(.auth-submit) {
     width: 100%;
     margin-top: 0.4rem;
     padding-block: 0.7rem;
@@ -128,7 +128,7 @@
     }
 
     /* Variante compacta: misma altura pero sin ancho completo */
-    .auth-submit-compact {
+    :global(.auth-submit-compact) {
     margin-top: 0.4rem;
     padding-block: 0.7rem;
     font-size: 0.9rem;
@@ -136,16 +136,16 @@
     align-self: flex-start;
     }
 
-    .admin-center-button {
+    :global(.admin-center-button) {
     align-self: center;
     }
 
-    .auth-center-button {
+    :global(.auth-center-button) {
     align-self: center;
     }
 
-    .auth-shell .button-primary:disabled,
-    .auth-shell .button-ghost:disabled {
+    :global(.auth-shell) :global(.button-primary):disabled,
+    :global(.auth-shell) :global(.button-ghost):disabled {
     background: rgba(30, 41, 59, 0.75);
     border-color: rgba(148, 163, 184, 0.22);
     color: #94a3b8;
@@ -156,8 +156,8 @@
     transform: none;
     }
 
-    .auth-shell .button-primary:disabled:hover,
-    .auth-shell .button-ghost:disabled:hover {
+    :global(.auth-shell) :global(.button-primary):disabled:hover,
+    :global(.auth-shell) :global(.button-ghost):disabled:hover {
     background: rgba(30, 41, 59, 0.75);
     border-color: rgba(148, 163, 184, 0.22);
     color: #94a3b8;
@@ -168,29 +168,29 @@
     }
 
     /* Mismo color de letra que el resto en Mi cuenta (visible en todos los dispositivos) */
-    .auth-form-panel .button-ghost {
+    :global(.auth-form-panel) :global(.button-ghost) {
       color: #cbd5e1;
     }
-    .auth-form-panel .button-ghost:hover {
+    :global(.auth-form-panel) :global(.button-ghost):hover {
       color: #e2e8f0;
     }
 
     /* Texto alternativo de registro */
-    .auth-alt {
+    :global(.auth-alt) {
     margin-top: 0.2rem;
     font-size: 0.85rem;
     color: #b8c4d4;
     }
 
-    /* Separador "o continúa con" */
-    .auth-divider {
+    /* Separador "o continÃºa con" */
+    :global(.auth-divider) {
     display: flex;
     align-items: center;
     gap: 0.6rem;
     margin: 0.6rem 0;
     }
 
-    .auth-divider-line {
+    :global(.auth-divider-line) {
     flex: 1;
     height: 1px;
     background: linear-gradient(
@@ -201,7 +201,7 @@
     );
     }
 
-    .auth-divider-text {
+    :global(.auth-divider-text) {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.16em;
@@ -209,14 +209,14 @@
     }
 
     /* Fila de botones sociales */
-    .auth-social-row {
+    :global(.auth-social-row) {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem;
     }
 
     /* Botones de acceso social (Google, Facebook, Twitter) */
-    .auth-social-button {
+    :global(.auth-social-button) {
     flex: 1;
     min-width: 0;
     display: inline-flex;
@@ -241,7 +241,7 @@
         transform 0.3s ease-out, box-shadow 120ms ease-out;
     }
 
-    .auth-social-button:hover {
+    :global(.auth-social-button):hover {
     background: radial-gradient(
         circle at top left,
         rgba(124, 58, 237, 0.25),
@@ -253,7 +253,7 @@
     }
 
     /* Iconos de los botones sociales */
-    .auth-social-icon {
+    :global(.auth-social-icon) {
     width: 20px;
     height: 20px;
     border-radius: 999px;
@@ -265,31 +265,31 @@
     font-weight: 600;
     }
 
-    .auth-social-icon-img {
+    :global(.auth-social-icon-img) {
     width: 18px;
     height: 18px;
     }
 
     /* Panel derecho con imagen y branding */
-    .auth-media-panel {
+    :global(.auth-media-panel) {
     position: relative;
     overflow: hidden;
     }
 
     /* Contenedor relativo para el <Image fill /> */
-    .auth-media-inner {
+    :global(.auth-media-inner) {
     position: relative;
     height: 100%;
     min-height: 420px;
     }
 
     /* Imagen de fondo del login */
-    .auth-media-image {
+    :global(.auth-media-image) {
     object-fit: cover;
     }
 
     /* Degradado sobre la imagen para integrar tu paleta */
-    .auth-media-gradient {
+    :global(.auth-media-gradient) {
     position: absolute;
     inset: 0;
     background-image:
@@ -302,7 +302,7 @@
     }
 
     /* Caja de texto sobre la imagen */
-    .auth-media-brand {
+    :global(.auth-media-brand) {
     position: absolute;
     left: 1.5rem;
     right: 1.5rem;
@@ -321,14 +321,14 @@
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
     }
 
-    .auth-media-tag {
+    :global(.auth-media-tag) {
     font-size: 0.7rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: rgba(129, 140, 248, 0.95);
     }
 
-    .auth-media-text {
+    :global(.auth-media-text) {
     font-size: 0.85rem;
     color: #cbd5e1;
     }
@@ -338,408 +338,63 @@
     ------------------------------ */
 
     @media (max-width: 960px) {
-    .auth-grid {
+    :global(.auth-grid) {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .auth-media-panel {
-        display: none; /* En móvil ocultamos la imagen lateral */
+    :global(.auth-media-panel) {
+        display: none; /* En mÃ³vil ocultamos la imagen lateral */
     }
 
-    .auth-form-panel {
+    :global(.auth-form-panel) {
         padding: 1.75rem 1.5rem 2rem;
     }
     }
 
     @media (max-width: 640px) {
-    .auth-shell {
+    :global(.auth-shell) {
         margin-top: 1.25rem;
     }
 
-    .auth-form-panel {
+    :global(.auth-form-panel) {
         padding: 1.5rem 1.25rem 1.85rem;
     }
 }
 
-.account-orders-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--border-subtle);
-  border-radius: 0.85rem;
-}
-
-.account-orders-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 640px;
-}
-
-.account-orders-table th,
-.account-orders-table td {
-  text-align: left;
-  padding: 0.7rem 0.8rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  color: #cbd5e1;
-  font-size: 0.86rem;
-  vertical-align: top;
-}
-
-.account-orders-table th {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #b8c4d4;
-  background: rgba(15, 23, 42, 0.5);
-}
-
-.account-orders-table tr:last-child td {
-  border-bottom: 0;
-}
-
-.account-orders-qty {
-  margin-left: 0.35rem;
-}
-
-.auth-divider-rule {
-  width: 100%;
-  border: 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.28);
-  margin: 0.2rem 0 0.4rem;
-}
-
-.account-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.account-tab {
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(15, 23, 42, 0.9);
-  color: #b8c4d4;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-
-.account-tab--active {
-  border-color: rgba(129, 140, 248, 0.9);
-  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), rgba(15, 23, 42, 0.96));
+:global(.auth-shell) :global(.auth-title) {
   color: #cbd5e1;
 }
-
-.account-avatar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.account-avatar-circle {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  border: 2px solid rgba(129, 140, 248, 0.9);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #cbd5e1;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 14px 30px rgba(30, 64, 175, 0.8);
-  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease-out;
-}
-
-.account-avatar-circle:hover {
-  transform: scale(1.3);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
-  border-color: rgba(191, 219, 254, 0.9);
-}
-
-.account-details-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  padding: 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 0.5rem;
-  background: rgba(15, 23, 42, 0.38);
-}
-
-.account-details-summary-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.account-details-edit-button {
-  min-width: 10.5rem;
-  padding-inline: 1rem;
-  white-space: nowrap;
-}
-
-.account-details-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1rem;
-  margin: 0;
-}
-
-.account-details-row {
-  min-width: 0;
-}
-
-.account-details-row dt {
-  margin: 0 0 0.2rem;
-  color: #b8c4d4;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.account-details-row dd {
-  margin: 0;
-  color: #cbd5e1;
-  font-size: 0.92rem;
-  overflow-wrap: anywhere;
-}
-
-.account-details-actions {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.account-recovery-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  padding: 1rem;
-  border: 1px solid rgba(96, 165, 250, 0.24);
-  border-radius: 0.5rem;
-  background: rgba(15, 23, 42, 0.32);
-}
-
-.account-pending-payment {
-  display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
-  border: 1px solid rgba(165, 180, 252, 0.28);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.42);
-}
-
-.account-pending-payment-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.account-pending-payment-title {
-  margin: 0.25rem 0 0;
-  color: #f8fafc;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.account-pending-payment-badge {
-  padding: 0.3rem 0.7rem;
-  border: 1px solid rgba(129, 140, 248, 0.45);
-  border-radius: 999px;
-  color: #dbeafe;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.account-pending-payment-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.account-pending-payment-grid > div {
-  display: grid;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.account-pending-payment-grid strong {
-  color: #cbd5e1;
-  overflow-wrap: anywhere;
-}
-
-.account-pending-payment-items {
-  display: grid;
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.account-pending-payment-items li {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  color: #b8c4d4;
-  font-size: 0.86rem;
-}
-
-.account-pending-payment-items strong {
-  color: #cbd5e1;
-}
-
-.account-pending-payment .auth-submit-compact {
-  justify-self: center;
-  width: auto;
-}
-
-.account-recovery-list {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-}
-
-.account-recovery-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  min-width: 0;
-}
-
-.account-recovery-row dt {
-  margin: 0;
-  color: #b8c4d4;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.account-recovery-row dd {
-  margin: 0;
-  color: #dbeafe;
-  font-size: 0.92rem;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 640px) {
-  .account-details-summary-head {
-    flex-direction: column;
-  }
-
-  .account-details-summary-head .button-primary {
-    width: 100%;
-  }
-
-  .account-details-edit-button {
-    min-width: 0;
-  }
-
-  .account-details-list {
-    grid-template-columns: 1fr;
-  }
-
-  .account-pending-payment-head,
-  .account-pending-payment-items li {
-    flex-direction: column;
-  }
-
-  .account-pending-payment-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .account-pending-payment .auth-submit-compact {
-    justify-self: stretch;
-    width: 100%;
-  }
-
-  .account-recovery-row {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .account-recovery-row dd {
-    text-align: left;
-  }
-
-  // Tabs: scroll horizontal en móvil para no romper layout
-  .account-tabs {
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-  }
-
-  .account-tab {
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  // Avatar header: avatar centrado debajo del título
-  .account-avatar-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .account-avatar-circle {
-    align-self: center;
-  }
-
-  // Botones de acción: ancho completo en móvil
-  .auth-form > div > .button-primary.auth-submit-compact {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* Panel de control y Pedidos globales: mismo estilo blanco que las cartas */
-.auth-shell .auth-title {
-  color: #cbd5e1;
-}
-.auth-shell .auth-subtitle {
+:global(.auth-shell) :global(.auth-subtitle) {
   color: #b8c4d4;
 }
-.auth-shell .auth-kicker {
+:global(.auth-shell) :global(.auth-kicker) {
   color: #c4b5fd;
 }
-.auth-shell .auth-alt,
-.auth-shell .auth-label,
-.auth-shell .auth-divider-text {
+:global(.auth-shell) :global(.auth-alt),
+:global(.auth-shell) :global(.auth-label),
+:global(.auth-shell) :global(.auth-divider-text) {
   color: #b8c4d4;
 }
-.auth-shell .auth-link {
+:global(.auth-shell) :global(.auth-link) {
   color: #a5b4fc;
 }
-.auth-shell .auth-link:hover {
+:global(.auth-shell) :global(.auth-link):hover {
   color: #c7d2fe;
 }
-.auth-shell .auth-form-panel .button-ghost {
+:global(.auth-shell) :global(.auth-form-panel) :global(.button-ghost) {
   color: #cbd5e1;
 }
-.auth-shell .auth-form-panel .button-ghost:hover {
+:global(.auth-shell) :global(.auth-form-panel) :global(.button-ghost):hover {
   color: #e2e8f0;
 }
-.auth-shell .auth-input {
+:global(.auth-shell) :global(.auth-input) {
   color: #cbd5e1;
 }
-.auth-shell .auth-input::placeholder {
+:global(.auth-shell) :global(.auth-input)::placeholder {
   color: #94a3b8;
 }
 
-.checkout-login-backdrop {
+:global(.checkout-login-backdrop) {
   position: fixed;
   inset: 0;
   z-index: 80;
@@ -750,7 +405,7 @@
   backdrop-filter: blur(10px);
 }
 
-.checkout-login-dialog {
+:global(.checkout-login-dialog) {
   position: relative;
   width: min(100%, 430px);
   padding: 1.4rem;
@@ -763,7 +418,7 @@
   color: #cbd5e1;
 }
 
-.checkout-login-close {
+:global(.checkout-login-close) {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
@@ -778,41 +433,41 @@
   cursor: pointer;
 }
 
-.checkout-login-close:hover,
-.checkout-login-close:focus-visible {
+:global(.checkout-login-close):hover,
+:global(.checkout-login-close):focus-visible {
   border-color: rgba(165, 180, 252, 0.65);
   color: #f8fafc;
   outline: none;
 }
 
-.checkout-login-title {
+:global(.checkout-login-title) {
   margin: 0.25rem 2.25rem 0.55rem 0;
   color: #f8fafc;
   font-size: 1.35rem;
   line-height: 1.15;
 }
 
-.checkout-login-text {
+:global(.checkout-login-text) {
   margin: 0;
   color: #b8c4d4;
   font-size: 0.95rem;
   line-height: 1.55;
 }
 
-.checkout-login-actions {
+:global(.checkout-login-actions) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-top: 1.15rem;
 }
 
-.checkout-login-actions .button-primary,
-.checkout-login-actions .button-ghost {
+:global(.checkout-login-actions) :global(.button-primary),
+:global(.checkout-login-actions) :global(.button-ghost) {
   justify-content: center;
   min-height: 2.75rem;
 }
 
-.checkout-status-panel {
+:global(.checkout-status-panel) {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -822,7 +477,7 @@
   background: rgba(15, 23, 42, 0.42);
 }
 
-.checkout-status-spinner {
+:global(.checkout-status-spinner) {
   width: 2.75rem;
   height: 2.75rem;
   flex: 0 0 auto;
@@ -832,18 +487,18 @@
   animation: checkout-status-spin 0.9s linear infinite;
 }
 
-.checkout-status-copy {
+:global(.checkout-status-copy) {
   min-width: 0;
 }
 
-.checkout-status-title {
+:global(.checkout-status-title) {
   margin: 0 0 0.25rem;
   color: #f8fafc;
   font-size: 1rem;
   font-weight: 700;
 }
 
-.checkout-progress-list {
+:global(.checkout-progress-list) {
   display: grid;
   gap: 0.7rem;
   margin: 0;
@@ -851,7 +506,7 @@
   list-style: none;
 }
 
-.checkout-progress-item {
+:global(.checkout-progress-item) {
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -859,7 +514,7 @@
   font-size: 0.9rem;
 }
 
-.checkout-progress-marker {
+:global(.checkout-progress-marker) {
   width: 0.8rem;
   height: 0.8rem;
   flex: 0 0 auto;
@@ -868,42 +523,42 @@
   background: rgba(15, 23, 42, 0.72);
 }
 
-.checkout-progress-item--active {
+:global(.checkout-progress-item--active) {
   color: #dbeafe;
 }
 
-.checkout-progress-item--active .checkout-progress-marker {
+:global(.checkout-progress-item--active) :global(.checkout-progress-marker) {
   border-color: rgba(165, 180, 252, 0.95);
   box-shadow: 0 0 0 5px rgba(129, 140, 248, 0.12);
 }
 
-.checkout-progress-item--error {
+:global(.checkout-progress-item--error) {
   color: #fecaca;
 }
 
-.checkout-progress-item--error .checkout-progress-marker {
+:global(.checkout-progress-item--error) :global(.checkout-progress-marker) {
   border-color: rgba(248, 113, 113, 0.95);
   background: rgba(127, 29, 29, 0.72);
   box-shadow: 0 0 0 5px rgba(248, 113, 113, 0.12);
 }
 
-.checkout-progress-item--done {
+:global(.checkout-progress-item--done) {
   color: #cbd5e1;
 }
 
-.checkout-progress-item--done .checkout-progress-marker {
+:global(.checkout-progress-item--done) :global(.checkout-progress-marker) {
   border-color: rgba(34, 197, 94, 0.85);
   background: rgba(34, 197, 94, 0.85);
 }
 
-.checkout-progress-list--complete {
+:global(.checkout-progress-list--complete) {
   padding: 1rem;
   border: 1px solid rgba(34, 197, 94, 0.3);
   border-radius: 8px;
   background: rgba(20, 83, 45, 0.16);
 }
 
-.checkout-account-button {
+:global(.checkout-account-button) {
   justify-self: center;
   width: auto;
 }
@@ -915,25 +570,25 @@
 }
 
 @media (max-width: 480px) {
-  .checkout-login-actions {
+  :global(.checkout-login-actions) {
     grid-template-columns: 1fr;
   }
 
-  .checkout-status-panel {
+  :global(.checkout-status-panel) {
     align-items: flex-start;
   }
 
-  .checkout-account-button {
+  :global(.checkout-account-button) {
     justify-self: stretch;
     width: 100%;
   }
 }
 
 /* Tabla de Pedidos del sistema: mismo blanco que las cartas */
-.auth-shell .auth-form table {
+:global(.auth-shell) :global(.auth-form) table {
   color: #cbd5e1;
 }
-.auth-shell .auth-form table th {
+:global(.auth-shell) :global(.auth-form) table th {
   color: #b8c4d4;
   background: rgba(15, 23, 42, 0.5);
   padding: 8px 10px;
@@ -942,11 +597,11 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.auth-shell .auth-form table td {
+:global(.auth-shell) :global(.auth-form) table td {
   color: #cbd5e1;
   padding: 8px 10px;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
 }
-.auth-shell .auth-form table strong {
+:global(.auth-shell) :global(.auth-form) table strong {
   color: #cbd5e1;
 }

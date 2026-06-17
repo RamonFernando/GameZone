@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import "../../../styles/auth.scss";
+import "../../../styles/auth.module.scss";
 
 type VerificationState = {
   status: "loading" | "success" | "error";

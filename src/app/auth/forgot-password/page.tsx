@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import "../../../styles/auth.scss";
+import "../../../styles/auth.module.scss";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

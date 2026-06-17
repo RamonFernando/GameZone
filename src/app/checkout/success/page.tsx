@@ -8,7 +8,7 @@ import {
   createPaymentProgressStorageKey,
   PAYMENT_PROGRESS_STEP_DELAY_MS,
 } from "@/services/checkout/payment-progress";
-import "../../../styles/auth.scss";
+import "../../../styles/auth.module.scss";
 
 type FinalizationState = "loading" | "success" | "error";
 type StripeStatus = "processing" | "paid" | "failed" | "error";

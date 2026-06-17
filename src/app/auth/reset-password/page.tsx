@@ -3,7 +3,7 @@
 import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import "../../../styles/auth.scss";
+import "../../../styles/auth.module.scss";
 
 export default function ResetPasswordPage() {
   return (

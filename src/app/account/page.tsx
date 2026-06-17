@@ -8,7 +8,8 @@ import { SESSION_COOKIE_NAME } from "@/services/auth/session";
 import { getActiveSessionFromToken } from "@/services/auth/session-server";
 import { prisma } from "@/lib/prisma";
 import { getUserById } from "@/services/auth/store";
-import "../../styles/auth.scss";
+import "../../styles/auth.module.scss";
+import "../../styles/account.module.scss";
 
 export default async function AccountPage({
   searchParams,
