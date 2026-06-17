@@ -314,12 +314,19 @@ El detalle histórico completo está en el commit anterior de este archivo (`git
 - **Verificar:** el componente migrado se ve igual en desktop y móvil; no hay clases huérfanas
   evidentes en `globals.scss`; `npx tsc --noEmit`, `npx vitest run` y `npm run build` pasan.
 
-- **Estado 13/06/2026:** Footer migrado a CSS Modules en commit `4d1bf0b`
-  (`src/components/Footer.module.scss`, `Footer.tsx`, limpieza en `globals.scss` y
-  `responsive-refinements.scss`). Hero migrado a CSS Modules en commit `0b375f7`
-  (`src/components/Hero.module.scss`, `Hero.tsx`, limpieza de estilos `hero*` en `globals.scss`
-  y `responsive-refinements.scss`). Validado con `npx tsc --noEmit`, `npx vitest run` (76/76)
-  y `npx next build`. Pendiente progresivo: GameCard -> GameGrid -> Header.
+- **Estado 17/06/2026 (rama dev-17062026-claude):**
+  - ✅ Footer — commit `4d1bf0b`
+  - ✅ Hero — commit `0b375f7`
+  - ✅ GameCard — commit `6b313a1` (`src/components/ui/GameCard.module.scss`)
+  - ✅ GameGrid — commit `6b313a1` (`src/components/ui/GameGrid.module.scss`)
+  - ✅ CartDrawer — commit `4396a46` (`src/components/features/CartDrawer.module.scss`)
+  - ✅ GameDetailClient — commit `9435b0f` (`src/app/games/[slug]/GameDetailClient.module.scss`)
+  - ✅ Header — commit `11857b0` (`src/components/layout/Header.module.scss`, 15+ breakpoints)
+  - ✅ MarketIntelligenceSections — commit `0fcea97` (`src/components/features/MarketIntelligenceSections.module.scss`, ~1500 líneas, THUMB_POSITION_CLASS map)
+  - ⬜ **FeaturedSection** — pendiente (`src/components/features/FeaturedSection.tsx`, clases `featured-*`)
+  - ⬜ **PromoAppBanner** — pendiente (`src/components/features/PromoAppBanner.tsx`, clases `promo-app-*`)
+  - ⬜ **auth.scss split** — pendiente: separar `src/styles/auth.scss` en `Auth.module.scss` (~620 líneas) + `AccountDashboard.module.scss` (~330 líneas)
+  - Validado con `npx tsc --noEmit` + `npx vitest run` (76/76) tras cada migración.
 
 ### Parte B — Modernización estética  🔵 OPCIONAL (elegir con el usuario)
 
