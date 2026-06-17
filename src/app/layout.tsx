@@ -72,6 +72,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const lang = uiLocale.slice(0, 2);
   return (
     <html lang={lang} className={exoDisplay.variable}>
+      <head>
+        <link rel="preconnect" href="https://shared.akamai.steamstatic.com" />
+        <link rel="preconnect" href="https://cdn.akamai.steamstatic.com" />
+        <link rel="preconnect" href="https://media.rawg.io" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+        <link rel="dns-prefetch" href="https://www.paypal.com" />
+      </head>
       <body>
         <CartProvider>
           <SearchProvider>
