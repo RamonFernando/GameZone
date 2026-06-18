@@ -26,6 +26,7 @@ import spaceInvaders   from "@iconify-icons/mdi/space-invaders";
 import puzzleOutline   from "@iconify-icons/mdi/puzzle-outline";
 import { useLocale } from "@/hooks/useLocale";
 import { useSearch } from "@/contexts/SearchContext";
+import { toPortraitCover } from "@/lib/portrait-cover";
 import type { ProductPreview } from "@/types/product";
 
 type Props = { products: ProductPreview[] };
@@ -95,18 +96,6 @@ function formatPrice(price: number) {
   return price.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
 
-function toPortraitUrl(url: string): string {
-  // Steam: landscape header → portrait library art (600×900)
-  if (url.includes("/steam/apps/") && url.endsWith("/header.jpg")) {
-    return url.replace("/header.jpg", "/library_600x900.jpg");
-  }
-  // G2A: upgrade small thumbnails to portrait 600×876
-  if (url.includes("images.g2a.com")) {
-    return url.replace(/\/images\/(?:58x58|230x336)\//, "/images/600x876/");
-  }
-  return url;
-}
-
 const DEAL_ROTATE_S = 8;
 
 function useCountdown() {
@@ -127,7 +116,7 @@ function useCountdown() {
 }
 
 function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: string; badgeClass: string }) {
-  const [imgSrc, setImgSrc] = useState(() => toPortraitUrl(game.coverImage));
+  const [imgSrc, setImgSrc] = useState(() => toPortraitCover(game.slug, game.coverImage));
   return (
     <Link href={`/games/${game.slug}`} className={styles.featuredSideCard} aria-label={game.name}>
       <div className={styles.featuredSideCardMedia}>
