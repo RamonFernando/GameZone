@@ -112,20 +112,22 @@ export function GameCard({ game }: Props) {
           </span>
         ) : null}
         <span className={styles.gameCardStorePill}>
-          {game.storeLabel.toLowerCase() === "steam" ? (
-            <>
-              <Image
-                src="/iconos_platforms/icon-steam.svg"
-                alt="Steam"
-                width={14}
-                height={14}
-                className={styles.gameCardStoreIcon}
-              />
+          {(() => {
+            const icons: Record<string, string> = {
+              steam: "/iconos_platforms/icon-steam.svg",
+              g2a:   "/iconos_platforms/icon-g2a.svg",
+              xbox:  "/iconos_platforms/icon-xbox.svg",
+            };
+            const icon = icons[game.storeLabel.toLowerCase()];
+            return icon ? (
+              <>
+                <Image src={icon} alt={game.storeLabel} width={14} height={14} className={styles.gameCardStoreIcon} />
+                <span>{game.storeLabel}</span>
+              </>
+            ) : (
               <span>{game.storeLabel}</span>
-            </>
-          ) : (
-            <span>{game.storeLabel}</span>
-          )}
+            );
+          })()}
         </span>
       </div> {/* FIN DE LA IMAGEN */}
       {/* INICIO DEL CUERPO */}

@@ -459,13 +459,16 @@ npm run build
 
 ## FASE 11 — BUGS CRÍTICOS (reportados por testers 18/06/2026) 🔴
 
-### 11.1 — Se puede comprar gratis 🔴 CRÍTICO
+### 11.1 — Se puede comprar gratis 🔴 CRÍTICO · ✅ HECHO (18/06/2026)
 - El flujo de checkout acepta órdenes sin validar que el importe > 0 o que el carrito tiene stock real.
 - **Acción:** en `/api/checkout` y `/api/payments/stripe/create-session` verificar que `totalAmount > 0` y que todos los slugs existen y tienen stock antes de crear la sesión/orden.
+- **Implementado/verificado en código:** la validación vive en `src/services/checkout/order-service.ts`, no duplicada en cada ruta. `normalizeOrderItemsFromDb()` exige carrito no vacío, slugs activos existentes, cantidad entera entre 1 y 5, consolidación de duplicados y stock suficiente; `createPendingOrder()` bloquea `totalAmount <= 0`. Aplica a manual, Stripe y PayPal porque las tres rutas llaman a este servicio.
 
-### 11.2 — Faltan las claves de los juegos en el email de compra 🔴 CRÍTICO
+### 11.2 — Faltan las claves de los juegos en el email de compra 🔴 CRÍTICO · ⚠️ PARCIAL (18/06/2026)
 - El email de confirmación no incluye la clave del juego, descripción breve ni enlace de vuelta.
 - **Acción:** en el servicio de email post-pago añadir: logo de GameZone arriba, clave del juego, nombre + descripción corta, enlace a la ficha. Revisar `src/services/auth/email.ts` y el webhook de Stripe/PayPal.
+- **Implementado:** `sendPurchaseConfirmationEmail()` añade logo opcional (`MAIL_LOGO_URL`), enlace a la ficha por cada juego (`/games/[slug]`) y CTA "Ver pedido en mi cuenta"; `completePaidOrder()` pasa `baseUrl`.
+- **Pendiente real:** claves de activación y stock de claves no existen todavía en el modelo de datos. Se cubre en FASE 14 (`GameKey`, asignación automática y mostrar clave en email/panel). No marcar como completo hasta implementar esa fase.
 
 ### 11.3 — No se puede eliminar datos personales ni cuenta 🔴 CRÍTICO · ✅ VERIFICADO HECHO (18/06/2026)
 - `DELETE /api/account` existe en `src/app/api/account/route.ts` con confirmación por contraseña y cascade completo.
@@ -473,12 +476,14 @@ npm run build
 - UI tiene diálogo de borrado con campo contraseña (`AccountDashboard.tsx` líneas 136-139, 742, 1664).
 - No requiere acción.
 
-### 11.4 — Sin validación de formularios en datos de cuenta 🟠 ALTA
+### 11.4 — Sin validación de formularios en datos de cuenta 🟠 ALTA · ⚠️ PARCIAL (18/06/2026)
 - Email sin validación de formato, código postal acepta texto, teléfono sin prefijo de país.
 - **Acción:**
   1. Validar email con regex en frontend y backend (ya hay Zod, añadir `.email()`).
   2. Código postal: solo dígitos, longitud según país.
   3. Teléfono: prefijo automático según campo `country` (ej. España → +34), editable manualmente. Usar librería `libphonenumber-js` o prefijos hardcodeados por país.
+- **Implementado:** backend `PATCH /api/account/me` valida email con `.email()` solo si cambia; frontend valida postal y teléfono antes de guardar. Teléfono exige formato internacional con `+`.
+- **Pendiente:** prefijo automático por país y validación postal específica por país no están implementados; el postal permite letras/números/guiones para soportar países no españoles.
 
 ---
 
@@ -520,20 +525,23 @@ npm run build
 - **Acción:** en el componente de Juegos Destacados, cuando `timeLeft === 0` avanzar al siguiente item del carrusel y reiniciar el timer.
 - **Verificado en código:** `FeaturedSection.tsx` (`DealsOfTheDay`) ya tiene `setInterval` que al llegar a `t<=1` hace `setActiveIndex((i) => (i+1) % games.length)` y resetea `timeLeft` a `DEAL_ROTATE_S` (8s). El carrusel de destacados rota correctamente. Posible confusión con el countdown individual de `GameCard.tsx` (campo `saleEndsAt` por producto): ese sí desaparece (`setTimeLeft(null)`) cuando la oferta caduca, lo cual es correcto si nadie actualiza la fecha — no es un bug de código, es dato de admin caducado. Recomendado confirmar con el tester a qué contador se refería antes de tocar nada.
 
-### 12.7 — Pedidos de admin sin paginación ni filtros de plataforma 🟡 MEDIA · 🔴 PENDIENTE CONFIRMADO
+### 12.7 — Pedidos de admin sin paginación ni filtros de plataforma 🟡 MEDIA · ⚠️ PARCIAL (18/06/2026)
 - La auditoría de transacciones muestra todos los pedidos sin paginar.
 - **Acción:** paginación de 20 por página + filtros por estado (pendiente/pagado/reembolsado) y pasarela (Stripe/PayPal/manual) en `AdminOrdersPanel`.
-- **Verificado en código:** no hay rastro de paginación, `slice`, ni filtros de plataforma/estado en `AdminOrdersPanel.tsx`. Sigue pendiente en su totalidad.
+- **Implementado/verificado en código:** `AdminOrdersPanel.tsx` tiene `ORDERS_PER_PAGE`, `statusFilter`, `providerFilter`, `currentPage`, `filteredOrders`, `paginatedOrders` con `slice()` y controles de página.
+- **Pendiente:** filtro por plataforma en pedidos admin. Este punto sigue vivo y se relaciona con 12.3.
 
-### 12.8 — Logo G2A incorrecto en ficha de detalle 🟡 MEDIA · 🔴 PENDIENTE CONFIRMADO
+### 12.8 — Logo G2A incorrecto en ficha de detalle 🟡 MEDIA · ✅ HECHO (18/06/2026)
 - En la sección "Enlaces" de la ficha aparece un icono genérico en lugar del logo de G2A.
 - **Acción:** usar el logo SVG correcto de G2A en `GameDetailClient` para los enlaces externos.
-- **Verificado en código:** `GameDetailClient.tsx` líneas 323-338 — el enlace externo usa `<SteamIcon />` solo si `externalStoreLabel` contiene "steam"; para cualquier otra tienda (incluido G2A) cae al `<StoreIcon />` genérico. No existe `G2AIcon`. Confirmado pendiente.
+- **Implementado:** `public/iconos_platforms/icon-g2a.svg` añadido y `GameDetailClient.tsx` usa `G2AIcon` con `next/image` cuando `externalStoreLabel` contiene "g2a". Steam mantiene su icono específico y el resto de tiendas siguen cayendo al icono genérico.
+- **Verificado:** `npm run lint`, `npx tsc --noEmit`, `npm run test:unit` y `npm run build` verdes el 18/06/2026.
 
-### 12.9 — Formato de imágenes API mal recortado en PC 🟡 MEDIA · 🔴 PENDIENTE CONFIRMADO
+### 12.9 — Formato de imágenes API mal recortado en PC 🟡 MEDIA · ✅ HECHO (18/06/2026)
 - Las imágenes de la API (panorámicas 16:9) se recortan en la Sección Destacada en PC donde el contenedor es más alto que ancho.
 - **Acción:** en `FeaturedSection` aplicar `object-fit: contain` o `object-position: top` en el breakpoint de escritorio para imágenes de API externa; reservar `cover` para imágenes propias.
-- **Verificado en código:** `FeaturedSection.module.scss` línea 367 — solo se ajustó `object-position: top center !important` en `.featuredDealCover img`; no hay `object-fit: contain` ni distinción por breakpoint de escritorio. El recorte en PC sigue sin resolverse del todo.
+- **Implementado:** la sección de ofertas destacadas pasa de una lista vertical a paneles de plataforma con contenedor 16:9, dots internos y barra de progreso por panel. Esto evita el contenedor alto que forzaba recorte agresivo en imágenes panorámicas de APIs externas.
+- **Verificado:** `FeaturedSection.tsx` selecciona hasta 6 ofertas y las reparte en paneles Steam/G2A/Xbox; `FeaturedSection.module.scss` define `featuredDealPlatformGrid`, `featuredDealPanel` y logo superpuesto. Verificación técnica verde: lint, tsc, unit tests y build.
 
 ---
 
@@ -543,9 +551,11 @@ npm run build
 - Los botones de social login no están activos en el registro.
 - **Acción:** activar los mismos providers OAuth que ya existen en login (`/api/auth/oauth/[provider]`) en la página de registro. Verificar que el flujo crea cuenta si no existe.
 
-### 13.2 — Logos de API en las cards (Steam/G2A/Xbox)
+### 13.2 — Logos de API en las cards (Steam/G2A/Xbox) ✅ HECHO (18/06/2026)
 - Las cards no indican de qué API proviene el precio.
 - **Acción:** en `GameCard` añadir badge pequeño con logo de la fuente (Steam/G2A/Xbox) encima del precio según el campo `storeLabel` o `platform`.
+- **Implementado:** `GameCard.tsx` muestra iconos Steam/G2A/Xbox en el pill de tienda según `storeLabel`; `MarketIntelligenceSections.tsx` usa el mismo set visual en las tarjetas de fuentes de mercado; `icon-steam.svg` se normalizó y se añadieron `icon-g2a.svg` e `icon-xbox.svg`.
+- **Verificado:** sin errores de lint/TypeScript/tests/build. Queda como mejora futura el comparador real entre APIs (13.3), que no se implementó en esta tanda.
 
 ### 13.3 — Comparador de precios entre APIs
 - No hay comparación de precios entre Steam, G2A y Xbox para el mismo juego.

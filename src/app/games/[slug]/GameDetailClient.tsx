@@ -29,10 +29,7 @@ function StoreIcon() {
 
 function G2AIcon() {
   return (
-    <svg viewBox="0 0 44 18" width="44" height="18" aria-hidden="true">
-      <rect width="44" height="18" rx="3" fill="#FF5500" />
-      <text x="22" y="13" fontFamily="Arial,Helvetica,sans-serif" fontSize="10" fontWeight="800" fill="#ffffff" textAnchor="middle" letterSpacing="0.5">G2A</text>
-    </svg>
+    <Image src="/iconos_platforms/icon-g2a.svg" width={16} height={16} alt="G2A" aria-hidden="true" />
   );
 }
 

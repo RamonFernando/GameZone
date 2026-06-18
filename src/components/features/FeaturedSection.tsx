@@ -136,24 +136,83 @@ function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: st
   );
 }
 
+
+function PlatformPanel({
+  games, logo, activeGameIdx, isActive, timeLeft,
+}: {
+  games: ProductPreview[];
+  logo: React.ReactNode;
+  activeGameIdx: number;
+  isActive: boolean;
+  timeLeft: number;
+}) {
+  const game = games[activeGameIdx];
+  if (!game) return null;
+  return (
+    <Link
+      href={`/games/${game.slug}`}
+      className={`${styles.featuredDealPanel}${isActive ? ` ${styles.featuredDealPanelActive}` : ""}`}
+    >
+      <div className={styles.featuredDealCover}>
+        <Image src={game.coverImage} alt={game.name} fill sizes="200px" style={{ objectFit: "cover" }} unoptimized />
+        <span className={styles.featuredDealPlatformLogo}>{logo}</span>
+      </div>
+      {games.length > 1 && (
+        <div className={styles.featuredDealDots}>
+          {games.map((_, i) => (
+            <span key={i} className={`${styles.featuredDealDot}${i === activeGameIdx ? ` ${styles.featuredDealDotActive}` : ""}`} />
+          ))}
+        </div>
+      )}
+      <div className={styles.featuredDealInfo}>
+        <p className={styles.featuredDealName}>{game.name}</p>
+        <div className={styles.featuredDealPriceRow}>
+          {game.discountPercent > 0 && <span className={styles.featuredDealBadge}>-{game.discountPercent}%</span>}
+          <span className={styles.featuredDealPrice}>{formatPrice(game.priceFinal)}</span>
+          <span className={styles.featuredDealOriginal}>{formatPrice(game.priceOriginal)}</span>
+        </div>
+      </div>
+      <div className={`${styles.featuredDealProgress}${!isActive ? ` ${styles.featuredDealProgressIdle}` : ""}`}>
+        <div
+          className={styles.featuredDealProgressBar}
+          style={{ width: isActive ? `${(timeLeft / DEAL_ROTATE_S) * 100}%` : "0%" }}
+        />
+      </div>
+    </Link>
+  );
+}
+
 function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string }) {
   const { h, m, s } = useCountdown();
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeSlot, setActiveSlot] = useState(0);
   const [timeLeft, setTimeLeft] = useState(DEAL_ROTATE_S);
 
   useEffect(() => {
     if (games.length < 2) return;
     const id = setInterval(() => {
       setTimeLeft((t) => {
-        if (t <= 1) {
-          setActiveIndex((i) => (i + 1) % games.length);
-          return DEAL_ROTATE_S;
-        }
+        if (t <= 1) { setActiveSlot((prev) => (prev + 1) % games.length); return DEAL_ROTATE_S; }
         return t - 1;
       });
     }, 1000);
     return () => clearInterval(id);
   }, [games.length]);
+
+  const steamGames = games.slice(0, 2);
+  const g2aGames   = games.slice(2, 4);
+  const xboxGames  = games.slice(4, 6);
+
+  const PANEL_SIZE      = 2;
+  const NUM_PANELS      = [steamGames, g2aGames, xboxGames].filter(g => g.length > 0).length;
+  // right-to-left: slot 0 → rightmost panel, slot last → leftmost panel
+  const activePanelIdx  = (NUM_PANELS - 1) - Math.floor(activeSlot / PANEL_SIZE);
+  const activeGameInPanel = activeSlot % PANEL_SIZE;
+
+  function gameIdx(panelIdx: number) {
+    if (panelIdx === activePanelIdx) return activeGameInPanel;
+    if (panelIdx > activePanelIdx) return PANEL_SIZE - 1; // already passed (higher index = earlier in R→L)
+    return 0;
+  }
 
   return (
     <div className={styles.featuredDeal}>
@@ -177,36 +236,34 @@ function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string 
           </div>
         </div>
       </div>
-      <div className={styles.featuredDealList}>
-        {games.map((game, index) => (
-          <Link
-            key={game.slug}
-            href={`/games/${game.slug}`}
-            className={`${styles.featuredDealRow}${index === activeIndex ? ` ${styles.featuredDealRowActive}` : ""}`}
-          >
-            <div className={styles.featuredDealCover}>
-              <Image src={game.coverImage} alt={game.name} fill sizes="64px" style={{ objectFit: "cover" }} unoptimized />
-            </div>
-            <div className={styles.featuredDealInfo}>
-              <p className={styles.featuredDealName}>{game.name}</p>
-              <div className={styles.featuredDealPriceRow}>
-                <span className={styles.featuredDealBadge}>-{game.discountPercent}%</span>
-                <span className={styles.featuredDealPrice}>{formatPrice(game.priceFinal)}</span>
-                <span className={styles.featuredDealOriginal}>{formatPrice(game.priceOriginal)}</span>
-              </div>
-              {games.length > 1 && (
-                <div
-                  className={`${styles.featuredDealProgress}${index === activeIndex ? "" : ` ${styles.featuredDealProgressIdle}`}`}
-                >
-                  <div
-                    className={styles.featuredDealProgressBar}
-                    style={{ width: index === activeIndex ? `${(timeLeft / DEAL_ROTATE_S) * 100}%` : "0%" }}
-                  />
-                </div>
-              )}
-            </div>
-          </Link>
-        ))}
+      <div className={styles.featuredDealPlatformGrid}>
+        {steamGames.length > 0 && (
+          <PlatformPanel
+            games={steamGames}
+            logo={<Image src="/iconos_platforms/icon-steam.svg" width={26} height={26} alt="Steam" />}
+            activeGameIdx={gameIdx(0)}
+            isActive={activePanelIdx === 0}
+            timeLeft={timeLeft}
+          />
+        )}
+        {g2aGames.length > 0 && (
+          <PlatformPanel
+            games={g2aGames}
+            logo={<Image src="/iconos_platforms/icon-g2a.svg" alt="G2A" width={20} height={20} />}
+            activeGameIdx={gameIdx(1)}
+            isActive={activePanelIdx === 1}
+            timeLeft={timeLeft}
+          />
+        )}
+        {xboxGames.length > 0 && (
+          <PlatformPanel
+            games={xboxGames}
+            logo={<Image src="/iconos_platforms/icon-xbox.svg" width={26} height={26} alt="Xbox" />}
+            activeGameIdx={gameIdx(2)}
+            isActive={activePanelIdx === 2}
+            timeLeft={timeLeft}
+          />
+        )}
       </div>
     </div>
   );
@@ -240,7 +297,7 @@ export function FeaturedSection({ products }: Props) {
     return [...products]
       .filter((p) => p.discountPercent > 0 && !skip.has(p.slug))
       .sort((a, b) => b.discountPercent - a.discountPercent)
-      .slice(0, 3);
+      .slice(0, 6);
   }, [products, featuredGame, biggestDiscountGame]);
 
   if (!featuredGame && topGenres.length === 0) return null;

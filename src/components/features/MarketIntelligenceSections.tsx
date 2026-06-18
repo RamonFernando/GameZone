@@ -468,14 +468,15 @@ function MarketPulseCarousel({
                 <span className={styles.marketPulseCatalogCardMedia}>
                   <Image src={game.image} alt="" fill sizes="(min-width: 1280px) 220px, 45vw" />
                   <span className={styles.marketPulseCatalogCardStore}>
-                    {section.source === "Steam" ? (
-                      <Image
-                        src="/iconos_platforms/icon-steam.svg"
-                        alt=""
-                        width={14}
-                        height={14}
-                      />
-                    ) : null}
+                    {(() => {
+                      const icons: Record<string, string> = {
+                        Steam: "/iconos_platforms/icon-steam.svg",
+                        G2A:   "/iconos_platforms/icon-g2a.svg",
+                        Xbox:  "/iconos_platforms/icon-xbox.svg",
+                      };
+                      const icon = icons[section.source];
+                      return icon ? <Image src={icon} alt="" width={14} height={14} /> : null;
+                    })()}
                     {section.source}
                   </span>
                 </span>

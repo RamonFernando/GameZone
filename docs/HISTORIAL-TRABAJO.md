@@ -12,6 +12,16 @@
 
 ---
 
+## 18-06-2026 (rama dev-18062026)
+
+### GPT
+
+- [12.8 ✅] Logo G2A en ficha de detalle: `icon-g2a.svg` añadido y `GameDetailClient` renderiza G2A con `next/image` cuando el enlace externo es G2A — commit este commit
+- [12.9 ✅] Ofertas destacadas: paneles Steam/G2A/Xbox con contenedor 16:9, dots y progreso por panel para evitar recortes agresivos de imágenes panorámicas API en PC — commit este commit
+- [13.2 ✅] Logos de API en cards y market intelligence: badges Steam/G2A/Xbox por `storeLabel`/fuente, `icon-steam.svg` normalizado e `icon-xbox.svg` añadido — commit este commit
+- [audit ✅] Auditoría actualizada en `PLAN-MEJORAS-AUDITORIA.md`: 11.1 hecho, 11.2 parcial por claves pendientes, 11.4 parcial, 12.7 parcial, 12.8/12.9/13.2 hechos — commit este commit
+- [verify ✅] Verificación completa: `npm run lint`, `npx tsc --noEmit`, `npm run test:unit` (76/76) y `npm run build` verdes; para el build se pararon procesos locales de Next/Playwright que bloqueaban el DLL de Prisma — commit este commit
+
 ## 17-06-2026 (ramas dev-17062026-claude / dev-17062026-gpt)
 
 ### Claude (VS Code)
