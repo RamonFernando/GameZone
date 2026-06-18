@@ -95,9 +95,14 @@ function formatPrice(price: number) {
   return price.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
 
-function toSteamPortrait(url: string): string {
+function toPortraitUrl(url: string): string {
+  // Steam: landscape header → portrait library art (600×900)
   if (url.includes("/steam/apps/") && url.endsWith("/header.jpg")) {
     return url.replace("/header.jpg", "/library_600x900.jpg");
+  }
+  // G2A: upgrade small thumbnails to portrait 600×876
+  if (url.includes("images.g2a.com")) {
+    return url.replace(/\/images\/(?:58x58|230x336)\//, "/images/600x876/");
   }
   return url;
 }
@@ -122,10 +127,11 @@ function useCountdown() {
 }
 
 function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: string; badgeClass: string }) {
-  const [imgSrc, setImgSrc] = useState(() => toSteamPortrait(game.coverImage));
+  const [imgSrc, setImgSrc] = useState(() => toPortraitUrl(game.coverImage));
   return (
     <Link href={`/games/${game.slug}`} className={styles.featuredSideCard} aria-label={game.name}>
       <div className={styles.featuredSideCardMedia}>
+        <Image src={imgSrc} alt="" aria-hidden fill sizes="220px" className={styles.featuredSideCardBg} unoptimized />
         <Image src={imgSrc} alt={game.name} fill sizes="220px" className={styles.featuredSideCardImg} unoptimized onError={() => setImgSrc(game.coverImage)} />
         <div className={styles.featuredSideCardOverlay} />
         <div className={styles.featuredSideCardInfo}>

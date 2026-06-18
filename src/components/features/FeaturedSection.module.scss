@@ -42,8 +42,15 @@
   background: #1e293b;
 }
 
-.featuredSideCardImg {
+.featuredSideCardBg {
   object-fit: cover;
+  object-position: center;
+  filter: blur(14px) brightness(0.35) saturate(0.7);
+  transform: scale(1.12);
+}
+
+.featuredSideCardImg {
+  object-fit: contain;
   object-position: center center;
 }
 
