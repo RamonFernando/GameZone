@@ -10,8 +10,13 @@ import { parseJsonBody } from "@/lib/validation";
 
 const createPaypalOrderSchema = z.object({
   items: z
-    .array(z.object({ slug: z.string().optional(), quantity: z.number().optional() }))
-    .optional(),
+    .array(
+      z.object({
+        slug: z.string().min(1),
+        quantity: z.number().int().positive(),
+      })
+    )
+    .min(1, "El carrito no puede estar vacío"),
 });
 
 export async function POST(request: Request) {
@@ -27,7 +32,7 @@ export async function POST(request: Request) {
   try {
     const pendingOrder = await createPendingOrder({
       userId: authResult.auth.userId,
-      items: payload.items ?? [],
+      items: payload.items,
       paymentProvider: "paypal",
     });
 
