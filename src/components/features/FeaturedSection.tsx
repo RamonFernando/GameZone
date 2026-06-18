@@ -95,6 +95,13 @@ function formatPrice(price: number) {
   return price.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
 
+function toSteamPortrait(url: string): string {
+  if (url.includes("/steam/apps/") && url.endsWith("/header.jpg")) {
+    return url.replace("/header.jpg", "/library_600x900.jpg");
+  }
+  return url;
+}
+
 const DEAL_ROTATE_S = 8;
 
 function useCountdown() {
@@ -115,10 +122,11 @@ function useCountdown() {
 }
 
 function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: string; badgeClass: string }) {
+  const [imgSrc, setImgSrc] = useState(() => toSteamPortrait(game.coverImage));
   return (
     <Link href={`/games/${game.slug}`} className={styles.featuredSideCard} aria-label={game.name}>
       <div className={styles.featuredSideCardMedia}>
-        <Image src={game.coverImage} alt={game.name} fill sizes="220px" className={styles.featuredSideCardImg} unoptimized />
+        <Image src={imgSrc} alt={game.name} fill sizes="220px" className={styles.featuredSideCardImg} unoptimized onError={() => setImgSrc(game.coverImage)} />
         <div className={styles.featuredSideCardOverlay} />
         <div className={styles.featuredSideCardInfo}>
           <span className={`${styles.featuredSideCardBadge} ${BADGE_CLASS[badgeClass] ?? ""}`}>{badge}</span>
