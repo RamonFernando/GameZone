@@ -21,11 +21,13 @@
 .featuredSideCard {
   display: flex;
   flex-direction: column;
+  align-self: start;
   border-radius: 14px;
   overflow: hidden;
   text-decoration: none;
   position: relative;
-  min-height: 300px;
+  background: #0f172a;
+  border: 1px solid rgba(71, 85, 105, 0.18);
   transition: transform 0.18s;
   box-shadow: 0 2px 12px rgba(2, 6, 23, 0.10);
 
@@ -37,43 +39,20 @@
 
 .featuredSideCardMedia {
   position: relative;
-  flex: 1;
-  min-height: 300px;
+  aspect-ratio: 3 / 4;
   background: #1e293b;
 }
 
-.featuredSideCardBg {
-  object-fit: cover;
-  object-position: center;
-  filter: blur(14px) brightness(0.35) saturate(0.7);
-  transform: scale(1.12);
-}
-
 .featuredSideCardImg {
-  object-fit: contain;
-  object-position: center center;
-}
-
-.featuredSideCardOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(2, 6, 23, 0.88) 0%, rgba(2, 6, 23, 0.2) 55%, transparent 100%);
-  z-index: 1;
-}
-
-.featuredSideCardInfo {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1rem;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  object-fit: cover;
+  object-position: top center;
 }
 
 .featuredSideCardBadge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  z-index: 2;
   display: inline-block;
   font-size: 0.68rem;
   font-weight: 700;
@@ -82,6 +61,15 @@
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   width: fit-content;
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.35);
+}
+
+.featuredSideCardInfo {
+  padding: 0.7rem 0.85rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: #0f172a;
 }
 
 .featuredSideCardBadgePurple {
@@ -100,7 +88,11 @@
   color: #f8fafc;
   line-height: 1.3;
   margin: 0;
-  text-shadow: 0 1px 6px rgba(2, 6, 23, 0.6);
+  min-height: 2.47rem; /* reserva 2 líneas para que ambas cards midan igual */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .featuredSideCardPriceRow {
@@ -354,6 +346,10 @@
   margin-top: 4px;
 }
 
+.featuredDealProgressIdle {
+  background: transparent;
+}
+
 .featuredDealProgressBar {
   height: 100%;
   background: #7c3aed;
@@ -364,14 +360,16 @@
 .featuredDealCover {
   position: relative;
   width: 100%;
-  height: 120px;
+  aspect-ratio: 16 / 9;
+  height: auto;
   border-radius: 7px;
   overflow: hidden;
   flex-shrink: 0;
   background: #e2e8f0;
 
   img {
-    object-position: top center !important;
+    object-fit: cover !important;
+    object-position: center center !important;
   }
 }
 
@@ -430,9 +428,9 @@
     order: -1;
   }
 
-  .featuredSideCard,
   .featuredSideCardMedia {
-    min-height: 240px;
+    aspect-ratio: auto;
+    height: 300px;
   }
 
   .featuredDealList {
@@ -454,9 +452,9 @@
     min-height: 0;
   }
 
-  .featuredSideCard,
   .featuredSideCardMedia {
-    min-height: 210px;
+    aspect-ratio: auto;
+    height: 220px;
   }
 
   .featuredGenres,
@@ -497,9 +495,9 @@
 }
 
 @media (max-width: 420px) {
-  .featuredSideCard,
   .featuredSideCardMedia {
-    min-height: 190px;
+    aspect-ratio: auto;
+    height: 200px;
   }
 
   .featuredSideCardInfo {

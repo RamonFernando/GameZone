@@ -120,18 +120,16 @@ function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: st
   return (
     <Link href={`/games/${game.slug}`} className={styles.featuredSideCard} aria-label={game.name}>
       <div className={styles.featuredSideCardMedia}>
-        <Image src={imgSrc} alt="" aria-hidden fill sizes="220px" className={styles.featuredSideCardBg} unoptimized />
         <Image src={imgSrc} alt={game.name} fill sizes="220px" className={styles.featuredSideCardImg} unoptimized onError={() => setImgSrc(game.coverImage)} />
-        <div className={styles.featuredSideCardOverlay} />
-        <div className={styles.featuredSideCardInfo}>
-          <span className={`${styles.featuredSideCardBadge} ${BADGE_CLASS[badgeClass] ?? ""}`}>{badge}</span>
-          <p className={styles.featuredSideCardName}>{game.name}</p>
-          <div className={styles.featuredSideCardPriceRow}>
-            {game.discountPercent > 0 && (
-              <span className={styles.featuredSideCardDiscount}>-{game.discountPercent}%</span>
-            )}
-            <span className={styles.featuredSideCardPrice}>{formatPrice(game.priceFinal)}</span>
-          </div>
+        <span className={`${styles.featuredSideCardBadge} ${BADGE_CLASS[badgeClass] ?? ""}`}>{badge}</span>
+      </div>
+      <div className={styles.featuredSideCardInfo}>
+        <p className={styles.featuredSideCardName}>{game.name}</p>
+        <div className={styles.featuredSideCardPriceRow}>
+          {game.discountPercent > 0 && (
+            <span className={styles.featuredSideCardDiscount}>-{game.discountPercent}%</span>
+          )}
+          <span className={styles.featuredSideCardPrice}>{formatPrice(game.priceFinal)}</span>
         </div>
       </div>
     </Link>
@@ -196,11 +194,13 @@ function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string 
                 <span className={styles.featuredDealPrice}>{formatPrice(game.priceFinal)}</span>
                 <span className={styles.featuredDealOriginal}>{formatPrice(game.priceOriginal)}</span>
               </div>
-              {index === activeIndex && games.length > 1 && (
-                <div className={styles.featuredDealProgress}>
+              {games.length > 1 && (
+                <div
+                  className={`${styles.featuredDealProgress}${index === activeIndex ? "" : ` ${styles.featuredDealProgressIdle}`}`}
+                >
                   <div
                     className={styles.featuredDealProgressBar}
-                    style={{ width: `${(timeLeft / DEAL_ROTATE_S) * 100}%` }}
+                    style={{ width: index === activeIndex ? `${(timeLeft / DEAL_ROTATE_S) * 100}%` : "0%" }}
                   />
                 </div>
               )}
