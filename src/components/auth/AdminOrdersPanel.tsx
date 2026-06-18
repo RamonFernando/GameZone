@@ -37,32 +37,26 @@ type AdminOrder = {
 type StatusFilter = "all" | "pending" | "paid" | "failed" | "refunded";
 type ProviderFilter = "all" | "stripe" | "paypal" | "manual";
 
+const ORDERS_PER_PAGE = 20;
+
 // Formatea importes para mostrarlos en la tabla de pedidos.
 function formatMoney(amount: number, currency = "EUR") {
   return amount.toLocaleString("es-ES", { style: "currency", currency });
 }
 
 // Componente principal que lista pedidos y permite filtrar y reembolsar.
+// Los pedidos se cargan una sola vez desde la API; el filtrado por estado/pasarela
+// y la paginación se aplican en local sobre los datos ya cargados, sin nuevas
+// llamadas a la API al cambiar de filtro o de página.
 export function AdminOrdersPanel() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [providerFilter, setProviderFilter] = useState<ProviderFilter>("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefundingOrderId, setIsRefundingOrderId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  const queryString = useMemo(() => {
-    const params = new URLSearchParams();
-    if (statusFilter !== "all") {
-      params.set("status", statusFilter);
-    }
-    if (providerFilter !== "all") {
-      params.set("provider", providerFilter);
-    }
-    const query = params.toString();
-    return query ? `?${query}` : "";
-  }, [providerFilter, statusFilter]);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -70,7 +64,7 @@ export function AdminOrdersPanel() {
         setIsLoading(true);
         setErrorMessage("");
         setSuccessMessage("");
-        const response = await fetch(`/api/admin/orders${queryString}`);
+        const response = await fetch("/api/admin/orders");
         const payload = (await response.json()) as {
           message?: string;
           orders?: AdminOrder[];
@@ -88,7 +82,34 @@ export function AdminOrdersPanel() {
     };
 
     void loadOrders();
-  }, [queryString]);
+  }, []);
+
+  // Filtrado local: no dispara peticiones nuevas, solo recalcula sobre `orders`.
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      if (statusFilter !== "all" && order.status !== statusFilter) {
+        return false;
+      }
+      if (providerFilter !== "all" && order.paymentProvider !== providerFilter) {
+        return false;
+      }
+      return true;
+    });
+  }, [orders, statusFilter, providerFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PER_PAGE));
+
+  // Si el filtro reduce los resultados y la página actual queda fuera de rango, la recolocamos.
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (currentPage - 1) * ORDERS_PER_PAGE;
+    return filteredOrders.slice(start, start + ORDERS_PER_PAGE);
+  }, [filteredOrders, currentPage]);
 
   const handleRefund = async (orderId: string) => {
     setErrorMessage("");
@@ -160,7 +181,10 @@ export function AdminOrdersPanel() {
             id="statusFilter"
             className="auth-input"
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+            onChange={(event) => {
+              setStatusFilter(event.target.value as StatusFilter);
+              setCurrentPage(1);
+            }}
           >
             <option value="all">Todos</option>
             <option value="pending">Pendiente</option>
@@ -178,7 +202,10 @@ export function AdminOrdersPanel() {
             id="providerFilter"
             className="auth-input"
             value={providerFilter}
-            onChange={(event) => setProviderFilter(event.target.value as ProviderFilter)}
+            onChange={(event) => {
+              setProviderFilter(event.target.value as ProviderFilter);
+              setCurrentPage(1);
+            }}
           >
             <option value="all">Todas</option>
             <option value="stripe">Stripe</option>
@@ -192,11 +219,11 @@ export function AdminOrdersPanel() {
       {errorMessage ? <p className="auth-alt">{errorMessage}</p> : null}
       {successMessage ? <p className="auth-alt">{successMessage}</p> : null}
 
-      {!isLoading && !errorMessage && orders.length === 0 ? (
+      {!isLoading && !errorMessage && filteredOrders.length === 0 ? (
         <p className="auth-alt">No hay pedidos con esos filtros.</p>
       ) : null}
 
-      {!isLoading && !errorMessage && orders.length > 0 ? (
+      {!isLoading && !errorMessage && filteredOrders.length > 0 ? (
         <div style={{ overflowX: "auto", border: "1px solid rgba(148,163,184,0.25)", borderRadius: 12 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1080, fontSize: "0.82rem" }}>
             <thead>
@@ -213,7 +240,7 @@ export function AdminOrdersPanel() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {paginatedOrders.map((order) => (
                 <tr key={order.id} style={{ borderTop: "1px solid rgba(148,163,184,0.2)" }}>
                   <td style={{ padding: "8px 10px", lineHeight: 1.35 }}>
                     <strong>#{order.id.slice(0, 8)}</strong>
@@ -262,6 +289,30 @@ export function AdminOrdersPanel() {
               ))}
             </tbody>
           </table>
+        </div>
+      ) : null}
+
+      {!isLoading && !errorMessage && filteredOrders.length > 0 && totalPages > 1 ? (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 12 }}>
+          <button
+            type="button"
+            className="button-ghost btn-padding-site"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={currentPage <= 1}
+          >
+            Anterior
+          </button>
+          <span className="auth-alt">
+            Página {currentPage} de {totalPages} ({filteredOrders.length} pedidos)
+          </span>
+          <button
+            type="button"
+            className="button-ghost btn-padding-site"
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            disabled={currentPage >= totalPages}
+          >
+            Siguiente
+          </button>
         </div>
       ) : null}
     </div>

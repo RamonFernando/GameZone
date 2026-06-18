@@ -205,13 +205,16 @@ export async function updateUserProfile(input: {
       data: {
         name: input.name.trim(),
         email: normalizedEmail,
-        avatarUrl: input.avatarUrl ?? undefined,
-        phone: input.phone ?? undefined,
-        addressLine1: input.addressLine1 ?? undefined,
-        city: input.city ?? undefined,
-        postalCode: input.postalCode ?? undefined,
-        country: input.country ?? undefined,
-        province: input.province ?? undefined,
+        // No usar "?? undefined": eso convertiría un null explícito (borrar campo)
+        // en undefined (Prisma lo ignora y no borra nada). Si el campo no se envía
+        // (undefined), Prisma lo deja igual; si se envía null, lo borra de verdad.
+        avatarUrl: input.avatarUrl,
+        phone: input.phone,
+        addressLine1: input.addressLine1,
+        city: input.city,
+        postalCode: input.postalCode,
+        country: input.country,
+        province: input.province,
       },
     });
   } catch (error) {

@@ -20,7 +20,8 @@ export type AuditAction =
   | "ADMIN_PRODUCT_UPDATED"
   | "ADMIN_PRODUCT_DELETED"
   | "ADMIN_USER_ROLE_CHANGED"
-  | "ORDER_PAID";
+  | "ORDER_PAID"
+  | "ACCOUNT_DELETED";
 
 export async function logAudit({
   userId,

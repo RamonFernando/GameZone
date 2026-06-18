@@ -133,6 +133,10 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
   const [totpSecret, setTotpSecret] = useState("");
   const [totpQrDataUrl, setTotpQrDataUrl] = useState("");
   const [totpCodeDraft, setTotpCodeDraft] = useState("");
+  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] = useState(false);
+  const [deleteAccountPassword, setDeleteAccountPassword] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteAccountMessage, setDeleteAccountMessage] = useState("");
   const lang = useLocale();
   useScrollMemory(!isLoading);
   const clearedPaidOrderRef = useRef<string | null>(null);
@@ -732,6 +736,41 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       setTotpMessage("Error de red al desactivar 2FA con app.");
     } finally {
       setIsUpdatingTotp(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteAccountMessage("");
+    if (!deleteAccountPassword.trim()) {
+      setDeleteAccountMessage(
+        lang === "en" ? "Enter your password to confirm." : "Introduce tu contraseña para confirmar."
+      );
+      return;
+    }
+
+    try {
+      setIsDeletingAccount(true);
+      const response = await fetch("/api/account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: deleteAccountPassword }),
+      });
+      const payload = (await response.json()) as { message?: string };
+
+      if (!response.ok) {
+        setDeleteAccountMessage(
+          payload.message ?? (lang === "en" ? "Could not delete account." : "No se pudo eliminar la cuenta.")
+        );
+        return;
+      }
+
+      window.location.href = "/";
+    } catch {
+      setDeleteAccountMessage(
+        lang === "en" ? "Network error deleting account." : "Error de red al eliminar la cuenta."
+      );
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -1608,6 +1647,83 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               ? "Coming soon: enable verification by mobile notification"
               : "Próximamente: activar verificación por notificación en el móvil"}
           </button>
+
+          <hr className="auth-divider-rule" />
+
+          <div className="auth-field">
+            <span className="auth-label">
+              {lang === "en" ? "Delete account" : "Eliminar cuenta"}
+            </span>
+            <p className="auth-alt">
+              {lang === "en"
+                ? "This permanently deletes your account and all associated data (orders, wishlist, sessions). This action cannot be undone."
+                : "Esto elimina tu cuenta y todos los datos asociados (pedidos, lista de deseos, sesiones) de forma permanente. Esta acción no se puede deshacer."}
+            </p>
+          </div>
+
+          {!isDeleteAccountDialogOpen ? (
+            <button
+              type="button"
+              className="button-ghost auth-center-button btn-padding-site"
+              onClick={() => {
+                setDeleteAccountMessage("");
+                setDeleteAccountPassword("");
+                setIsDeleteAccountDialogOpen(true);
+              }}
+            >
+              {lang === "en" ? "Delete account" : "Eliminar cuenta"}
+            </button>
+          ) : (
+            <div className="auth-field" style={{ gap: 8 }}>
+              <span className="auth-label">
+                {lang === "en"
+                  ? "Enter your password to confirm account deletion"
+                  : "Introduce tu contraseña para confirmar la eliminación de la cuenta"}
+              </span>
+              <input
+                type="password"
+                className="auth-input"
+                value={deleteAccountPassword}
+                onChange={(event) => setDeleteAccountPassword(event.target.value)}
+                placeholder={lang === "en" ? "Password" : "Contraseña"}
+                autoComplete="current-password"
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  className="button-primary auth-submit-compact btn-padding-site"
+                  onClick={handleDeleteAccount}
+                  disabled={isDeletingAccount}
+                  style={{ background: "#dc2626", borderColor: "#dc2626" }}
+                >
+                  {isDeletingAccount
+                    ? lang === "en"
+                      ? "Deleting..."
+                      : "Eliminando..."
+                    : lang === "en"
+                      ? "Confirm deletion"
+                      : "Confirmar eliminación"}
+                </button>
+                <button
+                  type="button"
+                  className="button-ghost auth-submit-compact btn-padding-site"
+                  onClick={() => {
+                    setIsDeleteAccountDialogOpen(false);
+                    setDeleteAccountPassword("");
+                    setDeleteAccountMessage("");
+                  }}
+                  disabled={isDeletingAccount}
+                >
+                  {lang === "en" ? "Cancel" : "Cancelar"}
+                </button>
+              </div>
+              {deleteAccountMessage ? (
+                <p className="auth-alt" role="status" aria-live="polite">
+                  {deleteAccountMessage}
+                </p>
+              ) : null}
+            </div>
+          )}
         </>
       ) : null}
 
