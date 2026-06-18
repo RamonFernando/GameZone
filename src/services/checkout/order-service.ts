@@ -252,10 +252,12 @@ export async function completePaidOrder(input: {
       username: recipientName,
       orderId: paidOrder.id,
       orderUrl: `${baseUrl}/account?order=${paidOrder.id}`,
+      baseUrl,
       currency: paidOrder.currency,
       totalAmount: paidOrder.totalAmount,
       items: paidOrder.items.map((item) => ({
         title: item.title,
+        slug: item.gameSlug,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         subtotal: item.subtotal,

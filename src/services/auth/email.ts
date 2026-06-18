@@ -172,10 +172,12 @@ export async function sendPurchaseConfirmationEmail(input: {
   username: string;
   orderId: string;
   orderUrl: string;
+  baseUrl: string;
   currency: string;
   totalAmount: number;
   items: Array<{
     title: string;
+    slug: string;
     quantity: number;
     unitPrice: number;
     subtotal: number;
@@ -190,7 +192,10 @@ export async function sendPurchaseConfirmationEmail(input: {
     .map(
       (item) => `
         <tr>
-          <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb;">${item.title}</td>
+          <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb;">
+            <a href="${input.baseUrl}/games/${item.slug}" target="_blank" rel="noopener noreferrer"
+               style="color:#4f46e5;text-decoration:none;font-weight:600;">${item.title}</a>
+          </td>
           <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
           <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">
             ${item.unitPrice.toLocaleString("es-ES", { style: "currency", currency: input.currency })}
@@ -285,7 +290,7 @@ export async function sendPurchaseConfirmationEmail(input: {
           `- ${item.title} x${item.quantity} (${item.subtotal.toLocaleString("es-ES", {
             style: "currency",
             currency: input.currency,
-          })})`
+          })}) — ${input.baseUrl}/games/${item.slug}`
       ),
       `Total: ${input.totalAmount.toLocaleString("es-ES", {
         style: "currency",
