@@ -435,7 +435,27 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
 
     if (nameDraft.trim().length < 3) {
       setProfileMessageType("error");
-      setProfileMessage("El nombre debe tener al menos 3 caracteres.");
+      setProfileMessage(lang === "en" ? "Name must be at least 3 characters." : "El nombre debe tener al menos 3 caracteres.");
+      return;
+    }
+
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailChanged = emailDraft.trim().toLowerCase() !== (profile?.email ?? "").toLowerCase();
+    if (emailChanged && !EMAIL_REGEX.test(emailDraft.trim())) {
+      setProfileMessageType("error");
+      setProfileMessage(lang === "en" ? "Invalid email format." : "El formato del email no es válido.");
+      return;
+    }
+
+    if (postalCodeDraft.trim() && !/^[a-zA-Z0-9][a-zA-Z0-9\s-]{1,9}$/.test(postalCodeDraft.trim())) {
+      setProfileMessageType("error");
+      setProfileMessage(lang === "en" ? "Invalid postal code." : "Código postal no válido (solo letras, números y guiones).");
+      return;
+    }
+
+    if (phoneDraft.trim() && !/^\+[0-9][\d\s\-()]{5,19}$/.test(phoneDraft.trim())) {
+      setProfileMessageType("error");
+      setProfileMessage(lang === "en" ? "Phone must include country code (e.g. +34 600 000 000)." : "El teléfono debe incluir el prefijo de país (ej. +34 600 000 000).");
       return;
     }
 

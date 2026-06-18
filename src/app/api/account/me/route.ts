@@ -86,7 +86,9 @@ export async function PATCH(request: Request) {
     );
   }
 
-  if (!EMAIL_REGEX.test(email)) {
+  const currentUser = await getUserById(authResult.auth.userId);
+  const emailChanged = email !== (currentUser?.email ?? "").toLowerCase();
+  if (emailChanged && !EMAIL_REGEX.test(email)) {
     return NextResponse.json(
       { message: "Email inválido.", code: "INVALID_EMAIL" },
       { status: 400 }
