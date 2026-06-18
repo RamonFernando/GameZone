@@ -467,9 +467,11 @@ npm run build
 - El email de confirmación no incluye la clave del juego, descripción breve ni enlace de vuelta.
 - **Acción:** en el servicio de email post-pago añadir: logo de GameZone arriba, clave del juego, nombre + descripción corta, enlace a la ficha. Revisar `src/services/auth/email.ts` y el webhook de Stripe/PayPal.
 
-### 11.3 — No se puede eliminar datos personales ni cuenta 🔴 CRÍTICO
-- No existe endpoint `DELETE /api/account` ni forma de borrar campos opcionales (teléfono, dirección).
-- **Acción:** crear `DELETE /api/account` con confirmación por contraseña; permitir enviar `null` en los campos opcionales del `PATCH /api/account/me`.
+### 11.3 — No se puede eliminar datos personales ni cuenta 🔴 CRÍTICO · ✅ VERIFICADO HECHO (18/06/2026)
+- `DELETE /api/account` existe en `src/app/api/account/route.ts` con confirmación por contraseña y cascade completo.
+- `PATCH /api/account/me` ya acepta `null` en todos los campos opcionales (phone, addressLine1, city, postalCode, country, province).
+- UI tiene diálogo de borrado con campo contraseña (`AccountDashboard.tsx` líneas 136-139, 742, 1664).
+- No requiere acción.
 
 ### 11.4 — Sin validación de formularios en datos de cuenta 🟠 ALTA
 - Email sin validación de formato, código postal acepta texto, teléfono sin prefijo de país.
