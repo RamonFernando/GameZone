@@ -16,6 +16,7 @@ Ver memoria Claude: `sistema-3-1-apd`. Resumen operativo:
 | 3 | Mínimo cambio viable |
 | 4 | Verificar antes de afirmar |
 | 5 | Código completo solo si se pide |
+| 6 | **Honestidad sobre el razonamiento de Ramón** — si Ramón se equivoca (total o parcialmente), decírselo con claridad. No darle la razón por comodidad. Indicar siempre si está: ✅ en lo correcto / ⚠️ parcialmente correcto / ❌ equivocado, con una línea explicando por qué. Esto aplica a diagnósticos técnicos, interpretación de código, CSS, bugs y cualquier afirmación sobre el proyecto. |
 
 Cabecera de respuesta: `[3.1 · U4 · mínimo cambio]`
 
