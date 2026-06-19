@@ -47,14 +47,14 @@ export const metadata: Metadata = {
       "Compra videojuegos digitales al mejor precio. Códigos oficiales con entrega inmediata.",
     url: baseUrl,
     locale: "es_ES",
-    images: [{ url: "/Recursos/logo.png", alt: "GameZone" }],
+    images: [{ url: "/Recursos/og-card.png", width: 1200, height: 630, alt: "GameZone" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "GameZone — Tienda de videojuegos digitales",
     description:
       "Compra videojuegos digitales al mejor precio. Códigos oficiales con entrega inmediata.",
-    images: ["/Recursos/logo.png"],
+    images: ["/Recursos/og-card.png"],
   },
   robots: {
     index: true,
