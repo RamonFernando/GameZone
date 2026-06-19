@@ -14,6 +14,14 @@
 
 ## 19-06-2026 (rama dev-19062026)
 
+### Sonnet (implementador)
+
+- [14.1 ✅] Modelo `GameKey` en `prisma/schema.prisma` + campo `gameKey String?` en `OrderItem` + `keys GameKey[]` en `Product`. Migración `20260619215057_add_game_keys` aplicada a Neon. 76/76 tests verdes — commit 293e6fb
+- [14.2 ✅] Panel admin de claves: botón 🔑 por producto en `AdminProductsPanel.tsx` abre modal con stock disponible, textarea para subida en bloque, listado con estado (disponible/asignada), borrado de claves no asignadas. Endpoints `GET/POST /api/admin/products/[slug]/keys` y `DELETE /api/admin/keys/[id]`. 76/76 tests — commit ea62d4a
+- [14.3 ✅] Asignación automática atómica en `completePaidOrder` (`order-service.ts`): `tx.gameKey.updateMany` con condición `assignedOrderId IS NULL` dentro de la misma transacción Prisma. Si faltan claves → `status: "paid_pending_key"` + `logger.warn`. Keys asignadas reflejadas en `OrderItem.gameKey`. Test mock actualizado con `gameKey`/`orderItem` — commit 3ad166f
+- [14.4 ✅] Clave de activación en email de compra (`email.ts`): cada ítem muestra la clave en bloque verde monoespacio, instrucciones de activación por plataforma (Steam/Xbox/PlayStation) e indicador "pendiente" si no hay clave — commit 3ad166f
+- [branch ⚠️] NOTA: el commit 14.1 aterrizó accidentalmente en `dev-19062026-gpt` antes de ser cherry-picked a `dev-19062026-sonnet`. Al mergear, tratar el commit duplicado en la rama GPT como redundante (puede ignorarse o rebased fuera).
+
 ### Opus (modelo superior / escritorio)
 
 - [P1 ⚠️] Rotación "Ofertas del día": `gameIdx` en `FeaturedSection.tsx` (`DealsOfTheDay`) cambiado para que un panel inactivo conserve su último juego (`PANEL_SIZE - 1`) en vez de resetear a juego 0 al reiniciar el ciclo. Así el panel izquierdo (Steam/Age of Empires) deja de quedarse congelado. Sin tocar orden/cantidad/nº de barras ni timing. tsc + 76/76 tests verdes. **PENDIENTE verificación visual** en dev server reiniciado limpio (pestaña en primer plano) — commit 9769a95

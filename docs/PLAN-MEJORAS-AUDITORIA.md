@@ -54,6 +54,27 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 
 ---
 
+## 🔴 PROBLEMAS PRIORITARIOS SIN RESOLVER
+
+### P1 — "Ofertas del día": la carta de Age of Empires (panel izquierdo/Steam) no cambia a su 2º juego
+
+**Síntoma (reportado por Ramón, 19/06/2026):** en `FeaturedSection` → `DealsOfTheDay`, los paneles central (G2A) y derecho (Xbox) sí rotan y muestran su 2º juego, pero el panel izquierdo (Steam/Age of Empires) parece quedarse siempre en el mismo juego.
+
+**Causa raíz (confirmada inspeccionando localhost:3000 en vivo):** la rotación recorre los paneles de derecha a izquierda y solo un panel está "activo" a la vez (una sola barra). Los paneles que ya pasaron su turno se quedan mostrando su 2º juego; pero el panel izquierdo es el **último** de la cola, así que solo muestra su 2º juego durante 1 slot y enseguida el ciclo se reinicia al primer juego. No tiene "tiempo de después" para mantenerlo, por eso parece que nunca cambia. Además, con menos de 6 ofertas el último slot puede no alcanzarse nunca (`activeSlot % games.length` + `PANEL_SIZE` fijo).
+
+**Intentos realizados (todos revertidos por efectos secundarios):**
+- Rotación independiente por panel → aparecían **2 barras** a la vez (rechazado).
+- Invertir dirección a izquierda→derecha → Ramón quiere mantener el salto **derecha→izquierda** (rechazado).
+- Rotación por slot-real + memoria por panel (`shown`) para que cada carta mantenga su último juego → lógicamente correcto pero **no verificable** y dejó la rotación inconsistente.
+
+**Bloqueo de verificación (importante para quien lo retome):** no se pudo confirmar ningún fix en vivo porque (a) el dev server lleva corriendo desde antes de las ediciones, en carpeta **Dropbox**, y recompila de forma irregular (sirve chunks cacheados/stale), y (b) la pestaña de automatización va en segundo plano (`document.hidden`), donde el navegador limita los `setInterval` y congela la rotación. **Verificación fiable = reiniciar limpio el dev server (`Ctrl+C` + `npm run dev`) y probar en una pestaña en primer plano.**
+
+**Archivo:** `src/components/features/FeaturedSection.tsx` (componente `DealsOfTheDay` y `PlatformPanel`).
+**Restricciones de Ramón:** mantener una sola barra, salto derecha→izquierda, no tocar el resto del diseño.
+**Estado:** ⚠️ FIX APLICADO (commit 9769a95, rama dev-19062026) — PENDIENTE verificación visual (reiniciar dev server limpio + pestaña en primer plano).
+
+---
+
 ## FASES 0–5 (v1) — resumen
 
 Las fases 0–3 están completas, incluida 3.2 (Upstash con fallback PostgreSQL, 17/06/2026). 3.5 quedó cubierto y ampliado el 11/06/2026 con tests de servicios, sesión, webhooks Stripe/PayPal y login + 2FA; el resto de robustez continúa en FASE 10.
@@ -588,7 +609,7 @@ npm run build
 > real. El modelo correcto es comprar claves a distribuidores (Genba, Fanatical, etc.) y subirlas
 > al sistema como inventario propio.
 
-### 14.1 — Modelo de datos `GameKey` 🔴 CRÍTICO
+### 14.1 — Modelo de datos `GameKey` 🔴 CRÍTICO · ✅ HECHO (19/06/2026)
 - **Acción:** añadir al schema de Prisma:
   ```prisma
   model GameKey {
@@ -607,7 +628,7 @@ npm run build
 - Añadir `keys GameKey[]` a `model Product`.
 - Migración: `npx prisma migrate dev --name add-game-keys`.
 
-### 14.2 — Panel admin: gestión de claves 🔴 CRÍTICO
+### 14.2 — Panel admin: gestión de claves 🔴 CRÍTICO · ✅ HECHO (19/06/2026)
 - En `AdminProductsPanel` añadir pestaña "Claves" por producto:
   - Ver stock de claves disponibles (count de `assignedOrderId IS NULL`)
   - Subir claves en bloque: textarea con una clave por línea o importación CSV
@@ -615,14 +636,14 @@ npm run build
   - Eliminar claves no asignadas erróneas
 - Endpoint: `POST /api/admin/products/[slug]/keys` (subir), `GET /api/admin/products/[slug]/keys` (listar), `DELETE /api/admin/keys/[id]` (borrar)
 
-### 14.3 — Asignación automática en `completePaidOrder` 🔴 CRÍTICO
+### 14.3 — Asignación automática en `completePaidOrder` 🔴 CRÍTICO · ✅ HECHO (19/06/2026)
 - En `src/services/checkout/order-service.ts`, dentro de `completePaidOrder`, tras marcar el pedido como pagado:
   1. Para cada `OrderItem`, buscar la primera `GameKey` disponible (`assignedOrderId IS NULL`) del `productSlug` correspondiente.
   2. Asignarla atómicamente dentro de la misma transacción Prisma (`updateMany` con condición `assignedOrderId IS NULL`).
   3. Si no hay claves disponibles para algún producto: marcar el pedido con `status: "paid_pending_key"` y enviar alerta por email al admin.
   4. Guardar `keyCode` en el `OrderItem` (añadir campo `gameKey String?` al modelo `OrderItem`).
 
-### 14.4 — Mostrar clave en email de confirmación 🔴 CRÍTICO
+### 14.4 — Mostrar clave en email de confirmación 🔴 CRÍTICO · ✅ HECHO (19/06/2026)
 - En `sendPurchaseConfirmationEmail` (`src/services/auth/email.ts`): añadir sección por cada ítem con:
   - Nombre del juego
   - **Clave de activación:** `XXXXX-XXXXX-XXXXX` (formato Steam/Xbox/etc.)
