@@ -1,12 +1,14 @@
 // Panel de administración de pedidos: listado filtrable y acciones de reembolso.
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./AdminOrdersPanel.module.scss";
 
 // Ítem de un pedido tal como lo ve el panel admin.
 type AdminOrderItem = {
   id: string;
+  gameSlug: string;
   title: string;
   quantity: number;
   subtotal: number;
@@ -37,8 +39,15 @@ type AdminOrder = {
 // Filtros disponibles para el listado de pedidos.
 type StatusFilter = "all" | "pending" | "paid" | "failed" | "refunded";
 type ProviderFilter = "all" | "stripe" | "paypal" | "manual";
+type PlatformFilter = "all" | "PlayStation" | "Xbox" | "Nintendo" | "PC";
 
 const ORDERS_PER_PAGE = 20;
+const PLATFORM_FILTERS: Array<{ label: PlatformFilter; icon: string }> = [
+  { label: "PlayStation", icon: "/iconos_platforms/icon-play.svg" },
+  { label: "Xbox", icon: "/iconos_platforms/icon-xbx.svg" },
+  { label: "Nintendo", icon: "/iconos_platforms/icon-swt.svg" },
+  { label: "PC", icon: "/iconos_platforms/icon-pc.svg" },
+];
 
 // Formatea importes para mostrarlos en la tabla de pedidos.
 function formatMoney(amount: number, currency = "EUR") {
@@ -53,6 +62,8 @@ export function AdminOrdersPanel() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [providerFilter, setProviderFilter] = useState<ProviderFilter>("all");
+  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
+  const [slugPlatformMap, setSlugPlatformMap] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefundingOrderId, setIsRefundingOrderId] = useState("");
@@ -85,6 +96,31 @@ export function AdminOrdersPanel() {
     void loadOrders();
   }, []);
 
+  useEffect(() => {
+    const loadProductPlatforms = async () => {
+      try {
+        const response = await fetch("/api/products", { cache: "force-cache" });
+        if (!response.ok) return;
+        const payload = (await response.json()) as {
+          products?: Array<{ slug?: string; platform?: string }>;
+        };
+        const map: Record<string, string> = {};
+        for (const product of payload.products ?? []) {
+          const slug = String(product.slug ?? "").trim();
+          const productPlatform = String(product.platform ?? "").trim();
+          if (slug && productPlatform) {
+            map[slug] = productPlatform;
+          }
+        }
+        setSlugPlatformMap(map);
+      } catch {
+        setSlugPlatformMap({});
+      }
+    };
+
+    void loadProductPlatforms();
+  }, []);
+
   // Filtrado local: no dispara peticiones nuevas, solo recalcula sobre `orders`.
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -94,9 +130,19 @@ export function AdminOrdersPanel() {
       if (providerFilter !== "all" && order.paymentProvider !== providerFilter) {
         return false;
       }
+      if (platformFilter !== "all") {
+        const normalizedPlatform = platformFilter.toLowerCase();
+        const hasPlatformItem = order.items.some((item) => {
+          const itemPlatform = slugPlatformMap[item.gameSlug]?.toLowerCase() ?? "";
+          return itemPlatform.includes(normalizedPlatform);
+        });
+        if (!hasPlatformItem) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [orders, statusFilter, providerFilter]);
+  }, [orders, statusFilter, providerFilter, platformFilter, slugPlatformMap]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PER_PAGE));
 
@@ -213,6 +259,39 @@ export function AdminOrdersPanel() {
             <option value="paypal">PayPal</option>
             <option value="manual">Manual</option>
           </select>
+        </div>
+      </div>
+
+      <div className="auth-field" style={{ gap: 8 }}>
+        <span className="auth-label">Plataforma</span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <button
+            type="button"
+            className={`button-ghost btn-padding-site${platformFilter === "all" ? " button-primary" : ""}`}
+            onClick={() => {
+              setPlatformFilter("all");
+              setCurrentPage(1);
+            }}
+            aria-pressed={platformFilter === "all" ? "true" : "false"}
+          >
+            Todos
+          </button>
+          {PLATFORM_FILTERS.map((platform) => (
+            <button
+              key={platform.label}
+              type="button"
+              className={`button-ghost btn-padding-site${platformFilter === platform.label ? " button-primary" : ""}`}
+              onClick={() => {
+                setPlatformFilter(platformFilter === platform.label ? "all" : platform.label);
+                setCurrentPage(1);
+              }}
+              aria-pressed={platformFilter === platform.label ? "true" : "false"}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              <Image src={platform.icon} alt="" aria-hidden="true" width={16} height={16} />
+              {platform.label}
+            </button>
+          ))}
         </div>
       </div>
 

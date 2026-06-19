@@ -80,6 +80,7 @@
 ### GPT
 
 - [12.2 ✅] Dropdown de sugerencias en el buscador del Header: top 5 productos desde `/api/products`, enlaces directos a `/games/[slug]`, cierre con click fuera y Escape; `npx tsc --noEmit` + `npx.cmd vitest run` verdes — commit pendiente
+- [12.3/12.7 ✅] Filtro por plataforma en pedidos admin: chips PlayStation/Xbox/Nintendo/PC integrados con filtros de estado, pasarela y paginación local en `AdminOrdersPanel`; `npx.cmd tsc --noEmit` + `npx.cmd vitest run` verdes — commit pendiente
 
 ## 18-06-2026 (rama dev-18062026)
 
