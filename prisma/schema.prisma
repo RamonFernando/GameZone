@@ -151,9 +151,24 @@ model Product {
 
   likes ProductLike[]
   cartItems UserCartItem[]
+  keys GameKey[]
 
   @@index([isActive, createdAt])
   @@index([rawgId])
+}
+
+model GameKey {
+  id              String    @id @default(uuid())
+  productSlug     String
+  keyCode         String    @unique
+  platform        String    @default("PC")
+  assignedOrderId String?
+  assignedItemId  String?
+  assignedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  product         Product   @relation(fields: [productSlug], references: [slug])
+
+  @@index([productSlug, assignedOrderId])
 }
 
 model UserCartItem {
@@ -233,6 +248,7 @@ model OrderItem {
   unitPrice Float
   quantity  Int
   subtotal  Float
+  gameKey   String?
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
