@@ -12,12 +12,12 @@ const addKeysSchema = z.object({
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ slug: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_PRODUCTS_READ);
   if (!authResult.ok) return authResult.response;
 
-  const { slug } = await context.params;
+  const { id: slug } = await context.params;
   const product = await prisma.product.findUnique({ where: { slug }, select: { slug: true } });
   if (!product) {
     return NextResponse.json({ message: "Producto no encontrado." }, { status: 404 });
@@ -43,12 +43,12 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ slug: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   const authResult = await requirePermission(request, PERMISSIONS.ADMIN_PRODUCTS_WRITE);
   if (!authResult.ok) return authResult.response;
 
-  const { slug } = await context.params;
+  const { id: slug } = await context.params;
   const product = await prisma.product.findUnique({ where: { slug }, select: { slug: true, platform: true } });
   if (!product) {
     return NextResponse.json({ message: "Producto no encontrado." }, { status: 404 });
