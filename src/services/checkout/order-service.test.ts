@@ -11,10 +11,18 @@ const mockTx = vi.hoisted(() => ({
   order: {
     updateMany: vi.fn(),
     findFirstOrThrow: vi.fn(),
+    update: vi.fn(),
   },
   product: {
     findUnique: vi.fn(),
     update: vi.fn(),
+  },
+  gameKey: {
+    updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+    findFirst: vi.fn().mockResolvedValue(null),
+  },
+  orderItem: {
+    update: vi.fn().mockResolvedValue({}),
   },
 }));
 

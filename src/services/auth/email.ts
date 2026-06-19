@@ -178,6 +178,7 @@ export async function sendPurchaseConfirmationEmail(input: {
   items: Array<{
     title: string;
     slug: string;
+    gameKey?: string | null;
     quantity: number;
     unitPrice: number;
     subtotal: number;
@@ -190,21 +191,39 @@ export async function sendPurchaseConfirmationEmail(input: {
 
   const rowsHtml = input.items
     .map(
-      (item) => `
-        <tr>
-          <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb;">
-            <a href="${input.baseUrl}/games/${item.slug}" target="_blank" rel="noopener noreferrer"
-               style="color:#4f46e5;text-decoration:none;font-weight:600;">${item.title}</a>
-          </td>
-          <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-          <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">
-            ${item.unitPrice.toLocaleString("es-ES", { style: "currency", currency: input.currency })}
-          </td>
-          <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">
-            ${item.subtotal.toLocaleString("es-ES", { style: "currency", currency: input.currency })}
-          </td>
-        </tr>
-      `
+      (item) => {
+        const keyHtml = item.gameKey
+          ? `<div style="margin-top:4px;padding:6px 8px;background:#0f2027;border:1px solid rgba(52,211,153,0.4);border-radius:6px;font-family:monospace;font-size:14px;letter-spacing:0.12em;color:#34d399;">${item.gameKey}</div>
+             <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Clave de activación · guárdala en un lugar seguro</div>`
+          : `<div style="margin-top:4px;font-size:11px;color:#f59e0b;">Clave pendiente — recibirás un correo cuando esté disponible.</div>`;
+
+        const activationHint = item.gameKey
+          ? (() => {
+              const s = item.slug.toLowerCase();
+              if (s.includes("steam")) return `<div style="font-size:11px;color:#64748b;margin-top:2px;">Activar en <a href="https://store.steampowered.com/account/registerkey" style="color:#4f46e5;">steam.steampowered.com</a></div>`;
+              if (s.includes("xbox") || s.includes("microsoft")) return `<div style="font-size:11px;color:#64748b;margin-top:2px;">Activar en <a href="https://redeem.microsoft.com" style="color:#4f46e5;">redeem.microsoft.com</a></div>`;
+              if (s.includes("playstation") || s.includes("ps4") || s.includes("ps5")) return `<div style="font-size:11px;color:#64748b;margin-top:2px;">Activar en la PlayStation Store</div>`;
+              return `<div style="font-size:11px;color:#64748b;margin-top:2px;">Actívala en el launcher correspondiente</div>`;
+            })()
+          : "";
+
+        return `
+          <tr>
+            <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb;">
+              <a href="${input.baseUrl}/games/${item.slug}" target="_blank" rel="noopener noreferrer"
+                 style="color:#4f46e5;text-decoration:none;font-weight:600;">${item.title}</a>
+              ${keyHtml}${activationHint}
+            </td>
+            <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
+            <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+              ${item.unitPrice.toLocaleString("es-ES", { style: "currency", currency: input.currency })}
+            </td>
+            <td style="padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+              ${item.subtotal.toLocaleString("es-ES", { style: "currency", currency: input.currency })}
+            </td>
+          </tr>
+        `;
+      }
     )
     .join("");
 
@@ -290,7 +309,8 @@ export async function sendPurchaseConfirmationEmail(input: {
           `- ${item.title} x${item.quantity} (${item.subtotal.toLocaleString("es-ES", {
             style: "currency",
             currency: input.currency,
-          })}) — ${input.baseUrl}/games/${item.slug}`
+          })}) — ${input.baseUrl}/games/${item.slug}` +
+          (item.gameKey ? `\n  Clave: ${item.gameKey}` : "\n  Clave: pendiente de asignación")
       ),
       `Total: ${input.totalAmount.toLocaleString("es-ES", {
         style: "currency",

@@ -181,7 +181,7 @@ export async function completePaidOrder(input: {
   // Claim atómico: solo el primer webhook/llamada que gane la transición
   // pending -> paid descuenta stock. Los duplicados (PayPal envía 2 eventos)
   // ven count === 0 y no repiten el descuento.
-  const paidOrder = await prisma.$transaction(async (tx) => {
+  const txResult = await prisma.$transaction(async (tx) => {
     const claim = await tx.order.updateMany({
       where: {
         id: existing.id,
@@ -201,7 +201,10 @@ export async function completePaidOrder(input: {
       include: { items: true },
     });
 
-    // Solo descontamos stock si esta llamada ganó la transición.
+    // Solo descontamos stock y asignamos claves si esta llamada ganó la transición.
+    let hasMissingKey = false;
+    // Mapa itemId → keyCode para reflejar las claves asignadas en la respuesta sin releer.
+    const assignedKeys = new Map<string, string>();
     if (claim.count > 0) {
       for (const item of order.items) {
         const product = await tx.product.findUnique({
@@ -214,11 +217,48 @@ export async function completePaidOrder(input: {
             data: { stock: Math.max(0, product.stock - item.quantity) },
           });
         }
+
+        // Asignación atómica de clave: updateMany con condición IS NULL garantiza que
+        // solo un pedido puede tomar cada clave incluso con webhooks concurrentes.
+        const keyAssign = await tx.gameKey.updateMany({
+          where: { productSlug: item.gameSlug, assignedOrderId: null },
+          data: { assignedOrderId: order.id, assignedItemId: item.id, assignedAt: new Date() },
+        });
+
+        if (keyAssign.count > 0) {
+          const assignedKey = await tx.gameKey.findFirst({
+            where: { productSlug: item.gameSlug, assignedOrderId: order.id, assignedItemId: item.id },
+            select: { keyCode: true },
+          });
+          if (assignedKey) {
+            await tx.orderItem.update({ where: { id: item.id }, data: { gameKey: assignedKey.keyCode } });
+            assignedKeys.set(item.id, assignedKey.keyCode);
+          } else {
+            hasMissingKey = true;
+          }
+        } else {
+          hasMissingKey = true;
+        }
+      }
+
+      if (hasMissingKey) {
+        await tx.order.update({ where: { id: order.id }, data: { status: "paid_pending_key" } });
+        logger.warn("Pedido pagado sin clave disponible — requiere atención manual.", { orderId: order.id });
       }
     }
 
-    return order;
+    // Construir el pedido enriquecido con claves sin releer la BD.
+    const enrichedOrder = {
+      ...order,
+      items: order.items.map((item) => ({
+        ...item,
+        gameKey: assignedKeys.get(item.id) ?? (item as { gameKey?: string | null }).gameKey ?? null,
+      })),
+    };
+    return { order: enrichedOrder, hasMissingKey };
   });
+
+  const { order: paidOrder, hasMissingKey: txHasMissingKey } = txResult;
 
   await clearUserCartItems(input.userId);
 
@@ -230,10 +270,7 @@ export async function completePaidOrder(input: {
   });
 
   if (emailClaim.count === 0) {
-    return {
-      order: paidOrder,
-      emailSent: true,
-    };
+    return { order: paidOrder, emailSent: true };
   }
 
   const baseUrl = process.env.APP_BASE_URL ?? new URL(input.requestUrl).origin;
@@ -258,6 +295,7 @@ export async function completePaidOrder(input: {
       items: paidOrder.items.map((item) => ({
         title: item.title,
         slug: item.gameSlug,
+        gameKey: item.gameKey ?? null,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         subtotal: item.subtotal,
@@ -277,8 +315,5 @@ export async function completePaidOrder(input: {
     });
   }
 
-  return {
-    order: paidOrder,
-    emailSent,
-  };
+  return { order: paidOrder, emailSent, hasMissingKey: txHasMissingKey };
 }
