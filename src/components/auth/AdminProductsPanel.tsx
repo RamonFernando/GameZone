@@ -105,6 +105,21 @@ type CatalogQualityReport = {
   products: CatalogQualityProduct[];
 };
 
+type KeyRow = {
+  id: string;
+  keyCode: string;
+  platform: string;
+  assignedOrderId: string | null;
+  assignedItemId: string | null;
+  assignedAt: string | null;
+  createdAt: string;
+};
+
+type KeysData = {
+  keys: KeyRow[];
+  available: number;
+};
+
 // Número de productos por página en el listado principal.
 const PAGE_SIZE = 6;
 
@@ -216,6 +231,14 @@ function TrashIcon() {
   );
 }
 
+function KeyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
+      <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
@@ -240,6 +263,11 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [pendingDeleteName, setPendingDeleteName] = useState<string | null>(null);
   const [modalDraft, setModalDraft] = useState<ProductDraft>(emptyDraft);
   const [modalNotice, setModalNotice] = useState<string>("");
+  const [keysPanelSlug, setKeysPanelSlug] = useState<string | null>(null);
+  const [keysData, setKeysData] = useState<KeysData | null>(null);
+  const [keysLoading, setKeysLoading] = useState(false);
+  const [newKeysText, setNewKeysText] = useState("");
+  const [addingKeys, setAddingKeys] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingModalCover, setUploadingModalCover] = useState(false);
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -251,6 +279,59 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       setToasts((prev) => prev.filter((item) => item.id !== id));
     }, 3000);
   }, []);
+
+  const loadKeys = useCallback(async (slug: string) => {
+    setKeysLoading(true);
+    try {
+      const response = await fetch(`/api/admin/products/${slug}/keys`, { cache: "no-store" });
+      const payload = (await response.json()) as KeysData & { message?: string };
+      if (!response.ok) { pushToast("error", payload.message ?? "Error cargando claves."); return; }
+      setKeysData(payload);
+    } catch { pushToast("error", "Error de red cargando claves."); }
+    finally { setKeysLoading(false); }
+  }, [pushToast]);
+
+  const openKeysPanel = useCallback((slug: string) => {
+    setKeysPanelSlug(slug);
+    setNewKeysText("");
+    setKeysData(null);
+    void loadKeys(slug);
+  }, [loadKeys]);
+
+  const closeKeysPanel = useCallback(() => {
+    setKeysPanelSlug(null);
+    setKeysData(null);
+    setNewKeysText("");
+  }, []);
+
+  const handleAddKeys = useCallback(async () => {
+    if (!keysPanelSlug || !newKeysText.trim()) return;
+    setAddingKeys(true);
+    try {
+      const response = await fetch(`/api/admin/products/${keysPanelSlug}/keys`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keys: newKeysText }),
+      });
+      const payload = (await response.json()) as { added?: number; duplicates?: number; message?: string };
+      if (!response.ok) { pushToast("error", payload.message ?? "Error añadiendo claves."); return; }
+      pushToast("success", `${payload.added ?? 0} clave(s) añadida(s). ${payload.duplicates ?? 0} duplicadas omitidas.`);
+      setNewKeysText("");
+      void loadKeys(keysPanelSlug);
+    } catch { pushToast("error", "Error de red añadiendo claves."); }
+    finally { setAddingKeys(false); }
+  }, [keysPanelSlug, newKeysText, loadKeys, pushToast]);
+
+  const handleDeleteKey = useCallback(async (keyId: string) => {
+    if (!keysPanelSlug) return;
+    try {
+      const response = await fetch(`/api/admin/keys/${keyId}`, { method: "DELETE" });
+      const payload = (await response.json()) as { deleted?: boolean; message?: string };
+      if (!response.ok) { pushToast("error", payload.message ?? "Error eliminando clave."); return; }
+      pushToast("success", "Clave eliminada.");
+      void loadKeys(keysPanelSlug);
+    } catch { pushToast("error", "Error de red eliminando clave."); }
+  }, [keysPanelSlug, loadKeys, pushToast]);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -1017,6 +1098,26 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                     <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
                       <button
                         type="button"
+                        onClick={() => openKeysPanel(product.slug)}
+                        aria-label={`Claves de ${product.name}`}
+                        title="Gestionar claves"
+                        style={{
+                          width: 30,
+                          height: 30,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: 8,
+                          border: "1px solid rgba(52,211,153,0.45)",
+                          background: "rgba(52,211,153,0.12)",
+                          color: "#6ee7b7",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <KeyIcon />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => openEditModal(product)}
                         aria-label={`Editar ${product.name}`}
                         title="Editar"
@@ -1291,6 +1392,132 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           </div>
         </div>
       ) : null}
+
+      {typeof document !== "undefined" && keysPanelSlug
+        ? createPortal(
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="keys-panel-title"
+              onClick={closeKeysPanel}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(15,23,42,0.7)",
+                display: "grid",
+                placeItems: "center",
+                zIndex: 10000,
+                padding: 16,
+                overflow: "auto",
+              }}
+            >
+              <div
+                className="card"
+                onClick={(event) => event.stopPropagation()}
+                style={{ width: "min(640px, 100%)", maxHeight: "85vh", overflow: "auto", padding: 16 }}
+              >
+                <h3 id="keys-panel-title" className="auth-title" style={{ marginBottom: 4 }}>
+                  Claves de activación
+                </h3>
+                <p className="auth-alt" style={{ marginBottom: 12 }}>
+                  Producto: <strong>{keysPanelSlug}</strong>
+                  {keysData ? ` · Stock disponible: ${keysData.available}` : ""}
+                </p>
+
+                <div style={{ marginBottom: 12 }}>
+                  <p className="auth-alt" style={{ marginBottom: 6, fontSize: 12 }}>
+                    Añadir claves (una por línea o separadas por comas):
+                  </p>
+                  <textarea
+                    className="auth-input"
+                    rows={4}
+                    placeholder={"XXXXX-XXXXX-XXXXX\nYYYYY-YYYYY-YYYYY"}
+                    value={newKeysText}
+                    onChange={(event) => setNewKeysText(event.target.value)}
+                    style={{ width: "100%", resize: "vertical", fontFamily: "monospace", fontSize: 12 }}
+                  />
+                  <button
+                    type="button"
+                    className="button-primary btn-padding-site"
+                    onClick={() => void handleAddKeys()}
+                    disabled={addingKeys || !newKeysText.trim()}
+                    style={{ marginTop: 6 }}
+                  >
+                    {addingKeys ? "Añadiendo…" : "Añadir claves"}
+                  </button>
+                </div>
+
+                {keysLoading ? (
+                  <p className="auth-alt">Cargando claves…</p>
+                ) : keysData && keysData.keys.length > 0 ? (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Clave</th>
+                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Plataforma</th>
+                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Estado</th>
+                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Pedido</th>
+                          <th style={{ padding: "6px 8px" }}></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {keysData.keys.map((key) => (
+                          <tr key={key.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                            <td style={{ padding: "6px 8px", fontFamily: "monospace" }}>
+                              {key.assignedOrderId ? "••••••••••••••••" : key.keyCode}
+                            </td>
+                            <td style={{ padding: "6px 8px" }}>{key.platform}</td>
+                            <td style={{ padding: "6px 8px" }}>
+                              <span style={{ color: key.assignedOrderId ? "#fbbf24" : "#34d399" }}>
+                                {key.assignedOrderId ? "Asignada" : "Disponible"}
+                              </span>
+                            </td>
+                            <td style={{ padding: "6px 8px", fontFamily: "monospace", fontSize: 11, color: "#94a3b8" }}>
+                              {key.assignedOrderId ? key.assignedOrderId.slice(0, 8) + "…" : "—"}
+                            </td>
+                            <td style={{ padding: "6px 8px" }}>
+                              {key.assignedOrderId === null && (
+                                <button
+                                  type="button"
+                                  onClick={() => void handleDeleteKey(key.id)}
+                                  aria-label="Eliminar clave"
+                                  title="Eliminar clave no asignada"
+                                  style={{
+                                    width: 24, height: 24, display: "inline-flex",
+                                    alignItems: "center", justifyContent: "center",
+                                    borderRadius: 6, border: "1px solid rgba(248,113,113,0.45)",
+                                    background: "rgba(248,113,113,0.12)", color: "#fecaca", cursor: "pointer",
+                                  }}
+                                >
+                                  <TrashIcon />
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : keysData ? (
+                  <p className="auth-alt">Sin claves para este producto.</p>
+                ) : null}
+
+                <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+                  <button
+                    type="button"
+                    className="button-ghost btn-padding-site"
+                    onClick={closeKeysPanel}
+                    style={{ color: "#cbd5e1" }}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
 
       {typeof document !== "undefined" && pendingDeleteId
         ? createPortal(
