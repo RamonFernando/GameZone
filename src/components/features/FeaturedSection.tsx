@@ -210,8 +210,9 @@ function DealsOfTheDay({ games, lang }: { games: ProductPreview[]; lang: string 
 
   function gameIdx(panelIdx: number) {
     if (panelIdx === activePanelIdx) return activeGameInPanel;
-    if (panelIdx > activePanelIdx) return PANEL_SIZE - 1; // already passed (higher index = earlier in R→L)
-    return 0;
+    // panel inactivo → conserva su último juego mostrado (cada panel termina su turno en el último juego),
+    // así no se resetea a juego 0 al reiniciar el ciclo (corrige que el panel izquierdo no rotara)
+    return PANEL_SIZE - 1;
   }
 
   return (
