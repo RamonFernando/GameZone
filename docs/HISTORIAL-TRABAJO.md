@@ -12,6 +12,13 @@
 
 ---
 
+## 19-06-2026 (rama dev-19062026)
+
+### Opus (modelo superior / escritorio)
+
+- [P1 ⚠️] Rotación "Ofertas del día": `gameIdx` en `FeaturedSection.tsx` (`DealsOfTheDay`) cambiado para que un panel inactivo conserve su último juego (`PANEL_SIZE - 1`) en vez de resetear a juego 0 al reiniciar el ciclo. Así el panel izquierdo (Steam/Age of Empires) deja de quedarse congelado. Sin tocar orden/cantidad/nº de barras ni timing. tsc + 76/76 tests verdes. **PENDIENTE verificación visual** en dev server reiniciado limpio (pestaña en primer plano) — commit 9769a95
+- [OG ✅] Tarjeta Open Graph con el logo real de GameZone (disco + icono PlayStation + wordmark "GameZone" con Z naranja + "DIGITAL STORE / GameZone Edition"), renderizada con Playwright desde el HTML+CSS del Header (`scripts/make-og-card.cjs`) a `public/Recursos/og-card.png` (1200×630, fondo slate). `layout.tsx` actualiza `og:image`/`twitter:image`. Arregla la "M" recortada al compartir el enlace. **PENDIENTE deploy a Netlify + re-scrape de caché** (Sharing Debugger) para verla en WhatsApp — commit c1641b6
+
 ## 18-06-2026 (rama dev-18062026)
 
 ### GPT
