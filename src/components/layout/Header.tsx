@@ -1,7 +1,7 @@
 ﻿// Header principal del sitio: logo, filtros de plataforma, buscador, carrito y avatar.
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { useLocale } from "@/hooks/useLocale";
 import { t } from "@/lib/i18n";
 import Image from "next/image";
@@ -17,6 +17,12 @@ type MiniProfile = {
   name: string;
   email: string;
   avatarUrl?: string | null;
+};
+
+type SearchSuggestion = {
+  name: string;
+  slug: string;
+  platform: string;
 };
 
 // Lista de plataformas disponibles para el filtro rápido del header.
@@ -57,7 +63,11 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const [uiLocale, setUiLocale] = useState<string>("es-ES");
   const lang = useLocale();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [suggestionCatalog, setSuggestionCatalog] = useState<SearchSuggestion[]>([]);
   const headerRef = useRef<HTMLElement>(null);
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   // Lee el idioma/moneda preferidos (si existen) al montar.
   useEffect(() => {
@@ -155,6 +165,40 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   }, [topTransparentOnTop]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const loadSuggestionCatalog = async () => {
+      try {
+        const response = await fetch("/api/products", { cache: "force-cache" });
+        if (!response.ok) return;
+        const payload = (await response.json()) as {
+          products?: Array<{ name?: string; slug?: string; platform?: string }>;
+        };
+        if (cancelled) return;
+        setSuggestionCatalog(
+          (payload.products ?? [])
+            .map((product) => ({
+              name: String(product.name ?? "").trim(),
+              slug: String(product.slug ?? "").trim(),
+              platform: String(product.platform ?? "").trim(),
+            }))
+            .filter((product) => product.name && product.slug)
+        );
+      } catch {
+        if (!cancelled) {
+          setSuggestionCatalog([]);
+        }
+      }
+    };
+
+    void loadSuggestionCatalog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     const closeOnDesktop = () => {
       if (window.innerWidth > 480) {
         setMobileMenuOpen(false);
@@ -187,6 +231,34 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     };
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    if (!suggestionsOpen) return;
+
+    const handleOutside = (event: PointerEvent) => {
+      const target = event.target as Node;
+      const isInsideDesktop = desktopSearchRef.current?.contains(target) ?? false;
+      const isInsideMobile = mobileSearchRef.current?.contains(target) ?? false;
+
+      if (!isInsideDesktop && !isInsideMobile) {
+        setSuggestionsOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSuggestionsOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [suggestionsOpen]);
+
   const headerClassName = [
     styles.headerShell,
     "header-shell",
@@ -196,11 +268,44 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
     isScrolled ? styles.headerShellScrolled : "",
   ].filter(Boolean).join(" ");
 
+  const searchSuggestions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return [];
+
+    return suggestionCatalog
+      .map((product) => {
+        const name = product.name.toLowerCase();
+        const slug = product.slug.toLowerCase();
+        const platformName = product.platform.toLowerCase();
+        let score = 0;
+
+        if (name === normalizedQuery || slug === normalizedQuery) score += 1000;
+        if (name.startsWith(normalizedQuery)) score += 500;
+        if (slug.startsWith(normalizedQuery)) score += 350;
+        if (name.includes(normalizedQuery)) score += 220;
+        if (slug.includes(normalizedQuery)) score += 120;
+        if (platformName.includes(normalizedQuery)) score += 60;
+
+        return { ...product, score };
+      })
+      .filter((product) => product.score > 0)
+      .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+      .slice(0, 5);
+  }, [query, suggestionCatalog]);
+
+  const shouldShowSuggestions = suggestionsOpen && query.trim().length > 0 && searchSuggestions.length > 0;
+
   const handleSearchEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter") return;
 
     event.preventDefault();
+    setSuggestionsOpen(false);
     event.currentTarget.blur();
+
+    if (pathname !== "/" && pathname !== "/games" && query.trim()) {
+      router.push(`/?q=${encodeURIComponent(query)}#game-results`);
+      setMobileMenuOpen(false);
+    }
   };
 
   const scrollToSearchResults = () => {
@@ -215,17 +320,32 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
   const handleSearchChange = (value: string) => {
     const shouldScrollToResults = !query.trim() && value.trim();
     setQuery(value);
-
-    if (pathname !== "/" && pathname !== "/games" && value.trim()) {
-      router.push(`/?q=${encodeURIComponent(value)}#game-results`);
-      setMobileMenuOpen(false);
-      return;
-    }
+    setSuggestionsOpen(Boolean(value.trim()));
 
     if (shouldScrollToResults) {
       scrollToSearchResults();
     }
   };
+
+  const renderSearchSuggestions = () => (
+    <div className={styles.navSearchSuggestions} role="listbox">
+      {searchSuggestions.map((suggestion) => (
+        <Link
+          key={suggestion.slug}
+          href={`/games/${suggestion.slug}`}
+          className={styles.navSearchSuggestion}
+          role="option"
+          onClick={() => {
+            setSuggestionsOpen(false);
+            setMobileMenuOpen(false);
+          }}
+        >
+          <span className={styles.navSearchSuggestionTitle}>{suggestion.name}</span>
+          <span className={styles.navSearchSuggestionMeta}>{suggestion.platform}</span>
+        </Link>
+      ))}
+    </div>
+  );
 
   const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
     setQuery("");
@@ -306,6 +426,7 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
         <div className={`${styles.navActions} ${styles.navActionsDesktop}`}>
 
           {/* BUSCADOR */}
+          <div ref={desktopSearchRef} className={styles.navSearchWrap}>
           <div className={styles.navSearch}>
             <span className={styles.navSearchIcon} aria-hidden="true">🔍</span>
             <input
@@ -314,8 +435,13 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
               className={styles.navSearchInput}
               value={query}
               onChange={(event) => handleSearchChange(event.target.value)}
+              onFocus={() => setSuggestionsOpen(Boolean(query.trim()))}
               onKeyDown={handleSearchEnter}
+              aria-autocomplete="list"
+              aria-expanded={shouldShowSuggestions ? "true" : "false"}
             />
+          </div>
+          {shouldShowSuggestions ? renderSearchSuggestions() : null}
           </div>
 
           {/* CARRITO */}
@@ -394,7 +520,8 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
       </div>
 
       <div className={`${styles.navMobilePanel}${mobileMenuOpen ? ` ${styles.navMobilePanelOpen}` : ""}`}>
-        <div className={`${styles.navMobileSection} ${styles.navMobileSearch}`}>
+        <div ref={mobileSearchRef} className={`${styles.navMobileSection} ${styles.navMobileSearchWrap}`}>
+        <div className={styles.navMobileSearchControl}>
           <span className={styles.navSearchIcon} aria-hidden="true">🔍</span>
           <input
             type="text"
@@ -402,8 +529,13 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
             className={styles.navSearchInput}
             value={query}
             onChange={(event) => handleSearchChange(event.target.value)}
+            onFocus={() => setSuggestionsOpen(Boolean(query.trim()))}
             onKeyDown={handleSearchEnter}
+            aria-autocomplete="list"
+            aria-expanded={shouldShowSuggestions ? "true" : "false"}
           />
+        </div>
+        {shouldShowSuggestions ? renderSearchSuggestions() : null}
         </div>
 
         <nav className={`${styles.navMobileSection} ${styles.navMobilePlatforms}`} aria-label={t(lang, "nav.platforms")}>

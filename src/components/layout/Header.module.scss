@@ -346,6 +346,11 @@
 }
 
 /* ─── Search ─── */
+.navSearchWrap {
+  position: relative;
+  display: inline-flex;
+}
+
 .navSearch {
   display: inline-flex;
   align-items: center;
@@ -378,6 +383,54 @@
     border-color: rgba(148, 163, 184, 0.55);
     box-shadow: none;
   }
+}
+
+.navSearchSuggestions {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  right: 0;
+  min-width: min(320px, 80vw);
+  padding: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.96);
+  box-shadow: 0 18px 32px rgba(2, 6, 23, 0.38);
+  z-index: 60;
+}
+
+.navSearchSuggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 38px;
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  color: #f1f5f9;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(30, 64, 175, 0.34);
+    outline: none;
+  }
+}
+
+.navSearchSuggestionTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.navSearchSuggestionMeta {
+  flex: 0 0 auto;
+  color: #fdba74;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .navSearchIcon {
@@ -714,16 +767,31 @@
     margin-bottom: 0.6rem;
   }
 
-  .navMobileSearch {
+  .navMobileSearchWrap {
+    position: relative;
+    display: block;
+  }
+
+  .navMobileSearchControl {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
     padding: 0.2rem 0.75rem;
     border: 1px solid rgba(148, 163, 184, 0.4);
     border-radius: 999px;
     background: rgba(15, 23, 42, 0.9);
   }
 
-  .navMobileSearch .navSearchInput {
+  .navMobileSearchControl .navSearchInput {
     width: 100%;
     min-width: 0;
+  }
+
+  .navMobileSearchWrap .navSearchSuggestions {
+    position: static;
+    min-width: 0;
+    width: 100%;
+    margin-top: 0.45rem;
   }
 
   .navMobilePlatforms {
