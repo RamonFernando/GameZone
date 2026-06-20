@@ -52,7 +52,7 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **P1 — Ofertas del día** | ✅ RESUELTO 20/06/2026 — verificado visualmente por Ramón. Commit 9769a95. |
 | **FASE 11 — Bugs críticos** | ✅ 11.1/11.3 ✅; 11.2 ✅ (claves en email cubiertas por Fase 14); 11.4 ⚠️ parcial (prefijo país + postal específica por país pendientes) |
 | **FASE 12 — UX rota** | ⚠️ en curso · 🔴 **REABIERTOS por testing de Ramón 20/06**: 12.1 (falta Nick real), 12.2 (sin mergear a main), 12.6 (countdown a cero sigue roto), 12.4 (pedidos lentos/"no funcionan"). 12.5/12.8/12.9 ✅; 12.3/12.7 ✅ (GPT, sin mergear). Ver sección "FEEDBACK DE TESTING". |
-| **FASE 14 — Claves de juego** | ⚠️ en curso — **14.0b/14.1/14.2/14.3/14.4/14.5 ✅**; 14.6 ⚠️ (solo logger.warn), 14.7 ⬜ (validación pre-checkout) |
+| **FASE 14 — Claves de juego** | ⚠️ en curso — **14.0b/14.1/14.2/14.3/14.4/14.5/14.6 ✅**; 14.7 ⬜ (validación pre-checkout, requiere flag o inventario real) |
 | **FASE 15 — Cards y plataformas** | ⬜ FUTURO — 15.1 comparador de precios en card, 15.2 formato portrait, 15.3 roadmap de APIs (GOG, Epic, Eneba, EA, PlayStation, Nintendo…) |
 | **FASE 16 — Reestructuración MVC** | ⬜ PENDIENTE — 160 estilos inline a erradicar, paneles cuenta/admin sin módulo CSS, archivos de 1600-1800 L a trocear. Reorganización sin cambio de comportamiento. |
 | **FASE 17 — Sistema de diseño** | ⬜ DISEÑO — primitivos reutilizables + rediseño de card/header/footer/carrusel/secciones/comparador/cuenta/pedidos/admin. Ramón elige variantes A/B/C. |
@@ -675,13 +675,17 @@ npm run build
 - ⚠️ **PENDIENTE verificación visual de Ramón** (necesita un pedido `paid` con clave asignada en el navegador).
   Lógica cubierta por tsc + tests + build; falta la comprobación en runtime.
 
-### 14.6 — Alertas de stock bajo al admin 🟡 MEDIA · ⚠️ PARCIAL
-- Cuando queden pocas claves disponibles para un producto, notificar al admin para que reponga inventario.
-- **Matiz clave (20/06/2026):** para productos digitales el "stock" no es un campo `stock: Int` sino el conteo de `GameKey` con `assignedOrderId IS NULL`. La alerta tiene que usar ese conteo, no el campo de stock físico. Dos momentos de notificación:
-  1. **Umbral bajo** — después de cada asignación, si `count(GameKey WHERE productSlug = X AND assignedOrderId IS NULL) < LOW_STOCK_THRESHOLD` (ej. 3), enviar email al admin.
-  2. **Stock agotado** — si no queda ninguna clave (`paid_pending_key`), también notificar por email (además del `logger.warn` ya existente).
-- **Implementado hoy:** `order-service.ts` emite `logger.warn` en el caso de stock agotado, pero sin email al admin y sin comprobación de umbral bajo.
-- **Acción pendiente:** en `completePaidOrder`, tras asignar claves, contar las restantes por producto y enviar email al admin si están por debajo del umbral o en cero. La lógica de email ya existe en `src/services/auth/email.ts` — añadir una función `sendLowKeyStockAlert(adminEmail, productSlug, remaining)`.
+### 14.6 — Alertas de stock bajo al admin 🟡 MEDIA · ✅ HECHO (20/06/2026, commit `8e3b81c`)
+> **Implementado:** tras ganar el claim de pago en `completePaidOrder`, para cada producto del pedido se cuenta
+> `gameKey` disponibles (`assignedOrderId: null`) y, si quedan `<= LOW_KEY_STOCK_THRESHOLD` (3) o cero, se envía
+> `sendLowKeyStockAlert` al admin (`MASTER_ADMIN_EMAIL`, fallback al `SUPER_ADMIN` de BD). Es **best-effort**
+> (try/catch, nunca bloquea el pago) y solo se dispara en la llamada ganadora (no duplica con webhooks
+> repetidos). Nuevo email en `email.ts` con asunto distinto para "stock bajo" vs "agotado". Test dedicado en
+> `order-service.test.ts`. tsc + **77/77** + `next build` verdes. ⚠️ **PENDIENTE verificación en runtime** de Ramón
+> (configurar `MASTER_ADMIN_EMAIL` y comprobar el correo con un pedido real de bajo stock).
+- Para productos digitales el "stock" es el conteo de `GameKey` con `assignedOrderId IS NULL`, no el campo físico
+  `stock: Int`. Cubre ambos casos: **umbral bajo** (`<= 3`) y **agotado** (`= 0`), este último ya además marcaba
+  `paid_pending_key` + `logger.warn`.
 
 ### 14.7 — Validación pre-checkout de stock de claves 🟡 MEDIA · ⬜ PENDIENTE
 - Antes de redirigir a Stripe/PayPal, verificar que hay al menos 1 clave disponible por producto en el carrito.
