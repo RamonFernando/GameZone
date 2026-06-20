@@ -16,6 +16,7 @@
 
 ### Sonnet/Opus (planificación + auditoría)
 
+- [12.8b ✅] Logo G2A/Steam en el enlace "Web oficial" de la ficha: `GameDetailClient.tsx` aplica al link de `website` la misma detección que el enlace de tienda (steam/g2a → icono SVG, resto → 🌐), reutilizando `SteamIcon`/`G2AIcon` y estilos existentes. tsc + 76/76 + `next build` verdes. ⚠️ Falta verificación visual de Ramón — commit 5ace357
 - [14.5 ✅] Clave de activación en historial de pedidos: `AccountOrdersHistory.tsx` tipa y mapea `gameKey` desde `/api/orders`, la muestra (solo pedidos `paid`) en bloque monoespacio verde con botón Copiar/Copiada (`navigator.clipboard`, i18n ES/EN, `aria-label`); estilos `.account-order-key*` en `account.scss` (sin inline). tsc + 76/76 + `next build` verdes — commit 903378c
 - [P1 ✅] "Ofertas del día": marcado RESUELTO en auditoría — verificado visualmente por Ramón. Commit 9769a95.
 - [audit ✅] Auditoría sincronizada con el repo: 12.2 (dropdown sugerencias, GPT commit `07d9443`) y 12.3/12.7 (filtro plataforma admin, GPT commit `4286231`) marcados HECHOS pero **pendientes de merge a main** (viven en `dev-19062026-gpt`). 14.0b (fix segmento `[slug]→[id]`, commit `9dadbb8`) registrado. 14.5/14.6/14.7 verificados como pendientes con matices.

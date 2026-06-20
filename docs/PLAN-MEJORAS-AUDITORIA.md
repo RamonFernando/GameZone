@@ -672,6 +672,8 @@ npm run build
   (`.account-order-key*`), sin estilos inline. tsc + 76/76 tests + `next build` verdes.
 - **Pendiente menor:** el rediseño completo en burbuja de detalles vive en 17.7 (FASE 17); esto es la versión
   mínima funcional sobre la tabla actual.
+- ⚠️ **PENDIENTE verificación visual de Ramón** (necesita un pedido `paid` con clave asignada en el navegador).
+  Lógica cubierta por tsc + tests + build; falta la comprobación en runtime.
 
 ### 14.6 — Alertas de stock bajo al admin 🟡 MEDIA · ⚠️ PARCIAL
 - Cuando queden pocas claves disponibles para un producto, notificar al admin para que reponga inventario.
@@ -1048,7 +1050,7 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 | 7 | Comparador: filtra precios entre todas las APIs y devuelve los 3 mejores | 13.3 + 15.3 + 17.5 | ⬜ pendiente |
 | 8 | Crear cuenta con Google/Facebook/Twitter (+Xbox futuro) | 13.1 | ⬜ pendiente |
 | 9 | Cards: nuestro precio + precio de la API con su logo, en pequeño encima | 15.1 | ⬜ pendiente (idea card portrait confirmada) |
-| 10 | Logo G2A correcto en "enlaces" de detalles (web oficial sale con icono raro) | **NUEVO 12.8b** | ⬜ nuevo |
+| 10 | Logo G2A correcto en "enlaces" de detalles (web oficial sale con icono raro) | 12.8b | ✅ hecho (commit `5ace357`, falta verif. visual) |
 | 11 | Formato fotos Xbox/API: en PC se recortan a los lados (portrait vs 16:9) | 12.9 + 15.2 | ⚠️ revisar caso PC |
 | 12 | Cuenta tarda en cargar; "pedidos de sistema tampoco funcionan" | 12.4 | 🔴 REABIERTO — verificar flujo en runtime |
 | 13 | Admin transacciones: filtros estado/pasarela + paginación 20/página | 12.7 | ✅ hecho (GPT) **sin mergear** |
@@ -1076,9 +1078,11 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 
 ### 🆕 Items nuevos (no existían en el plan)
 
-- **12.8b — Logo G2A en la sección "Enlaces / web oficial" de la ficha (punto 10):** el 12.8 arregló el logo
-  G2A en la card, pero en la sección de enlaces externos de la ficha (web oficial) sigue saliendo un icono
-  genérico raro. Acción: usar `icon-g2a.svg` también ahí cuando el enlace sea de G2A.
+- **12.8b — Logo G2A en la sección "Enlaces / web oficial" de la ficha (punto 10):** ✅ **HECHO (20/06/2026,
+  commit `5ace357`).** El enlace "Web oficial" usaba un emoji `🌐` fijo; ahora aplica la misma detección que el
+  enlace de tienda (si `website` incluye "steam"/"g2a" → `SteamIcon`/`G2AIcon`, ya definidos en el archivo;
+  resto → `🌐`). Reutiliza estilos `gameDetailLinkSteam/G2A` existentes. tsc + 76/76 + `next build` verdes.
+  ⚠️ **PENDIENTE verificación visual de Ramón** (confirmar que era ese el "icono raro" y no otro).
 - **17.0b — Revisión profesional de paleta de color (punto 20):** propuesta de paleta más profesional y
   actual (referencia G2A: superficies oscuras frías, acentos vivos contenidos, jerarquía de contraste). Se
   integra en los tokens de 17.0. **Respetar la restricción guardada de Ramón: nada de negro puro; oscuros
