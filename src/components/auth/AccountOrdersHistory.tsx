@@ -13,6 +13,7 @@ type OrderItem = {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  gameKey?: string | null;
 };
 
 type Order = {
@@ -32,6 +33,7 @@ type PurchaseRow = {
   currency: string;
   date: string;
   orderStatus: string;
+  gameKey?: string | null;
 };
 
 function formatMoney(amount: number, currency = "EUR", locale = "es-ES") {
@@ -43,8 +45,19 @@ export function AccountOrdersHistory() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [slugPlatformMap, setSlugPlatformMap] = useState<Record<string, string>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const lang = useLocale();
   const { platform } = useSearch();
+
+  const handleCopyKey = async (rowId: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(key);
+      setCopiedId(rowId);
+      setTimeout(() => setCopiedId((current) => (current === rowId ? null : current)), 2000);
+    } catch {
+      // El navegador puede bloquear el portapapeles; la clave sigue visible para copiar a mano.
+    }
+  };
 
   const rows = useMemo<PurchaseRow[]>(() => {
     return orders
@@ -58,6 +71,7 @@ export function AccountOrdersHistory() {
           currency: order.currency,
           date: order.createdAt,
           orderStatus: order.status,
+          gameKey: item.gameKey ?? null,
         }))
       )
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -175,6 +189,25 @@ export function AccountOrdersHistory() {
                 <td>
                   {row.gameName}
                   <span className="auth-alt account-orders-qty">x{row.quantity}</span>
+                  {row.orderStatus === "paid" && row.gameKey ? (
+                    <div className="account-order-key">
+                      <code className="account-order-key-code">{row.gameKey}</code>
+                      <button
+                        type="button"
+                        className="account-order-key-copy"
+                        onClick={() => handleCopyKey(row.rowId, row.gameKey as string)}
+                        aria-label={lang === "en" ? "Copy activation key" : "Copiar clave de activación"}
+                      >
+                        {copiedId === row.rowId
+                          ? lang === "en"
+                            ? "Copied"
+                            : "Copiada"
+                          : lang === "en"
+                            ? "Copy"
+                            : "Copiar"}
+                      </button>
+                    </div>
+                  ) : null}
                 </td>
                 <td>
                   {new Date(row.date).toLocaleString(
