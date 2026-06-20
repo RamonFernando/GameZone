@@ -320,9 +320,21 @@ export default function GameDetailClient({
                       href={game.website}
                       target="_blank"
                       rel="noreferrer"
-                      className={styles.gameDetailLink}
+                      className={`${styles.gameDetailLink}${
+                        game.website.toLowerCase().includes("steam")
+                          ? ` ${styles.gameDetailLinkSteam}`
+                          : game.website.toLowerCase().includes("g2a")
+                            ? ` ${styles.gameDetailLinkG2A}`
+                            : ""
+                      }`}
                     >
-                      <span aria-hidden="true">🌐</span>
+                      {game.website.toLowerCase().includes("steam") ? (
+                        <SteamIcon />
+                      ) : game.website.toLowerCase().includes("g2a") ? (
+                        <G2AIcon />
+                      ) : (
+                        <span aria-hidden="true">🌐</span>
+                      )}
                       {isEnglish ? "Official website" : "Web oficial"}
                     </a>
                   ) : null}
