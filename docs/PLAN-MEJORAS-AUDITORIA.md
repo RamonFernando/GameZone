@@ -995,8 +995,10 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
   `IconButton` con `aria-label` y tooltip, no emojis sueltos.
 
 ### 17.9 — Idiomas: traducción por API + fix del selector 🔵 (liga con 13.6)
-- **Mientras no haya API (corto plazo):** el fix de CSS del selector ya está en 17.2 (dropdown custom como la
-  home). Esto resuelve la inconsistencia visual que señaló Ramón entre la home y el resto.
+- **Mientras no haya API (corto plazo):** retoque CSS del `<select>` nativo aplicado (20/06/2026, commit
+  `61ca789`): flecha/caret visible, opciones con fondo blanco limpio, padding y contraste. ⚠️ **Limitación
+  conocida:** con un `<select>` nativo el popup desplegable lo pinta el navegador/SO y no se puede clonar el
+  popup blanco custom de la captura de Ramón; eso requiere el **dropdown custom** de 17.2 (pendiente).
 - **Medio plazo (propuesta):** conectar una **API de traducción** (DeepL API o `i18next` + archivos por
   locale) para traducir toda la página de forma centralizada, eliminando los ternarios
   `lang === "en" ? … : …` repartidos por los componentes. Evaluar coste DeepL vs catálogos i18next estáticos.
@@ -1050,7 +1052,7 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 | 3 | Registro sin Google/Facebook/Twitter; Nick no se ve (sale "Mi cuenta") | 13.1 + 12.1 | 🔴 REABIERTO — no hay campo `username`; OAuth registro pendiente |
 | 4 | Botones plataforma deben filtrar también en historial/cuenta (buscador global) | 12.3 | ⚠️ cuenta hecha; admin y comportamiento home→cards por revisar |
 | 5 | Buscador: en "ver todos" filtra en esa página, no te lleva a la principal; falta panel sugerencias | 12.2 | 🔴 REABIERTO — hecho por GPT pero **sin mergear a main** |
-| 6 | Botón idiomas → API de idioma + API de traducción (hoy hardcodeado, "muy malo") | 13.6 + 17.9 | ⬜ pendiente |
+| 6 | Botón idiomas → API de idioma + API de traducción (hoy hardcodeado, "muy malo") | 13.6 + 17.9 | ⚠️ retoque CSS del selector hecho (commit `61ca789`); API de traducción y dropdown custom pendientes |
 | 7 | Comparador: filtra precios entre todas las APIs y devuelve los 3 mejores | 13.3 + 15.3 + 17.5 | ⬜ pendiente |
 | 8 | Crear cuenta con Google/Facebook/Twitter (+Xbox futuro) | 13.1 | ⬜ pendiente |
 | 9 | Cards: nuestro precio + precio de la API con su logo, en pequeño encima | 15.1 | ⬜ pendiente (idea card portrait confirmada) |
