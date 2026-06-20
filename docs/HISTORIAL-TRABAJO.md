@@ -12,6 +12,20 @@
 
 ---
 
+## 20-06-2026 (rama dev-20062026)
+
+### Sonnet/Opus (planificación + auditoría)
+
+- [14.5 ✅] Clave de activación en historial de pedidos: `AccountOrdersHistory.tsx` tipa y mapea `gameKey` desde `/api/orders`, la muestra (solo pedidos `paid`) en bloque monoespacio verde con botón Copiar/Copiada (`navigator.clipboard`, i18n ES/EN, `aria-label`); estilos `.account-order-key*` en `account.scss` (sin inline). tsc + 76/76 + `next build` verdes — commit 903378c
+- [P1 ✅] "Ofertas del día": marcado RESUELTO en auditoría — verificado visualmente por Ramón. Commit 9769a95.
+- [audit ✅] Auditoría sincronizada con el repo: 12.2 (dropdown sugerencias, GPT commit `07d9443`) y 12.3/12.7 (filtro plataforma admin, GPT commit `4286231`) marcados HECHOS pero **pendientes de merge a main** (viven en `dev-19062026-gpt`). 14.0b (fix segmento `[slug]→[id]`, commit `9dadbb8`) registrado. 14.5/14.6/14.7 verificados como pendientes con matices.
+- [14.6 ✅ matiz] Documentado que para productos digitales el "stock" es el conteo de `GameKey` libres, no un campo físico; la alerta debe notificar al admin por umbral bajo y por agotado.
+- [FASE 15 ✅ plan] Añadida al plan: rediseño de card con precio mínimo de mercado + logo de plataforma (15.1), formato portrait 3:4 (15.2) y roadmap de conexiones a tiendas/APIs —Steam, G2A, GOG, Epic, Eneba, EA, Ubisoft, PlayStation, Nintendo, marketplaces— (15.3).
+- [FASE 16 ✅ plan] Añadida: **Reestructuración MVC**. Diagnóstico medido contra el código (160 estilos inline en 18 archivos; `AdminProductsPanel` 1604 L/86 inline; `AccountDashboard` 1813 L; paneles cuenta/admin sin `.module.scss`; `globals.scss` 837 L). Reorganización sin cambio de comportamiento.
+- [FASE 17 ✅ plan] Añadida: **Sistema de diseño por componentes**. Primitivos reutilizables + propuestas A/B/C para card, header, footer, carrusel, secciones, comparador, cuenta, pedidos (miniatura/nombre/precio/fecha/icono reembolso + burbuja de detalles) y admin (crear producto en modal, toggle admin con Switch, nav pegajosa). Fix del selector de idioma (`<select>` nativo → dropdown custom como la home).
+- [split ✅] Definido el reparto C/G de las FASES 16 y 17 sin colisiones (Claude: cuenta/admin + primitivos; GPT: features/ui + card/header/footer/comparador). FASE 16 antes que 17.
+- [nota] G2A no se pudo inspeccionar en vivo (timeout por peso de JS); propuestas basadas en capturas de Ramón, patrones conocidos del sector y código actual.
+
 ## 19-06-2026 (rama dev-19062026)
 
 ### Sonnet (implementador)

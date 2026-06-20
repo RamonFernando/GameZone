@@ -106,6 +106,19 @@ _(Añadir aquí cuando Ramón pida revisión senior)_
 
 ---
 
+## SPLIT ACTIVO (20/06/2026) — FASES 16 y 17
+
+Ver `docs/PLAN-MEJORAS-AUDITORIA.md` → sección **"SPLIT DE IMPLEMENTACIÓN — FASES 16 y 17"** para el reparto
+completo C/G. Resumen operativo:
+
+- **Orden obligatorio:** FASE 16 (MVC, reordenar) **antes** que FASE 17 (rediseño). No se rediseña sobre estilos inline.
+- **Sin colisiones:** Claude es dueño de cuenta/admin + primitivos `components/ui/`; GPT de features/ui restantes + card/header/footer/comparador.
+- **Bloqueo:** los primitivos (17.0, Claude) bloquean las vistas de ambos → hacerlos primero y publicarlos en la rama del día.
+- **Diseño:** Ramón elige las variantes A/B/C de cada componente de la FASE 17 antes de implementarlas.
+- **Honestidad:** las propuestas de diseño se basan en capturas + patrones del sector (G2A no se pudo cargar en vivo), no en inspección en vivo. Indicado en el plan.
+
+---
+
 ## FUTURAS MEJORAS
 
 Ver `docs/PLAN-MEJORAS-AUDITORIA.md` para el backlog completo.
