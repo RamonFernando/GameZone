@@ -433,16 +433,19 @@
   appearance: none;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.35);
-  background: linear-gradient(
-    45deg,
-    rgba(15, 23, 42, 0.98) 0%,
-    rgba(30, 41, 59, 0.95) 45%,
-    rgba(51, 65, 85, 0.92) 55%,
-    rgba(15, 23, 42, 0.98) 100%
-  );
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23cbd5e1' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 0.6rem center,
+    linear-gradient(
+      45deg,
+      rgba(15, 23, 42, 0.98) 0%,
+      rgba(30, 41, 59, 0.95) 45%,
+      rgba(51, 65, 85, 0.92) 55%,
+      rgba(15, 23, 42, 0.98) 100%
+    );
   color: #f1f5f9;
-  font-size: 0.7rem;
-  padding: 0.26rem 0.5rem;
+  font-size: 0.72rem;
+  padding: 0.26rem 1.5rem 0.26rem 0.7rem;
   cursor: pointer;
   height: 1.9rem;
   display: inline-flex;
@@ -453,14 +456,18 @@
   transition: transform 0.3s ease-out;
 
   option {
-    background-color: #e5e7eb;
+    background-color: #ffffff;
     color: #0f172a;
+    padding: 0.4rem 0.6rem;
   }
 
   &:hover {
     transform: scale(0.94);
     border-color: rgba(56, 189, 248, 0.9);
-    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.96));
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23e0f2fe' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        no-repeat right 0.6rem center,
+      radial-gradient(circle at top, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.96));
     color: #f0f9ff;
   }
 
