@@ -36,9 +36,14 @@ vi.mock("@/lib/prisma", () => ({
     },
     product: {
       findMany: vi.fn(),
+      findUnique: vi.fn().mockResolvedValue(null),
     },
     user: {
       findUnique: vi.fn(),
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
+    gameKey: {
+      count: vi.fn().mockResolvedValue(99),
     },
     $transaction: vi.fn((arg: unknown) => {
       if (typeof arg === "function") {
@@ -58,6 +63,7 @@ vi.mock("@/lib/products", () => ({
 
 vi.mock("@/services/auth/email", () => ({
   sendPurchaseConfirmationEmail: vi.fn().mockResolvedValue(undefined),
+  sendLowKeyStockAlert: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/services/cart/persistent-cart", () => ({
@@ -65,7 +71,7 @@ vi.mock("@/services/cart/persistent-cart", () => ({
 }));
 
 import { prisma } from "@/lib/prisma";
-import { sendPurchaseConfirmationEmail } from "@/services/auth/email";
+import { sendPurchaseConfirmationEmail, sendLowKeyStockAlert } from "@/services/auth/email";
 import { computeDiscountedPrice } from "@/lib/products";
 
 const MOCK_CATALOG = [
@@ -395,5 +401,70 @@ describe("flujo completo: createPendingOrder → completePaidOrder", () => {
     expect(paid.status).toBe("paid");
     expect(emailSent).toBe(true);
     expect(sendPurchaseConfirmationEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it("avisa al admin cuando quedan pocas claves tras pagar (14.6)", async () => {
+    const prevAdmin = process.env.MASTER_ADMIN_EMAIL;
+    process.env.MASTER_ADMIN_EMAIL = "admin@test.local";
+    try {
+      const pendingOrderResult = {
+        ...MOCK_ORDER,
+        id: "order-lowkey",
+        totalAmount: 29.99,
+        items: [
+          {
+            id: "item-lowkey",
+            orderId: "order-lowkey",
+            gameSlug: "cyberpunk-2077",
+            title: "Cyberpunk 2077",
+            unitPrice: 29.99,
+            quantity: 1,
+            subtotal: 29.99,
+          },
+        ],
+      };
+
+      vi.mocked(prisma.product.findMany).mockResolvedValueOnce(MOCK_CATALOG as never);
+      vi.mocked(prisma.order.create).mockResolvedValueOnce(pendingOrderResult as never);
+
+      vi.mocked(prisma.order.findFirst).mockResolvedValueOnce(pendingOrderResult as never);
+      mockTx.order.updateMany.mockResolvedValueOnce({ count: 1 });
+      mockTx.order.findFirstOrThrow.mockResolvedValueOnce(MOCK_PAID_ORDER as never);
+      mockTx.product.findUnique.mockResolvedValueOnce(MOCK_PRODUCT as never);
+      mockTx.product.update.mockResolvedValueOnce({} as never);
+      vi.mocked(prisma.order.updateMany).mockResolvedValueOnce({ count: 1 } as never);
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(MOCK_USER as never);
+
+      // 14.6: solo 1 clave disponible (por debajo del umbral) → debe avisar
+      vi.mocked(prisma.gameKey.count).mockResolvedValueOnce(1 as never);
+      vi.mocked(prisma.product.findUnique).mockResolvedValueOnce({ name: "Cyberpunk 2077" } as never);
+
+      const pending = await createPendingOrder({
+        userId: "user-xyz",
+        items: [{ slug: "cyberpunk-2077", quantity: 1 }],
+        paymentProvider: "stripe",
+      });
+
+      await completePaidOrder({
+        orderId: pending.id,
+        userId: "user-xyz",
+        paymentProvider: "stripe",
+        paymentReference: "pi_test_lowkey",
+        requestUrl: "https://gamezone.app/api/payments/stripe/webhook",
+        fallbackEmail: "no-reply@gamezone.local",
+        fallbackUsername: "gamer",
+      });
+
+      expect(sendLowKeyStockAlert).toHaveBeenCalledTimes(1);
+      expect(sendLowKeyStockAlert).toHaveBeenCalledWith(
+        expect.objectContaining({ to: "admin@test.local", productSlug: "cyberpunk-2077", remaining: 1 })
+      );
+    } finally {
+      if (prevAdmin === undefined) {
+        delete process.env.MASTER_ADMIN_EMAIL;
+      } else {
+        process.env.MASTER_ADMIN_EMAIL = prevAdmin;
+      }
+    }
   });
 });

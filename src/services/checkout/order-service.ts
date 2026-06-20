@@ -1,8 +1,11 @@
 ﻿import { prisma } from "@/lib/prisma";
-import { sendPurchaseConfirmationEmail } from "@/services/auth/email";
+import { sendPurchaseConfirmationEmail, sendLowKeyStockAlert } from "@/services/auth/email";
 import { clearUserCartItems } from "@/services/cart/persistent-cart";
 import { computeDiscountedPrice, ensureProductsSeeded } from "@/lib/products";
 import { logger } from "@/lib/logger";
+
+// Umbral de claves disponibles por debajo del cual se avisa al admin (14.6).
+export const LOW_KEY_STOCK_THRESHOLD = 3;
 
 type CheckoutItemInput = {
   slug?: string;
@@ -255,12 +258,49 @@ export async function completePaidOrder(input: {
         gameKey: assignedKeys.get(item.id) ?? (item as { gameKey?: string | null }).gameKey ?? null,
       })),
     };
-    return { order: enrichedOrder, hasMissingKey };
+    // Slugs únicos del pedido, solo si esta llamada ganó la transición (para no duplicar alertas).
+    const claimedSlugs =
+      claim.count > 0 ? Array.from(new Set(order.items.map((item) => item.gameSlug))) : [];
+    return { order: enrichedOrder, hasMissingKey, claimedSlugs };
   });
 
-  const { order: paidOrder, hasMissingKey: txHasMissingKey } = txResult;
+  const { order: paidOrder, hasMissingKey: txHasMissingKey, claimedSlugs } = txResult;
 
   await clearUserCartItems(input.userId);
+
+  // Alerta de stock bajo de claves al admin (14.6). Best-effort: nunca bloquea el pago.
+  // Solo en la llamada que ganó el claim (claimedSlugs no vacío) → no duplica con webhooks repetidos.
+  if (claimedSlugs.length > 0) {
+    try {
+      const adminEmail =
+        process.env.MASTER_ADMIN_EMAIL ??
+        (await prisma.user.findFirst({
+          where: { role: "SUPER_ADMIN" },
+          select: { email: true },
+        }))?.email;
+      if (adminEmail) {
+        for (const slug of claimedSlugs) {
+          const remaining = await prisma.gameKey.count({
+            where: { productSlug: slug, assignedOrderId: null },
+          });
+          if (remaining <= LOW_KEY_STOCK_THRESHOLD) {
+            const product = await prisma.product.findUnique({
+              where: { slug },
+              select: { name: true },
+            });
+            await sendLowKeyStockAlert({
+              to: adminEmail,
+              productName: product?.name ?? slug,
+              productSlug: slug,
+              remaining,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      logger.error("No se pudo enviar la alerta de stock bajo de claves.", { err: error });
+    }
+  }
 
   // Claim atómico del email: solo gana quien pasa confirmationEmailSentAt de null
   // a una fecha. Evita correos duplicados ante webhooks concurrentes.

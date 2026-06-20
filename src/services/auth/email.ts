@@ -377,3 +377,51 @@ export async function sendRefundConfirmationEmail(input: {
     }
   }
 }
+
+// Alerta al admin cuando el stock de claves de un producto baja del umbral o se agota (14.6).
+// Para productos digitales el "stock" es el conteo de GameKey libres, no el campo físico.
+export async function sendLowKeyStockAlert(input: {
+  to: string;
+  productName: string;
+  productSlug: string;
+  remaining: number;
+}) {
+  const { transporter, from, isTestTransport } = await getMailerConfig();
+  const brandName = process.env.MAIL_BRAND_NAME ?? "GameZone";
+  const isOut = input.remaining <= 0;
+  const subject = isOut
+    ? `Sin claves disponibles: ${input.productName} - ${brandName}`
+    : `Stock bajo de claves (${input.remaining}): ${input.productName} - ${brandName}`;
+
+  const info = await transporter.sendMail({
+    from: `"${brandName} Alertas" <${from}>`,
+    to: input.to,
+    subject,
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;">
+        <h2>Aviso de inventario de claves</h2>
+        <p>
+          El producto <strong>${input.productName}</strong> (<code>${input.productSlug}</code>)
+          ${isOut
+            ? "se ha quedado <strong>sin claves disponibles</strong>."
+            : `tiene solo <strong>${input.remaining}</strong> clave(s) disponible(s).`}
+        </p>
+        <p>Sube más claves desde el panel de administración para no dejar pedidos pendientes de clave.</p>
+      </div>
+    `,
+    text: [
+      `Aviso de inventario de claves - ${brandName}`,
+      isOut
+        ? `${input.productName} (${input.productSlug}) se ha quedado SIN claves disponibles.`
+        : `${input.productName} (${input.productSlug}) tiene solo ${input.remaining} clave(s) disponible(s).`,
+      "Sube más claves desde el panel de administración.",
+    ].join("\n"),
+  });
+
+  if (isTestTransport) {
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      logger.info("Vista previa alerta de stock de claves", { previewUrl });
+    }
+  }
+}
