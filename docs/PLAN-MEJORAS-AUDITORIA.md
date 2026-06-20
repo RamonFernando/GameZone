@@ -986,9 +986,12 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
   con todos los inputs, reutilizando el `ProductFormFields` que saldrá de 16.3. El campo `saleEndsAt`
   (`datetime-local`, ya existe) se presenta con **icono de fecha de fin de oferta**. Quita el formulario
   permanente de la vista.
-- **17.8b — Usuarios, toggle admin (mejora pedida):** hoy `handleToggleAdmin` muestra texto tipo "hacer
-  admin / quitar". Propuesta: un primitivo `Switch` con etiqueta de estado **"Admin"** (on/off) o un control
-  segmentado **USER | ADMIN**, deshabilitado para `SUPER_ADMIN`. Comunica el estado, no la acción cruda.
+- **17.8b — Usuarios, toggle admin (mejora pedida):** ⚠️ **versión sencilla HECHA (20/06/2026, commit
+  `9c78a48`)** — el botón ya no dice "Hacer/Quitar admin"; muestra el **estado** ("Admin" / "No admin") como
+  toggle (`aria-pressed`, `title` que aclara la acción, color verde cuando es admin), y la columna Rol usa
+  etiqueta legible ("Usuario"/"Admin"/"Super admin") en vez del enum. **Pendiente FASE 17:** el primitivo
+  `Switch` visual real (interruptor) y, opcionalmente, control segmentado **USER | ADMIN**. ⚠️ Verificación
+  visual de Ramón pendiente.
 - **17.8c — Navegación admin pegajosa:** mismos accesos rápidos arriba ("Ver panel de pedidos" / "Volver a mi
   cuenta") que en 17.6.
 - **17.8d — Iconos de acción** (ya existen: 🔑 claves / ✏️ editar / 🗑️ borrar): formalizarlos como
