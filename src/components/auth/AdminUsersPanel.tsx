@@ -160,7 +160,8 @@ export function AdminUsersPanel() {
               {users.map((user) => {
                 const isUpdating = updatingUserId === user.id;
                 const isSuperAdmin = user.role === "SUPER_ADMIN";
-                const actionLabel = user.role === "ADMIN" ? "Quitar admin" : "Hacer admin";
+                const isAdmin = user.role === "ADMIN";
+                const roleLabel = isSuperAdmin ? "Super admin" : isAdmin ? "Admin" : "Usuario";
 
                 return (
                   <tr key={user.id} style={{ borderTop: "1px solid rgba(148,163,184,0.2)" }}>
@@ -168,7 +169,7 @@ export function AdminUsersPanel() {
                       <strong>{user.name}</strong>
                     </td>
                     <td style={{ padding: "10px 12px" }}>{user.email}</td>
-                    <td style={{ padding: "10px 12px" }}>{user.role}</td>
+                    <td style={{ padding: "10px 12px" }}>{roleLabel}</td>
                     <td style={{ padding: "10px 12px" }}>{user.isVerified ? "Si" : "No"}</td>
                     <td style={{ padding: "10px 12px" }}>
                       {new Date(user.createdAt).toLocaleDateString("es-ES")}
@@ -182,8 +183,19 @@ export function AdminUsersPanel() {
                           className="button-ghost btn-padding-site"
                           onClick={() => handleToggleAdmin(user)}
                           disabled={isUpdating || updatingUserId !== null}
+                          aria-pressed={isAdmin}
+                          title={
+                            isAdmin
+                              ? "Administrador — pulsa para revocar el rol"
+                              : "Usuario — pulsa para conceder el rol de administrador"
+                          }
+                          style={
+                            isAdmin
+                              ? { borderColor: "rgba(52,211,153,0.6)", color: "#34d399" }
+                              : undefined
+                          }
                         >
-                          {isUpdating ? "Actualizando..." : actionLabel}
+                          {isUpdating ? "Actualizando..." : isAdmin ? "Admin" : "No admin"}
                         </button>
                       )}
                     </td>
