@@ -2,8 +2,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import styles from "./AdminProductsPanel.module.scss";
+import { ProductEditModal } from "./admin/ProductEditModal";
+import { DeleteProductModal } from "./admin/DeleteProductModal";
+import { KeysModal } from "./admin/KeysModal";
+import { AdminToastList } from "./admin/AdminToastList";
+import type { ProductDraft, ToastItem, KeyRow, KeysData } from "./admin/types";
 
 // Fila de producto tal y como viene del backend para el panel admin.
 type ProductRow = {
@@ -27,34 +31,9 @@ type ProductRow = {
   createdAt: string;
 };
 
-// Borrador editable de un producto en los formularios de creación/edición.
-type ProductDraft = {
-  name: string;
-  slug: string;
-  description: string;
-  coverImage: string;
-  platform: string;
-  region: string;
-  storeLabel: string;
-  cardSubtitle: string;
-  priceOriginal: string;
-  discountPercent: string;
-  cashbackPercent: string;
-  likesCount: string;
-  stock: string;
-  isActive: boolean;
-  saleEndsAt: string;
-};
-
-// Tipos auxiliares para ordenar columnas y mostrar toasts de feedback.
+// Tipos auxiliares para ordenar columnas.
 type SortColumn = "priceOriginal" | "stock" | "createdAt";
 type SortDirection = "asc" | "desc";
-
-type ToastItem = {
-  id: string;
-  type: "success" | "error";
-  text: string;
-};
 
 type AdminRole = "ADMIN" | "SUPER_ADMIN";
 
@@ -104,21 +83,6 @@ type CatalogQualityReport = {
   total: number;
   incomplete: number;
   products: CatalogQualityProduct[];
-};
-
-type KeyRow = {
-  id: string;
-  keyCode: string;
-  platform: string;
-  assignedOrderId: string | null;
-  assignedItemId: string | null;
-  assignedAt: string | null;
-  createdAt: string;
-};
-
-type KeysData = {
-  keys: KeyRow[];
-  available: number;
 };
 
 // Número de productos por página en el listado principal.
@@ -1130,364 +1094,40 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         </div>
       ) : null}
 
-      {editingProductId ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={closeEditModal}
-          className={styles.modalOverlay}
-        >
-          <div
-            className={`card ${styles.modalCard}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3 className={`auth-title ${styles.modalTitle}`}>
-              Editar producto
-            </h3>
-            <div className="auth-form">
-              <input
-                className="auth-input"
-                placeholder="Nombre"
-                value={modalDraft.name}
-                ref={modalNameInputRef}
-                onChange={(event) =>
-                  setModalDraft((prev) => ({ ...prev, name: event.target.value }))
-                }
-              />
-              <input
-                className="auth-input"
-                placeholder="Slug"
-                value={modalDraft.slug}
-                onChange={(event) =>
-                  setModalDraft((prev) => ({ ...prev, slug: event.target.value }))
-                }
-              />
-              <input
-                className="auth-input"
-                placeholder="Descripción"
-                value={modalDraft.description}
-                onChange={(event) =>
-                  setModalDraft((prev) => ({ ...prev, description: event.target.value }))
-                }
-              />
-              <input
-                className="auth-input"
-                placeholder="URL imagen"
-                value={modalDraft.coverImage}
-                onChange={(event) =>
-                  setModalDraft((prev) => ({ ...prev, coverImage: event.target.value }))
-                }
-              />
-              {/* Alternativa a la URL: subir una imagen desde el equipo. Al
-                  subirla, rellena automáticamente el campo de arriba. */}
-              <input
-                className="auth-input"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={uploadingModalCover}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  event.target.value = "";
-                  void handleModalCoverUpload(file);
-                }}
-              />
-              {uploadingModalCover ? (
-                <p className="auth-alt">Subiendo imagen...</p>
-              ) : null}
-              <div className={styles.gridThreeCols}>
-                <input
-                  className="auth-input"
-                  placeholder="Plataforma"
-                  value={modalDraft.platform}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, platform: event.target.value }))
-                  }
-                />
-                <input
-                  className="auth-input"
-                  placeholder="Región"
-                  value={modalDraft.region}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, region: event.target.value }))
-                  }
-                />
-                <input
-                  className="auth-input"
-                  placeholder="Tienda / launcher"
-                  value={modalDraft.storeLabel}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, storeLabel: event.target.value }))
-                  }
-                />
-              </div>
-              <input
-                className="auth-input"
-                placeholder="Subtítulo"
-                value={modalDraft.cardSubtitle}
-                onChange={(event) =>
-                  setModalDraft((prev) => ({ ...prev, cardSubtitle: event.target.value }))
-                }
-              />
-              <div className={styles.gridThreeCols}>
-                <input
-                  className="auth-input"
-                  placeholder="Precio original"
-                  value={modalDraft.priceOriginal}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, priceOriginal: event.target.value }))
-                  }
-                />
-                <input
-                  className="auth-input"
-                  placeholder="Descuento (%)"
-                  value={modalDraft.discountPercent}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, discountPercent: event.target.value }))
-                  }
-                />
-                <input
-                  className="auth-input"
-                  placeholder="Stock disponible"
-                  value={modalDraft.stock}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, stock: event.target.value }))
-                  }
-                />
-                <input
-                  className="auth-input"
-                  placeholder="Cashback (%)"
-                  value={modalDraft.cashbackPercent}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, cashbackPercent: event.target.value }))
-                  }
-                />
-                <input
-                  className="auth-input"
-                  placeholder="Likes"
-                  value={modalDraft.likesCount}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, likesCount: event.target.value }))
-                  }
-                />
-              </div>
-              <label className={`auth-alt ${styles.labelCheckbox}`}>
-                <input
-                  type="checkbox"
-                  checked={modalDraft.isActive}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, isActive: event.target.checked }))
-                  }
-                />
-                Producto activo
-              </label>
-              <label className={`auth-alt ${styles.labelSaleDate}`}>
-                Fin de oferta (opcional)
-                <input
-                  className="auth-input"
-                  type="datetime-local"
-                  value={modalDraft.saleEndsAt}
-                  onChange={(event) =>
-                    setModalDraft((prev) => ({ ...prev, saleEndsAt: event.target.value }))
-                  }
-                />
-              </label>
-              {modalErrors.map((error) => (
-                <p key={error} className="auth-alt" role="alert">
-                  {error}
-                </p>
-              ))}
-              {modalNotice ? (
-                <p className="auth-alt" role="status" aria-live="polite">
-                  {modalNotice}
-                </p>
-              ) : null}
-              <div className={styles.modalBtnRow}>
-                <button
-                  type="button"
-                  className={`button-primary auth-submit-compact admin-center-button button-primary-edit-product-save ${styles.lightText}`}
-                  onClick={handleModalSave}
-                  disabled={savingId === editingProductId}
-                >
-                  {savingId === editingProductId ? "Guardando..." : "Guardar"}
-                </button>
-                <button
-                  type="button"
-                  className={`button-ghost button-ghost-equal admin-center-button button-primary-edit-product-cancel ${styles.lightTextBold}`}
-                  onClick={closeEditModal}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ProductEditModal
+        editingProductId={editingProductId}
+        modalDraft={modalDraft}
+        setModalDraft={setModalDraft}
+        modalNameInputRef={modalNameInputRef}
+        uploadingModalCover={uploadingModalCover}
+        onCoverUpload={handleModalCoverUpload}
+        modalErrors={modalErrors}
+        modalNotice={modalNotice}
+        savingId={savingId}
+        onSave={handleModalSave}
+        onClose={closeEditModal}
+      />
 
-      {typeof document !== "undefined" && keysPanelSlug
-        ? createPortal(
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="keys-panel-title"
-              onClick={closeKeysPanel}
-              className={styles.modalOverlayPortal}
-            >
-              <div
-                className={`card ${styles.modalCardKeys}`}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <h3 id="keys-panel-title" className={`auth-title ${styles.modalTitleSm}`}>
-                  Claves de activación
-                </h3>
-                <p className={`auth-alt ${styles.keysInfo}`}>
-                  Producto: <strong>{keysPanelSlug}</strong>
-                  {keysData ? ` · Stock disponible: ${keysData.available}` : ""}
-                </p>
+      <KeysModal
+        keysPanelSlug={keysPanelSlug}
+        keysData={keysData}
+        keysLoading={keysLoading}
+        newKeysText={newKeysText}
+        setNewKeysText={setNewKeysText}
+        addingKeys={addingKeys}
+        onAddKeys={() => void handleAddKeys()}
+        onDeleteKey={(keyId) => void handleDeleteKey(keyId)}
+        onClose={closeKeysPanel}
+      />
 
-                <div className={styles.keysAddSection}>
-                  <p className={`auth-alt ${styles.keysAddNote}`}>
-                    Añadir claves (una por línea o separadas por comas):
-                  </p>
-                  <textarea
-                    className={`auth-input ${styles.keysTextarea}`}
-                    rows={4}
-                    placeholder={"XXXXX-XXXXX-XXXXX\nYYYYY-YYYYY-YYYYY"}
-                    value={newKeysText}
-                    onChange={(event) => setNewKeysText(event.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className={`button-primary btn-padding-site ${styles.keysAddBtn}`}
-                    onClick={() => void handleAddKeys()}
-                    disabled={addingKeys || !newKeysText.trim()}
-                  >
-                    {addingKeys ? "Añadiendo…" : "Añadir claves"}
-                  </button>
-                </div>
+      <DeleteProductModal
+        pendingDeleteId={pendingDeleteId}
+        pendingDeleteName={pendingDeleteName}
+        onDelete={handleDelete}
+        onClose={closeDeleteModal}
+      />
 
-                {keysLoading ? (
-                  <p className="auth-alt">Cargando claves…</p>
-                ) : keysData && keysData.keys.length > 0 ? (
-                  <div className={styles.keysTableWrapper}>
-                    <table className={styles.keysTable}>
-                      <thead>
-                        <tr className={styles.keysTheadRow}>
-                          <th className={styles.keysTh}>Clave</th>
-                          <th className={styles.keysTh}>Plataforma</th>
-                          <th className={styles.keysTh}>Estado</th>
-                          <th className={styles.keysTh}>Pedido</th>
-                          <th className={styles.keysThEmpty}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {keysData.keys.map((key) => (
-                          <tr key={key.id} className={styles.keysTr}>
-                            <td className={styles.keysTdMono}>
-                              {key.assignedOrderId ? "••••••••••••••••" : key.keyCode}
-                            </td>
-                            <td className={styles.keysTd}>{key.platform}</td>
-                            <td className={styles.keysTd}>
-                              <span className={key.assignedOrderId ? styles.keyStatusAssigned : styles.keyStatusAvailable}>
-                                {key.assignedOrderId ? "Asignada" : "Disponible"}
-                              </span>
-                            </td>
-                            <td className={styles.keysTdOrderId}>
-                              {key.assignedOrderId ? key.assignedOrderId.slice(0, 8) + "…" : "—"}
-                            </td>
-                            <td className={styles.keysTd}>
-                              {key.assignedOrderId === null && (
-                                <button
-                                  type="button"
-                                  onClick={() => void handleDeleteKey(key.id)}
-                                  aria-label="Eliminar clave"
-                                  title="Eliminar clave no asignada"
-                                  className={styles.keyDeleteBtn}
-                                >
-                                  <TrashIcon />
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : keysData ? (
-                  <p className="auth-alt">Sin claves para este producto.</p>
-                ) : null}
-
-                <div className={styles.keysCloseRow}>
-                  <button
-                    type="button"
-                    className={`button-ghost btn-padding-site ${styles.lightText}`}
-                    onClick={closeKeysPanel}
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-
-      {typeof document !== "undefined" && pendingDeleteId
-        ? createPortal(
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="delete-product-title"
-              onClick={closeDeleteModal}
-              className={styles.modalOverlayPortal}
-            >
-              <div
-                className={`card ${styles.modalCardSm}`}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <h3 id="delete-product-title" className={`auth-title ${styles.modalTitle}`}>
-                  Eliminar producto
-                </h3>
-                <p className={`auth-alt ${styles.deleteSubtitle}`}>
-                  {pendingDeleteName
-                    ? `¿Seguro que quieres eliminar "${pendingDeleteName}"?`
-                    : "¿Seguro que quieres eliminar este producto?"}
-                  {" "}
-                  Esta acción no se puede deshacer.
-                </p>
-                <div className={styles.deleteBtnRow}>
-                  <button
-                    type="button"
-                    className={`button-ghost admin-center-button button-primary-edit-product-cancel ${styles.lightTextBold}`}
-                    onClick={closeDeleteModal}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    className={`button-primary admin-center-button button-primary-edit-product-delete ${styles.lightText}`}
-                    onClick={handleDelete}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-
-      {toasts.length > 0 ? (
-        <div className={styles.toastContainer}>
-          {toasts.map((toast) => (
-            <div
-              key={toast.id}
-              className={`${styles.toast} ${toast.type === "success" ? styles.toastSuccess : styles.toastError}`}
-            >
-              {toast.text}
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <AdminToastList toasts={toasts} />
     </div>
   );
 }
