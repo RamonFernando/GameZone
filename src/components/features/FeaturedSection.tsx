@@ -120,7 +120,15 @@ function SideCard({ game, badge, badgeClass }: { game: ProductPreview; badge: st
   return (
     <Link href={`/games/${game.slug}`} className={styles.featuredSideCard} aria-label={game.name}>
       <div className={styles.featuredSideCardMedia}>
-        <Image src={imgSrc} alt={game.name} fill sizes="220px" className={styles.featuredSideCardImg} unoptimized onError={() => setImgSrc(game.coverImage)} />
+        <Image
+          src={imgSrc}
+          alt={game.name}
+          fill
+          sizes="(max-width: 360px) 100vw, (max-width: 720px) 50vw, 220px"
+          className={styles.featuredSideCardImg}
+          unoptimized
+          onError={() => setImgSrc(game.coverImage)}
+        />
         <span className={`${styles.featuredSideCardBadge} ${BADGE_CLASS[badgeClass] ?? ""}`}>{badge}</span>
       </div>
       <div className={styles.featuredSideCardInfo}>

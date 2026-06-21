@@ -1072,6 +1072,8 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 | 20 | Mejora sustancial de colores / más profesional, tipo G2A | **NUEVO 17.0b** | ⬜ nuevo (design system) |
 | 21 | Countdown a cero no cambia los juegos en Destacados | 12.6 | 🔴 REABIERTO — sigue roto |
 | 22 | Secciones g2a/Steam/Motor de mercado "muy pobre"; ficha de detalle estilo G2A | 17.5 + **NUEVO 17.10** | ⬜ ficha rica (vídeo/reseñas/ediciones/vendedores) |
+| 23 | Barra de menú móvil con iconos de plataformas junto a "Digital Store / GameZone Edition" | **NUEVO 17.11** | ⬜ pendiente de discutir enfoque |
+| 24 | Rediseño completo de la experiencia móvil (mínimo 50% de la home móvil) | **NUEVO 17.12** | ⬜ pendiente de plan visual antes de código |
 
 ### 🔴 Reabiertos (Ramón los reporta rotos en runtime — re-verificar antes de cerrar)
 
@@ -1113,12 +1115,26 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
   contenido. Es una **idea para valorar**, no un diseño cerrado.
 - **G2A Plus (captura "implementar este efecto"):** modal/sección de suscripción premium → mapea a **13.5
   (planes Premium)**. Ubicación sugerida: acceso desde el área de cuenta + un slot promocional en home/ficha.
+- **17.11 — Barra de menú móvil con iconos de plataformas:** pendiente de discutir cómo integrarlo sin saturar
+  el header. Idea base de Ramón: en móvil, junto o debajo de `DIGITAL STORE / GameZone Edition`, mostrar accesos
+  visuales a **PlayStation, Xbox, Nintendo y PC** con sus iconos. Opciones a valorar antes de escribir código:
+  A — fila compacta de iconos bajo el subtítulo del header; B — carrusel horizontal de plataformas debajo del
+  header; C — panel desplegable desde el menú hamburguesa con iconos grandes y etiquetas. Debe mantener tap targets
+  cómodos, no tapar el logo ni el botón de menú, y filtrar/navegar de forma coherente con los filtros de plataforma
+  existentes.
+- **17.12 — Rediseño completo de la página para móvil:** mejora mayor de UX móvil pendiente de plan visual antes
+  de código. Alcance mínimo propuesto: rediseñar al menos **50% de la home móvil**, incluyendo sistema de cards para
+  móviles, sección de destacados, "Explorar por género", Hero, carruseles/ofertas y jerarquía de precios. Objetivo:
+  reducir scroll innecesario, evitar imágenes mal recortadas, priorizar compra rápida, hacer cards compactas tipo
+  tienda digital y separar claramente bloques de descubrimiento (Hero/destacados/géneros/ofertas). Antes de implementar
+  se debe discutir el plan: wireframe móvil, orden de secciones, ratios de imagen, número de columnas por breakpoint,
+  qué información conserva cada card y qué se mueve a ficha/detalle.
 
 ### Reconciliación de ESTADO GLOBAL
 
 Los puntos 5/12.2, 3·17/12.1, 21/12.6 y 12/12.4 **dejan de contar como cerrados** hasta re-verificación tras el
-merge de `dev-19062026-gpt`. El resto de los 22 puntos ya tienen fase asignada arriba; los nuevos (12.8b,
-17.0b, 17.10) entran en el backlog de diseño/bugs.
+merge de `dev-19062026-gpt`. El resto de los puntos ya tienen fase asignada arriba; los nuevos (12.8b,
+17.0b, 17.10, 17.11, 17.12) entran en el backlog de diseño/bugs.
 
 ---
 
