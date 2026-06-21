@@ -26,7 +26,7 @@ import spaceInvaders   from "@iconify-icons/mdi/space-invaders";
 import puzzleOutline   from "@iconify-icons/mdi/puzzle-outline";
 import { useLocale } from "@/hooks/useLocale";
 import { useSearch } from "@/contexts/SearchContext";
-import { toPortraitCover } from "@/lib/portrait-cover";
+import { toPortraitCover } from "./portrait-cover";
 import type { ProductPreview } from "@/types/product";
 
 type Props = { products: ProductPreview[] };

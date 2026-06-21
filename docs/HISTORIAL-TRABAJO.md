@@ -26,6 +26,9 @@
 - [16.1 ✅] AccountDashboard: 9 inline styles → AccountDashboard.module.scss. tsc + 77/77 — commit 170df28
 - [16.1 ✅] AdminProductsPanel: 86 inline styles → AdminProductsPanel.module.scss. tsc + 77/77 — commit e7009db
 - [16.3 ✅] AdminProductsPanel split: 3 modales + toasts extraídos a components/auth/admin/ (ProductEditModal, DeleteProductModal, KeysModal, AdminToastList + types.ts). Archivo reducido de ~1604L a ~880L. tsc + 77/77 — commit 79eea59
+- [16.2 ✅] AccountOrdersHistory: 6 clases account-orders-*/account-order-key-* migradas de account.scss → AccountOrdersHistory.module.scss. tsc + 77/77 — commit contenido en ea88acb
+- [16.2 ✅] AccountDashboard: account-tabs, account-tab/active, auth-divider-rule, account-details-*, account-recovery-*, account-pending-payment-* migradas de account.scss → AccountDashboard.module.scss (19 clases, ~31 referencias). account.scss queda solo con account-avatar-*. tsc + 77/77 — commit ea88acb
+- [16.5 ✅] Auditoría de carpetas: portrait-cover.ts movido de lib/ (INFRA) a components/features/ (VIEW) — único consumer es FeaturedSection.tsx. store.ts (15 deps, mezcla data+BL) y co-locación de Client Components en app/ dejados intencionalmente. tsc + 77/77 — commit pendiente
 
 ---
 
