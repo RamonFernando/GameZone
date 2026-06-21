@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import styles from "./AccountOrdersHistory.module.scss";
 import { useLocale } from "@/hooks/useLocale";
 import { useSearch } from "@/contexts/SearchContext";
 
@@ -167,7 +168,7 @@ export function AccountOrdersHistory() {
   return (
     <div className="auth-form">
       {platform && (
-        <p className="auth-alt" style={{ marginBottom: 8 }}>
+        <p className={`auth-alt ${styles.platformFilterNote}`}>
           {lang === "en"
             ? `Filtering by platform: ${platform} (${filteredRows.length} result${filteredRows.length !== 1 ? "s" : ""})`
             : `Filtrando por plataforma: ${platform} (${filteredRows.length} resultado${filteredRows.length !== 1 ? "s" : ""})`}
