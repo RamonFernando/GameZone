@@ -805,39 +805,31 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
 
   return (
     <div className="auth-form">
-      <div className="account-tabs">
+      <div className={styles.tabs}>
         <button
           type="button"
-          className={
-            "account-tab" + (activeTab === "account" ? " account-tab--active" : "")
-          }
+          className={`${styles.tab}${activeTab === "account" ? ` ${styles.tabActive}` : ""}`}
           onClick={() => setActiveTab("account")}
         >
           {lang === "en" ? "Profile" : "Perfil"}
         </button>
         <button
           type="button"
-          className={
-            "account-tab" + (activeTab === "details" ? " account-tab--active" : "")
-          }
+          className={`${styles.tab}${activeTab === "details" ? ` ${styles.tabActive}` : ""}`}
           onClick={() => setActiveTab("details")}
         >
           {lang === "en" ? "Personal data" : "Datos personales"}
         </button>
         <button
           type="button"
-          className={
-            "account-tab" + (activeTab === "security" ? " account-tab--active" : "")
-          }
+          className={`${styles.tab}${activeTab === "security" ? ` ${styles.tabActive}` : ""}`}
           onClick={() => setActiveTab("security")}
         >
           {lang === "en" ? "Security" : "Seguridad"}
         </button>
         <button
           type="button"
-          className={
-            "account-tab" + (activeTab === "wishlist" ? " account-tab--active" : "")
-          }
+          className={`${styles.tab}${activeTab === "wishlist" ? ` ${styles.tabActive}` : ""}`}
           onClick={() => setActiveTab("wishlist")}
         >
           {lang === "en" ? "My list" : "Mi lista"}
@@ -845,9 +837,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
         {pendingPayment || paymentResult ? (
           <button
             type="button"
-            className={
-              "account-tab" + (activeTab === "payment" ? " account-tab--active" : "")
-            }
+            className={`${styles.tab}${activeTab === "payment" ? ` ${styles.tabActive}` : ""}`}
             onClick={() => setActiveTab("payment")}
           >
             {pendingPayment
@@ -862,13 +852,13 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       </div>
 
       {activeTab === "payment" && (pendingPayment || paymentResult) ? (
-        <section className="account-pending-payment account-payment-validation" aria-live="polite">
-          <div className="account-pending-payment-head">
+        <section className={`${styles.pendingPayment} account-payment-validation`} aria-live="polite">
+          <div className={styles.pendingPaymentHead}>
             <div>
               <span className="auth-label">
                 {lang === "en" ? "Checkout status" : "Estado del pago"}
               </span>
-              <h3 className="account-pending-payment-title">
+              <h3 className={styles.pendingPaymentTitle}>
                 {paymentIsAnimatingConfirmation
                   ? lang === "en"
                     ? "We are confirming your purchase"
@@ -886,7 +876,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                     : "Estamos confirmando tu compra"}
               </h3>
             </div>
-            <span className="account-pending-payment-badge">
+            <span className={styles.pendingPaymentBadge}>
               {(pendingPayment ?? paymentResult)?.paymentProvider === "paypal" ? "PayPal" : "Stripe"}
             </span>
           </div>
@@ -985,7 +975,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               : "Puedes quedarte en tu cuenta mientras la pasarela confirma la transacción. Este panel desaparece cuando el pedido queda pagado."}
           </p>
 
-          <div className="account-pending-payment-grid">
+          <div className={styles.pendingPaymentGrid}>
             <div>
               <span className="auth-label">{lang === "en" ? "Order" : "Pedido"}</span>
               <strong>#{(pendingPayment ?? paymentResult)?.id.slice(0, 8)}</strong>
@@ -1024,7 +1014,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
             </p>
           ) : null}
 
-          <ul className="account-pending-payment-items">
+          <ul className={styles.pendingPaymentItems}>
             {(pendingPayment ?? paymentResult)?.items.map((item) => (
               <li key={item.id}>
                 <span>{item.title}</span>
@@ -1059,15 +1049,15 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
       {activeTab === "account" ? (
         <>
           {!isEditingProfile ? (
-            <div className="account-details-summary">
-              <div className="account-details-summary-head">
+            <div className={styles.detailsSummary}>
+              <div className={styles.detailsSummaryHead}>
                 <div>
                   <span className="auth-label">{profile?.name || "—"}</span>
                   <p className="auth-alt">{profile?.email || "—"}</p>
                 </div>
                 <button
                   type="button"
-                  className="button-primary auth-submit-compact btn-padding-site account-details-edit-button"
+                  className={`button-primary auth-submit-compact btn-padding-site ${styles.detailsEditButton}`}
                   onClick={() => setIsEditingProfile(true)}
                 >
                   {lang === "en" ? "Edit profile" : "Editar perfil"}
@@ -1149,7 +1139,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
             <strong>{formatMoney(totalSpent)}</strong>
           </p>
 
-          <hr className="auth-divider-rule" />
+          <hr className={styles.dividerRule} />
 
           <p className="auth-alt">
             {lang === "en"
@@ -1219,8 +1209,8 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
         <>
           {!isEditingDetails ? (
             <>
-              <div className="account-details-summary">
-                <div className="account-details-summary-head">
+              <div className={styles.detailsSummary}>
+                <div className={styles.detailsSummaryHead}>
                   <div>
                     <span className="auth-label">
                       {lang === "en" ? "Saved personal data" : "Datos personales guardados"}
@@ -1233,7 +1223,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                   </div>
                   <button
                     type="button"
-                    className="button-primary auth-submit-compact btn-padding-site account-details-edit-button"
+                    className={`button-primary auth-submit-compact btn-padding-site ${styles.detailsEditButton}`}
                     onClick={openDetailsEditor}
                   >
                     {hasPersonalData
@@ -1247,9 +1237,9 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                 </div>
 
                 {hasPersonalData ? (
-                  <dl className="account-details-list">
+                  <dl className={styles.detailsList}>
                     {personalDataRows.map((row) => (
-                      <div className="account-details-row" key={row.label}>
+                      <div className={styles.detailsRow} key={row.label}>
                         <dt>{row.label}</dt>
                         <dd>{row.value?.trim() || (lang === "en" ? "Not set" : "Sin completar")}</dd>
                       </div>
@@ -1382,7 +1372,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                 />
               </div>
 
-              <div className="account-details-actions">
+              <div className={styles.detailsActions}>
                 <button
                   type="button"
                   className="button-primary auth-submit-compact auth-center-button btn-padding-site"
@@ -1427,7 +1417,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
 
       {activeTab === "security" ? (
         <>
-          <div className="account-recovery-panel">
+          <div className={styles.recoveryPanel}>
             <div>
               <span className="auth-label">
                 {lang === "en" ? "Account recovery" : "Recuperación de cuenta"}
@@ -1439,23 +1429,23 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               </p>
             </div>
 
-            <dl className="account-recovery-list">
-              <div className="account-recovery-row">
+            <dl className={styles.recoveryList}>
+              <div className={styles.recoveryRow}>
                 <dt>{lang === "en" ? "Main email" : "Email principal"}</dt>
                 <dd>{profile?.email ?? "—"}</dd>
               </div>
-              <div className="account-recovery-row">
+              <div className={styles.recoveryRow}>
                 <dt>{lang === "en" ? "Recovery email" : "Email de recuperación"}</dt>
                 <dd>{lang === "en" ? "Not configured yet" : "Aún no configurado"}</dd>
               </div>
-              <div className="account-recovery-row">
+              <div className={styles.recoveryRow}>
                 <dt>{lang === "en" ? "Recovery codes" : "Códigos de recuperación"}</dt>
                 <dd>{lang === "en" ? "Not generated yet" : "Aún no generados"}</dd>
               </div>
             </dl>
           </div>
 
-          <hr className="auth-divider-rule" />
+          <hr className={styles.dividerRule} />
 
           <div className="auth-field">
             <span className="auth-label">Acceso en dos pasos (2FA)</span>
@@ -1514,7 +1504,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
             </p>
           ) : null}
 
-          <hr className="auth-divider-rule" />
+          <hr className={styles.dividerRule} />
 
           <div className="auth-field">
             <span className="auth-label">Autenticación con app (TOTP)</span>
@@ -1640,7 +1630,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
             </p>
           ) : null}
 
-          <hr className="auth-divider-rule" />
+          <hr className={styles.dividerRule} />
 
           <div className="auth-field">
             <span className="auth-label">Verificación de acceso desde el móvil (Push MFA)</span>
@@ -1668,7 +1658,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               : "Próximamente: activar verificación por notificación en el móvil"}
           </button>
 
-          <hr className="auth-divider-rule" />
+          <hr className={styles.dividerRule} />
 
           <div className="auth-field">
             <span className="auth-label">
