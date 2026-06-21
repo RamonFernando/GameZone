@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import styles from "./AccountDashboard.module.scss";
 import { useLocale } from "@/hooks/useLocale";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
 import type { WishlistItem } from "@/app/api/account/wishlist/route";
@@ -1101,7 +1102,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                 />
               </div>
 
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className={styles.btnRow}>
                 <button
                   type="button"
                   className="button-primary auth-submit-compact btn-padding-site"
@@ -1554,16 +1555,16 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               ) : null}
 
               {totpSecret && (
-                <div className="auth-field" style={{ marginTop: "0.75rem" }}>
+                <div className={`auth-field ${styles.totpFieldWithMargin}`}>
                   {totpQrDataUrl ? (
-                    <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+                    <div className={styles.totpQrCenter}>
                       <Image
                         src={totpQrDataUrl}
                         alt="Código QR para app de autenticación"
                         width={180}
                         height={180}
                         unoptimized
-                        style={{ maxWidth: 180, height: "auto", margin: "0 auto" }}
+                        className={styles.totpQrImage}
                       />
                     </div>
                   ) : null}
@@ -1572,7 +1573,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                       ? "1. Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.). If you can't scan it, add the account manually using this secret:"
                       : "1. Escanea el código QR con tu app de autenticación (Google Authenticator, Authy, etc.). Si no puedes escanearlo, añade la cuenta manualmente usando este secreto:"}
                   </p>
-                  <p className="auth-alt" style={{ fontFamily: "monospace" }}>
+                  <p className={`auth-alt ${styles.totpSecret}`}>
                     {totpSecret}
                   </p>
                   <p className="auth-alt">
@@ -1592,8 +1593,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                   />
                   <button
                     type="button"
-                    className="button-primary auth-submit-compact auth-center-button btn-padding-site"
-                    style={{ marginTop: "0.5rem" }}
+                    className={`button-primary auth-submit-compact auth-center-button btn-padding-site ${styles.totpConfirmBtn}`}
                     onClick={handleConfirmTotp}
                     disabled={isUpdatingTotp}
                   >
@@ -1694,7 +1694,7 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
               {lang === "en" ? "Delete account" : "Eliminar cuenta"}
             </button>
           ) : (
-            <div className="auth-field" style={{ gap: 8 }}>
+            <div className={`auth-field ${styles.deleteFieldWithGap}`}>
               <span className="auth-label">
                 {lang === "en"
                   ? "Enter your password to confirm account deletion"
@@ -1708,13 +1708,12 @@ export function AccountDashboard({ initialTab = "account" }: { initialTab?: Acco
                 placeholder={lang === "en" ? "Password" : "Contraseña"}
                 autoComplete="current-password"
               />
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className={styles.btnRow}>
                 <button
                   type="button"
-                  className="button-primary auth-submit-compact btn-padding-site"
+                  className={`button-primary auth-submit-compact btn-padding-site ${styles.btnDanger}`}
                   onClick={handleDeleteAccount}
                   disabled={isDeletingAccount}
-                  style={{ background: "#dc2626", borderColor: "#dc2626" }}
                 >
                   {isDeletingAccount
                     ? lang === "en"

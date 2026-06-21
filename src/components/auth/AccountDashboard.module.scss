@@ -1,0 +1,36 @@
+.btnRow {
+  display: flex;
+  gap: 8px;
+}
+
+.totpFieldWithMargin {
+  margin-top: 0.75rem;
+}
+
+.totpQrCenter {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.totpQrImage {
+  max-width: 180px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.totpSecret {
+  font-family: monospace;
+}
+
+.totpConfirmBtn {
+  margin-top: 0.5rem;
+}
+
+.deleteFieldWithGap {
+  gap: 8px;
+}
+
+.btnDanger {
+  background: #dc2626;
+  border-color: #dc2626;
+}
