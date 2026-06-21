@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import styles from "./AdminProductsPanel.module.scss";
 
 // Fila de producto tal y como viene del backend para el panel admin.
 type ProductRow = {
@@ -852,7 +853,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         value={draft.likesCount}
         onChange={(event) => setDraft((prev) => ({ ...prev, likesCount: event.target.value }))}
       />
-      <label className="auth-alt" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <label className={`auth-alt ${styles.labelCheckbox}`}>
         <input
           type="checkbox"
           checked={draft.isActive}
@@ -862,7 +863,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         />
         Producto activo
       </label>
-      <label className="auth-alt" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <label className={`auth-alt ${styles.labelSaleDate}`}>
         Fin de oferta (opcional — deja vacío para sin límite)
         <input
           className="auth-input"
@@ -893,7 +894,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         onChange={(event) => setSearchTerm(event.target.value)}
       />
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className={styles.sortBar}>
         <button type="button" className="button-ghost btn-padding-site" onClick={() => toggleSort("priceOriginal")}>
           Ordenar por precio {sortColumn === "priceOriginal" ? `(${sortDirection})` : ""}
         </button>
@@ -921,28 +922,28 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         </button>
       </div>
 
-      <div className="auth-alt" style={{ display: "grid", gap: 4 }}>
+      <div className={`auth-alt ${styles.syncStatusGrid}`}>
         {latestSync ? (
-          <p style={{ margin: 0 }}>
+          <p className={styles.p0}>
             Ultima sync: {latestSync.status} · {new Date(latestSync.startedAt).toLocaleString("es-ES")} ·{" "}
             {latestSync.createdCount} creados, {latestSync.updatedCount} actualizados,{" "}
             {latestSync.skippedCount} omitidos.
           </p>
         ) : (
-          <p style={{ margin: 0 }}>Todavia no hay sincronizaciones registradas.</p>
+          <p className={styles.p0}>Todavia no hay sincronizaciones registradas.</p>
         )}
         {lastWriteSync && !syncStatus?.canRunToday ? (
-          <p style={{ margin: 0 }}>
+          <p className={styles.p0}>
             Sync diaria ya ejecutada: {new Date(lastWriteSync.finishedAt ?? lastWriteSync.startedAt).toLocaleString("es-ES")}.
           </p>
         ) : null}
         {syncStatus?.runningRun ? (
-          <p style={{ margin: 0 }} role="status" aria-live="polite">
+          <p className={styles.p0} role="status" aria-live="polite">
             Hay una sincronizacion en curso.
           </p>
         ) : null}
         {canForceSync ? (
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label className={styles.forceSyncLabel}>
             <input
               type="checkbox"
               checked={forceSync}
@@ -953,22 +954,13 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         ) : null}
       </div>
 
-      <section
-        style={{
-          display: "grid",
-          gap: 12,
-          padding: 14,
-          border: "1px solid rgba(45,212,191,0.28)",
-          borderRadius: 12,
-          background: "rgba(15,23,42,0.42)",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+      <section className={styles.enrichmentPanel}>
+        <div className={styles.enrichmentHeader}>
           <div>
-            <h3 className="auth-label" style={{ marginBottom: 4 }}>
+            <h3 className={`auth-label ${styles.enrichmentTitle}`}>
               Catalogo incompleto
             </h3>
-            <p className="auth-alt" style={{ margin: 0 }}>
+            <p className={`auth-alt ${styles.p0}`}>
               {isLoadingQuality
                 ? "Revisando metadata..."
                 : catalogQuality
@@ -976,7 +968,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   : "No hay auditoria disponible."}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <div className={styles.enrichmentActions}>
             <button
               type="button"
               className="button-ghost btn-padding-site"
@@ -997,38 +989,20 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         </div>
 
         {catalogQuality?.products.length ? (
-          <div style={{ display: "grid", gap: 8 }}>
+          <div className={styles.qualityList}>
             {catalogQuality.products.slice(0, 6).map((product) => (
-              <div
-                key={product.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(0, 1fr) auto",
-                  gap: 10,
-                  alignItems: "center",
-                  padding: 10,
-                  border: "1px solid rgba(148,163,184,0.18)",
-                  borderRadius: 10,
-                  background: "rgba(2,6,23,0.28)",
-                }}
-              >
+              <div key={product.id} className={styles.qualityItem}>
                 <div>
                   <strong>{product.name}</strong>
                   <div className="auth-alt">
                     {product.slug} · {product.storeLabel} · {product.metadataSource ?? "sin fuente"}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <div className={styles.qualityIssuesList}>
                   {product.issues.slice(0, 3).map((issue) => (
                     <span
                       key={`${product.id}-${issue}`}
-                      className="auth-alt"
-                      style={{
-                        padding: "3px 7px",
-                        border: "1px solid rgba(251,191,36,0.3)",
-                        borderRadius: 999,
-                        color: "#fde68a",
-                      }}
+                      className={`auth-alt ${styles.qualityIssueBadge}`}
                     >
                       {CATALOG_ISSUE_LABELS[issue]}
                     </span>
@@ -1038,7 +1012,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
             ))}
           </div>
         ) : !isLoadingQuality ? (
-          <p className="auth-alt" style={{ margin: 0 }}>
+          <p className={`auth-alt ${styles.p0}`}>
             Todos los productos activos tienen metadata suficiente.
           </p>
         ) : null}
@@ -1047,27 +1021,27 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       {isLoading ? <p className="auth-alt">Cargando productos...</p> : null}
 
       {!isLoading ? (
-        <div style={{ overflowX: "auto", border: "1px solid rgba(148,163,184,0.25)", borderRadius: 12 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Nombre</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Precio</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Stock</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Extras</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Estado</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Alta</th>
-                <th style={{ textAlign: "right", padding: "10px 12px" }}>Acciones</th>
+                <th className={styles.th}>Nombre</th>
+                <th className={styles.th}>Precio</th>
+                <th className={styles.th}>Stock</th>
+                <th className={styles.th}>Extras</th>
+                <th className={styles.th}>Estado</th>
+                <th className={styles.th}>Alta</th>
+                <th className={styles.thRight}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {pageItems.map((product) => (
-                <tr key={product.id} style={{ borderTop: "1px solid rgba(148,163,184,0.2)" }}>
-                  <td style={{ padding: "10px 12px" }}>
+                <tr key={product.id} className={styles.tr}>
+                  <td className={styles.td}>
                     <strong>{product.name}</strong>
                     <div className="auth-alt">{product.slug}</div>
                   </td>
-                  <td style={{ padding: "10px 12px" }}>
+                  <td className={styles.td}>
                     <div className="auth-alt">
                       {product.priceOriginal.toLocaleString("es-ES", {
                         style: "currency",
@@ -1084,35 +1058,24 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                       <span className="auth-alt">(-{product.discountPercent}%)</span>
                     </div>
                   </td>
-                  <td style={{ padding: "10px 12px" }}>{product.stock}</td>
-                  <td style={{ padding: "10px 12px", lineHeight: 1.35 }}>
+                  <td className={styles.td}>{product.stock}</td>
+                  <td className={styles.tdMultiline}>
                     <div className="auth-alt">{product.platform} · {product.region}</div>
                     <div className="auth-alt">{product.storeLabel}</div>
                     <div className="auth-alt">Cashback {product.cashbackPercent}% · ♥ {product.likesCount}</div>
                   </td>
-                  <td style={{ padding: "10px 12px" }}>{product.isActive ? "Activo" : "Inactivo"}</td>
-                  <td style={{ padding: "10px 12px" }}>
+                  <td className={styles.td}>{product.isActive ? "Activo" : "Inactivo"}</td>
+                  <td className={styles.td}>
                     {new Date(product.createdAt).toLocaleDateString("es-ES")}
                   </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                  <td className={styles.td}>
+                    <div className={styles.actionsCell}>
                       <button
                         type="button"
                         onClick={() => openKeysPanel(product.slug)}
                         aria-label={`Claves de ${product.name}`}
                         title="Gestionar claves"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: 8,
-                          border: "1px solid rgba(52,211,153,0.45)",
-                          background: "rgba(52,211,153,0.12)",
-                          color: "#6ee7b7",
-                          cursor: "pointer",
-                        }}
+                        className={`${styles.iconBtn} ${styles.iconBtnKeys}`}
                       >
                         <KeyIcon />
                       </button>
@@ -1121,18 +1084,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                         onClick={() => openEditModal(product)}
                         aria-label={`Editar ${product.name}`}
                         title="Editar"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: 8,
-                          border: "1px solid rgba(59,130,246,0.45)",
-                          background: "rgba(59,130,246,0.12)",
-                          color: "#bfdbfe",
-                          cursor: "pointer",
-                        }}
+                        className={`${styles.iconBtn} ${styles.iconBtnEdit}`}
                       >
                         <PencilIcon />
                       </button>
@@ -1141,18 +1093,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                         onClick={() => openDeleteModal(product)}
                         aria-label={`Eliminar ${product.name}`}
                         title="Eliminar"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: 8,
-                          border: "1px solid rgba(248,113,113,0.45)",
-                          background: "rgba(248,113,113,0.12)",
-                          color: "#fecaca",
-                          cursor: "pointer",
-                        }}
+                        className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
                       >
                         <TrashIcon />
                       </button>
@@ -1166,7 +1107,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       ) : null}
 
       {!isLoading && sortedFilteredProducts.length > PAGE_SIZE ? (
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className={styles.pagination}>
           <button
             type="button"
             className="button-ghost btn-padding-site"
@@ -1194,22 +1135,13 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           role="dialog"
           aria-modal="true"
           onClick={closeEditModal}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15,23,42,0.7)",
-            display: "grid",
-            placeItems: "center",
-            zIndex: 1000,
-            padding: 16,
-          }}
+          className={styles.modalOverlay}
         >
           <div
-            className="card"
+            className={`card ${styles.modalCard}`}
             onClick={(event) => event.stopPropagation()}
-            style={{ width: "min(680px, 100%)", maxHeight: "85vh", overflow: "auto", padding: 16 }}
           >
-            <h3 className="auth-title" style={{ marginBottom: 8 }}>
+            <h3 className={`auth-title ${styles.modalTitle}`}>
               Editar producto
             </h3>
             <div className="auth-form">
@@ -1262,7 +1194,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
               {uploadingModalCover ? (
                 <p className="auth-alt">Subiendo imagen...</p>
               ) : null}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+              <div className={styles.gridThreeCols}>
                 <input
                   className="auth-input"
                   placeholder="Plataforma"
@@ -1296,7 +1228,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   setModalDraft((prev) => ({ ...prev, cardSubtitle: event.target.value }))
                 }
               />
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+              <div className={styles.gridThreeCols}>
                 <input
                   className="auth-input"
                   placeholder="Precio original"
@@ -1338,7 +1270,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   }
                 />
               </div>
-              <label className="auth-alt" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <label className={`auth-alt ${styles.labelCheckbox}`}>
                 <input
                   type="checkbox"
                   checked={modalDraft.isActive}
@@ -1348,7 +1280,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                 />
                 Producto activo
               </label>
-              <label className="auth-alt" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <label className={`auth-alt ${styles.labelSaleDate}`}>
                 Fin de oferta (opcional)
                 <input
                   className="auth-input"
@@ -1369,21 +1301,19 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   {modalNotice}
                 </p>
               ) : null}
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <div className={styles.modalBtnRow}>
                 <button
                   type="button"
-                  className="button-primary auth-submit-compact admin-center-button button-primary-edit-product-save"
+                  className={`button-primary auth-submit-compact admin-center-button button-primary-edit-product-save ${styles.lightText}`}
                   onClick={handleModalSave}
                   disabled={savingId === editingProductId}
-                  style={{ color: "#cbd5e1" }}
                 >
                   {savingId === editingProductId ? "Guardando..." : "Guardar"}
                 </button>
                 <button
                   type="button"
-                  className="button-ghost button-ghost-equal admin-center-button button-primary-edit-product-cancel"
+                  className={`button-ghost button-ghost-equal admin-center-button button-primary-edit-product-cancel ${styles.lightTextBold}`}
                   onClick={closeEditModal}
-                  style={{ color: "#cbd5e1", fontWeight: 600 }}
                 >
                   Cancelar
                 </button>
@@ -1400,48 +1330,36 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
               aria-modal="true"
               aria-labelledby="keys-panel-title"
               onClick={closeKeysPanel}
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(15,23,42,0.7)",
-                display: "grid",
-                placeItems: "center",
-                zIndex: 10000,
-                padding: 16,
-                overflow: "auto",
-              }}
+              className={styles.modalOverlayPortal}
             >
               <div
-                className="card"
+                className={`card ${styles.modalCardKeys}`}
                 onClick={(event) => event.stopPropagation()}
-                style={{ width: "min(640px, 100%)", maxHeight: "85vh", overflow: "auto", padding: 16 }}
               >
-                <h3 id="keys-panel-title" className="auth-title" style={{ marginBottom: 4 }}>
+                <h3 id="keys-panel-title" className={`auth-title ${styles.modalTitleSm}`}>
                   Claves de activación
                 </h3>
-                <p className="auth-alt" style={{ marginBottom: 12 }}>
+                <p className={`auth-alt ${styles.keysInfo}`}>
                   Producto: <strong>{keysPanelSlug}</strong>
                   {keysData ? ` · Stock disponible: ${keysData.available}` : ""}
                 </p>
 
-                <div style={{ marginBottom: 12 }}>
-                  <p className="auth-alt" style={{ marginBottom: 6, fontSize: 12 }}>
+                <div className={styles.keysAddSection}>
+                  <p className={`auth-alt ${styles.keysAddNote}`}>
                     Añadir claves (una por línea o separadas por comas):
                   </p>
                   <textarea
-                    className="auth-input"
+                    className={`auth-input ${styles.keysTextarea}`}
                     rows={4}
                     placeholder={"XXXXX-XXXXX-XXXXX\nYYYYY-YYYYY-YYYYY"}
                     value={newKeysText}
                     onChange={(event) => setNewKeysText(event.target.value)}
-                    style={{ width: "100%", resize: "vertical", fontFamily: "monospace", fontSize: 12 }}
                   />
                   <button
                     type="button"
-                    className="button-primary btn-padding-site"
+                    className={`button-primary btn-padding-site ${styles.keysAddBtn}`}
                     onClick={() => void handleAddKeys()}
                     disabled={addingKeys || !newKeysText.trim()}
-                    style={{ marginTop: 6 }}
                   >
                     {addingKeys ? "Añadiendo…" : "Añadir claves"}
                   </button>
@@ -1450,45 +1368,40 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                 {keysLoading ? (
                   <p className="auth-alt">Cargando claves…</p>
                 ) : keysData && keysData.keys.length > 0 ? (
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <div className={styles.keysTableWrapper}>
+                    <table className={styles.keysTable}>
                       <thead>
-                        <tr style={{ background: "rgba(255,255,255,0.04)" }}>
-                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Clave</th>
-                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Plataforma</th>
-                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Estado</th>
-                          <th style={{ padding: "6px 8px", textAlign: "left" }}>Pedido</th>
-                          <th style={{ padding: "6px 8px" }}></th>
+                        <tr className={styles.keysTheadRow}>
+                          <th className={styles.keysTh}>Clave</th>
+                          <th className={styles.keysTh}>Plataforma</th>
+                          <th className={styles.keysTh}>Estado</th>
+                          <th className={styles.keysTh}>Pedido</th>
+                          <th className={styles.keysThEmpty}></th>
                         </tr>
                       </thead>
                       <tbody>
                         {keysData.keys.map((key) => (
-                          <tr key={key.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                            <td style={{ padding: "6px 8px", fontFamily: "monospace" }}>
+                          <tr key={key.id} className={styles.keysTr}>
+                            <td className={styles.keysTdMono}>
                               {key.assignedOrderId ? "••••••••••••••••" : key.keyCode}
                             </td>
-                            <td style={{ padding: "6px 8px" }}>{key.platform}</td>
-                            <td style={{ padding: "6px 8px" }}>
-                              <span style={{ color: key.assignedOrderId ? "#fbbf24" : "#34d399" }}>
+                            <td className={styles.keysTd}>{key.platform}</td>
+                            <td className={styles.keysTd}>
+                              <span className={key.assignedOrderId ? styles.keyStatusAssigned : styles.keyStatusAvailable}>
                                 {key.assignedOrderId ? "Asignada" : "Disponible"}
                               </span>
                             </td>
-                            <td style={{ padding: "6px 8px", fontFamily: "monospace", fontSize: 11, color: "#94a3b8" }}>
+                            <td className={styles.keysTdOrderId}>
                               {key.assignedOrderId ? key.assignedOrderId.slice(0, 8) + "…" : "—"}
                             </td>
-                            <td style={{ padding: "6px 8px" }}>
+                            <td className={styles.keysTd}>
                               {key.assignedOrderId === null && (
                                 <button
                                   type="button"
                                   onClick={() => void handleDeleteKey(key.id)}
                                   aria-label="Eliminar clave"
                                   title="Eliminar clave no asignada"
-                                  style={{
-                                    width: 24, height: 24, display: "inline-flex",
-                                    alignItems: "center", justifyContent: "center",
-                                    borderRadius: 6, border: "1px solid rgba(248,113,113,0.45)",
-                                    background: "rgba(248,113,113,0.12)", color: "#fecaca", cursor: "pointer",
-                                  }}
+                                  className={styles.keyDeleteBtn}
                                 >
                                   <TrashIcon />
                                 </button>
@@ -1503,12 +1416,11 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
                   <p className="auth-alt">Sin claves para este producto.</p>
                 ) : null}
 
-                <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+                <div className={styles.keysCloseRow}>
                   <button
                     type="button"
-                    className="button-ghost btn-padding-site"
+                    className={`button-ghost btn-padding-site ${styles.lightText}`}
                     onClick={closeKeysPanel}
-                    style={{ color: "#cbd5e1" }}
                   >
                     Cerrar
                   </button>
@@ -1526,50 +1438,34 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
               aria-modal="true"
               aria-labelledby="delete-product-title"
               onClick={closeDeleteModal}
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(15,23,42,0.7)",
-                display: "grid",
-                placeItems: "center",
-                zIndex: 10000,
-                padding: 16,
-                overflow: "auto",
-              }}
+              className={styles.modalOverlayPortal}
             >
               <div
-                className="card"
+                className={`card ${styles.modalCardSm}`}
                 onClick={(event) => event.stopPropagation()}
-                style={{
-                  width: "min(420px, 100%)",
-                  padding: 16,
-                  margin: "auto",
-                }}
               >
-                <h3 id="delete-product-title" className="auth-title" style={{ marginBottom: 8 }}>
+                <h3 id="delete-product-title" className={`auth-title ${styles.modalTitle}`}>
                   Eliminar producto
                 </h3>
-                <p className="auth-alt" style={{ marginBottom: 12 }}>
+                <p className={`auth-alt ${styles.deleteSubtitle}`}>
                   {pendingDeleteName
                     ? `¿Seguro que quieres eliminar "${pendingDeleteName}"?`
                     : "¿Seguro que quieres eliminar este producto?"}
                   {" "}
                   Esta acción no se puede deshacer.
                 </p>
-                <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end" }}>
+                <div className={styles.deleteBtnRow}>
                   <button
                     type="button"
-                    className="button-ghost admin-center-button button-primary-edit-product-cancel"
+                    className={`button-ghost admin-center-button button-primary-edit-product-cancel ${styles.lightTextBold}`}
                     onClick={closeDeleteModal}
-                    style={{ color: "#cbd5e1", fontWeight: 600 }}
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
-                    className="button-primary admin-center-button button-primary-edit-product-delete"
+                    className={`button-primary admin-center-button button-primary-edit-product-delete ${styles.lightText}`}
                     onClick={handleDelete}
-                    style={{ color: "#cbd5e1" }}
                   >
                     Eliminar
                   </button>
@@ -1581,18 +1477,11 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
         : null}
 
       {toasts.length > 0 ? (
-        <div style={{ position: "fixed", right: 16, bottom: 16, zIndex: 1200, display: "grid", gap: 8 }}>
+        <div className={styles.toastContainer}>
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              style={{
-                borderRadius: 10,
-                padding: "10px 12px",
-                background: toast.type === "success" ? "#14532d" : "#7f1d1d",
-                color: "#f8fafc",
-                border: "1px solid rgba(255,255,255,0.2)",
-                minWidth: 240,
-              }}
+              className={`${styles.toast} ${toast.type === "success" ? styles.toastSuccess : styles.toastError}`}
             >
               {toast.text}
             </div>

@@ -1,0 +1,328 @@
+/* ── CREATE FORM ──────────────────────────────────────────── */
+.labelCheckbox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.labelSaleDate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── SORT BAR ─────────────────────────────────────────────── */
+.sortBar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── SYNC STATUS ──────────────────────────────────────────── */
+.syncStatusGrid {
+  display: grid;
+  gap: 4px;
+}
+.p0 {
+  margin: 0;
+}
+.forceSyncLabel {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── ENRICHMENT / CATALOG QUALITY PANEL ──────────────────── */
+.enrichmentPanel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(45, 212, 191, 0.28);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.42);
+}
+.enrichmentHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.enrichmentTitle {
+  margin-bottom: 4px;
+}
+.enrichmentActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.qualityList {
+  display: grid;
+  gap: 8px;
+}
+.qualityItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.28);
+}
+.qualityIssuesList {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.qualityIssueBadge {
+  padding: 3px 7px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 999px;
+  color: #fde68a;
+}
+
+/* ── PRODUCTS TABLE ───────────────────────────────────────── */
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+.th {
+  text-align: left;
+  padding: 10px 12px;
+}
+.thRight {
+  text-align: right;
+  padding: 10px 12px;
+}
+.tr {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+.td {
+  padding: 10px 12px;
+}
+.tdMultiline {
+  padding: 10px 12px;
+  line-height: 1.35;
+}
+.actionsCell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* ── ICON BUTTONS (key / edit / delete) ───────────────────── */
+.iconBtn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.iconBtnKeys {
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  background: rgba(52, 211, 153, 0.12);
+  color: #6ee7b7;
+}
+.iconBtnEdit {
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+  color: #bfdbfe;
+}
+.iconBtnDelete {
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+}
+
+/* ── PAGINATION ───────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── MODAL OVERLAYS ───────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 1000;
+}
+.modalOverlayPortal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: grid;
+  place-items: center;
+  z-index: 10000;
+  padding: 16px;
+  overflow: auto;
+}
+
+/* ── MODAL CARDS ──────────────────────────────────────────── */
+.modalCard {
+  width: min(680px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  padding: 16px;
+}
+.modalCardSm {
+  width: min(420px, 100%);
+  padding: 16px;
+  margin: auto;
+}
+.modalCardKeys {
+  width: min(640px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  padding: 16px;
+}
+.modalTitle {
+  margin-bottom: 8px;
+}
+.modalTitleSm {
+  margin-bottom: 4px;
+}
+
+/* ── EDIT MODAL FORM ──────────────────────────────────────── */
+.gridThreeCols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.modalBtnRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.lightText {
+  color: #cbd5e1;
+}
+.lightTextBold {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* ── DELETE MODAL ─────────────────────────────────────────── */
+.deleteSubtitle {
+  margin-bottom: 12px;
+}
+.deleteBtnRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ── KEYS MODAL ───────────────────────────────────────────── */
+.keysInfo {
+  margin-bottom: 12px;
+}
+.keysAddSection {
+  margin-bottom: 12px;
+}
+.keysAddNote {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.keysTextarea {
+  width: 100%;
+  resize: vertical;
+  font-family: monospace;
+  font-size: 12px;
+}
+.keysAddBtn {
+  margin-top: 6px;
+}
+.keysTableWrapper {
+  overflow-x: auto;
+}
+.keysTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.keysTheadRow {
+  background: rgba(255, 255, 255, 0.04);
+}
+.keysTh {
+  padding: 6px 8px;
+  text-align: left;
+}
+.keysThEmpty {
+  padding: 6px 8px;
+}
+.keysTr {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.keysTd {
+  padding: 6px 8px;
+}
+.keysTdMono {
+  padding: 6px 8px;
+  font-family: monospace;
+}
+.keysTdOrderId {
+  padding: 6px 8px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.keyStatusAvailable {
+  color: #34d399;
+}
+.keyStatusAssigned {
+  color: #fbbf24;
+}
+.keyDeleteBtn {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+  cursor: pointer;
+}
+.keysCloseRow {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── TOASTS ───────────────────────────────────────────────── */
+.toastContainer {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1200;
+  display: grid;
+  gap: 8px;
+}
+.toast {
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 240px;
+}
+.toastSuccess {
+  background: #14532d;
+}
+.toastError {
+  background: #7f1d1d;
+}
