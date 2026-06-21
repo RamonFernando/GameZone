@@ -174,8 +174,8 @@ export function AccountOrdersHistory() {
             : `Filtrando por plataforma: ${platform} (${filteredRows.length} resultado${filteredRows.length !== 1 ? "s" : ""})`}
         </p>
       )}
-      <div className="account-orders-table-wrap">
-        <table className="account-orders-table">
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
           <thead>
             <tr>
               <th>{lang === "en" ? "Game" : "Juego"}</th>
@@ -189,13 +189,13 @@ export function AccountOrdersHistory() {
               <tr key={row.rowId}>
                 <td>
                   {row.gameName}
-                  <span className="auth-alt account-orders-qty">x{row.quantity}</span>
+                  <span className={`auth-alt ${styles.qty}`}>x{row.quantity}</span>
                   {row.orderStatus === "paid" && row.gameKey ? (
-                    <div className="account-order-key">
-                      <code className="account-order-key-code">{row.gameKey}</code>
+                    <div className={styles.keyRow}>
+                      <code className={styles.keyCode}>{row.gameKey}</code>
                       <button
                         type="button"
-                        className="account-order-key-copy"
+                        className={styles.keyCopyBtn}
                         onClick={() => handleCopyKey(row.rowId, row.gameKey as string)}
                         aria-label={lang === "en" ? "Copy activation key" : "Copiar clave de activación"}
                       >

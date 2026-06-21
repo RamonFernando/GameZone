@@ -1,3 +1,84 @@
 .platformFilterNote {
   margin-bottom: 8px;
 }
+
+/* ── Tabla de pedidos ─────────────────────────────────────── */
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.85rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b8c4d4;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.qty {
+  margin-left: 0.35rem;
+}
+
+/* ── Clave de activación en fila de pedido ───────────────── */
+.keyRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.keyCode {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  user-select: all;
+}
+
+.keyCopyBtn {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(148, 163, 184, 0.5);
+    background: rgba(148, 163, 184, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #34d399;
+    outline-offset: 1px;
+  }
+}
