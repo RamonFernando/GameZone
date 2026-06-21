@@ -20,6 +20,12 @@
 - [17.11 📋] Nueva tarea registrada en plan: barra de menú móvil con iconos de plataformas. Pendiente de discutir enfoque (opciones A/B/C documentadas en PLAN-MEJORAS-AUDITORIA.md)
 - [17.12 📋] Nueva tarea registrada en plan: rediseño completo experiencia móvil (mínimo 50% home). Pendiente plan visual antes de código
 - [responsive ✅] FeaturedSection mobile: grid 2 columnas en 720px, aspect-ratio 3:4, `sizes` responsive en SideCard, tipografía compacta, badges ajustados — commit 13a1564
+- [16.1 ✅] AdminUsersPanel: 15 inline styles → AdminUsersPanel.module.scss. tsc + 77/77 — commit 5336de9
+- [16.1 ✅] AdminOrdersPanel: 25 inline styles → AdminOrdersPanel.module.scss. tsc + 77/77 — commit efba5f4
+- [16.1 ✅] AccountOrdersHistory: 1 inline style → AccountOrdersHistory.module.scss. tsc + 77/77 — commit 202ab36
+- [16.1 ✅] AccountDashboard: 9 inline styles → AccountDashboard.module.scss. tsc + 77/77 — commit 170df28
+- [16.1 ✅] AdminProductsPanel: 86 inline styles → AdminProductsPanel.module.scss. tsc + 77/77 — commit e7009db
+- [16.3 ✅] AdminProductsPanel split: 3 modales + toasts extraídos a components/auth/admin/ (ProductEditModal, DeleteProductModal, KeysModal, AdminToastList + types.ts). Archivo reducido de ~1604L a ~880L. tsc + 77/77 — commit 79eea59
 
 ---
 
