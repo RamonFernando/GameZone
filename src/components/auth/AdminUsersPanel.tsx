@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import styles from "./AdminUsersPanel.module.scss";
 
 type UserRow = {
   id: string;
@@ -144,16 +145,16 @@ export function AdminUsersPanel() {
       {isLoading ? <p className="auth-alt">Cargando usuarios...</p> : null}
 
       {!isLoading ? (
-        <div style={{ overflowX: "auto", border: "1px solid rgba(148,163,184,0.25)", borderRadius: 12 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Nombre</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Email</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Rol</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Verificado</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Alta</th>
-                <th style={{ textAlign: "left", padding: "10px 12px" }}>Accion</th>
+                <th className={styles.th}>Nombre</th>
+                <th className={styles.th}>Email</th>
+                <th className={styles.th}>Rol</th>
+                <th className={styles.th}>Verificado</th>
+                <th className={styles.th}>Alta</th>
+                <th className={styles.th}>Accion</th>
               </tr>
             </thead>
             <tbody>
@@ -164,23 +165,23 @@ export function AdminUsersPanel() {
                 const roleLabel = isSuperAdmin ? "Super admin" : isAdmin ? "Admin" : "Usuario";
 
                 return (
-                  <tr key={user.id} style={{ borderTop: "1px solid rgba(148,163,184,0.2)" }}>
-                    <td style={{ padding: "10px 12px" }}>
+                  <tr key={user.id} className={styles.tr}>
+                    <td className={styles.td}>
                       <strong>{user.name}</strong>
                     </td>
-                    <td style={{ padding: "10px 12px" }}>{user.email}</td>
-                    <td style={{ padding: "10px 12px" }}>{roleLabel}</td>
-                    <td style={{ padding: "10px 12px" }}>{user.isVerified ? "Si" : "No"}</td>
-                    <td style={{ padding: "10px 12px" }}>
+                    <td className={styles.td}>{user.email}</td>
+                    <td className={styles.td}>{roleLabel}</td>
+                    <td className={styles.td}>{user.isVerified ? "Si" : "No"}</td>
+                    <td className={styles.td}>
                       {new Date(user.createdAt).toLocaleDateString("es-ES")}
                     </td>
-                    <td style={{ padding: "10px 12px" }}>
+                    <td className={styles.td}>
                       {isSuperAdmin ? (
                         <span className="auth-alt">Bloqueado</span>
                       ) : (
                         <button
                           type="button"
-                          className="button-ghost btn-padding-site"
+                          className={`button-ghost btn-padding-site${isAdmin ? ` ${styles.btnAdminActive}` : ""}`}
                           onClick={() => handleToggleAdmin(user)}
                           disabled={isUpdating || updatingUserId !== null}
                           aria-pressed={isAdmin}
@@ -188,11 +189,6 @@ export function AdminUsersPanel() {
                             isAdmin
                               ? "Administrador — pulsa para revocar el rol"
                               : "Usuario — pulsa para conceder el rol de administrador"
-                          }
-                          style={
-                            isAdmin
-                              ? { borderColor: "rgba(52,211,153,0.6)", color: "#34d399" }
-                              : undefined
                           }
                         >
                           {isUpdating ? "Actualizando..." : isAdmin ? "Admin" : "No admin"}

@@ -1,0 +1,29 @@
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.th {
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.tr {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.td {
+  padding: 10px 12px;
+}
+
+.btnAdminActive {
+  border-color: rgba(52, 211, 153, 0.6);
+  color: #34d399;
+}
