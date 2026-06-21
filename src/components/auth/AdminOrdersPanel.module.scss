@@ -1,0 +1,65 @@
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.filterField {
+  gap: 6px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1080px;
+  font-size: 0.82rem;
+}
+
+.th {
+  text-align: left;
+  padding: 8px 10px;
+}
+
+.thItems {
+  text-align: left;
+  padding: 8px 10px;
+  min-width: 260px;
+}
+
+.tr {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.td {
+  padding: 8px 10px;
+}
+
+.tdMultiline {
+  padding: 8px 10px;
+  line-height: 1.35;
+}
+
+.tdNowrap {
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.tdItems {
+  padding: 8px 10px;
+  line-height: 1.35;
+  min-width: 260px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}

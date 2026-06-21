@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import styles from "./AdminOrdersPanel.module.scss";
 
 // Ítem de un pedido tal como lo ve el panel admin.
 type AdminOrderItem = {
@@ -172,8 +173,8 @@ export function AdminOrdersPanel() {
 
   return (
     <div className="auth-form">
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-        <div className="auth-field" style={{ gap: 6 }}>
+      <div className={styles.filtersGrid}>
+        <div className={`auth-field ${styles.filterField}`}>
           <label htmlFor="statusFilter" className="auth-label">
             Estado
           </label>
@@ -194,7 +195,7 @@ export function AdminOrdersPanel() {
           </select>
         </div>
 
-        <div className="auth-field" style={{ gap: 6 }}>
+        <div className={`auth-field ${styles.filterField}`}>
           <label htmlFor="providerFilter" className="auth-label">
             Pasarela
           </label>
@@ -224,40 +225,40 @@ export function AdminOrdersPanel() {
       ) : null}
 
       {!isLoading && !errorMessage && filteredOrders.length > 0 ? (
-        <div style={{ overflowX: "auto", border: "1px solid rgba(148,163,184,0.25)", borderRadius: 12 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1080, fontSize: "0.82rem" }}>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Pedido</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Estado</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Pasarela</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Total</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Fecha</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Referencia</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Reembolso</th>
-                <th style={{ textAlign: "left", padding: "8px 10px", minWidth: 260 }}>Items</th>
-                <th style={{ textAlign: "left", padding: "8px 10px" }}>Acciones</th>
+                <th className={styles.th}>Pedido</th>
+                <th className={styles.th}>Estado</th>
+                <th className={styles.th}>Pasarela</th>
+                <th className={styles.th}>Total</th>
+                <th className={styles.th}>Fecha</th>
+                <th className={styles.th}>Referencia</th>
+                <th className={styles.th}>Reembolso</th>
+                <th className={styles.thItems}>Items</th>
+                <th className={styles.th}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {paginatedOrders.map((order) => (
-                <tr key={order.id} style={{ borderTop: "1px solid rgba(148,163,184,0.2)" }}>
-                  <td style={{ padding: "8px 10px", lineHeight: 1.35 }}>
+                <tr key={order.id} className={styles.tr}>
+                  <td className={styles.tdMultiline}>
                     <strong>#{order.id.slice(0, 8)}</strong>
                     <div className="auth-alt">{order.user.email}</div>
                   </td>
-                  <td style={{ padding: "8px 10px" }}>
+                  <td className={styles.td}>
                     <strong>{order.status}</strong>
                   </td>
-                  <td style={{ padding: "8px 10px" }}>{order.paymentProvider ?? "n/a"}</td>
-                  <td style={{ padding: "8px 10px" }}>
+                  <td className={styles.td}>{order.paymentProvider ?? "n/a"}</td>
+                  <td className={styles.td}>
                     <strong>{formatMoney(order.totalAmount, order.currency)}</strong>
                   </td>
-                  <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                  <td className={styles.tdNowrap}>
                     {new Date(order.createdAt).toLocaleString("es-ES")}
                   </td>
-                  <td style={{ padding: "8px 10px" }}>{order.paymentReference ?? "sin referencia"}</td>
-                  <td style={{ padding: "8px 10px", lineHeight: 1.35 }}>
+                  <td className={styles.td}>{order.paymentReference ?? "sin referencia"}</td>
+                  <td className={styles.tdMultiline}>
                     {order.refundedAt ? (
                       <>
                         <div>{new Date(order.refundedAt).toLocaleString("es-ES")}</div>
@@ -268,10 +269,10 @@ export function AdminOrdersPanel() {
                       <span className="auth-alt">-</span>
                     )}
                   </td>
-                  <td style={{ padding: "8px 10px", lineHeight: 1.35, minWidth: 260 }}>
+                  <td className={styles.tdItems}>
                     {order.items.map((item) => `${item.title} x${item.quantity}`).join(", ")}
                   </td>
-                  <td style={{ padding: "8px 10px" }}>
+                  <td className={styles.td}>
                     {order.status === "paid" && order.paymentProvider === "stripe" ? (
                       <button
                         type="button"
@@ -293,7 +294,7 @@ export function AdminOrdersPanel() {
       ) : null}
 
       {!isLoading && !errorMessage && filteredOrders.length > 0 && totalPages > 1 ? (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 12 }}>
+        <div className={styles.pagination}>
           <button
             type="button"
             className="button-ghost btn-padding-site"
