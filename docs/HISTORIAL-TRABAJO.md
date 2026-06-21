@@ -12,6 +12,17 @@
 
 ---
 
+## 21-06-2026 (rama dev-21062026-sonnet)
+
+### Sonnet (auditoría + inicio jornada)
+
+- [audit ✅] Auditoría de apertura: REGLAS-IA, HISTORIAL y git revisados. 4 cambios sin commitear de la jornada anterior sellados en rama nueva — commit 13a1564
+- [17.11 📋] Nueva tarea registrada en plan: barra de menú móvil con iconos de plataformas. Pendiente de discutir enfoque (opciones A/B/C documentadas en PLAN-MEJORAS-AUDITORIA.md)
+- [17.12 📋] Nueva tarea registrada en plan: rediseño completo experiencia móvil (mínimo 50% home). Pendiente plan visual antes de código
+- [responsive ✅] FeaturedSection mobile: grid 2 columnas en 720px, aspect-ratio 3:4, `sizes` responsive en SideCard, tipografía compacta, badges ajustados — commit 13a1564
+
+---
+
 ## 20-06-2026 (rama dev-20062026)
 
 ### Sonnet/Opus (planificación + auditoría)
