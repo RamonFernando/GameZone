@@ -91,7 +91,7 @@ export function AdminControlClient({ role }: { role: AdminRole }) {
       />
 
       {role === "SUPER_ADMIN" && showAdminPanel ? (
-        <div ref={adminPanelRef}>
+        <div ref={adminPanelRef} style={{ scrollMarginTop: "120px" }}>
           <AdminUsersPanel />
         </div>
       ) : role !== "SUPER_ADMIN" ? (
