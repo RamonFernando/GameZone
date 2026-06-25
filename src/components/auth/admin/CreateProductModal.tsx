@@ -126,6 +126,8 @@ export function CreateProductModal({
               value={draft.stock}
               onChange={(event) => setDraft((prev) => ({ ...prev, stock: event.target.value }))}
             />
+          </div>
+          <div className={styles.gridTwoCols}>
             <input
               className="auth-input"
               placeholder="Cashback (%)"
@@ -186,7 +188,7 @@ export function CreateProductModal({
           <div className={styles.btnRow}>
             <button
               type="button"
-              className={`button-primary auth-submit-compact admin-center-button ${styles.btnSave}`}
+              className={`button-primary auth-submit-compact ${styles.btnSave}`}
               onClick={onSave}
               disabled={isSaving}
             >
@@ -194,7 +196,7 @@ export function CreateProductModal({
             </button>
             <button
               type="button"
-              className={`button-ghost button-ghost-equal admin-center-button ${styles.btnCancel}`}
+              className={`button-ghost button-ghost-equal ${styles.btnCancel}`}
               onClick={onClose}
             >
               Cancelar
