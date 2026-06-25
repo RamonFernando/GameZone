@@ -1,3 +1,5 @@
+@use '../../styles/mixins' as *;
+
 /* ─── Animaciones ─── */
 @keyframes nav-logo-circle-rotate {
   from { transform: rotate(0deg); }
@@ -534,9 +536,21 @@
   }
 }
 
-/* 1100px — navbar flex-wrap */
+/* 1100px — ocultar texto de plataformas + ajuste acciones */
 @media (max-width: 1100px) {
+  .navActions {
+    margin-left: 0;
+  }
+
+  .navPlatformsDesktop .navPlatformText {
+    display: none;
+  }
+}
+
+/* 840px — segunda fila para plataformas + ajustes tablet pequeña */
+@media (max-width: 840px) {
   .navbar {
+    padding: 0.65rem 0.9rem 0.7rem;
     flex-wrap: wrap;
     row-gap: 0.6rem;
   }
@@ -547,17 +561,6 @@
     overflow-x: auto;
     padding-bottom: 0.25rem;
     scrollbar-width: thin;
-  }
-
-  .navActions {
-    margin-left: 0;
-  }
-}
-
-/* 840px */
-@media (max-width: 840px) {
-  .navbar {
-    padding: 0.65rem 0.9rem 0.7rem;
   }
 
   .navLogoText {
@@ -728,7 +731,11 @@
   }
 
   .navMobilePlatforms .navPlatformPill {
-    padding: 0.35rem 0.75rem;
+    padding: 0.35rem 0.75rem 0.35rem 42%;
+  }
+
+  .navMobilePlatforms .navPlatformWithIcon {
+    justify-content: flex-start;
   }
 
   .navMobileActions {
@@ -974,6 +981,69 @@
 
     &:focus {
       width: clamp(230px, 38vw, 320px);
+    }
+  }
+}
+
+/* 815–1100px — override: fila única con solo iconos */
+@media (min-width: 815px) and (max-width: 1100px) {
+  .navbar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    row-gap: 0;
+    padding: 0.65rem 1.25rem 0.75rem;
+  }
+
+  .navLogo {
+    width: auto;
+    grid-area: unset;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+  }
+
+  .navPlatforms {
+    order: 0;
+    width: auto;
+    grid-area: unset;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    row-gap: 0;
+  }
+
+  .navActions {
+    width: auto;
+    grid-area: unset;
+    justify-self: unset;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .navSearch {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: auto;
+  }
+
+  .navPlatformPill {
+    flex: 0 0 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* 815–1024px — buscador compacto para que quepan logo + iconos */
+@media (min-width: 815px) and (max-width: 1024px) {
+  .navSearchInput {
+    width: clamp(80px, 10vw, 130px);
+
+    &:focus {
+      width: clamp(100px, 14vw, 160px);
     }
   }
 }

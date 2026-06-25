@@ -843,10 +843,6 @@ h1,
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
-
-  @media (min-width: 641px) and (max-width: 1100px) {
-    display: none;
-  }
 }
 
 /* featured-* migrado a FeaturedSection.module.scss */

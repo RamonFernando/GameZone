@@ -1,0 +1,30 @@
+// ── BREAKPOINTS ─────────────────────────────────────────────
+$bp-mobile:     480px;
+$bp-tablet-min: 841px;
+$bp-tablet-max: 1100px;
+$bp-desktop:    1101px;
+
+// ── MIXINS ───────────────────────────────────────────────────
+@mixin device-between($min, $max) {
+  @media (min-width: $min) and (max-width: $max) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: $bp-mobile) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @include device-between($bp-tablet-min, $bp-tablet-max) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $bp-desktop) {
+    @content;
+  }
+}
