@@ -16,9 +16,11 @@
 
 ### Sonnet (auditoría + implementación)
 
-- [audit ✅] Auditoría de apertura: REGLAS-IA, HISTORIAL y git revisados. Working tree limpio, última jornada 21-06-2026.
-- [17.x ✅] Modal "Crear producto": formulario inline de AdminProductsPanel (~14 inputs siempre visibles) sustituido por botón `+ Crear producto` → abre `CreateProductModal`. Escape + scroll-lock + reset al cancelar/crear. "Fin de oferta" como toggle opcional dentro del modal. CreateProductModal.tsx + CreateProductModal.module.scss creados. tsc + 77/77 — commit pendiente
-- [17.x ✅] Modal "Crear administrador": formulario inline de AdminUsersPanel (3 campos) sustituido por botón `+ Crear administrador` → abre modal inline. Mismo patrón (Escape, scroll-lock, reset). tsc + 77/77 — commit pendiente
+- [audit ✅] Auditoría de apertura (sesión 1): REGLAS-IA, HISTORIAL y git revisados. Working tree limpio, última jornada 21-06-2026.
+- [17.x ✅] Modal "Crear producto": formulario inline de AdminProductsPanel (~14 inputs siempre visibles) sustituido por botón `+ Crear producto` → abre `CreateProductModal`. Escape + scroll-lock + reset al cancelar/crear. "Fin de oferta" como toggle opcional dentro del modal. CreateProductModal.tsx + CreateProductModal.module.scss creados. tsc + 77/77 — commits en rama (ver git log 25062026)
+- [17.x ✅] Modal "Crear administrador": formulario inline de AdminUsersPanel (3 campos) sustituido por botón `+ Crear administrador` → abre modal inline. Mismo patrón (Escape, scroll-lock, reset). tsc + 77/77 — commits en rama (ver git log 25062026)
+- [audit ✅] Auditoría de apertura (sesión 2): REGLAS-IA, HISTORIAL y git revisados. 20 commits de sesión 1 verificados en rama. Rama renombrada dev-21062026-sonnet → dev-25062026-sonnet. Sistema 3.1 verificado operativo — commit f2c5f0e
+- [fix ✅] Botones plataforma (PlayStation/Xbox/Nintendo/PC) en header no hacían scroll a las cards. Causa: setPlatform() sin scrollToSearchResults(). Fix: añadido scroll en handlers desktop + móvil; scroll-margin-top: 70px en #game-results para no quedar tapado por el header sticky. tsc + 77/77 — commit b2ffbfd
 
 ---
 
