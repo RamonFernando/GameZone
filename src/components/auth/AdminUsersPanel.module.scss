@@ -57,13 +57,7 @@
   display: flex;
   gap: 8px;
   width: 100%;
-  align-items: stretch;
-
-  > button {
-    flex: 1;
-    min-width: 0;
-    align-self: auto;
-  }
+  align-items: center;
 }
 
 /* ── TABLE ──────────────────────────────────────────── */

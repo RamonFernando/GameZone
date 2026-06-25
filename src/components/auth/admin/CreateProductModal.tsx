@@ -188,7 +188,7 @@ export function CreateProductModal({
           <div className={styles.btnRow}>
             <button
               type="button"
-              className={`button-primary auth-submit-compact ${styles.btnSave}`}
+              className={`button-primary button-admin-modal-save ${styles.btnSave}`}
               onClick={onSave}
               disabled={isSaving}
             >
@@ -196,7 +196,7 @@ export function CreateProductModal({
             </button>
             <button
               type="button"
-              className={`button-ghost button-ghost-equal ${styles.btnCancel}`}
+              className={`button-ghost button-admin-modal-cancel ${styles.btnCancel}`}
               onClick={onClose}
             >
               Cancelar

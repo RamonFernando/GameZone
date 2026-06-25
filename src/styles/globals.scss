@@ -146,6 +146,19 @@ img {
   font-weight: 600;
 }
 
+/* Clases compartidas para todos los pares acción/cancelar en modales admin.
+   Garantizan mismo tamaño y alineación sin depender del contexto flex padre. */
+.button-admin-modal-save,
+.button-admin-modal-cancel {
+  padding-block: 0.6rem !important;
+  padding-inline: 1.2rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  align-self: center !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
 .button-ghost {
   display: inline-flex;
   align-items: center;

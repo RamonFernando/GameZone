@@ -194,7 +194,7 @@ export function AdminUsersPanel() {
               <div className={styles.btnRow}>
                 <button
                   type="button"
-                  className="button-primary auth-submit-compact btn-padding-site"
+                  className="button-primary button-admin-modal-save"
                   onClick={handleCreateAdmin}
                   disabled={isCreating}
                 >
@@ -202,7 +202,7 @@ export function AdminUsersPanel() {
                 </button>
                 <button
                   type="button"
-                  className="button-ghost button-ghost-equal btn-padding-site"
+                  className="button-ghost button-admin-modal-cancel"
                   onClick={closeCreateAdmin}
                 >
                   Cancelar
