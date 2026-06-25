@@ -1,4 +1,5 @@
-﻿import { cookies } from "next/headers";
+﻿import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccountOrdersHistory } from "@/components/auth/AccountOrdersHistory";
 import { SESSION_COOKIE_NAME } from "@/services/auth/session";
@@ -31,6 +32,10 @@ export default async function AccountOrdersPage() {
           </header>
 
           <AccountOrdersHistory />
+
+          <Link href="/account" className="button-ghost btn-padding-site">
+            Volver a mi cuenta
+          </Link>
         </AuthFormPanel>
       </AuthCard>
     </AuthShell>
