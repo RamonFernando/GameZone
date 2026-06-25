@@ -116,61 +116,59 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
           </Link>
         )}
       </div>
-      <div className={styles.gridGames}>
-        {displayedGames.length === 0 ? (
-          isFiltered ? (
-            <div className="game-grid-empty">
-              <p className="section-subtitle">
-                {emptyQuery
-                  ? t(lang, "grid.empty-query")(emptyQuery)
-                  : t(lang, "grid.empty-no-query")}
-              </p>
-              {onClearSearch && (
-                <button
-                  type="button"
-                  className="button-ghost btn-padding-site"
-                  onClick={onClearSearch}
-                  style={{ marginTop: "0.75rem" }}
-                >
-                  {t(lang, "grid.clear-search")}
-                </button>
-              )}
-              {popularSuggestions && popularSuggestions.length > 0 && (
-                <div style={{ marginTop: "2rem" }}>
-                  <p className="section-subtitle" style={{ marginBottom: "1rem" }}>
-                    {t(lang, "grid.suggestions-label")}
-                  </p>
-                  <div className={styles.gridGames}>
-                    {popularSuggestions.map((game) => (
-                      <GameCard key={game.slug} game={game} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
+      {displayedGames.length === 0 ? (
+        isFiltered ? (
+          <div className="game-grid-empty">
             <p className="section-subtitle">
-              {t(lang, "grid.empty-catalog")}
+              {emptyQuery
+                ? t(lang, "grid.empty-query")(emptyQuery)
+                : t(lang, "grid.empty-no-query")}
             </p>
-          )
-        ) : (
-          <div className={styles.gridGames}>
-            {displayedGames.map((game, index) => (
-              <div
-                key={game.slug}
-                className={[
-                  styles.gameCardReveal,
-                  styles[`revealDelay${Math.min(index, 8)}` as keyof typeof styles],
-                  visibleCards.has(game.slug) ? styles.gameCardRevealVisible : "",
-                ].filter(Boolean).join(" ")}
-                data-reveal-slug={game.slug}
+            {onClearSearch && (
+              <button
+                type="button"
+                className="button-ghost btn-padding-site"
+                onClick={onClearSearch}
+                style={{ marginTop: "0.75rem" }}
               >
-                <GameCard game={game} />
+                {t(lang, "grid.clear-search")}
+              </button>
+            )}
+            {popularSuggestions && popularSuggestions.length > 0 && (
+              <div style={{ marginTop: "2rem" }}>
+                <p className="section-subtitle" style={{ marginBottom: "1rem" }}>
+                  {t(lang, "grid.suggestions-label")}
+                </p>
+                <div className={styles.gridGames}>
+                  {popularSuggestions.map((game) => (
+                    <GameCard key={game.slug} game={game} />
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+        ) : (
+          <p className="section-subtitle">
+            {t(lang, "grid.empty-catalog")}
+          </p>
+        )
+      ) : (
+        <div className={styles.gridGames}>
+          {displayedGames.map((game, index) => (
+            <div
+              key={game.slug}
+              className={[
+                styles.gameCardReveal,
+                styles[`revealDelay${Math.min(index, 8)}` as keyof typeof styles],
+                visibleCards.has(game.slug) ? styles.gameCardRevealVisible : "",
+              ].filter(Boolean).join(" ")}
+              data-reveal-slug={game.slug}
+            >
+              <GameCard game={game} />
+            </div>
+          ))}
+        </div>
+      )}
       {backHref && (
         <div className="section-footer-back">
           <Link href={backHref} className="button-ghost button-ghost--nav btn-padding-site">

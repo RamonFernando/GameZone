@@ -527,6 +527,12 @@ h1,
   margin-bottom: 1.25rem;
 }
 
+.section-footer-back {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
 @media (max-width: 640px) {
   .section-header {
     flex-direction: column;
