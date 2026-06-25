@@ -56,7 +56,10 @@
 .btnRow {
   display: flex;
   gap: 8px;
-  align-items: center;
+
+  > button {
+    flex: 1;
+  }
 }
 
 /* ── TABLE ──────────────────────────────────────────── */

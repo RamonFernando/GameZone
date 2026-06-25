@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./AdminUsersPanel.module.scss";
 
 type UserRow = {
@@ -156,7 +157,7 @@ export function AdminUsersPanel() {
           Crear administrador
         </button>
       </div>
-      {isCreateAdminOpen ? (
+      {isCreateAdminOpen ? createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -209,7 +210,8 @@ export function AdminUsersPanel() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       ) : null}
 
       <h3 className="auth-label">Usuarios del sistema</h3>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import type { Dispatch, SetStateAction } from "react";
 import type { ProductDraft } from "./types";
 import styles from "./CreateProductModal.module.scss";
@@ -30,7 +31,7 @@ export function CreateProductModal({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -201,6 +202,7 @@ export function CreateProductModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
