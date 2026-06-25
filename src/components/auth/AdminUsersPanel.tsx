@@ -202,7 +202,7 @@ export function AdminUsersPanel() {
                 </button>
                 <button
                   type="button"
-                  className="button-ghost button-admin-modal-cancel"
+                  className={`button-ghost button-admin-modal-cancel ${styles.btnCancelExpand}`}
                   onClick={closeCreateAdmin}
                 >
                   Cancelar
