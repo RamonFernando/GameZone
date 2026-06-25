@@ -11,10 +11,27 @@
 }
 
 /* ── SORT BAR ─────────────────────────────────────────────── */
+.filterToggle {
+  display: none;
+
+  @media (max-width: 640px) {
+    display: inline-flex;
+  }
+}
+
 .sortBar {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    display: none;
+    flex-direction: column;
+
+    &.sortBarVisible {
+      display: flex;
+    }
+  }
 }
 
 /* ── SYNC STATUS ──────────────────────────────────────────── */

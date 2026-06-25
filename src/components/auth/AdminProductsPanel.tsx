@@ -244,6 +244,7 @@ export function AdminProductsPanel({ role, isCreateOpen, onCreateClose, showEnri
   const [addingKeys, setAddingKeys] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingModalCover, setUploadingModalCover] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const pushToast = useCallback((type: ToastItem["type"], text: string) => {
@@ -774,7 +775,15 @@ export function AdminProductsPanel({ role, isCreateOpen, onCreateClose, showEnri
         onChange={(event) => setSearchTerm(event.target.value)}
       />
 
-      <div className={styles.sortBar}>
+      <button
+          type="button"
+          className={`button-ghost btn-padding-site ${styles.filterToggle}`}
+          onClick={() => setShowMobileFilters((prev) => !prev)}
+        >
+          {showMobileFilters ? "✕ Cerrar filtros" : "≡ Filtros y sync"}
+        </button>
+
+      <div className={`${styles.sortBar}${showMobileFilters ? ` ${styles.sortBarVisible}` : ""}`}>
         <button type="button" className="button-ghost btn-padding-site" onClick={() => toggleSort("priceOriginal")}>
           Ordenar por precio {sortColumn === "priceOriginal" ? `(${sortDirection})` : ""}
         </button>
