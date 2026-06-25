@@ -7,6 +7,7 @@ import { ProductEditModal } from "./admin/ProductEditModal";
 import { DeleteProductModal } from "./admin/DeleteProductModal";
 import { KeysModal } from "./admin/KeysModal";
 import { AdminToastList } from "./admin/AdminToastList";
+import { CreateProductModal } from "./admin/CreateProductModal";
 import type { ProductDraft, ToastItem, KeyRow, KeysData } from "./admin/types";
 
 // Fila de producto tal y como viene del backend para el panel admin.
@@ -204,6 +205,14 @@ function KeyIcon() {
   );
 }
 
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+      <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
@@ -235,6 +244,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [addingKeys, setAddingKeys] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingModalCover, setUploadingModalCover] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const pushToast = useCallback((type: ToastItem["type"], text: string) => {
@@ -489,6 +499,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       }
       setDraft(emptyDraft);
       setCreateErrors([]);
+      setIsCreateOpen(false);
       pushToast("success", payload.message ?? "Producto creado.");
       await loadProducts();
     } catch {
@@ -651,6 +662,12 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
     setModalNotice("");
   };
 
+  const closeCreateModal = () => {
+    setIsCreateOpen(false);
+    setDraft(emptyDraft);
+    setCreateErrors([]);
+  };
+
   useEffect(() => {
     if (!editingProductId) {
       return;
@@ -669,6 +686,24 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [editingProductId]);
+
+  useEffect(() => {
+    if (!isCreateOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isCreateOpen]);
+
+  useEffect(() => {
+    if (!isCreateOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeCreateModal();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isCreateOpen]);
 
   const handleModalSave = async () => {
     if (!editingProductId) return;
@@ -720,135 +755,27 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
 
   return (
     <div className="auth-form">
-      <h3 className="auth-label">Crear producto</h3>
-      <input
-        className="auth-input"
-        placeholder="Nombre"
-        value={draft.name}
-        onChange={(event) => setDraft((prev) => ({ ...prev, name: event.target.value }))}
+      <div className={styles.actionBar}>
+        <button
+          type="button"
+          className={`${styles.actionBtn} ${styles.actionBtnCreate}`}
+          onClick={() => setIsCreateOpen(true)}
+        >
+          <PlusIcon />
+          Crear producto
+        </button>
+      </div>
+      <CreateProductModal
+        isOpen={isCreateOpen}
+        draft={draft}
+        setDraft={setDraft}
+        uploadingCover={uploadingCover}
+        onCoverUpload={(file) => void handleCoverUpload(file)}
+        createErrors={createErrors}
+        isSaving={isSaving}
+        onSave={handleCreate}
+        onClose={closeCreateModal}
       />
-      <input
-        className="auth-input"
-        placeholder="Slug"
-        value={draft.slug}
-        onChange={(event) => setDraft((prev) => ({ ...prev, slug: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Descripción"
-        value={draft.description}
-        onChange={(event) => setDraft((prev) => ({ ...prev, description: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="URL imagen (ej: /games_data/.../cover.jpg)"
-        value={draft.coverImage}
-        onChange={(event) => setDraft((prev) => ({ ...prev, coverImage: event.target.value }))}
-      />
-      {/* Alternativa a la URL: subir una imagen desde el equipo. Al subirla,
-          rellena automáticamente el campo de arriba con la URL generada. */}
-      <input
-        className="auth-input"
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={uploadingCover}
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          event.target.value = "";
-          void handleCoverUpload(file);
-        }}
-      />
-      {uploadingCover ? (
-        <p className="auth-alt">Subiendo imagen...</p>
-      ) : null}
-      <input
-        className="auth-input"
-        placeholder="Plataforma (ej: PC, PlayStation)"
-        value={draft.platform}
-        onChange={(event) => setDraft((prev) => ({ ...prev, platform: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Región (ej: EUROPA)"
-        value={draft.region}
-        onChange={(event) => setDraft((prev) => ({ ...prev, region: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Tienda / launcher (ej: Steam)"
-        value={draft.storeLabel}
-        onChange={(event) => setDraft((prev) => ({ ...prev, storeLabel: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Subtítulo de tarjeta (ej: Código de Steam EUROPE)"
-        value={draft.cardSubtitle}
-        onChange={(event) => setDraft((prev) => ({ ...prev, cardSubtitle: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Precio original"
-        value={draft.priceOriginal}
-        onChange={(event) => setDraft((prev) => ({ ...prev, priceOriginal: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Descuento (%)"
-        value={draft.discountPercent}
-        onChange={(event) =>
-          setDraft((prev) => ({ ...prev, discountPercent: event.target.value }))
-        }
-      />
-      <input
-        className="auth-input"
-        placeholder="Stock disponible"
-        value={draft.stock}
-        onChange={(event) => setDraft((prev) => ({ ...prev, stock: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Cashback (%)"
-        value={draft.cashbackPercent}
-        onChange={(event) => setDraft((prev) => ({ ...prev, cashbackPercent: event.target.value }))}
-      />
-      <input
-        className="auth-input"
-        placeholder="Likes"
-        value={draft.likesCount}
-        onChange={(event) => setDraft((prev) => ({ ...prev, likesCount: event.target.value }))}
-      />
-      <label className={`auth-alt ${styles.labelCheckbox}`}>
-        <input
-          type="checkbox"
-          checked={draft.isActive}
-          onChange={(event) =>
-            setDraft((prev) => ({ ...prev, isActive: event.target.checked }))
-          }
-        />
-        Producto activo
-      </label>
-      <label className={`auth-alt ${styles.labelSaleDate}`}>
-        Fin de oferta (opcional — deja vacío para sin límite)
-        <input
-          className="auth-input"
-          type="datetime-local"
-          value={draft.saleEndsAt}
-          onChange={(event) => setDraft((prev) => ({ ...prev, saleEndsAt: event.target.value }))}
-        />
-      </label>
-      {createErrors.map((error) => (
-        <p key={error} className="auth-alt" role="alert">
-          {error}
-        </p>
-      ))}
-      <button
-        type="button"
-        className="button-primary auth-submit-compact admin-center-button btn-padding-site"
-        onClick={handleCreate}
-        disabled={isSaving}
-      >
-        {isSaving ? "Guardando..." : "Crear producto"}
-      </button>
 
       <h3 className="auth-label">Productos</h3>
       <input

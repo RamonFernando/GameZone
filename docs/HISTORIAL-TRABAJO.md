@@ -12,6 +12,16 @@
 
 ---
 
+## 25-06-2026 (rama dev-25062026-sonnet)
+
+### Sonnet (auditoría + implementación)
+
+- [audit ✅] Auditoría de apertura: REGLAS-IA, HISTORIAL y git revisados. Working tree limpio, última jornada 21-06-2026.
+- [17.x ✅] Modal "Crear producto": formulario inline de AdminProductsPanel (~14 inputs siempre visibles) sustituido por botón `+ Crear producto` → abre `CreateProductModal`. Escape + scroll-lock + reset al cancelar/crear. "Fin de oferta" como toggle opcional dentro del modal. CreateProductModal.tsx + CreateProductModal.module.scss creados. tsc + 77/77 — commit pendiente
+- [17.x ✅] Modal "Crear administrador": formulario inline de AdminUsersPanel (3 campos) sustituido por botón `+ Crear administrador` → abre modal inline. Mismo patrón (Escape, scroll-lock, reset). tsc + 77/77 — commit pendiente
+
+---
+
 ## 21-06-2026 (rama dev-21062026-sonnet)
 
 ### Sonnet (auditoría + inicio jornada)
