@@ -1,8 +1,7 @@
 ﻿import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { AdminProductsPanel } from "@/components/auth/AdminProductsPanel";
-import { AdminUsersPanel } from "@/components/auth/AdminUsersPanel";
+import { AdminControlClient } from "@/components/auth/AdminControlClient";
 import { SESSION_COOKIE_NAME } from "@/services/auth/session";
 import { getActiveSessionFromToken } from "@/services/auth/session-server";
 import { AuthShell } from "@/components/auth/layout/AuthShell";
@@ -36,14 +35,7 @@ export default async function AdminControlPage() {
             </p>
           </header>
 
-          <AdminProductsPanel role={session.role} />
-          {session.role === "SUPER_ADMIN" ? (
-            <AdminUsersPanel />
-          ) : (
-            <p className="auth-alt">
-              Solo el super admin puede gestionar administradores.
-            </p>
-          )}
+          <AdminControlClient role={session.role} />
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             <Link href="/admin/orders" className="button-ghost btn-padding-site">

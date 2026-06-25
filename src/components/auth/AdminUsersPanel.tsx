@@ -25,23 +25,18 @@ const emptyDraft: Draft = {
   password: "",
 };
 
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-      <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
-    </svg>
-  );
-}
+type AdminUsersPanelProps = {
+  isCreateAdminOpen: boolean;
+  onCreateAdminClose: () => void;
+};
 
-export function AdminUsersPanel() {
+export function AdminUsersPanel({ isCreateAdminOpen, onCreateAdminClose }: AdminUsersPanelProps) {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
-  const [isCreateAdminOpen, setIsCreateAdminOpen] = useState(false);
-
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -82,7 +77,7 @@ export function AdminUsersPanel() {
   }, [isCreateAdminOpen]);
 
   const closeCreateAdmin = () => {
-    setIsCreateAdminOpen(false);
+    onCreateAdminClose();
     setDraft(emptyDraft);
     setMessage("");
   };
@@ -103,7 +98,7 @@ export function AdminUsersPanel() {
         return;
       }
 
-      setIsCreateAdminOpen(false);
+      onCreateAdminClose();
       setDraft(emptyDraft);
       setMessage(payload.message ?? "Administrador creado.");
       await loadUsers();
@@ -147,16 +142,6 @@ export function AdminUsersPanel() {
 
   return (
     <div className="auth-form">
-      <div className={styles.actionBar}>
-        <button
-          type="button"
-          className={`${styles.actionBtn} ${styles.actionBtnCreate}`}
-          onClick={() => setIsCreateAdminOpen(true)}
-        >
-          <PlusIcon />
-          Crear administrador
-        </button>
-      </div>
       {isCreateAdminOpen ? createPortal(
         <div
           role="dialog"

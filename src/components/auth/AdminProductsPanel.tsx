@@ -205,15 +205,14 @@ function KeyIcon() {
   );
 }
 
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-      <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
-    </svg>
-  );
-}
+type AdminProductsPanelProps = {
+  role: AdminRole;
+  isCreateOpen: boolean;
+  onCreateClose: () => void;
+  showEnrichment: boolean;
+};
 
-export function AdminProductsPanel({ role }: { role: AdminRole }) {
+export function AdminProductsPanel({ role, isCreateOpen, onCreateClose, showEnrichment }: AdminProductsPanelProps) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
   const [createErrors, setCreateErrors] = useState<string[]>([]);
@@ -244,7 +243,6 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   const [addingKeys, setAddingKeys] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingModalCover, setUploadingModalCover] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const modalNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const pushToast = useCallback((type: ToastItem["type"], text: string) => {
@@ -499,7 +497,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
       }
       setDraft(emptyDraft);
       setCreateErrors([]);
-      setIsCreateOpen(false);
+      onCreateClose();
       pushToast("success", payload.message ?? "Producto creado.");
       await loadProducts();
     } catch {
@@ -663,7 +661,7 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
   };
 
   const closeCreateModal = () => {
-    setIsCreateOpen(false);
+    onCreateClose();
     setDraft(emptyDraft);
     setCreateErrors([]);
   };
@@ -755,16 +753,6 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
 
   return (
     <div className="auth-form">
-      <div className={styles.actionBar}>
-        <button
-          type="button"
-          className={`${styles.actionBtn} ${styles.actionBtnCreate}`}
-          onClick={() => setIsCreateOpen(true)}
-        >
-          <PlusIcon />
-          Crear producto
-        </button>
-      </div>
       <CreateProductModal
         isOpen={isCreateOpen}
         draft={draft}
@@ -844,70 +832,6 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
           </label>
         ) : null}
       </div>
-
-      <section className={styles.enrichmentPanel}>
-        <div className={styles.enrichmentHeader}>
-          <div>
-            <h3 className={`auth-label ${styles.enrichmentTitle}`}>
-              Catalogo incompleto
-            </h3>
-            <p className={`auth-alt ${styles.p0}`}>
-              {isLoadingQuality
-                ? "Revisando metadata..."
-                : catalogQuality
-                  ? `${catalogQuality.incomplete} de ${catalogQuality.total} productos necesitan mas informacion.`
-                  : "No hay auditoria disponible."}
-            </p>
-          </div>
-          <div className={styles.enrichmentActions}>
-            <button
-              type="button"
-              className="button-ghost btn-padding-site"
-              onClick={() => loadCatalogQuality()}
-              disabled={isLoadingQuality || isEnrichingCatalog}
-            >
-              Revisar
-            </button>
-            <button
-              type="button"
-              className="button-primary btn-padding-site"
-              onClick={() => handleCatalogEnrichment(false)}
-              disabled={isLoadingQuality || isEnrichingCatalog || catalogQuality?.incomplete === 0}
-            >
-              {isEnrichingCatalog ? "Enriqueciendo..." : "Enriquecer incompletos"}
-            </button>
-          </div>
-        </div>
-
-        {catalogQuality?.products.length ? (
-          <div className={styles.qualityList}>
-            {catalogQuality.products.slice(0, 6).map((product) => (
-              <div key={product.id} className={styles.qualityItem}>
-                <div>
-                  <strong>{product.name}</strong>
-                  <div className="auth-alt">
-                    {product.slug} · {product.storeLabel} · {product.metadataSource ?? "sin fuente"}
-                  </div>
-                </div>
-                <div className={styles.qualityIssuesList}>
-                  {product.issues.slice(0, 3).map((issue) => (
-                    <span
-                      key={`${product.id}-${issue}`}
-                      className={`auth-alt ${styles.qualityIssueBadge}`}
-                    >
-                      {CATALOG_ISSUE_LABELS[issue]}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : !isLoadingQuality ? (
-          <p className={`auth-alt ${styles.p0}`}>
-            Todos los productos activos tienen metadata suficiente.
-          </p>
-        ) : null}
-      </section>
 
       {isLoading ? <p className="auth-alt">Cargando productos...</p> : null}
 
@@ -1019,6 +943,72 @@ export function AdminProductsPanel({ role }: { role: AdminRole }) {
             Siguiente
           </button>
         </div>
+      ) : null}
+
+      {showEnrichment ? (
+        <section className={styles.enrichmentPanel}>
+          <div className={styles.enrichmentHeader}>
+            <div>
+              <h3 className={`auth-label ${styles.enrichmentTitle}`}>
+                Catalogo incompleto
+              </h3>
+              <p className={`auth-alt ${styles.p0}`}>
+                {isLoadingQuality
+                  ? "Revisando metadata..."
+                  : catalogQuality
+                    ? `${catalogQuality.incomplete} de ${catalogQuality.total} productos necesitan mas informacion.`
+                    : "No hay auditoria disponible."}
+              </p>
+            </div>
+            <div className={styles.enrichmentActions}>
+              <button
+                type="button"
+                className="button-ghost btn-padding-site"
+                onClick={() => loadCatalogQuality()}
+                disabled={isLoadingQuality || isEnrichingCatalog}
+              >
+                Revisar
+              </button>
+              <button
+                type="button"
+                className="button-primary btn-padding-site"
+                onClick={() => handleCatalogEnrichment(false)}
+                disabled={isLoadingQuality || isEnrichingCatalog || catalogQuality?.incomplete === 0}
+              >
+                {isEnrichingCatalog ? "Enriqueciendo..." : "Enriquecer incompletos"}
+              </button>
+            </div>
+          </div>
+
+          {catalogQuality?.products.length ? (
+            <div className={styles.qualityList}>
+              {catalogQuality.products.slice(0, 6).map((product) => (
+                <div key={product.id} className={styles.qualityItem}>
+                  <div>
+                    <strong>{product.name}</strong>
+                    <div className="auth-alt">
+                      {product.slug} · {product.storeLabel} · {product.metadataSource ?? "sin fuente"}
+                    </div>
+                  </div>
+                  <div className={styles.qualityIssuesList}>
+                    {product.issues.slice(0, 3).map((issue) => (
+                      <span
+                        key={`${product.id}-${issue}`}
+                        className={`auth-alt ${styles.qualityIssueBadge}`}
+                      >
+                        {CATALOG_ISSUE_LABELS[issue]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : !isLoadingQuality ? (
+            <p className={`auth-alt ${styles.p0}`}>
+              Todos los productos activos tienen metadata suficiente.
+            </p>
+          ) : null}
+        </section>
       ) : null}
 
       <ProductEditModal
