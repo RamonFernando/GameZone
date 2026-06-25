@@ -39,6 +39,29 @@
   border-color: rgba(191, 219, 254, 0.9);
 }
 
+/* ── ORDERS PAGE BACK BUTTON ───────────────────────────── */
+.orders-kicker-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orders-subtitle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+
+  .auth-subtitle { margin: 0; }
+}
+
+.orders-back-mobile { display: none; }
+
+@media (max-width: 640px) {
+  .orders-back-desktop { display: none; }
+  .orders-back-mobile  { display: inline-flex; }
+}
+
 @media (max-width: 640px) {
   /* Avatar header: centrado en móvil */
   .account-avatar-header {
