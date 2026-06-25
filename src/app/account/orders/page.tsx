@@ -23,6 +23,10 @@ export default async function AccountOrdersPage() {
     <AuthShell>
       <AuthCard>
         <AuthFormPanel>
+          <Link href="/account" className="button-ghost btn-padding-site" style={{ alignSelf: "flex-start" }}>
+            ← Volver
+          </Link>
+
           <header className="auth-header">
             <p className="auth-kicker">GameZone Access</p>
             <h1 className="auth-title">Historial de compras</h1>
@@ -33,9 +37,11 @@ export default async function AccountOrdersPage() {
 
           <AccountOrdersHistory />
 
-          <Link href="/account" className="button-ghost btn-padding-site">
-            Volver a mi cuenta
-          </Link>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Link href="/account" className="button-ghost btn-padding-site">
+              Volver a mi cuenta
+            </Link>
+          </div>
         </AuthFormPanel>
       </AuthCard>
     </AuthShell>
