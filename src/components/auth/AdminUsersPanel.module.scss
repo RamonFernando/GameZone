@@ -58,10 +58,10 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
-}
 
-.btnCancelExpand {
-  width: 100% !important;
+  > button {
+    width: 100% !important;
+  }
 }
 
 /* ── TABLE ──────────────────────────────────────────── */
