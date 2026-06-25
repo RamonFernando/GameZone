@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styles from "./AdminControlClient.module.scss";
 import { AdminProductsPanel } from "./AdminProductsPanel";
 import { AdminUsersPanel } from "./AdminUsersPanel";
@@ -25,8 +25,31 @@ function ListIcon() {
 
 export function AdminControlClient({ role }: { role: AdminRole }) {
   const [isCreateProductOpen, setIsCreateProductOpen] = useState(false);
-  const [isCreateAdminOpen, setIsCreateAdminOpen] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showEnrichment, setShowEnrichment] = useState(false);
+
+  const adminPanelRef = useRef<HTMLDivElement>(null);
+  const enrichmentRef = useRef<HTMLElement>(null);
+
+  const toggleAdminPanel = () => {
+    setShowAdminPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => adminPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      }
+      return next;
+    });
+  };
+
+  const toggleEnrichment = () => {
+    setShowEnrichment((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => enrichmentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      }
+      return next;
+    });
+  };
 
   return (
     <>
@@ -43,16 +66,16 @@ export function AdminControlClient({ role }: { role: AdminRole }) {
           <button
             type="button"
             className={`${styles.actionBtn} ${styles.actionBtnCreate}`}
-            onClick={() => setIsCreateAdminOpen(true)}
+            onClick={toggleAdminPanel}
           >
             <PlusIcon />
-            Crear administrador
+            {showAdminPanel ? "Ocultar administradores" : "Crear administrador"}
           </button>
         ) : null}
         <button
           type="button"
           className={`${styles.actionBtn} ${styles.actionBtnCatalog}`}
-          onClick={() => setShowEnrichment((prev) => !prev)}
+          onClick={toggleEnrichment}
         >
           <ListIcon />
           {showEnrichment ? "Ocultar catálogo" : "Catálogo incompleto"}
@@ -64,18 +87,18 @@ export function AdminControlClient({ role }: { role: AdminRole }) {
         isCreateOpen={isCreateProductOpen}
         onCreateClose={() => setIsCreateProductOpen(false)}
         showEnrichment={showEnrichment}
+        enrichmentRef={enrichmentRef}
       />
 
-      {role === "SUPER_ADMIN" ? (
-        <AdminUsersPanel
-          isCreateAdminOpen={isCreateAdminOpen}
-          onCreateAdminClose={() => setIsCreateAdminOpen(false)}
-        />
-      ) : (
+      {role === "SUPER_ADMIN" && showAdminPanel ? (
+        <div ref={adminPanelRef}>
+          <AdminUsersPanel />
+        </div>
+      ) : role !== "SUPER_ADMIN" ? (
         <p className="auth-alt">
           Solo el super admin puede gestionar administradores.
         </p>
-      )}
+      ) : null}
     </>
   );
 }

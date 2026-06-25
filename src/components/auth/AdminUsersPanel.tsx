@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import styles from "./AdminUsersPanel.module.scss";
 
 type UserRow = {
@@ -25,18 +24,14 @@ const emptyDraft: Draft = {
   password: "",
 };
 
-type AdminUsersPanelProps = {
-  isCreateAdminOpen: boolean;
-  onCreateAdminClose: () => void;
-};
-
-export function AdminUsersPanel({ isCreateAdminOpen, onCreateAdminClose }: AdminUsersPanelProps) {
+export function AdminUsersPanel() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -58,30 +53,6 @@ export function AdminUsersPanel({ isCreateAdminOpen, onCreateAdminClose }: Admin
     void loadUsers();
   }, []);
 
-  useEffect(() => {
-    if (!isCreateAdminOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [isCreateAdminOpen]);
-
-  useEffect(() => {
-    if (!isCreateAdminOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeCreateAdmin();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isCreateAdminOpen]);
-
-  const closeCreateAdmin = () => {
-    onCreateAdminClose();
-    setDraft(emptyDraft);
-    setMessage("");
-  };
-
   const handleCreateAdmin = async () => {
     try {
       setIsCreating(true);
@@ -98,7 +69,6 @@ export function AdminUsersPanel({ isCreateAdminOpen, onCreateAdminClose }: Admin
         return;
       }
 
-      onCreateAdminClose();
       setDraft(emptyDraft);
       setMessage(payload.message ?? "Administrador creado.");
       await loadUsers();
@@ -142,65 +112,39 @@ export function AdminUsersPanel({ isCreateAdminOpen, onCreateAdminClose }: Admin
 
   return (
     <div className="auth-form">
-      {isCreateAdminOpen ? createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Crear administrador"
-          onClick={closeCreateAdmin}
-          className={styles.overlay}
+      <h3 className="auth-label">Crear administrador</h3>
+      <div className={styles.createForm}>
+        <input
+          className="auth-input"
+          placeholder="Nombre"
+          value={draft.name}
+          onChange={(event) => setDraft((prev) => ({ ...prev, name: event.target.value }))}
+        />
+        <input
+          className="auth-input"
+          placeholder="Email"
+          value={draft.email}
+          onChange={(event) => setDraft((prev) => ({ ...prev, email: event.target.value }))}
+        />
+        <input
+          className="auth-input"
+          type="password"
+          placeholder="Contraseña temporal"
+          value={draft.password}
+          onChange={(event) => setDraft((prev) => ({ ...prev, password: event.target.value }))}
+        />
+        {message ? <p className="auth-alt" role="alert">{message}</p> : null}
+        <button
+          type="button"
+          className="button-primary btn-padding-site"
+          onClick={handleCreateAdmin}
+          disabled={isCreating}
         >
-          <div
-            className={`card ${styles.modalCard}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3 className="auth-title" style={{ marginBottom: 8 }}>Crear administrador</h3>
-            <div className="auth-form">
-              <input
-                className="auth-input"
-                placeholder="Nombre"
-                value={draft.name}
-                onChange={(event) => setDraft((prev) => ({ ...prev, name: event.target.value }))}
-              />
-              <input
-                className="auth-input"
-                placeholder="Email"
-                value={draft.email}
-                onChange={(event) => setDraft((prev) => ({ ...prev, email: event.target.value }))}
-              />
-              <input
-                className="auth-input"
-                type="password"
-                placeholder="Contraseña temporal"
-                value={draft.password}
-                onChange={(event) => setDraft((prev) => ({ ...prev, password: event.target.value }))}
-              />
-              {message ? <p className="auth-alt" role="alert">{message}</p> : null}
-              <div className={styles.btnRow}>
-                <button
-                  type="button"
-                  className="button-primary button-admin-modal-save"
-                  onClick={handleCreateAdmin}
-                  disabled={isCreating}
-                >
-                  {isCreating ? "Creando..." : "Crear administrador"}
-                </button>
-                <button
-                  type="button"
-                  className="button-ghost button-admin-modal-cancel"
-                  onClick={closeCreateAdmin}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body
-      ) : null}
+          {isCreating ? "Creando..." : "Crear administrador"}
+        </button>
+      </div>
 
       <h3 className="auth-label">Usuarios del sistema</h3>
-      {message ? <p className="auth-alt">{message}</p> : null}
       {isLoading ? <p className="auth-alt">Cargando usuarios...</p> : null}
 
       {!isLoading ? (

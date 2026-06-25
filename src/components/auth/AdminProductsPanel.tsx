@@ -1,7 +1,7 @@
 // Panel de administración de productos: listado, filtros, creación y edición.
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import styles from "./AdminProductsPanel.module.scss";
 import { ProductEditModal } from "./admin/ProductEditModal";
 import { DeleteProductModal } from "./admin/DeleteProductModal";
@@ -210,9 +210,10 @@ type AdminProductsPanelProps = {
   isCreateOpen: boolean;
   onCreateClose: () => void;
   showEnrichment: boolean;
+  enrichmentRef?: RefObject<HTMLElement | null>;
 };
 
-export function AdminProductsPanel({ role, isCreateOpen, onCreateClose, showEnrichment }: AdminProductsPanelProps) {
+export function AdminProductsPanel({ role, isCreateOpen, onCreateClose, showEnrichment, enrichmentRef }: AdminProductsPanelProps) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
   const [createErrors, setCreateErrors] = useState<string[]>([]);
@@ -946,7 +947,7 @@ export function AdminProductsPanel({ role, isCreateOpen, onCreateClose, showEnri
       ) : null}
 
       {showEnrichment ? (
-        <section className={styles.enrichmentPanel}>
+        <section ref={enrichmentRef} className={styles.enrichmentPanel}>
           <div className={styles.enrichmentHeader}>
             <div>
               <h3 className={`auth-label ${styles.enrichmentTitle}`}>
