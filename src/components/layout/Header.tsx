@@ -279,10 +279,12 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
         key={platformName}
         type="button"
         className={`${styles.navPlatformPill} ${styles.navPlatformWithIcon}${platform === platformName ? ` ${styles.navPlatformPillActive}` : ""}`}
-        onClick={() =>
-          setPlatform(platform === platformName ? null : platformName)
-        }
-                 aria-pressed={platform === platformName ? "true" : "false"}
+        onClick={() => {
+          const next = platform === platformName ? null : platformName;
+          setPlatform(next);
+          if (next) scrollToSearchResults();
+        }}
+        aria-pressed={platform === platformName ? "true" : "false"}
       >
         <Image
           src={iconMap[platformName]}
@@ -419,10 +421,12 @@ export function Header({ topTransparentOnTop = false }: HeaderProps) {
                 type="button"
                 className={`${styles.navPlatformPill} ${styles.navPlatformWithIcon}${platform === platformName ? ` ${styles.navPlatformPillActive}` : ""}`}
                 onClick={() => {
-                  setPlatform(platform === platformName ? null : platformName);
+                  const next = platform === platformName ? null : platformName;
+                  setPlatform(next);
                   setMobileMenuOpen(false);
+                  if (next) scrollToSearchResults();
                 }}
-                 aria-pressed={platform === platformName ? "true" : "false"}
+                aria-pressed={platform === platformName ? "true" : "false"}
               >
                 <Image
                   src={iconMap[platformName]}

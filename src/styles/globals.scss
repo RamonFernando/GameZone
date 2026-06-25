@@ -848,3 +848,6 @@ h1,
 /* featured-* migrado a FeaturedSection.module.scss */
 
 /* promo-app-* migrado a PromoAppBanner.module.scss */
+
+/* scroll offset para que el header sticky no tape la sección de resultados */
+#game-results { scroll-margin-top: 70px; }
