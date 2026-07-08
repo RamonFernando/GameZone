@@ -12,6 +12,17 @@
 
 ---
 
+## 08-07-2026 (rama dev-08072026)
+
+### Fable 5 (auditoría + merge a producción)
+
+- [audit ✅] Auditoría de apertura: REGLAS-IA, HISTORIAL, auditoría y git revisados. Working tree limpio. Detectados 2 commits GPT huérfanos en `dev-19062026-gpt` (12.2 sugerencias buscador `07d9443` · 12.3/12.7 filtro plataforma admin `4286231`) no incluidos en la rama sonnet.
+- [merge ✅] Cherry-pick de `07d9443` y `4286231` a `dev-25062026-sonnet` sin conflictos. Verificación: tsc limpio + 77/77 tests. Nota: `npm run build` falla en local por lock de Prisma DLL (EPERM Windows/Dropbox, problema conocido, no de código); lint con 2 errores preexistentes (`make-og-card.cjs` require-imports · `KeyRow` sin uso en AdminProductsPanel, anteriores a esta sesión).
+- [merge ✅] `dev-25062026-sonnet` → `main` (fast-forward, **79 commits**, 66 archivos, +4967/−1358) + push a `origin/main` → deploy Netlify disparado. main pasa de `1cc10d9` (17/06) a `67ff4ec`. Incluye: FASE 14 completa salvo 14.7, FASE 16 cuenta/admin, fix P1, OG card, modales admin, fixes responsive 25/06 y los 2 cherry-picks GPT.
+- [docs ✅] Auditoría sincronizada tras el merge: 12.2/12.3/12.7 ya no figuran "sin mergear"; FASE 16 actualizada de "⬜ PENDIENTE" a su estado real (~80%: 16.2 ✅, 16.1 casi —27 inline restantes fuera de admin—, 16.3 parcial —falta trocear AccountDashboard 1802 L—, 16.5 parcial, 16.4 pendiente —globals.scss 859 L). Reabiertos 12.1/12.4/12.6 y re-verificación de 12.2 quedan pendientes de comprobación en producción.
+
+---
+
 ## 25-06-2026 (rama dev-25062026-sonnet)
 
 ### Sonnet (auditoría + implementación)

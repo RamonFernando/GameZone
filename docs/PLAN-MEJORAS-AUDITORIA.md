@@ -51,10 +51,10 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 10 — Testing y robustez** | ⚠️ en curso — **10.1 ✅ 11/06**, **10.2 ✅ 13/06** (Playwright 3 specs), **10.3 ✅ 13/06** (ESLint CI + Lighthouse CI); 10.4 pendiente |
 | **P1 — Ofertas del día** | ✅ RESUELTO 20/06/2026 — verificado visualmente por Ramón. Commit 9769a95. |
 | **FASE 11 — Bugs críticos** | ✅ 11.1/11.3 ✅; 11.2 ✅ (claves en email cubiertas por Fase 14); 11.4 ⚠️ parcial (prefijo país + postal específica por país pendientes) |
-| **FASE 12 — UX rota** | ⚠️ en curso · 🔴 **REABIERTOS por testing de Ramón 20/06**: 12.1 (falta Nick real), 12.2 (sin mergear a main), 12.6 (countdown a cero sigue roto), 12.4 (pedidos lentos/"no funcionan"). 12.5/12.8/12.9 ✅; 12.3/12.7 ✅ (GPT, sin mergear). Ver sección "FEEDBACK DE TESTING". |
+| **FASE 12 — UX rota** | ⚠️ en curso · **12.2/12.3/12.7 mergeados a main el 08/07/2026** (ya en producción). 🔴 Reabiertos pendientes de re-verificar en producción tras el deploy: 12.1 (falta Nick real), 12.2 (re-test buscador), 12.6 (countdown a cero), 12.4 (pedidos lentos/"no funcionan"). 12.5/12.8/12.9 ✅. Ver sección "FEEDBACK DE TESTING". |
 | **FASE 14 — Claves de juego** | ⚠️ en curso — **14.0b/14.1/14.2/14.3/14.4/14.5/14.6 ✅**; 14.7 ⬜ (validación pre-checkout, requiere flag o inventario real) |
 | **FASE 15 — Cards y plataformas** | ⬜ FUTURO — 15.1 comparador de precios en card, 15.2 formato portrait, 15.3 roadmap de APIs (GOG, Epic, Eneba, EA, PlayStation, Nintendo…) |
-| **FASE 16 — Reestructuración MVC** | ⬜ PENDIENTE — 160 estilos inline a erradicar, paneles cuenta/admin sin módulo CSS, archivos de 1600-1800 L a trocear. Reorganización sin cambio de comportamiento. |
+| **FASE 16 — Reestructuración MVC** | ⚠️ ~80% HECHA (21/06, en main desde 08/07) — 16.2 ✅ módulos en todos los paneles cuenta/admin · 16.1 casi (de 160 inline quedan 27, fuera de admin) · 16.3 parcial (AdminProductsPanel troceado; falta AccountDashboard 1802 L) · 16.5 parcial · 16.4 ⬜ (globals.scss 859 L) |
 | **FASE 17 — Sistema de diseño** | ⬜ DISEÑO — primitivos reutilizables + rediseño de card/header/footer/carrusel/secciones/comparador/cuenta/pedidos/admin. Ramón elige variantes A/B/C. |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
@@ -528,13 +528,13 @@ npm run build
 - **Acción:**
   1. Detectar ruta actual en el componente de búsqueda: si `pathname === "/"` filtrar en home; si `pathname === "/games"` filtrar en `/games`.
   2. Añadir dropdown de sugerencias (top 5 resultados) visible desde cualquier página, con link directo a la ficha.
-- **Implementado:** punto 1 resuelto previamente (18/06/2026). Punto 2 (dropdown de sugerencias) implementado por GPT en `Header.tsx` + `Header.module.scss` — commit `07d9443` (rama `dev-19062026-gpt`, pendiente merge a main).
-- **Nota:** merge a main pendiente para que los cambios de GPT (12.2 + 12.3/12.7) lleguen a producción.
+- **Implementado:** punto 1 resuelto previamente (18/06/2026). Punto 2 (dropdown de sugerencias) implementado por GPT en `Header.tsx` + `Header.module.scss` — commit `07d9443`, **cherry-picked y mergeado a main el 08/07/2026**.
+- **Nota:** en producción desde el deploy del 08/07/2026 — re-verificar en runtime (estaba reabierto por testing).
 
 ### 12.3 — Botones PlayStation/Xbox/Nintendo/PC no filtran en cuenta ni pedidos 🟠 ALTA · ✅ HECHO (19/06/2026)
 - Los chips de plataforma solo funcionan en la home. En historial de pedidos y en pedidos de admin no hacen nada.
 - **Acción:** en `AccountDashboard` (historial de pedidos) y en `AdminOrdersPanel` añadir filtro por plataforma usando los mismos chips. Si se está en la home, navegar y filtrar las cards.
-- **Implementado:** lado cuenta (`AccountOrdersHistory.tsx`) resuelto previamente (18/06/2026). Lado admin (`AdminOrdersPanel.tsx`) resuelto por GPT — commit `4286231` (rama `dev-19062026-gpt`, pendiente merge a main).
+- **Implementado:** lado cuenta (`AccountOrdersHistory.tsx`) resuelto previamente (18/06/2026). Lado admin (`AdminOrdersPanel.tsx`) resuelto por GPT — commit `4286231`, **cherry-picked y mergeado a main el 08/07/2026**.
 
 ### 12.4 — Panel de cuenta muy básico y lento 🟠 ALTA · ⚠️ PARCIAL
 - Los datos tardan en cargar (sin caché), siempre hay inputs visibles, la foto ocupa demasiado.
@@ -557,7 +557,7 @@ npm run build
 ### 12.7 — Pedidos de admin sin paginación ni filtros de plataforma 🟡 MEDIA · ✅ HECHO (19/06/2026)
 - La auditoría de transacciones muestra todos los pedidos sin paginar.
 - **Acción:** paginación de 20 por página + filtros por estado (pendiente/pagado/reembolsado) y pasarela (Stripe/PayPal/manual) en `AdminOrdersPanel`.
-- **Implementado:** paginación, `statusFilter`, `providerFilter`, controles de página — 18/06/2026. Filtro por plataforma añadido por GPT (commit `4286231`, pendiente merge a main junto con 12.3). Tarea completa.
+- **Implementado:** paginación, `statusFilter`, `providerFilter`, controles de página — 18/06/2026. Filtro por plataforma añadido por GPT (commit `4286231`, **mergeado a main el 08/07/2026**). Tarea completa.
 
 ### 12.8 — Logo G2A incorrecto en ficha de detalle 🟡 MEDIA · ✅ HECHO (18/06/2026)
 - En la sección "Enlaces" de la ficha aparece un icono genérico en lugar del logo de G2A.
@@ -839,7 +839,10 @@ Service    → services/**  → lógica de negocio (ya está razonablemente sepa
 Infra      → lib/**       → prisma, logger, validación, acceso a datos
 ```
 
-### 16.1 — Erradicar estilos inline → CSS Modules 🟠 ALTA · ⬜ PENDIENTE
+### 16.1 — Erradicar estilos inline → CSS Modules 🟠 ALTA · ⚠️ CASI HECHA (21/06/2026)
+> **Estado 08/07/2026:** cuenta/admin migrados (commits `5336de9`/`efba5f4`/`202ab36`/`170df28`/`e7009db`).
+> De 160 inline quedan **27** repartidos en features/app (GameDetailClient 4, GameGrid 3, FeaturedSection 3,
+> CartDrawer 2, loading 2, auth pages 4, resto 9) — auditar cuáles son dinámicos legítimos y migrar el resto.
 - **Acción:** migrar los 160 `style={{…}}` a clases en `*.module.scss` co-locado con cada componente.
   Excepción legítima: valores **dinámicos calculados en runtime** (ej. `style={{ width: \`${pct}%\` }}` de
   una barra de progreso) → se quedan inline o pasan a CSS custom properties (`style={{ "--w": pct }}`).
@@ -848,13 +851,18 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
 - **Verificar:** parità visual antes/después por componente; `grep -rn "style={{" src` baja de 160 a solo
   los dinámicos justificados.
 
-### 16.2 — Co-locar `.module.scss` en los paneles de cuenta/admin 🟠 ALTA · ⬜ PENDIENTE
+### 16.2 — Co-locar `.module.scss` en los paneles de cuenta/admin 🟠 ALTA · ✅ HECHA (21/06/2026)
+> Los 6 paneles tienen su módulo co-locado (AccountDashboard, AccountOrdersHistory, AdminProductsPanel,
+> AdminOrdersPanel, AdminUsersPanel, AdminControlClient). `account.scss` adelgazado 349→~50 L (commit `ea88acb`).
 - **Acción:** crear `AccountDashboard.module.scss`, `AdminProductsPanel.module.scss`,
   `AdminOrdersPanel.module.scss`, `AdminUsersPanel.module.scss`, `AccountOrdersHistory.module.scss`.
   Mover a cada uno las reglas que hoy viven en `account.scss`/`globals.scss` y que solo usa ese panel.
 - **Verificar:** `account.scss` adelgaza; cada panel se ve igual; sin clases huérfanas.
 
-### 16.3 — Trocear los componentes kilométricos 🟠 ALTA · ⬜ PENDIENTE
+### 16.3 — Trocear los componentes kilométricos 🟠 ALTA · ⚠️ PARCIAL (21/06/2026)
+> **Hecho:** AdminProductsPanel 1604→1060 L — modales y toasts extraídos a `components/auth/admin/`
+> (ProductEditModal, DeleteProductModal, KeysModal, CreateProductModal, AdminToastList + types.ts, commit `79eea59`).
+> **Pendiente:** `AccountDashboard.tsx` sigue en **1802 L** — es la pieza grande que queda de toda la fase.
 - **Problema:** `AccountDashboard.tsx` (1813 L) y `AdminProductsPanel.tsx` (1604 L) son inmantenibles —
   mezclan datos, formularios, modales y vistas en un solo archivo.
 - **Acción (sin cambiar comportamiento):** extraer subcomponentes con responsabilidad única. Ejemplos:
@@ -863,13 +871,15 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
 - Carpeta por dominio: `components/auth/account/…` y `components/auth/admin/…` para no inflar `components/auth/`.
 - **Verificar:** mismos flujos (crear/editar/borrar/claves/perfil) funcionando; `tsc` + 76 tests + build verdes.
 
-### 16.4 — Adelgazar `globals.scss` 🟡 MEDIA · ⬜ PENDIENTE
+### 16.4 — Adelgazar `globals.scss` 🟡 MEDIA · ⬜ PENDIENTE (08/07/2026: sigue en 859 L, no ha adelgazado)
 - **Acción:** dejar en `globals.scss` solo reset, tokens, tipografía base, `html/body` y utilidades
   realmente globales. Lo que pertenezca a un componente concreto se va a su módulo (resultado natural de
   16.1–16.3). Documentar arriba del archivo qué tipo de regla puede vivir aquí.
 - **Verificar:** `globals.scss` baja claramente de 837 L; nada se rompe visualmente.
 
-### 16.5 — Auditoría de orden de carpetas 🟡 MEDIA · ⬜ PENDIENTE
+### 16.5 — Auditoría de orden de carpetas 🟡 MEDIA · ⚠️ PARCIAL (21/06/2026)
+> `portrait-cover.ts` movido de `lib/` a `components/features/` (commit `54022f6`). `store.ts` y co-locación
+> de Client Components en `app/` dejados intencionalmente (documentado en historial 21/06).
 - **Acción:** revisar archivos "mezclados" fuera de su capa. Mover lo que esté mal ubicado (helpers de UI en
   `lib/`, lógica de negocio en componentes, etc.) respetando el mapa de `CLAUDE.md`. Actualizar imports.
 - **Regla:** mover, no reescribir. Un PR de movimientos + ajuste de imports, sin tocar lógica.
@@ -1043,8 +1053,9 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 > planificación, no implementación** — Ramón pidió expresamente "no se escribe nada, solo planificar".
 >
 > **Dato crítico que explica varios "fallos":** las tareas 12.2 (buscador) y 12.3/12.7 (filtros admin) las
-> hizo GPT pero **viven en `dev-19062026-gpt`, sin mergear a `main`**. Ramón las ve rotas porque su versión
-> en ejecución no las tiene aún. **Acción previa a todo: mergear esa rama.**
+> hizo GPT pero vivían en `dev-19062026-gpt`, sin mergear a `main`. Ramón las veía rotas porque su versión
+> en ejecución no las tenía. ✅ **RESUELTO 08/07/2026:** cherry-picks `07d9443` + `4286231` mergeados a main
+> junto con toda la rama sonnet (79 commits) y desplegados en Netlify. Re-verificar los reabiertos en producción.
 
 ### Mapa de los 22 puntos → fase y estado real
 
@@ -1054,7 +1065,7 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 | 2 | Quitar prefijo si estás en otro país; faltan claves; "compro gratis con postal sin número" | 11.4 + 14 | ⚠️ revisar postal opcional; claves = FASE 14 |
 | 3 | Registro sin Google/Facebook/Twitter; Nick no se ve (sale "Mi cuenta") | 13.1 + 12.1 | 🔴 REABIERTO — no hay campo `username`; OAuth registro pendiente |
 | 4 | Botones plataforma deben filtrar también en historial/cuenta (buscador global) | 12.3 | ⚠️ cuenta hecha; admin y comportamiento home→cards por revisar |
-| 5 | Buscador: en "ver todos" filtra en esa página, no te lleva a la principal; falta panel sugerencias | 12.2 | 🔴 REABIERTO — hecho por GPT pero **sin mergear a main** |
+| 5 | Buscador: en "ver todos" filtra en esa página, no te lleva a la principal; falta panel sugerencias | 12.2 | ⚠️ mergeado a main 08/07/2026 — re-verificar en producción |
 | 6 | Botón idiomas → API de idioma + API de traducción (hoy hardcodeado, "muy malo") | 13.6 + 17.9 | ⚠️ retoque CSS del selector hecho (commit `61ca789`); API de traducción y dropdown custom pendientes |
 | 7 | Comparador: filtra precios entre todas las APIs y devuelve los 3 mejores | 13.3 + 15.3 + 17.5 | ⬜ pendiente |
 | 8 | Crear cuenta con Google/Facebook/Twitter (+Xbox futuro) | 13.1 | ⬜ pendiente |
@@ -1062,7 +1073,7 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 | 10 | Logo G2A correcto en "enlaces" de detalles (web oficial sale con icono raro) | 12.8b | ✅ hecho (commit `5ace357`, falta verif. visual) |
 | 11 | Formato fotos Xbox/API: en PC se recortan a los lados (portrait vs 16:9) | 12.9 + 15.2 | ⚠️ revisar caso PC |
 | 12 | Cuenta tarda en cargar; "pedidos de sistema tampoco funcionan" | 12.4 | 🔴 REABIERTO — verificar flujo en runtime |
-| 13 | Admin transacciones: filtros estado/pasarela + paginación 20/página | 12.7 | ✅ hecho (GPT) **sin mergear** |
+| 13 | Admin transacciones: filtros estado/pasarela + paginación 20/página | 12.7 | ✅ hecho (GPT) — mergeado a main 08/07/2026 |
 | 14 | Revisar reembolsos; email compra con clave, descripción, enlace, logo arriba | 11.2 + 14.4 | ⚠️ verificar reembolsos; email ya hecho |
 | 15 | "También te puede interesar": preferidos/vistos/categoría, no siempre los mismos | 12.5 | ⚠️ falta criterio "vistos recientemente" |
 | 16 | Datos de cuenta en caché (no recargar siempre) | 12.4 | ⬜ pendiente (SWR) |
@@ -1080,7 +1091,7 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 - **12.1 / punto 3,17 — Nick de usuario:** el `<h1>` muestra `name || email`, pero **no existe campo `username`**
   en el modelo `User`. Acción: añadir `username String?` a Prisma + mostrar Nombre + Email + Nick en la cabecera
   de cuenta. Sin Nick, la tarea NO está completa.
-- **12.2 / punto 5 — Buscador:** **mergear `dev-19062026-gpt` a main**. Si tras el merge sigue fallando el
+- **12.2 / punto 5 — Buscador:** ✅ merge hecho el 08/07/2026. Si tras el deploy sigue fallando el
   scope en "ver todos" o falta el panel de sugerencias en detalles, reabrir como bug de código.
 - **12.6 / punto 21 — Countdown a cero:** verificar en vivo que al llegar a 0 el carrusel de Destacados avanza
   de juego y reinicia el timer. La auditoría lo tenía como "aparenta resuelto" sin confirmar.
@@ -1132,8 +1143,9 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 
 ### Reconciliación de ESTADO GLOBAL
 
-Los puntos 5/12.2, 3·17/12.1, 21/12.6 y 12/12.4 **dejan de contar como cerrados** hasta re-verificación tras el
-merge de `dev-19062026-gpt`. El resto de los puntos ya tienen fase asignada arriba; los nuevos (12.8b,
+Los puntos 5/12.2, 3·17/12.1, 21/12.6 y 12/12.4 **dejan de contar como cerrados** hasta re-verificación en
+producción (el merge de `dev-19062026-gpt` ya se hizo el 08/07/2026 — falta el re-test visual de Ramón).
+El resto de los puntos ya tienen fase asignada arriba; los nuevos (12.8b,
 17.0b, 17.10, 17.11, 17.12) entran en el backlog de diseño/bugs.
 
 ---
