@@ -12,6 +12,17 @@
 
 ---
 
+## 14-07-2026 (rama dev-14072026-cloude)
+
+### Cloude (implementacion + verificacion)
+
+- [audit OK] REGLAS-IA, HISTORIAL, auditoria y git revisados. Sistema 3.1 activo. Rama creada desde `dev-08072026` como `dev-14072026-cloude`; no se toca `main`.
+- [fix OK] Permitido `cdn.cloudflare.steamstatic.com` en `next.config.mjs` para cargar portadas portrait oficiales de Steam usadas por `portrait-cover.ts` - commit `e9f10fe`
+- [17.1/15.2 OK] Cards de producto ajustadas a formato portrait compacto: grid no estirado, cards clicables, fallback de portada, vistos recientemente con imagen fill y carrito como icono - commit `230643d`
+- [verify OK] `.\\node_modules\\.bin\\tsc.cmd --noEmit`, `npm run test:unit` (77/77) y `npm run build` verdes. Primer build bloqueado por EPERM de Prisma DLL; se pararon procesos Node del proyecto y el segundo build paso.
+
+---
+
 ## 08-07-2026 (rama dev-08072026)
 
 ### Fable 5 (auditoría + merge a producción)
