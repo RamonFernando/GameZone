@@ -309,7 +309,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
             </div>
             <div className="recently-viewed-grid">
               {recentlyViewed.map((game) => (
-                <GameCard key={game.slug} game={game} />
+                <GameCard key={game.slug} game={game} fillImage />
               ))}
             </div>
           </section>
@@ -326,6 +326,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
           emptyQuery={query}
           popularSuggestions={popularSuggestions}
           onClearSearch={() => { setQuery(""); setPlatform(null); setFilterOffer(false); setFilterGenre(null); }}
+          compact
         />
       </main>
       <ScrollToTop />

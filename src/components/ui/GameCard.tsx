@@ -1,27 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { ProductPreview } from "@/types/product";
 import { useCart } from "@/contexts/CartContext";
 import { formatPublicPrice } from "@/lib/public-price";
 import { useLocale } from "@/hooks/useLocale";
+import { toPortraitCover } from "@/components/features/portrait-cover";
 import styles from "./GameCard.module.scss";
 
 // Props que recibe la tarjeta de juego (información básica del producto).
 type Props = {
   game: ProductPreview;
+  /** La imagen rellena la card recortando en vez de dejar bordes (contain) */
+  fillImage?: boolean;
 };
 
 // Componente de tarjeta que muestra un juego dentro de listados y rejillas.
-export function GameCard({ game }: Props) {
+export function GameCard({ game, fillImage = false }: Props) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const slug = game.slug;
   const [likesCount, setLikesCount] = useState(game.likesCount);
   const [isLiking, setIsLiking] = useState(false);
   const [liked, setLiked] = useState(Boolean(game.likedByCurrentUser));
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
+  const [imgSrc, setImgSrc] = useState(() => toPortraitCover(game.slug, game.coverImage));
+  const [portraitFailed, setPortraitFailed] = useState(false);
   const lang = useLocale();
 
   useEffect(() => {
@@ -58,7 +64,8 @@ export function GameCard({ game }: Props) {
       : game.cardSubtitle;
 
   // Maneja el toggle de "me gusta" llamando al API y actualizando el estado local.
-  const handleLike = async () => {
+  const handleLike = async (event: React.MouseEvent) => {
+    event.stopPropagation();
     if (isLiking) return;
     setIsLiking(true);
     try {
@@ -87,25 +94,23 @@ export function GameCard({ game }: Props) {
 
   return (
     // Componente de tarjeta que muestra un juego dentro de listados y rejillas.
-    <article className={`card card-hover ${styles.gameCardPlus}`}>
+    <article
+      className={`card card-hover ${styles.gameCardPlus}`}
+      onClick={() => router.push(`/games/${slug}`)}
+    >
       {/* INICIO DE LA IMAGEN */}
       <div className={styles.gameCardMedia}>
         <Image
-          src={game.coverImage}
+          src={imgSrc}
           alt={game.name}
           fill
           sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, 25vw"
           quality={85}
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IGZpbGw9IiMwZjE3MmEiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz48L3N2Zz4="
-          style={{ objectFit: "contain", objectPosition: "center center" }}
+          style={{ objectFit: fillImage && !portraitFailed ? "cover" : "contain", objectPosition: "center center" }}
+          onError={() => { setImgSrc(game.coverImage); setPortraitFailed(true); }}
         />
-        {game.cashbackPercent > 0 ? (
-          <span className={styles.gameCardCashbackBadge}>+{game.cashbackPercent}% Cashback</span>
-        ) : null}
-        {game.discountPercent > 0 ? (
-          <span className={styles.gameCardDiscountBadge}>-{game.discountPercent}%</span>
-        ) : null}
         {timeLeft ? (
           <span className={styles.gameCardCountdown} aria-label={`Oferta termina en ${timeLeft}`}>
             ⏱ {timeLeft}
@@ -167,35 +172,40 @@ export function GameCard({ game }: Props) {
           </p>
         ) : null}
         {/* FIN DEL CASHBACK */}
-        <button
-          type="button"
-          className={styles.gameCardLikeButton}
-          onClick={handleLike}
-          disabled={isLiking}
-          aria-label={`${liked ? "Quitar me gusta de" : "Dar me gusta a"} ${game.name}`}
-          title={liked ? "Quitar me gusta" : "Me gusta"}
-        > 
-          <span className={`${styles.gameCardLikeIcon}${liked ? ` ${styles.gameCardLikeIconActive}` : ""}`}>
-            {liked ? "♥" : "♡"}
-          </span>{" "}
-          {likesCount}
-        </button>
-        {/* INICIO DE LAS ACCIONES */}
-        <div className={styles.gameCardActions}>
-          <Link
-            href={`/games/${slug}`}
-            className={`button-ghost ${styles.gameCardButton} btn-padding-site`}
-          >
-            {lang === "en" ? "View details" : "Ver detalles"}
-          </Link>
+        {/* INICIO DEL PIE: me gusta + añadir al carrito */}
+        <div className={styles.gameCardFooter}>
           <button
             type="button"
-            className={`button-primary ${styles.gameCardButton} btn-padding-site`}
-            onClick={() => addToCart(game)}
+            className={styles.gameCardLikeButton}
+            onClick={handleLike}
+            disabled={isLiking}
+            aria-label={`${liked ? "Quitar me gusta de" : "Dar me gusta a"} ${game.name}`}
+            title={liked ? "Quitar me gusta" : "Me gusta"}
           >
-            {lang === "en" ? "Add" : "Añadir"}
+            <span className={`${styles.gameCardLikeIcon}${liked ? ` ${styles.gameCardLikeIconActive}` : ""}`}>
+              {liked ? "♥" : "♡"}
+            </span>{" "}
+            {likesCount}
           </button>
-        </div>
+          <button
+            type="button"
+            className={`cart-icon-button ${styles.gameCardCartButton}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              addToCart(game);
+            }}
+            aria-label={lang === "en" ? `Add ${game.name} to cart` : `Añadir ${game.name} al carrito`}
+            title={lang === "en" ? "Add to cart" : "Añadir al carrito"}
+          >
+            <Image
+              src="/iconos_platforms/carritoCompra2.svg"
+              alt=""
+              width={16}
+              height={16}
+              className={styles.gameCardCartIcon}
+            />
+          </button>
+        </div> {/* FIN DEL PIE */}
       </div> {/* FIN DEL CUERPO */}
     </article>
   );

@@ -1,7 +1,8 @@
 .gameCardMedia {
   position: relative;
   overflow: hidden;
-  height: 240px;
+  aspect-ratio: 3 / 4;
+  flex-shrink: 0;
   background:
     radial-gradient(circle at 50% 42%, rgba(59, 130, 246, 0.18), transparent 58%),
     linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.94));
@@ -23,6 +24,10 @@
 }
 
 .gameCardPlus {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border-color: rgba(148, 163, 184, 0.34);
   box-shadow:
     0 1px 0 rgba(226, 232, 240, 0.05) inset,
@@ -31,7 +36,7 @@
 }
 
 :global(.card):global(.card-hover).gameCardPlus:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   border-color: rgba(129, 140, 248, 0.72);
   box-shadow:
     0 1px 0 rgba(226, 232, 240, 0.06) inset,
@@ -69,33 +74,6 @@
   .gameCardLikeIcon {
     transition: none;
   }
-}
-
-.gameCardCashbackBadge {
-  position: absolute;
-  left: 0.55rem;
-  top: 0.6rem;
-  z-index: 2;
-  background: #34d399;
-  color: #064e3b;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.35rem 0.6rem;
-  border-radius: 0.45rem;
-}
-
-.gameCardDiscountBadge {
-  position: absolute;
-  right: 0.55rem;
-  top: 0.6rem;
-  z-index: 2;
-  background: #b91c1c;
-  color: #fef2f2;
-  opacity: 0.9;
-  font-size: 0.78rem;
-  font-weight: 800;
-  padding: 0.3rem 0.55rem;
-  border-radius: 999px;
 }
 
 .gameCardCountdown {
@@ -139,6 +117,8 @@
 }
 
 .gameCardBody {
+  flex: 1;
+  min-height: 0;
   padding: 0.7rem 0.75rem 0.7rem;
   display: flex;
   flex-direction: column;
@@ -212,6 +192,23 @@
   font-weight: 700;
 }
 
+.gameCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.15rem;
+}
+
+.gameCardCartButton {
+  flex-shrink: 0;
+}
+
+.gameCardCartIcon {
+  filter: brightness(0) saturate(100%) invert(42%) sepia(45%) saturate(1200%) hue-rotate(5deg);
+}
+
 .gameCardLikeButton {
   margin: 0;
   border: 0;
@@ -241,44 +238,4 @@
   color: #7f1d1d;
   opacity: 0.8;
   text-shadow: 0 0 6px rgba(127, 29, 29, 0.3);
-}
-
-.gameCardActions {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  align-items: center;
-  padding: 0 0.4rem 0.1rem;
-}
-
-.gameCardActions :global(.button-ghost) {
-  color: #cbd5e1;
-}
-
-.gameCardActions :global(.button-ghost):hover {
-  color: #e2e8f0;
-}
-
-.gameCardActions :global(.button-primary) {
-  color: #cbd5e1;
-  background: linear-gradient(90deg, rgba(30, 41, 59, 0.98) 0%, rgba(92, 61, 184, 0.9) 25%, rgba(127, 88, 231, 0.95) 50%, rgba(92, 61, 184, 0.9) 75%, rgba(30, 41, 59, 0.98) 100%);
-  background-size: 200% 100%;
-  background-position: 100% 50%;
-  animation: badge-gradient-sweep 30s linear infinite;
-}
-
-.gameCardActions :global(.button-primary):hover {
-  color: #e2e8f0;
-}
-
-.gameCardButton {
-  font-size: 0.64rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.gameCardActions .gameCardButton {
-  flex: 1 1 0;
-  min-width: 0;
-  justify-content: center;
 }

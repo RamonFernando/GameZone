@@ -4,6 +4,10 @@
   gap: 1.1rem;
 }
 
+.gridGamesCompact {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 210px));
+}
+
 .gameCardReveal {
   opacity: 0;
   transform: translate3d(-34px, 0, 0);

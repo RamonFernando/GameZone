@@ -27,9 +27,11 @@ type Props = {
   popularSuggestions?: ProductPreview[];
   /** Callback para limpiar la búsqueda activa */
   onClearSearch?: () => void;
+  /** Limita el ancho de columna al de la imagen de portada (no estira las cards) */
+  compact?: boolean;
 };
 
-export function GameGrid({ games, isFiltered = false, title, subtitle, backHref, emptyQuery, popularSuggestions, onClearSearch }: Props) {
+export function GameGrid({ games, isFiltered = false, title, subtitle, backHref, emptyQuery, popularSuggestions, onClearSearch, compact = false }: Props) {
   const lang = useLocale();
   const [isMobile, setIsMobile] = useState(false);
   const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
@@ -153,7 +155,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
           </p>
         )
       ) : (
-        <div className={styles.gridGames}>
+        <div className={compact ? `${styles.gridGames} ${styles.gridGamesCompact}` : styles.gridGames}>
           {displayedGames.map((game, index) => (
             <div
               key={game.slug}
@@ -164,7 +166,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
               ].filter(Boolean).join(" ")}
               data-reveal-slug={game.slug}
             >
-              <GameCard game={game} />
+              <GameCard game={game} fillImage={compact} />
             </div>
           ))}
         </div>
