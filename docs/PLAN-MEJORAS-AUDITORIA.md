@@ -53,11 +53,19 @@ Leyenda: ✅ hecho · ⚠️ parcial / acción manual pendiente · ⬜ pendiente
 | **FASE 11 — Bugs críticos** | ✅ 11.1/11.3 ✅; 11.2 ✅ (claves en email cubiertas por Fase 14); 11.4 ⚠️ parcial (prefijo país + postal específica por país pendientes) |
 | **FASE 12 — UX rota** | ⚠️ en curso · **12.2/12.3/12.7 mergeados a main el 08/07/2026** (ya en producción). 🔴 Reabiertos pendientes de re-verificar en producción tras el deploy: 12.1 (falta Nick real), 12.2 (re-test buscador), 12.6 (countdown a cero), 12.4 (pedidos lentos/"no funcionan"). 12.5/12.8/12.9 ✅. Ver sección "FEEDBACK DE TESTING". |
 | **FASE 14 — Claves de juego** | ⚠️ en curso — **14.0b/14.1/14.2/14.3/14.4/14.5/14.6 ✅**; 14.7 ⬜ (validación pre-checkout, requiere flag o inventario real) |
-| **FASE 15 — Cards y plataformas** | ⬜ FUTURO — 15.1 comparador de precios en card, 15.2 formato portrait, 15.3 roadmap de APIs (GOG, Epic, Eneba, EA, PlayStation, Nintendo…) |
+| **FASE 15 — Cards y plataformas** | ⚠️ EN CURSO — 15.2 tiene una primera iteración en `dev-14072026-cloude` (commits `e9f10fe` + `230643d`), aún no mergeada ni cerrada; 15.1 y 15.3 siguen pendientes. |
 | **FASE 16 — Reestructuración MVC** | ⚠️ ~80% HECHA (21/06, en main desde 08/07) — 16.2 ✅ módulos en todos los paneles cuenta/admin · 16.1 casi (de 160 inline quedan 27, fuera de admin) · 16.3 parcial (AdminProductsPanel troceado; falta AccountDashboard 1802 L) · 16.5 parcial · 16.4 ⬜ (globals.scss 859 L) |
-| **FASE 17 — Sistema de diseño** | ⬜ DISEÑO — primitivos reutilizables + rediseño de card/header/footer/carrusel/secciones/comparador/cuenta/pedidos/admin. Ramón elige variantes A/B/C. |
+| **FASE 17 — Sistema de diseño** | ⚠️ EN CURSO — 17.1 tiene una iteración parcial de card en `dev-14072026-cloude`; faltan accesibilidad, revisión visual, elección/confirmación de variante, primitivos reutilizables y el resto de componentes. |
 
 **Acciones manuales del usuario aún pendientes:** rotación de secretos (0.1), URL pooled en Netlify (1.1), dominio propio (4.2).
+
+**Pendientes técnicos detectados el 14/07/2026 antes de fusionar `dev-14072026-cloude`:**
+- Restaurar navegación accesible a la ficha desde `GameCard`: enlace o interacción equivalente con foco y teclado; el `<article onClick>` actual solo cubre ratón/táctil.
+- Ajustar el fallback de portadas landscape para evitar recorte central agresivo y cumplir `object-position: top`; comprobar visualmente desktop y móvil.
+- Confirmar que búsqueda, resultados vacíos y vistos recientemente mantienen toda la información y el layout esperado.
+- Añadir tests de render/interacción para `GameCard`/`GameGrid`; los 77 tests actuales no cubren esta modificación visual.
+- Resolver el lint de CI: 4 errores `no-require-imports` en `scripts/make-og-card.cjs` y `KeyRow` sin uso en `AdminProductsPanel.tsx`. Son anteriores a los commits de esta rama, pero impiden considerar la validación completa como verde.
+- Decidir si `AGENTS.md` se versiona. Actualmente replica `CLAUDE.md` para Codex, pero permanece como archivo sin seguimiento.
 
 ---
 
@@ -694,7 +702,7 @@ npm run build
 
 ---
 
-## FASE 15 — REDISEÑO DE CARDS Y COMPARADOR DE PRECIOS 🔵 FUTURO
+## FASE 15 — REDISEÑO DE CARDS Y COMPARADOR DE PRECIOS ⚠️ EN CURSO
 
 > Inspirado en el diseño de G2A, Instant Gaming y Eneba (capturas referencia: 20/06/2026).
 > Las tres mejoras son independientes entre sí — pueden implementarse por separado.
@@ -731,7 +739,24 @@ Desde 20,00 € -50%
 
 ---
 
-### 15.2 — Formato de imagen de card: portada vertical (ratio 3:4) 🔵 FUTURO
+### 15.2 — Formato de imagen de card: portada vertical (ratio 3:4) ⚠️ PARCIAL EN RAMA
+
+**Estado 14/07/2026:** primera iteración implementada en `dev-14072026-cloude` mediante `e9f10fe` y
+`230643d`; todavía no está en `main` y no cumple todo el Definition of Done.
+
+**Implementado y verificado:**
+- Ratio visual 3:4 y rejilla compacta sin estirar las cards.
+- Selección de portadas portrait mediante `portrait-cover.ts` y permiso para el CDN Cloudflare de Steam.
+- Carrito como icono, navegación al pulsar la card y aplicación del formato a resultados principales y vistos recientemente.
+- TypeScript, 77/77 tests unitarios y build de producción verdes.
+
+**Pendiente para cerrar 15.2:**
+- Hacer accesible la navegación a detalle mediante foco y teclado, conservando semántica de enlace.
+- Detectar o tratar correctamente imágenes landscape que cargan sin error: usar fallback alineado arriba y evitar recorte central agresivo.
+- Revisar visualmente el impacto en búsqueda, estado sin resultados, vistos recientemente, desktop y móvil.
+- Añadir la indicación de formato recomendado 600×900 en la subida de imágenes del panel admin.
+- Añadir tests específicos de render, navegación, carrito, like y fallback de imagen.
+- Fusionar a la rama común/main solo después de completar estas comprobaciones.
 
 **Objetivo:** adoptar el formato estándar de portada de videojuego (vertical, tipo "box art") en lugar de imágenes panorámicas, que es el formato dominante en G2A, Instant Gaming y Eneba.
 
@@ -890,7 +915,7 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
 
 ---
 
-## FASE 17 — SISTEMA DE DISEÑO POR COMPONENTES 🔵 DISEÑO
+## FASE 17 — SISTEMA DE DISEÑO POR COMPONENTES ⚠️ EN CURSO
 
 > **Origen:** petición de Ramón (20/06/2026). "Apartado de diseño — diseño por componentes, muy importante
 > para que sea reutilizable. Diferentes propuestas para cards, header, layouts, footer, carrusel, secciones,
@@ -919,9 +944,12 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
 - **Verificar:** un mini-catálogo (página interna `/admin/ui` o Storybook ligero, opcional) que renderice
   cada primitivo en sus variantes.
 
-### 17.1 — Card de juego (3 propuestas) 🔵 — liga con 15.1/15.2
-> Estado actual (`GameCard.tsx`): imagen con `objectFit: contain` (inline), badges cashback/descuento/
-> countdown, pill de tienda, "Desde X -Y%", precio final, like, ver-detalles/añadir. Una sola tienda.
+### 17.1 — Card de juego (3 propuestas) ⚠️ PARCIAL — liga con 15.1/15.2
+> Estado 14/07/2026 (`dev-14072026-cloude`): existe una primera iteración portrait 3:4 compacta con
+> navegación al pulsar la card, portadas curadas/fallback por error y carrito como icono. Se mantienen en el
+> cuerpo cashback, countdown, pill de tienda, subtítulo, región, precio y likes. No equivale todavía al cierre
+> de 17.1: no usa los primitivos de 17.0, no incorpora el comparador 15.1 y requiere correcciones de
+> accesibilidad, fallback, tests y revisión visual.
 
 - **Propuesta A — "G2A clásica" (portrait):** imagen de portada vertical 3:4 que llena el marco
   (`object-fit: cover`), badges flotando sobre la imagen, cuerpo compacto con `PriceTag` doble
@@ -931,6 +959,10 @@ Infra      → lib/**       → prisma, logger, validación, acceso a datos
 - **Propuesta C — "Minimal hover":** card limpia; el detalle de precios externos y el countdown aparecen en
   un `Popover` al hover/focus para no recargar la rejilla. Buena para móvil.
 - **Reutiliza:** `CardShell`, `Badge`, `PriceTag`, `Thumbnail`. **Decisión de Ramón:** elegir A/B/C.
+
+**Pendiente para cerrar 17.1:** confirmar si la iteración actual se adopta como propuesta A o se ajusta;
+componer la card con los primitivos de 17.0 cuando estén disponibles; incorporar 15.1 cuando exista el dato
+de precio externo; resolver los pendientes de 15.2; y completar tests de interacción y revisión visual.
 
 ### 17.2 — Header + selector de idioma (fix del "precario") 🟠 — incluye bug visual real
 > **Verificado:** el selector es un `<select>` HTML nativo (`navLocaleSelect`, `Header.tsx` líneas 367 y 494)
@@ -1042,7 +1074,7 @@ publicarlo en `dev-DDMMYYYY` para que GPT construya encima. Hasta entonces, GPT 
 - Render tests (Vitest + Testing Library) de cada primitivo nuevo de 17.0.
 - Tests de los subcomponentes extraídos en 16.3 (que el flujo crear/editar/borrar/perfil sigue intacto).
 - E2E Playwright: añadir un spec de "abrir detalles de pedido en burbuja muestra la clave" cuando 17.7 + 14.5 estén.
-- Guard de regresión: mantener 76/76 verdes en cada commit; no fusionar nada que baje la cuenta.
+- Guard de regresión: mantener como mínimo los 77/77 tests actuales verdes en cada commit; no fusionar nada que baje la cuenta.
 
 ---
 

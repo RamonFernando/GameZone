@@ -14,12 +14,18 @@
 
 ## 14-07-2026 (rama dev-14072026-cloude)
 
-### Cloude (implementacion + verificacion)
+### Claude (implementación + verificación)
 
-- [audit OK] REGLAS-IA, HISTORIAL, auditoria y git revisados. Sistema 3.1 activo. Rama creada desde `dev-08072026` como `dev-14072026-cloude`; no se toca `main`.
-- [fix OK] Permitido `cdn.cloudflare.steamstatic.com` en `next.config.mjs` para cargar portadas portrait oficiales de Steam usadas por `portrait-cover.ts` - commit `e9f10fe`
-- [17.1/15.2 OK] Cards de producto ajustadas a formato portrait compacto: grid no estirado, cards clicables, fallback de portada, vistos recientemente con imagen fill y carrito como icono - commit `230643d`
-- [verify OK] `.\\node_modules\\.bin\\tsc.cmd --noEmit`, `npm run test:unit` (77/77) y `npm run build` verdes. Primer build bloqueado por EPERM de Prisma DLL; se pararon procesos Node del proyecto y el segundo build paso.
+- [audit ✅] REGLAS-IA, HISTORIAL, auditoría y git revisados. Sistema 3.1 activo. Rama creada desde `dev-08072026` con el nombre real `dev-14072026-cloude`; no se toca `main`.
+- [fix ✅] Permitido `cdn.cloudflare.steamstatic.com` en `next.config.mjs` para cargar portadas portrait oficiales de Steam usadas por `portrait-cover.ts` — commit `e9f10fe`.
+- [15.2/17.1 ⚠️ parcial] Implementada una primera iteración de cards portrait compactas: ratio 3:4, grid no estirado, navegación al pulsar la card, portadas portrait con fallback por error, vistos recientemente con imagen `fill` y carrito como icono — commit `230643d`. No se considera cerrada hasta resolver los pendientes registrados en la auditoría.
+- [verify ⚠️ parcial] TypeScript, 77/77 tests unitarios y build de producción pasan. El lint sigue rojo con 5 errores preexistentes fuera de los archivos modificados por estos commits; la validación completa de CI no está verde.
+- [docs ✅] Registrados los cambios de la jornada — commit `a1cc0d4`.
+
+### Codex (reconciliación documental)
+
+- [audit/docs ✅] Reconciliados HISTORIAL y PLAN-MEJORAS-AUDITORIA con los commits reales: 15.2/17.1 quedan en estado parcial y se documentan accesibilidad, fallback de imágenes, revisión visual, primitivos/tests y lint como pendientes — incluido en el commit documental de esta jornada.
+- [trazabilidad ⚠️] El nombre `cloude` se conserva únicamente donde forma parte del nombre real de la rama o de mensajes de commit ya existentes. El actor correcto es Claude. `AGENTS.md` continúa sin versionar y queda pendiente decidir si se incorpora al repositorio.
 
 ---
 
