@@ -45,9 +45,12 @@ export function toPortraitCover(slug: string, coverImage: string): string {
   const override = PORTRAIT_OVERRIDES[slug];
   if (override) return override;
 
-  // Steam: landscape header → portrait library art
-  if (coverImage.includes("/steam/apps/") && coverImage.endsWith("/header.jpg")) {
-    return coverImage.replace("/header.jpg", "/library_600x900.jpg");
+  // Steam: cualquier arte landscape (header.jpg, header_alt_*, con o sin ?t=…,
+  // en cdn.akamai / shared.akamai / cdn.cloudflare) → arte vertical de biblioteca.
+  // Extraemos el appId de la URL en vez de exigir que termine en /header.jpg.
+  const steamApp = coverImage.match(/\/steam\/apps\/(\d+)\//);
+  if (steamApp) {
+    return STEAM_LIB(Number(steamApp[1]));
   }
 
   // G2A: upgrade small thumbnails to portrait 600×876
