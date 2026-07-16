@@ -44,6 +44,9 @@ const nextConfig = {
     ];
   },
   images: {
+    // Next 16 solo sirve las calidades declaradas; el resto devuelve 400.
+    // Cubrimos todas las usadas en la app (GameCard 85, Hero 50/90, market 95, ficha/carrito 80/100).
+    qualities: [50, 75, 80, 85, 90, 95, 100],
     remotePatterns: [
       {
         protocol: "https",
