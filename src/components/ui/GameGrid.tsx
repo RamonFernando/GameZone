@@ -166,7 +166,7 @@ export function GameGrid({ games, isFiltered = false, title, subtitle, backHref,
               ].filter(Boolean).join(" ")}
               data-reveal-slug={game.slug}
             >
-              <GameCard game={game} fillImage={compact} />
+              <GameCard game={game} />
             </div>
           ))}
         </div>

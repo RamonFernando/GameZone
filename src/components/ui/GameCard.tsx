@@ -13,12 +13,10 @@ import styles from "./GameCard.module.scss";
 // Props que recibe la tarjeta de juego (información básica del producto).
 type Props = {
   game: ProductPreview;
-  /** La imagen rellena la card recortando en vez de dejar bordes (contain) */
-  fillImage?: boolean;
 };
 
 // Componente de tarjeta que muestra un juego dentro de listados y rejillas.
-export function GameCard({ game, fillImage = false }: Props) {
+export function GameCard({ game }: Props) {
   const router = useRouter();
   const { addToCart } = useCart();
   const slug = game.slug;
@@ -27,7 +25,9 @@ export function GameCard({ game, fillImage = false }: Props) {
   const [liked, setLiked] = useState(Boolean(game.likedByCurrentUser));
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const [imgSrc, setImgSrc] = useState(() => toPortraitCover(game.slug, game.coverImage));
-  const [portraitFailed, setPortraitFailed] = useState(false);
+  // Detectamos al cargar si la imagen resuelta es horizontal (sin portada vertical
+  // disponible) para mostrarla entera sobre un fondo difuminado en vez de recortada.
+  const [isLandscape, setIsLandscape] = useState(false);
   const lang = useLocale();
 
   useEffect(() => {
@@ -100,6 +100,17 @@ export function GameCard({ game, fillImage = false }: Props) {
     >
       {/* INICIO DE LA IMAGEN */}
       <div className={styles.gameCardMedia}>
+        {isLandscape ? (
+          <Image
+            src={imgSrc}
+            alt=""
+            aria-hidden
+            fill
+            sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, 25vw"
+            quality={50}
+            className={styles.gameCardBackdrop}
+          />
+        ) : null}
         <Image
           src={imgSrc}
           alt={game.name}
@@ -108,8 +119,14 @@ export function GameCard({ game, fillImage = false }: Props) {
           quality={85}
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IGZpbGw9IiMwZjE3MmEiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiLz48L3N2Zz4="
-          style={{ objectFit: fillImage && !portraitFailed ? "cover" : "contain", objectPosition: "center center" }}
-          onError={() => { setImgSrc(game.coverImage); setPortraitFailed(true); }}
+          className={isLandscape ? styles.gameCardFgContain : styles.gameCardFgCover}
+          onLoad={(event) => {
+            const el = event.currentTarget;
+            if (el.naturalWidth && el.naturalHeight) {
+              setIsLandscape(el.naturalWidth > el.naturalHeight * 1.05);
+            }
+          }}
+          onError={() => setImgSrc(game.coverImage)}
         />
         {timeLeft ? (
           <span className={styles.gameCardCountdown} aria-label={`Oferta termina en ${timeLeft}`}>

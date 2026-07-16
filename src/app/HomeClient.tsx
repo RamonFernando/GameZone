@@ -309,7 +309,7 @@ export function HomeClient({ initialProducts, initialHeroSections }: HomeClientP
             </div>
             <div className="recently-viewed-grid">
               {recentlyViewed.map((game) => (
-                <GameCard key={game.slug} game={game} fillImage />
+                <GameCard key={game.slug} game={game} />
               ))}
             </div>
           </section>

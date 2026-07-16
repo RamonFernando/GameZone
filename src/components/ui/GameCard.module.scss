@@ -8,9 +8,27 @@
     linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.94));
 }
 
-.gameCardMedia img {
+/* Portada vertical (caso normal): llena el ancho de la card sin barras, anclada
+   arriba para no recortar el key-art superior. */
+.gameCardFgCover {
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Imagen horizontal sin portada vertical disponible: se muestra ENTERA (contain)
+   sobre un fondo difuminado de sí misma, para evitar el zoom/recorte agresivo. */
+.gameCardFgContain {
   object-fit: contain;
   object-position: center center;
+  z-index: 1;
+}
+
+.gameCardBackdrop {
+  object-fit: cover;
+  object-position: center center;
+  filter: blur(22px) brightness(0.55) saturate(1.15);
+  transform: scale(1.25);
+  z-index: 0;
 }
 
 .gameCardMedia::after {
@@ -57,11 +75,11 @@
 
 /* B3 — Zoom sutil de portada en hover (respeta prefers-reduced-motion) */
 @media (prefers-reduced-motion: no-preference) {
-  .gameCardMedia img {
+  .gameCardFgCover {
     transition: transform 220ms ease-out;
   }
 
-  :global(.card):global(.card-hover).gameCardPlus:hover .gameCardMedia img {
+  :global(.card):global(.card-hover).gameCardPlus:hover .gameCardFgCover {
     transform: scale(1.05);
   }
 }
