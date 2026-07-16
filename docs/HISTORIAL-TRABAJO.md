@@ -12,6 +12,19 @@
 
 ---
 
+## 16-07-2026 (rama dev-14072026-cloude)
+
+### Claude (implementación + verificación)
+
+- [audit ✅] Auditoría de apertura: REGLAS-IA, HISTORIAL, PLAN-MEJORAS-AUDITORIA y git revisados. Sistema 3.1 activo. Se continúa en la rama `dev-14072026-cloude`; no se toca `main`.
+- [15.2 ✅] Portada de card a ancho completo sin padding lateral: `GameCard` pasa de `object-fit: contain` (que dejaba barras laterales/letterbox) a `cover` + `object-position: top`. Eliminada la prop muerta `fillImage` y el estado `portraitFailed` en `GameCard`/`GameGrid`/`HomeClient`. Verificado en navegador: hueco lateral medido = 0px — commit `294dd07`.
+- [15.2 ✅] Fallback landscape elegante (resuelve el pendiente de auditoría "recorte central agresivo"): las portadas horizontales sin arte vertical disponible se muestran enteras (`contain`) sobre un fondo difuminado de sí mismas (blur 22px + scale 1.25), detectando la orientación en `onLoad`. Verificado card por card (portrait→cover sin backdrop / landscape→contain+backdrop, allCorrect) — commit `294dd07`.
+- [15.2 ✅] `portrait-cover.ts`: la subida de header de Steam a arte vertical `library_600x900` ahora extrae el `appId` de cualquier URL (`cdn.akamai`, `shared.akamai`, con `?t=…`, `header_alt_*`), no solo las que terminan en `/header.jpg`. Recupera 14 cards que se quedaban en horizontal. Medido sobre 69 productos: 62 en portada vertical perfecta, 7 con fondo difuminado — commit `bd42303`.
+- [fix ✅] Restauradas TODAS las imágenes de la app (bug de Next 16): el optimizador solo servía `quality=75` y devolvía 400 para el resto (Hero 50/90, GameCard 85, market 95, ficha/carrito 80/100). Añadido `images.qualities: [50,75,80,85,90,95,100]` en `next.config.mjs`. Confirmado en red: q85 400→200 — commit `07f8fca`.
+- [verify ✅] `npx tsc --noEmit` limpio · 77/77 tests unitarios · sin errores de consola en la home. Verificación visual en el navegador con capturas (cards verticales a borde completo + fondo difuminado en Zelda/Cuphead). `npm run build` no ejecutado en esta sesión (lock conocido de Prisma DLL en Windows/Dropbox).
+
+---
+
 ## 14-07-2026 (rama dev-14072026-cloude)
 
 ### Claude (implementación + verificación)
